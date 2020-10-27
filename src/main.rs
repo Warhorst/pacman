@@ -2,7 +2,8 @@ use bevy::prelude::*;
 
 use pacman::PacmanPlugin;
 
-pub mod pacman;
+mod pacman;
+mod board;
 
 fn main() {
     App::build()
