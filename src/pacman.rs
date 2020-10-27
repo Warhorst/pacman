@@ -21,10 +21,10 @@ enum Direction {
 }
 
 fn spawn_pacman(mut commands: Commands, mut materials: ResMut<Assets<ColorMaterial>>) {
-    commands.spawn(Camera2dComponents::default())
+    commands
         .spawn(SpriteComponents {
             material: materials.add(Color::hex("FFEE00").unwrap().into()),
-            transform: Transform::from_translation(Vec3::new(-100.0, -215.0, 0.0)),
+            transform: Transform::from_translation(Vec3::new(0.0, -215.0, 0.0)),
             sprite: Sprite::new(Vec2::new(30.0, 30.0)),
             ..Default::default()
         })
@@ -64,8 +64,8 @@ fn move_pacman(time: Res<Time>, mut query: Query<(&Pacman, &mut Transform)>) {
         };
 
         *translation.x_mut() += time.delta_seconds * x * 500.0;
-        *translation.x_mut() = translation.x().min(700.0).max(-700.0);
+        *translation.x_mut() = translation.x().min(400.0).max(-400.0);
         *translation.y_mut() += time.delta_seconds * y * 500.0;
-        *translation.y_mut() = translation.y().min(700.0).max(-700.0);
+        *translation.y_mut() = translation.y().min(200.0).max(-200.0);
     }
 }
