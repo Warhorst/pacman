@@ -1,12 +1,14 @@
-use std::cmp::Ordering;
+use std::cmp::{min, Ordering};
 use std::collections::HashMap;
 
 use bevy::ecs::Commands;
 use bevy::prelude::*;
+use bevy::sprite::collide_aabb::{collide, Collision};
 
 use FieldType::{Free, Wall};
 
-use crate::common::Position;
+use crate::common::{Direction::*, Position};
+use crate::common;
 
 pub type Fields<'a> = Vec<Field<'a>>;
 type FieldTypeVec = Vec<Vec<FieldType>>;
@@ -24,7 +26,8 @@ impl Plugin for BoardPlugin {
 pub struct Board {
     fields: HashMap<Position, FieldType>,
     field_dimension: Vec2,
-    board_root: Vec2
+    board_root: Vec2,
+    max_position: Position,
 }
 
 pub struct Field<'a> {
@@ -40,13 +43,16 @@ enum FieldType {
 
 impl Board {
     fn new() -> Self {
-        let fields = Self::fields_from_field_type_vec(Self::create_board());
+        let board = Self::create_board();
+        let max_position = Self::get_max_position(&board);
+        let fields = Self::fields_from_field_type_vec(board);
         let board_root = Vec2::new(-100.0, -50.0);
         let field_size = Vec2::new(30.0, 30.0);
         Board {
             fields,
             field_dimension: field_size,
-            board_root
+            board_root,
+            max_position,
         }
     }
 
@@ -58,6 +64,15 @@ impl Board {
             vec![Wall, Free, Free, Free, Free, Free, Free, Wall],
             vec![Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall]
         ]
+    }
+
+    fn get_max_position(board: &Vec<Vec<FieldType>>) -> Position {
+        let x = board.len() - 1;
+        let y = match board.get(0) {
+            Some(vec) => vec.len(),
+            None => 0
+        };
+        Position::new(x, y)
     }
 
     fn fields_from_field_type_vec(fields: FieldTypeVec) -> HashMap<Position, FieldType> {
@@ -99,8 +114,70 @@ impl Board {
         }
     }
 
-    pub fn field_size(self) -> Vec2 {
-        self.field_dimension
+    pub fn calculate_position(&self, coordinates: &Vec3, dimension: &Vec2) -> Position {
+        let width = (self.max_position.x() + 1) as f32 * self.field_dimension.x();
+        let height = (self.max_position.y() + 1) as f32 * self.field_dimension.y();
+        let x = width / dimension.x() + coordinates.x();
+        let y = height / dimension.y() + coordinates.y();
+        Position::new(x as usize, y as usize)
+    }
+
+    pub fn collides_with_obstacle(&self, position: &Position, coordinates: &Vec3, dimension: &Vec2, direction: &common::Direction) -> bool {
+        let position_in_direction = match self.position_in_direction(position, direction) {
+            Some(pos) if !self.position_is_movable(&pos) => pos,
+            _ => return false,
+        };
+        let field_coordinates = self.window_coordinates(&position_in_direction, &self.field_dimension);
+        collide(*coordinates,
+                *dimension,
+                field_coordinates,
+                self.field_dimension)
+            .is_some()
+    }
+
+    fn position_in_direction(&self, position: &Position, direction: &common::Direction) -> Option<Position> {
+        match direction {
+            Up => self.position_up_of(position),
+            Down => self.position_down_of(position),
+            Left => self.position_left_of(position),
+            Right => self.position_right_of(position),
+        }
+    }
+
+    fn position_up_of(&self, position: &Position) -> Option<Position> {
+        match position.y() {
+            y if y == self.max_position.y() => None,
+            y => Some(Position::new(position.x(), y + 1))
+        }
+    }
+
+    fn position_down_of(&self, position: &Position) -> Option<Position> {
+        match position.y() {
+            0 => None,
+            y => Some(Position::new(position.x(), y - 1))
+        }
+    }
+
+    fn position_left_of(&self, position: &Position) -> Option<Position> {
+        match position.x() {
+            0 => None,
+            x => Some(Position::new(x - 1, position.y()))
+        }
+    }
+
+    fn position_right_of(&self, position: &Position) -> Option<Position> {
+        match position.x() {
+            x if x > self.max_position.x() => None,
+            x => Some(Position::new(x + 1, position.y()))
+        }
+    }
+
+    fn position_is_movable(&self, position: &Position) -> bool {
+        let field_type = self.fields.get(position).unwrap();
+        match field_type {
+            Free => true,
+            Wall => false
+        }
     }
 }
 

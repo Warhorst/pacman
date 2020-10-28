@@ -10,6 +10,7 @@ impl Plugin for PacmanPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.add_startup_system(spawn_pacman.system())
             .add_system(set_direction.system())
+            .add_system(update_position.system())
             .add_system(move_pacman.system());
     }
 }
@@ -57,23 +58,36 @@ fn set_direction(keyboard_input: Res<Input<KeyCode>>, mut query: Query<&mut Pacm
     }
 }
 
-fn move_pacman(time: Res<Time>, mut query: Query<(&Pacman, &Position, &mut Transform)>) {
-    for (pacman, _position, mut transform) in &mut query.iter() {
-        let translation = &mut transform.translation_mut();
+fn update_position(board: Res<Board>, mut query: Query<(&Pacman, &Transform, &Sprite, &mut Position)>) {
+    for (_pacman, transform, sprite, mut position) in &mut query.iter() {
+        *position = board.calculate_position(&transform.translation(), &sprite.size);
+    }
+}
 
-        let (x, y) = match &pacman.movement {
+fn move_pacman(time: Res<Time>, board: Res<Board>, mut query: Query<(&Pacman, &Position, &Sprite, &mut Transform)>) {
+    for (pacman, position, sprite, mut transform) in &mut query.iter() {
+        let direction = match &pacman.movement {
             Movement::Idle => return,
-            Movement::Moving(dir) => match dir {
-                Direction::Up => (0.0, 1.0),
-                Direction::Down => (0.0, -1.0),
-                Direction::Left => (-1.0, 0.0),
-                Direction::Right => (1.0, 0.0)
-            }
+            Movement::Moving(dir) => dir
         };
 
+        let (x, y) = match direction {
+            Direction::Up => (0.0, 1.0),
+            Direction::Down => (0.0, -1.0),
+            Direction::Left => (-1.0, 0.0),
+            Direction::Right => (1.0, 0.0)
+        };
+
+        let mut translation = transform.translation();
         *translation.x_mut() += time.delta_seconds * x * 250.0;
-        *translation.x_mut() = translation.x().min(400.0).max(-400.0);
         *translation.y_mut() += time.delta_seconds * y * 250.0;
-        *translation.y_mut() = translation.y().min(200.0).max(-200.0);
+
+        let collides = board.collides_with_obstacle(position, &translation, &sprite.size, &direction);
+
+        if !collides {
+            let translation_mut = &mut transform.translation_mut();
+            *translation_mut.x_mut() = translation.x();
+            *translation_mut.y_mut() = translation.y()
+        }
     }
 }
