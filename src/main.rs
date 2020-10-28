@@ -4,6 +4,7 @@ use pacman::PacmanPlugin;
 
 use crate::board::BoardPlugin;
 
+mod common;
 mod pacman;
 mod board;
 
