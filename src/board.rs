@@ -1,9 +1,7 @@
-use std::cmp::{min, Ordering};
 use std::collections::HashMap;
 
 use bevy::ecs::Commands;
 use bevy::prelude::*;
-use bevy::sprite::collide_aabb::{collide, Collision};
 
 use FieldType::{Free, Wall};
 
@@ -60,7 +58,11 @@ impl Board {
         vec![
             vec![Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall],
             vec![Wall, Free, Free, Free, Free, Free, Free, Wall],
-            vec![Wall, Free, Free, Free, Free, Free, Free, Wall],
+            vec![Wall, Free, Wall, Free, Wall, Wall, Free, Wall],
+            vec![Wall, Free, Wall, Free, Wall, Wall, Free, Wall],
+            vec![Wall, Free, Wall, Free, Wall, Wall, Free, Wall],
+            vec![Wall, Free, Wall, Free, Wall, Wall, Free, Wall],
+            vec![Wall, Free, Wall, Free, Wall, Wall, Free, Wall],
             vec![Wall, Free, Free, Free, Free, Free, Free, Wall],
             vec![Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall]
         ]
@@ -96,33 +98,15 @@ impl Board {
             .collect()
     }
 
-    pub fn field_dimension(&self) -> Vec2 {
-        self.field_dimension
-    }
-
-    pub fn window_coordinates(&self, position: &Position, dimension: &Vec2) -> Vec3 {
-        let padding_in_field = self.calc_padding_in_field(dimension);
-        let x = self.board_root.x() + (position.x() as f32) * self.field_dimension.x() + padding_in_field.x();
-        let y = self.board_root.y() + (position.y() as f32) * self.field_dimension.y() + padding_in_field.y();
+    pub fn window_coordinates(&self, position: &Position) -> Vec3 {
+        let x = self.board_root.x() + (position.x() as f32) * self.field_dimension.x();
+        let y = self.board_root.y() + (position.y() as f32) * self.field_dimension.y();
         Vec3::new(x, y, 0.0)
     }
 
-    fn calc_padding_in_field(&self, dimension: &Vec2) -> Vec2 {
-        Vec2::new(Self::calc_padding(dimension.x(), self.field_dimension.x()), Self::calc_padding(dimension.y(), self.field_dimension.y()))
-    }
-
-    fn calc_padding(size_other: f32, size_field: f32) -> f32 {
-        match size_other < size_field {
-            true => (size_field - size_other) / 2.0,
-            false => 0.0
-        }
-    }
-
-    pub fn calculate_position(&self, coordinates: &Vec3, dimension: &Vec2) -> Position {
-        let center_x = coordinates.x() + dimension.x() / 2.0;
-        let center_y = coordinates.y() + dimension.y() / 2.0;
-        let x = (center_x - self.board_root.x()) / self.field_dimension.x();
-        let y = (center_y - self.board_root.y()) / self.field_dimension.y();
+    pub fn calculate_position(&self, coordinates: &Vec3) -> Position {
+        let x = (coordinates.x() - self.board_root.x() + self.field_dimension.x() / 2.0) / self.field_dimension.x();
+        let y = (coordinates.y() - self.board_root.y() + self.field_dimension.y() / 2.0) / self.field_dimension.y();
         Position::new(x as usize, y as usize)
     }
 
@@ -188,7 +172,7 @@ fn create_board(mut commands: Commands, board: Res<Board>, mut materials: ResMut
 
         commands.spawn(SpriteComponents {
             material: materials.add(color_material),
-            transform: Transform::from_translation(board.window_coordinates(field.position, &board.field_dimension)),
+            transform: Transform::from_translation(board.window_coordinates(field.position)),
             sprite: Sprite::new(board.field_dimension),
             ..Default::default()
         });
