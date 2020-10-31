@@ -46,7 +46,7 @@ impl Board {
         let board = Self::create_board();
         let max_position = Self::get_max_position(&board);
         let fields = Self::fields_from_field_type_vec(board);
-        let board_root = Vec2::new(-100.0, -50.0);
+        let board_root = Vec2::new(0.0, 0.0);
         let field_size = Vec2::new(30.0, 30.0);
         Board {
             fields,
@@ -96,6 +96,10 @@ impl Board {
             .collect()
     }
 
+    pub fn field_dimension(&self) -> Vec2 {
+        self.field_dimension
+    }
+
     pub fn window_coordinates(&self, position: &Position, dimension: &Vec2) -> Vec3 {
         let padding_in_field = self.calc_padding_in_field(dimension);
         let x = self.board_root.x() + (position.x() as f32) * self.field_dimension.x() + padding_in_field.x();
@@ -115,24 +119,18 @@ impl Board {
     }
 
     pub fn calculate_position(&self, coordinates: &Vec3, dimension: &Vec2) -> Position {
-        let width = (self.max_position.x() + 1) as f32 * self.field_dimension.x();
-        let height = (self.max_position.y() + 1) as f32 * self.field_dimension.y();
-        let x = width / dimension.x() + coordinates.x();
-        let y = height / dimension.y() + coordinates.y();
+        let center_x = coordinates.x() + dimension.x() / 2.0;
+        let center_y = coordinates.y() + dimension.y() / 2.0;
+        let x = (center_x - self.board_root.x()) / self.field_dimension.x();
+        let y = (center_y - self.board_root.y()) / self.field_dimension.y();
         Position::new(x as usize, y as usize)
     }
 
-    pub fn collides_with_obstacle(&self, position: &Position, coordinates: &Vec3, dimension: &Vec2, direction: &common::Direction) -> bool {
-        let position_in_direction = match self.position_in_direction(position, direction) {
-            Some(pos) if !self.position_is_movable(&pos) => pos,
-            _ => return false,
-        };
-        let field_coordinates = self.window_coordinates(&position_in_direction, &self.field_dimension);
-        collide(*coordinates,
-                *dimension,
-                field_coordinates,
-                self.field_dimension)
-            .is_some()
+    pub fn collides_with_obstacle(&self, position: &Position, direction: &common::Direction) -> bool {
+        match self.position_in_direction(position, direction) {
+            Some(pos) if !self.position_is_movable(&pos) => true,
+            _ => false,
+        }
     }
 
     fn position_in_direction(&self, position: &Position, direction: &common::Direction) -> Option<Position> {

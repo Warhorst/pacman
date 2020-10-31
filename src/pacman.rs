@@ -10,7 +10,6 @@ impl Plugin for PacmanPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.add_startup_system(spawn_pacman.system())
             .add_system(set_direction.system())
-            .add_system(update_position.system())
             .add_system(move_pacman.system());
     }
 }
@@ -58,14 +57,8 @@ fn set_direction(keyboard_input: Res<Input<KeyCode>>, mut query: Query<&mut Pacm
     }
 }
 
-fn update_position(board: Res<Board>, mut query: Query<(&Pacman, &Transform, &Sprite, &mut Position)>) {
-    for (_pacman, transform, sprite, mut position) in &mut query.iter() {
-        *position = board.calculate_position(&transform.translation(), &sprite.size);
-    }
-}
-
-fn move_pacman(time: Res<Time>, board: Res<Board>, mut query: Query<(&Pacman, &Position, &Sprite, &mut Transform)>) {
-    for (pacman, position, sprite, mut transform) in &mut query.iter() {
+fn move_pacman(time: Res<Time>, board: Res<Board>, mut query: Query<(&Pacman, &mut Position, &Sprite, &mut Transform)>) {
+    for (pacman, mut position, sprite, mut transform) in &mut query.iter() {
         let direction = match &pacman.movement {
             Movement::Idle => return,
             Movement::Moving(dir) => dir
@@ -78,16 +71,22 @@ fn move_pacman(time: Res<Time>, board: Res<Board>, mut query: Query<(&Pacman, &P
             Direction::Right => (1.0, 0.0)
         };
 
-        let mut translation = transform.translation();
+        let translation = &mut transform.translation_mut();
         *translation.x_mut() += time.delta_seconds * x * 250.0;
         *translation.y_mut() += time.delta_seconds * y * 250.0;
+        *position = board.calculate_position(&Vec3::new(translation.x(), translation.y(), 0.0), &sprite.size);
 
-        let collides = board.collides_with_obstacle(position, &translation, &sprite.size, &direction);
-
-        if !collides {
-            let translation_mut = &mut transform.translation_mut();
-            *translation_mut.x_mut() = translation.x();
-            *translation_mut.y_mut() = translation.y()
+        if board.collides_with_obstacle(&position, &direction) {
+            let pacman_coordinates = board.window_coordinates(&position, &sprite.size);
+            println!("New: {:?}", Vec3::new(translation.x(), translation.y(), 0.0));
+            println!("Bounds: {:?}", pacman_coordinates);
+            match direction {
+                Direction::Up => *translation.y_mut() = translation.y().min(pacman_coordinates.y()),
+                Direction::Down => *translation.y_mut() = translation.y().max(pacman_coordinates.y()),
+                Direction::Left => *translation.x_mut() = translation.x().max(pacman_coordinates.x()),
+                Direction::Right => *translation.x_mut() = translation.x().min(pacman_coordinates.x())
+            };
+            println!("New After: {:?}", Vec3::new(translation.x(), translation.y(), 0.0));
         }
     }
 }
