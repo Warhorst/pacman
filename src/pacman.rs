@@ -57,8 +57,8 @@ fn set_direction(keyboard_input: Res<Input<KeyCode>>, mut query: Query<&mut Pacm
     }
 }
 
-fn move_pacman(time: Res<Time>, board: Res<Board>, mut query: Query<(&mut Pacman, &mut Position, &mut Transform)>) {
-    for (mut pacman, mut position, mut transform) in &mut query.iter() {
+fn move_pacman(time: Res<Time>, board: Res<Board>, mut query: Query<(&mut Pacman, &Sprite, &mut Position, &mut Transform)>) {
+    for (mut pacman, sprite, mut position, mut transform) in &mut query.iter() {
         let direction = match pacman.movement {
             Movement::Idle => return,
             Movement::Moving(dir) => dir
@@ -68,8 +68,10 @@ fn move_pacman(time: Res<Time>, board: Res<Board>, mut query: Query<(&mut Pacman
         let translation = transform.translation_mut();
         move_in_direction(&direction, translation, time.delta_seconds);
 
-        if board.collides_with_obstacle(&position, &direction) {
+        if board.collides_with_obstacle(&position, &direction, &Vec3::new(translation.x(), translation.y(), 0.0), &sprite.size) {
             process_collision(&board, &position, &direction, translation, &mut pacman)
+        } else {
+            center_position(&board, translation, &position, &direction)
         }
     }
 }
@@ -114,5 +116,13 @@ fn stop_if_at_border(direction: &Direction, border_coordinates: &Vec3, translati
         Direction::Left | Direction::Right => if border_coordinates.x() == translation.x() {
             pacman.movement = Movement::Idle
         }
+    }
+}
+
+fn center_position(board: &Board, translation: &mut Vec4, position: &Position, direction: &Direction) {
+    let position_coordinates = board.window_coordinates(position);
+    match direction {
+        Direction::Up | Direction::Down => *translation.x_mut() = position_coordinates.x(),
+        Direction::Left | Direction::Right => *translation.y_mut() = position_coordinates.y()
     }
 }

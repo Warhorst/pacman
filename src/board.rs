@@ -110,9 +110,10 @@ impl Board {
         Position::new(x as usize, y as usize)
     }
 
-    pub fn collides_with_obstacle(&self, position: &Position, direction: &common::Direction) -> bool {
+    pub fn collides_with_obstacle(&self, position: &Position, direction: &common::Direction, coordinates: &Vec3, dimension: &Vec2) -> bool {
         match self.position_in_direction(position, direction) {
-            Some(pos) if !self.position_is_movable(&pos) => true,
+            Some(pos) if self.position_is_obstacle(&pos) => true,
+            Some(pos) => !self.coordinates_in_field_center(coordinates, dimension, &pos, direction),
             _ => false,
         }
     }
@@ -154,11 +155,25 @@ impl Board {
         }
     }
 
-    fn position_is_movable(&self, position: &Position) -> bool {
+    fn position_is_obstacle(&self, position: &Position) -> bool {
         let field_type = self.fields.get(position).unwrap();
         match field_type {
-            Free => true,
-            Wall => false
+            Free => false,
+            Wall => true
+        }
+    }
+
+    fn coordinates_in_field_center(&self, coordinates: &Vec3, dimension: &Vec2, position: &Position, direction: &common::Direction) -> bool {
+        let position_coordinates = self.window_coordinates(position);
+
+        let x_start = position_coordinates.x() - ((self.field_dimension.x() - dimension.x()) / 2.0);
+        let x_end = position_coordinates.x() + ((self.field_dimension.x() - dimension.x()) / 2.0);
+        let y_start = position_coordinates.y() - ((self.field_dimension.y() - dimension.y()) / 2.0);
+        let y_end = position_coordinates.y() + ((self.field_dimension.y() - dimension.y()) / 2.0);
+
+        match direction {
+            Left | Right => coordinates.y() >= y_start && coordinates.y() <= y_end,
+            Up | Down => coordinates.x() >= x_start && coordinates.x() <= x_end
         }
     }
 }
