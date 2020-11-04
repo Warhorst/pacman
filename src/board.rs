@@ -25,7 +25,6 @@ pub struct Board {
     fields: HashMap<Position, FieldType>,
     field_dimension: Vec2,
     board_root: Vec2,
-    max_position: Position,
 }
 
 pub struct Field<'a> {
@@ -42,7 +41,6 @@ enum FieldType {
 impl Board {
     fn new() -> Self {
         let board = Self::create_board();
-        let max_position = Self::get_max_position(&board);
         let fields = Self::fields_from_field_type_vec(board);
         let board_root = Vec2::new(0.0, 0.0);
         let field_size = Vec2::new(30.0, 30.0);
@@ -50,7 +48,6 @@ impl Board {
             fields,
             field_dimension: field_size,
             board_root,
-            max_position,
         }
     }
 
@@ -66,15 +63,6 @@ impl Board {
             vec![Wall, Free, Free, Free, Free, Free, Free, Wall],
             vec![Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall]
         ]
-    }
-
-    fn get_max_position(board: &Vec<Vec<FieldType>>) -> Position {
-        let x = board.len() - 1;
-        let y = match board.get(0) {
-            Some(vec) => vec.len(),
-            None => 0
-        };
-        Position::new(x, y)
     }
 
     fn fields_from_field_type_vec(fields: FieldTypeVec) -> HashMap<Position, FieldType> {
@@ -112,13 +100,12 @@ impl Board {
 
     pub fn collides_with_obstacle(&self, position: &Position, direction: &common::Direction, coordinates: &Vec3, dimension: &Vec2) -> bool {
         match self.position_in_direction(position, direction) {
-            Some(pos) if self.position_is_obstacle(&pos) => true,
-            Some(pos) => !self.coordinates_in_field_center(coordinates, dimension, &pos, direction),
-            _ => false,
+            pos if self.position_is_obstacle(&pos) => true,
+            pos => !self.coordinates_in_field_center(coordinates, dimension, &pos, direction)
         }
     }
 
-    fn position_in_direction(&self, position: &Position, direction: &common::Direction) -> Option<Position> {
+    fn position_in_direction(&self, position: &Position, direction: &common::Direction) -> Position {
         match direction {
             Up => self.position_up_of(position),
             Down => self.position_down_of(position),
@@ -127,32 +114,20 @@ impl Board {
         }
     }
 
-    fn position_up_of(&self, position: &Position) -> Option<Position> {
-        match position.y() {
-            y if y == self.max_position.y() => None,
-            y => Some(Position::new(position.x(), y + 1))
-        }
+    fn position_up_of(&self, position: &Position) -> Position {
+        Position::new(position.x(), position.y() + 1)
     }
 
-    fn position_down_of(&self, position: &Position) -> Option<Position> {
-        match position.y() {
-            0 => None,
-            y => Some(Position::new(position.x(), y - 1))
-        }
+    fn position_down_of(&self, position: &Position) -> Position {
+        Position::new(position.x(), position.y() - 1)
     }
 
-    fn position_left_of(&self, position: &Position) -> Option<Position> {
-        match position.x() {
-            0 => None,
-            x => Some(Position::new(x - 1, position.y()))
-        }
+    fn position_left_of(&self, position: &Position) -> Position {
+        Position::new(position.x() - 1, position.y())
     }
 
-    fn position_right_of(&self, position: &Position) -> Option<Position> {
-        match position.x() {
-            x if x > self.max_position.x() => None,
-            x => Some(Position::new(x + 1, position.y()))
-        }
+    fn position_right_of(&self, position: &Position) -> Position {
+        Position::new(position.x() + 1, position.y())
     }
 
     fn position_is_obstacle(&self, position: &Position) -> bool {
@@ -166,14 +141,19 @@ impl Board {
     fn coordinates_in_field_center(&self, coordinates: &Vec3, dimension: &Vec2, position: &Position, direction: &common::Direction) -> bool {
         let position_coordinates = self.window_coordinates(position);
 
-        let x_start = position_coordinates.x() - ((self.field_dimension.x() - dimension.x()) / 2.0);
-        let x_end = position_coordinates.x() + ((self.field_dimension.x() - dimension.x()) / 2.0);
-        let y_start = position_coordinates.y() - ((self.field_dimension.y() - dimension.y()) / 2.0);
-        let y_end = position_coordinates.y() + ((self.field_dimension.y() - dimension.y()) / 2.0);
-
         match direction {
-            Left | Right => coordinates.y() >= y_start && coordinates.y() <= y_end,
-            Up | Down => coordinates.x() >= x_start && coordinates.x() <= x_end
+            Left | Right => {
+                let y_center_range = (self.field_dimension.y() - dimension.y()) / 2.0;
+                let y_start = position_coordinates.y() - y_center_range;
+                let y_end = position_coordinates.y() + y_center_range;
+                coordinates.y() >= y_start && coordinates.y() <= y_end
+            },
+            Up | Down => {
+                let x_center_range = (self.field_dimension.x() - dimension.x()) / 2.0;
+                let x_start = position_coordinates.x() - x_center_range;
+                let x_end = position_coordinates.x() + x_center_range;
+                coordinates.x() >= x_start && coordinates.x() <= x_end
+            }
         }
     }
 }
