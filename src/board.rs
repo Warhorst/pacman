@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use bevy::ecs::Commands;
 use bevy::prelude::*;
 
-use FieldType::{Free, Wall};
+use FieldType::*;
 
 use crate::common::{Direction::*, Position};
 use crate::common;
@@ -34,10 +34,12 @@ pub struct Field<'a> {
     field_type: &'a FieldType,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialOrd, PartialEq)]
 enum FieldType {
     Free,
     Wall,
+    LeftTunnel,
+    RightTunnel
 }
 
 impl Board {
@@ -56,7 +58,7 @@ impl Board {
 
     fn create_field_type_matrix() -> FieldTypeMatrix {
         vec![
-            vec![Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall],
+            vec![Wall, Wall, Wall, LeftTunnel, Wall, Wall, Wall, Wall],
             vec![Wall, Free, Free, Free, Free, Free, Free, Wall],
             vec![Wall, Free, Wall, Free, Wall, Wall, Free, Wall],
             vec![Wall, Free, Wall, Free, Wall, Wall, Free, Wall],
@@ -64,7 +66,7 @@ impl Board {
             vec![Wall, Free, Wall, Free, Wall, Wall, Free, Wall],
             vec![Wall, Free, Wall, Free, Wall, Wall, Free, Wall],
             vec![Wall, Free, Free, Free, Free, Free, Free, Wall],
-            vec![Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall]
+            vec![Wall, Wall, Wall, RightTunnel, Wall, Wall, Wall, Wall]
         ]
     }
 
@@ -149,8 +151,8 @@ impl Board {
     fn position_is_obstacle(&self, position: &Position) -> bool {
         let field_type = self.fields.get(position).unwrap();
         match field_type {
-            Free => false,
-            Wall => true
+            Wall => true,
+            _ => false,
         }
     }
 
@@ -172,13 +174,30 @@ impl Board {
             }
         }
     }
+
+    pub fn get_left_tunnel_position(&self) -> &Position {
+        let left_tunnels: Vec<&Position> = self.fields.iter()
+            .filter(|(_, field_type)| *field_type == &LeftTunnel)
+            .map(|(position, _)| position)
+            .collect();
+        left_tunnels.get(0).expect("The board should contain one left tunnel")
+    }
+
+    pub fn get_right_tunnel_position(&self) -> &Position {
+        let left_tunnels: Vec<&Position> = self.fields.iter()
+            .filter(|(_, field_type)| *field_type == &RightTunnel)
+            .map(|(position, _)| position)
+            .collect();
+        left_tunnels.get(0).expect("The board should contain one right tunnel")
+    }
 }
 
 fn create_board(mut commands: Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
     for field in board.fields() {
         let color_material = match field.field_type {
             Free => Color::rgb(0.0, 0.0, 0.0).into(),
-            Wall => Color::rgb(0.0, 0.0, 1.0).into()
+            Wall => Color::rgb(0.0, 0.0, 1.0).into(),
+            LeftTunnel | RightTunnel => Color::rgb(211.0, 211.0, 211.0).into()
         };
 
         commands.spawn(SpriteComponents {

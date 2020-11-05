@@ -9,7 +9,8 @@ impl Plugin for PacmanPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.add_startup_system(spawn_pacman.system())
             .add_system(set_direction.system())
-            .add_system(move_pacman.system());
+            .add_system(move_pacman.system())
+            .add_system(walk_through_tunnel.system());
     }
 }
 
@@ -124,5 +125,44 @@ fn center_position(board: &Board, translation: &mut Vec3, position: &Position, d
     match direction {
         Direction::Up | Direction::Down => *translation.x_mut() = position_coordinates.x(),
         Direction::Left | Direction::Right => *translation.y_mut() = position_coordinates.y()
+    }
+}
+
+fn walk_through_tunnel(board: Res<Board>, mut query: Query<(&Pacman, &mut Position, &mut Transform)>) {
+    for(pacman, mut position, mut transform) in query.iter_mut() {
+        let direction = match pacman.movement {
+            Movement::Idle => return,
+            Movement::Moving(dir) => dir
+        };
+
+        match direction {
+            Direction::Up | Direction::Down => return,
+            Direction::Right => walk_through_right_tunnel(&board, &mut position, &mut transform.translation),
+            Direction::Left => walk_through_left_tunnel(&board, &mut position, &mut transform.translation)
+        }
+    }
+}
+
+fn walk_through_right_tunnel(board: &Board, position: &mut Position, translation: &mut Vec3) {
+    let right_tunnel_position = board.get_right_tunnel_position();
+    let left_tunnel_position = board.get_left_tunnel_position();
+    match position == right_tunnel_position {
+        false => return,
+        true => {
+            *translation = board.window_coordinates(left_tunnel_position);
+            *position = *left_tunnel_position;
+        }
+    }
+}
+
+fn walk_through_left_tunnel(board: &Board, position: &mut Position, translation: &mut Vec3) {
+    let right_tunnel_position = board.get_right_tunnel_position();
+    let left_tunnel_position = board.get_left_tunnel_position();
+    match position == left_tunnel_position {
+        false => return,
+        true => {
+            *translation = board.window_coordinates(right_tunnel_position);
+            *position = *right_tunnel_position;
+        }
     }
 }
