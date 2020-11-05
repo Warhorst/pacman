@@ -9,7 +9,7 @@ use crate::common::{Direction::*, Position};
 use crate::common;
 
 pub type Fields<'a> = Vec<Field<'a>>;
-type FieldTypeVec = Vec<Vec<FieldType>>;
+type FieldTypeMatrix = Vec<Vec<FieldType>>;
 
 pub struct BoardPlugin;
 
@@ -23,6 +23,8 @@ impl Plugin for BoardPlugin {
 
 pub struct Board {
     fields: HashMap<Position, FieldType>,
+    width: usize,
+    height: usize,
     field_dimension: Vec2,
     board_root: Vec2,
 }
@@ -40,18 +42,19 @@ enum FieldType {
 
 impl Board {
     fn new() -> Self {
-        let board = Self::create_board();
-        let fields = Self::fields_from_field_type_vec(board);
+        let (fields, width, height) = Self::read_board_data_from_matrix(Self::create_field_type_matrix());
         let board_root = Vec2::new(0.0, 0.0);
         let field_size = Vec2::new(30.0, 30.0);
         Board {
             fields,
+            width,
+            height,
             field_dimension: field_size,
             board_root,
         }
     }
 
-    fn create_board() -> FieldTypeVec {
+    fn create_field_type_matrix() -> FieldTypeMatrix {
         vec![
             vec![Wall, Wall, Wall, Wall, Wall, Wall, Wall, Wall],
             vec![Wall, Free, Free, Free, Free, Free, Free, Wall],
@@ -65,19 +68,19 @@ impl Board {
         ]
     }
 
-    fn fields_from_field_type_vec(fields: FieldTypeVec) -> HashMap<Position, FieldType> {
-        let mut result = HashMap::new();
-        let width = fields.len();
-        let height = match fields.get(0) {
+    fn read_board_data_from_matrix(matrix: FieldTypeMatrix) -> (HashMap<Position, FieldType>, usize, usize) {
+        let mut fields = HashMap::new();
+        let width = matrix.len();
+        let height = match matrix.get(0) {
             Some(vec) => vec.len(),
             None => 1
         };
         for i in 0..width {
             for j in 0..height {
-                result.insert(Position::new(i, j), fields[i][j]);
+                fields.insert(Position::new(i, j), matrix[i][j]);
             }
         }
-        result
+        (fields, width, height)
     }
 
     pub fn fields(&self) -> Fields {
@@ -100,12 +103,13 @@ impl Board {
 
     pub fn collides_with_obstacle(&self, position: &Position, direction: &common::Direction, coordinates: &Vec3, dimension: &Vec2) -> bool {
         match self.position_in_direction(position, direction) {
-            pos if self.position_is_obstacle(&pos) => true,
-            pos => !self.coordinates_in_field_center(coordinates, dimension, &pos, direction)
+            Some(pos) if self.position_is_obstacle(&pos) => true,
+            Some(pos) => !self.coordinates_in_field_center(coordinates, dimension, &pos, direction),
+            None => true
         }
     }
 
-    fn position_in_direction(&self, position: &Position, direction: &common::Direction) -> Position {
+    fn position_in_direction(&self, position: &Position, direction: &common::Direction) -> Option<Position> {
         match direction {
             Up => self.position_up_of(position),
             Down => self.position_down_of(position),
@@ -114,20 +118,32 @@ impl Board {
         }
     }
 
-    fn position_up_of(&self, position: &Position) -> Position {
-        Position::new(position.x(), position.y() + 1)
+    fn position_up_of(&self, position: &Position) -> Option<Position> {
+        match position.y() {
+            y if y < self.height - 1 => Some(Position::new(position.x(), y + 1)),
+            _ => None
+        }
     }
 
-    fn position_down_of(&self, position: &Position) -> Position {
-        Position::new(position.x(), position.y() - 1)
+    fn position_down_of(&self, position: &Position) -> Option<Position> {
+        match position.y() {
+            y if y > 0 => Some(Position::new(position.x(), y - 1)),
+            _ => None
+        }
     }
 
-    fn position_left_of(&self, position: &Position) -> Position {
-        Position::new(position.x() - 1, position.y())
+    fn position_left_of(&self, position: &Position) -> Option<Position> {
+        match position.x() {
+            x if x > 0 => Some(Position::new(x - 1, position.y())),
+            _ => None
+        }
     }
 
-    fn position_right_of(&self, position: &Position) -> Position {
-        Position::new(position.x() + 1, position.y())
+    fn position_right_of(&self, position: &Position) -> Option<Position> {
+        match position.x() {
+            x if x < self.width - 1 => Some(Position::new(x + 1, position.y())),
+            _ => None
+        }
     }
 
     fn position_is_obstacle(&self, position: &Position) -> bool {

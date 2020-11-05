@@ -64,11 +64,11 @@ fn move_pacman(time: Res<Time>, board: Res<Board>, mut query: Query<(&mut Pacman
             Movement::Moving(dir) => dir
         };
 
-        *position = board.calculate_position(&transform.translation);
         let translation = &mut transform.translation;
+        *position = board.calculate_position(translation);
         move_in_direction(&direction, translation, time.delta_seconds);
 
-        if board.collides_with_obstacle(&position, &direction, &Vec3::new(translation.x(), translation.y(), 0.0), &sprite.size) {
+        if board.collides_with_obstacle(&position, &direction, translation, &sprite.size) {
             process_collision(&board, &position, &direction, translation, &mut pacman)
         } else {
             center_position(&board, translation, &position, &direction)
