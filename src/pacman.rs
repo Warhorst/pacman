@@ -14,9 +14,7 @@ impl Plugin for PacmanPlugin {
     }
 }
 
-struct Pacman {
-    movement: Movement
-}
+struct Pacman;
 
 #[derive(Debug)]
 enum Movement {
@@ -34,33 +32,34 @@ fn spawn_pacman(mut commands: Commands, mut materials: ResMut<Assets<ColorMateri
             sprite: Sprite::new(pacman_dimension),
             ..Default::default()
         })
-        .with(Pacman { movement: Movement::Idle })
+        .with(Pacman)
+        .with(Movement::Idle)
         .with(start_position);
 }
 
-fn set_direction(keyboard_input: Res<Input<KeyCode>>, mut query: Query<&mut Pacman>) {
-    for mut pacman in query.iter_mut() {
+fn set_direction(keyboard_input: Res<Input<KeyCode>>, mut query: Query<(&Pacman, &mut Movement)>) {
+    for (_pacman, mut movement) in query.iter_mut() {
         if keyboard_input.pressed(KeyCode::Left) {
-            pacman.movement = Movement::Moving(Direction::Left)
+            *movement = Movement::Moving(Direction::Left)
         }
 
         if keyboard_input.pressed(KeyCode::Right) {
-            pacman.movement = Movement::Moving(Direction::Right)
+            *movement = Movement::Moving(Direction::Right)
         }
 
         if keyboard_input.pressed(KeyCode::Up) {
-            pacman.movement = Movement::Moving(Direction::Up)
+            *movement = Movement::Moving(Direction::Up)
         }
 
         if keyboard_input.pressed(KeyCode::Down) {
-            pacman.movement = Movement::Moving(Direction::Down)
+            *movement = Movement::Moving(Direction::Down)
         }
     }
 }
 
-fn move_pacman(time: Res<Time>, board: Res<Board>, mut query: Query<(&mut Pacman, &Sprite, &mut Position, &mut Transform)>) {
-    for (mut pacman, sprite, mut position, mut transform) in query.iter_mut() {
-        let direction = match pacman.movement {
+fn move_pacman(time: Res<Time>, board: Res<Board>, mut query: Query<(&Pacman, &mut Movement, &Sprite, &mut Position, &mut Transform)>) {
+    for (_pacman, mut movement, sprite, mut position, mut transform) in query.iter_mut() {
+        let direction = match *movement {
             Movement::Idle => return,
             Movement::Moving(dir) => dir
         };
@@ -70,7 +69,7 @@ fn move_pacman(time: Res<Time>, board: Res<Board>, mut query: Query<(&mut Pacman
         move_in_direction(&direction, translation, time.delta_seconds);
 
         if board.collides_with_obstacle(&position, &direction, translation, &sprite.size) {
-            process_collision(&board, &position, &direction, translation, &mut pacman)
+            process_collision(&board, &position, &direction, translation, &mut movement)
         } else {
             center_position(&board, translation, &position, &direction)
         }
@@ -93,10 +92,10 @@ fn get_modifiers_for_direction(direction: &Direction) -> (f32, f32) {
     }
 }
 
-fn process_collision(board: &Board, position: &Position, direction: &Direction, translation: &mut Vec3, pacman: &mut Pacman) {
+fn process_collision(board: &Board, position: &Position, direction: &Direction, translation: &mut Vec3, movement: &mut Movement) {
     let border_coordinates = board.window_coordinates(&position);
     limit_movement(direction, &border_coordinates, translation);
-    stop_if_at_border(direction, &border_coordinates, translation, pacman)
+    stop_if_at_border(direction, &border_coordinates, translation, movement)
 }
 
 fn limit_movement(direction: &Direction, border_coordinates: &Vec3, translation: &mut Vec3) {
@@ -108,14 +107,14 @@ fn limit_movement(direction: &Direction, border_coordinates: &Vec3, translation:
     }
 }
 
-fn stop_if_at_border(direction: &Direction, border_coordinates: &Vec3, translation: &mut Vec3, pacman: &mut Pacman) {
+fn stop_if_at_border(direction: &Direction, border_coordinates: &Vec3, translation: &mut Vec3, movement: &mut Movement) {
     match direction {
         Direction::Up | Direction::Down => if border_coordinates.y() == translation.y() {
-            pacman.movement = Movement::Idle
+            *movement = Movement::Idle
         }
         ,
         Direction::Left | Direction::Right => if border_coordinates.x() == translation.x() {
-            pacman.movement = Movement::Idle
+            *movement = Movement::Idle
         }
     }
 }
@@ -128,9 +127,9 @@ fn center_position(board: &Board, translation: &mut Vec3, position: &Position, d
     }
 }
 
-fn walk_through_tunnel(board: Res<Board>, mut query: Query<(&Pacman, &mut Position, &mut Transform)>) {
-    for(pacman, mut position, mut transform) in query.iter_mut() {
-        let direction = match pacman.movement {
+fn walk_through_tunnel(board: Res<Board>, mut query: Query<(&Pacman, &Movement, &mut Position, &mut Transform)>) {
+    for(_pacman, movement, mut position, mut transform) in query.iter_mut() {
+        let direction = match movement {
             Movement::Idle => return,
             Movement::Moving(dir) => dir
         };
