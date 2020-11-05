@@ -38,7 +38,7 @@ fn spawn_pacman(mut commands: Commands, mut materials: ResMut<Assets<ColorMateri
 }
 
 fn set_direction(keyboard_input: Res<Input<KeyCode>>, mut query: Query<&mut Pacman>) {
-    for mut pacman in &mut query.iter() {
+    for mut pacman in query.iter_mut() {
         if keyboard_input.pressed(KeyCode::Left) {
             pacman.movement = Movement::Moving(Direction::Left)
         }
@@ -58,14 +58,14 @@ fn set_direction(keyboard_input: Res<Input<KeyCode>>, mut query: Query<&mut Pacm
 }
 
 fn move_pacman(time: Res<Time>, board: Res<Board>, mut query: Query<(&mut Pacman, &Sprite, &mut Position, &mut Transform)>) {
-    for (mut pacman, sprite, mut position, mut transform) in &mut query.iter() {
+    for (mut pacman, sprite, mut position, mut transform) in query.iter_mut() {
         let direction = match pacman.movement {
             Movement::Idle => return,
             Movement::Moving(dir) => dir
         };
 
-        *position = board.calculate_position(&transform.translation());
-        let translation = transform.translation_mut();
+        *position = board.calculate_position(&transform.translation);
+        let translation = &mut transform.translation;
         move_in_direction(&direction, translation, time.delta_seconds);
 
         if board.collides_with_obstacle(&position, &direction, &Vec3::new(translation.x(), translation.y(), 0.0), &sprite.size) {
@@ -76,7 +76,7 @@ fn move_pacman(time: Res<Time>, board: Res<Board>, mut query: Query<(&mut Pacman
     }
 }
 
-fn move_in_direction(direction: &Direction, translation: &mut Vec4, delta_seconds: f32) {
+fn move_in_direction(direction: &Direction, translation: &mut Vec3, delta_seconds: f32) {
     let speed = 250.0;
     let (x, y) = get_modifiers_for_direction(direction);
     *translation.x_mut() += delta_seconds * x * speed;
@@ -92,13 +92,13 @@ fn get_modifiers_for_direction(direction: &Direction) -> (f32, f32) {
     }
 }
 
-fn process_collision(board: &Board, position: &Position, direction: &Direction, translation: &mut Vec4, pacman: &mut Pacman) {
+fn process_collision(board: &Board, position: &Position, direction: &Direction, translation: &mut Vec3, pacman: &mut Pacman) {
     let border_coordinates = board.window_coordinates(&position);
     limit_movement(direction, &border_coordinates, translation);
     stop_if_at_border(direction, &border_coordinates, translation, pacman)
 }
 
-fn limit_movement(direction: &Direction, border_coordinates: &Vec3, translation: &mut Vec4) {
+fn limit_movement(direction: &Direction, border_coordinates: &Vec3, translation: &mut Vec3) {
     match direction {
         Direction::Up => *translation.y_mut() = translation.y().min(border_coordinates.y()),
         Direction::Down => *translation.y_mut() = translation.y().max(border_coordinates.y()),
@@ -107,7 +107,7 @@ fn limit_movement(direction: &Direction, border_coordinates: &Vec3, translation:
     }
 }
 
-fn stop_if_at_border(direction: &Direction, border_coordinates: &Vec3, translation: &mut Vec4, pacman: &mut Pacman) {
+fn stop_if_at_border(direction: &Direction, border_coordinates: &Vec3, translation: &mut Vec3, pacman: &mut Pacman) {
     match direction {
         Direction::Up | Direction::Down => if border_coordinates.y() == translation.y() {
             pacman.movement = Movement::Idle
@@ -119,7 +119,7 @@ fn stop_if_at_border(direction: &Direction, border_coordinates: &Vec3, translati
     }
 }
 
-fn center_position(board: &Board, translation: &mut Vec4, position: &Position, direction: &Direction) {
+fn center_position(board: &Board, translation: &mut Vec3, position: &Position, direction: &Direction) {
     let position_coordinates = board.window_coordinates(position);
     match direction {
         Direction::Up | Direction::Down => *translation.x_mut() = position_coordinates.x(),

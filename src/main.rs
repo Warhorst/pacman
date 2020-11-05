@@ -10,7 +10,7 @@ mod board;
 
 fn main() {
     App::build()
-        .add_default_plugins()
+        .add_plugins(DefaultPlugins)
         .add_startup_system(init.system())
         .add_plugin(BoardPlugin)
         .add_plugin(PacmanPlugin)
