@@ -1,15 +1,15 @@
-use std::collections::HashMap;
+use std::fs::File;
 
 use bevy::ecs::Commands;
 use bevy::prelude::*;
 
 use crate::common::{Direction::*, Position};
 use crate::common;
-use crate::map::FieldType;
+use crate::map::{FieldType, PositionTypeMap};
 use crate::map::FieldType::*;
+use crate::map::pacmap::PacMap;
 
 pub type Fields<'a> = Vec<Field<'a>>;
-type FieldTypeMatrix = Vec<Vec<FieldType>>;
 
 pub struct BoardPlugin;
 
@@ -22,7 +22,7 @@ impl Plugin for BoardPlugin {
 }
 
 pub struct Board {
-    fields: HashMap<Position, FieldType>,
+    fields: PositionTypeMap,
     width: usize,
     height: usize,
     field_dimension: Vec2,
@@ -36,45 +36,16 @@ pub struct Field<'a> {
 
 impl Board {
     fn new() -> Self {
-        let (fields, width, height) = Self::read_board_data_from_matrix(Self::create_field_type_matrix());
+        let pacmap = PacMap::from_read(File::open("maps/default.pacmap").unwrap());
         let board_root = Vec2::new(0.0, 0.0);
         let field_size = Vec2::new(30.0, 30.0);
         Board {
-            fields,
-            width,
-            height,
+            width: pacmap.width,
+            height: pacmap.height,
+            fields: pacmap.into_position_type_map(),
             field_dimension: field_size,
             board_root,
         }
-    }
-
-    fn create_field_type_matrix() -> FieldTypeMatrix {
-        vec![
-            vec![Wall, Wall, Wall, LeftTunnel, Wall, Wall, Wall, Wall],
-            vec![Wall, Free, Free, Free, Free, Free, Free, Wall],
-            vec![Wall, Free, Wall, Free, Wall, Wall, Free, Wall],
-            vec![Wall, Free, Wall, Free, Wall, Wall, Free, Wall],
-            vec![Wall, Free, Wall, Free, Wall, Wall, Free, Wall],
-            vec![Wall, Free, Wall, Free, Wall, Wall, Free, Wall],
-            vec![Wall, Free, Wall, Free, Wall, Wall, Free, Wall],
-            vec![Wall, Free, Free, Free, Free, Free, Free, Wall],
-            vec![Wall, Wall, Wall, RightTunnel, Wall, Wall, Wall, Wall]
-        ]
-    }
-
-    fn read_board_data_from_matrix(matrix: FieldTypeMatrix) -> (HashMap<Position, FieldType>, usize, usize) {
-        let mut fields = HashMap::new();
-        let width = matrix.len();
-        let height = match matrix.get(0) {
-            Some(vec) => vec.len(),
-            None => 1
-        };
-        for i in 0..width {
-            for j in 0..height {
-                fields.insert(Position::new(i, j), matrix[i][j]);
-            }
-        }
-        (fields, width, height)
     }
 
     pub fn fields(&self) -> Fields {
