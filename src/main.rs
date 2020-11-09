@@ -1,12 +1,11 @@
 use bevy::prelude::*;
 
+use map::board::BoardPlugin;
 use pacman::PacmanPlugin;
-
-use crate::board::BoardPlugin;
 
 mod common;
 mod pacman;
-mod board;
+mod map;
 
 fn main() {
     App::build()

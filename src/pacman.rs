@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
-use crate::board::Board;
 use crate::common::{Direction, Position};
+use crate::map::board::Board;
 
 pub struct PacmanPlugin;
 

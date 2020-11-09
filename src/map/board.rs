@@ -3,10 +3,10 @@ use std::collections::HashMap;
 use bevy::ecs::Commands;
 use bevy::prelude::*;
 
-use FieldType::*;
-
 use crate::common::{Direction::*, Position};
 use crate::common;
+use crate::map::FieldType;
+use crate::map::FieldType::*;
 
 pub type Fields<'a> = Vec<Field<'a>>;
 type FieldTypeMatrix = Vec<Vec<FieldType>>;
@@ -32,14 +32,6 @@ pub struct Board {
 pub struct Field<'a> {
     position: &'a Position,
     field_type: &'a FieldType,
-}
-
-#[derive(Copy, Clone, PartialOrd, PartialEq)]
-enum FieldType {
-    Free,
-    Wall,
-    LeftTunnel,
-    RightTunnel
 }
 
 impl Board {
