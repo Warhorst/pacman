@@ -25,7 +25,7 @@ impl TryFrom<char> for FieldType {
 
     fn try_from(value: char) -> Result<Self, Self::Error> {
         match value {
-            ' ' => Ok(Free),
+            '#' => Ok(Free),
             'W' => Ok(Wall),
             'L' => Ok(LeftTunnel),
             'R' => Ok(RightTunnel),

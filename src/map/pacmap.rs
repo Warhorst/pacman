@@ -49,7 +49,7 @@ impl PacMap {
     /// filled with FieldType::Free.
     fn line_to_field_types(line: String, width: usize) -> Vec<FieldType> {
         let mut field_types = line.chars()
-            .map(|char| FieldType::try_from(char).unwrap())
+            .map(|char| FieldType::try_from(char).expect("The map should contain only valid characters."))
             .collect::<Vec<_>>();
         while field_types.len() < width {
             field_types.push(FieldType::Free)

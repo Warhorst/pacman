@@ -24,11 +24,11 @@ enum Movement {
 
 fn spawn_pacman(mut commands: Commands, mut materials: ResMut<Assets<ColorMaterial>>, board: Res<Board>) {
     let start_position = Position::new(1, 1);
-    let pacman_dimension = Vec2::new(20.0, 20.0);
+    let pacman_dimension = Vec2::new(10.0, 10.0);
     commands
         .spawn(SpriteComponents {
             material: materials.add(Color::hex("FFEE00").unwrap().into()),
-            transform: Transform::from_translation(board.window_coordinates(&start_position)),
+            transform: Transform::from_translation(board.coordinates_of_position(&start_position)),
             sprite: Sprite::new(pacman_dimension),
             ..Default::default()
         })
@@ -65,7 +65,7 @@ fn move_pacman(time: Res<Time>, board: Res<Board>, mut query: Query<(&Pacman, &m
         };
 
         let translation = &mut transform.translation;
-        *position = board.calculate_position(translation);
+        *position = board.position_of_coordinates(translation);
         move_in_direction(&direction, translation, time.delta_seconds);
 
         if board.collides_with_obstacle(&position, &direction, translation, &sprite.size) {
@@ -77,7 +77,7 @@ fn move_pacman(time: Res<Time>, board: Res<Board>, mut query: Query<(&Pacman, &m
 }
 
 fn move_in_direction(direction: &Direction, translation: &mut Vec3, delta_seconds: f32) {
-    let speed = 250.0;
+    let speed = 75.0;
     let (x, y) = get_modifiers_for_direction(direction);
     *translation.x_mut() += delta_seconds * x * speed;
     *translation.y_mut() += delta_seconds * y * speed;
@@ -93,34 +93,37 @@ fn get_modifiers_for_direction(direction: &Direction) -> (f32, f32) {
 }
 
 fn process_collision(board: &Board, position: &Position, direction: &Direction, translation: &mut Vec3, movement: &mut Movement) {
-    let border_coordinates = board.window_coordinates(&position);
-    limit_movement(direction, &border_coordinates, translation);
-    stop_if_at_border(direction, &border_coordinates, translation, movement)
+    let field_coordinates = board.coordinates_of_position(&position);
+    limit_movement(direction, &field_coordinates, translation);
+    stop_if_at_border(direction, &field_coordinates, translation, movement)
 }
 
-fn limit_movement(direction: &Direction, border_coordinates: &Vec3, translation: &mut Vec3) {
+/// Because the next field is an obstacle, pacman can not go beyond his current field.
+fn limit_movement(direction: &Direction, field_coordinates: &Vec3, translation: &mut Vec3) {
     match direction {
-        Direction::Up => *translation.y_mut() = translation.y().min(border_coordinates.y()),
-        Direction::Down => *translation.y_mut() = translation.y().max(border_coordinates.y()),
-        Direction::Left => *translation.x_mut() = translation.x().max(border_coordinates.x()),
-        Direction::Right => *translation.x_mut() = translation.x().min(border_coordinates.x())
+        Direction::Up => *translation.y_mut() = translation.y().min(field_coordinates.y()),
+        Direction::Down => *translation.y_mut() = translation.y().max(field_coordinates.y()),
+        Direction::Left => *translation.x_mut() = translation.x().max(field_coordinates.x()),
+        Direction::Right => *translation.x_mut() = translation.x().min(field_coordinates.x())
     }
 }
 
-fn stop_if_at_border(direction: &Direction, border_coordinates: &Vec3, translation: &mut Vec3, movement: &mut Movement) {
+/// If pacman is at a border, he can not go further and stop.
+fn stop_if_at_border(direction: &Direction, field_coordinates: &Vec3, translation: &mut Vec3, movement: &mut Movement) {
     match direction {
-        Direction::Up | Direction::Down => if border_coordinates.y() == translation.y() {
+        Direction::Up | Direction::Down => if field_coordinates.y() == translation.y() {
             *movement = Movement::Idle
         }
         ,
-        Direction::Left | Direction::Right => if border_coordinates.x() == translation.x() {
+        Direction::Left | Direction::Right => if field_coordinates.x() == translation.x() {
             *movement = Movement::Idle
         }
     }
 }
 
+/// When pacman enters a hallway, he might not be centered. This is fixed here.
 fn center_position(board: &Board, translation: &mut Vec3, position: &Position, direction: &Direction) {
-    let position_coordinates = board.window_coordinates(position);
+    let position_coordinates = board.coordinates_of_position(position);
     match direction {
         Direction::Up | Direction::Down => *translation.x_mut() = position_coordinates.x(),
         Direction::Left | Direction::Right => *translation.y_mut() = position_coordinates.y()
@@ -148,7 +151,7 @@ fn walk_through_right_tunnel(board: &Board, position: &mut Position, translation
     match position == right_tunnel_position {
         false => return,
         true => {
-            *translation = board.window_coordinates(left_tunnel_position);
+            *translation = board.coordinates_of_position(left_tunnel_position);
             *position = *left_tunnel_position;
         }
     }
@@ -160,7 +163,7 @@ fn walk_through_left_tunnel(board: &Board, position: &mut Position, translation:
     match position == left_tunnel_position {
         false => return,
         true => {
-            *translation = board.window_coordinates(right_tunnel_position);
+            *translation = board.coordinates_of_position(right_tunnel_position);
             *position = *right_tunnel_position;
         }
     }

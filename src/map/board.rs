@@ -21,6 +21,8 @@ impl Plugin for BoardPlugin {
     }
 }
 
+/// The Board is a resource that provides methods to easily manipulate
+/// entities on the map (pacman, ghosts, points, etc).
 pub struct Board {
     fields: PositionTypeMap,
     width: usize,
@@ -37,15 +39,24 @@ pub struct Field<'a> {
 impl Board {
     fn new() -> Self {
         let pacmap = PacMap::from_read(File::open("maps/default.pacmap").unwrap());
-        let board_root = Vec2::new(0.0, 0.0);
-        let field_size = Vec2::new(30.0, 30.0);
+        let width = pacmap.width;
+        let height = pacmap.height;
+        let field_dimension = Vec2::new(15.0, 15.0);
+        let board_root = Self::calculate_board_root(width, height, field_dimension);
         Board {
-            width: pacmap.width,
-            height: pacmap.height,
+            width,
+            height,
             fields: pacmap.into_position_type_map(),
-            field_dimension: field_size,
+            field_dimension,
             board_root,
         }
+    }
+
+    /// Calculate a board root where the board is always centered.
+    fn calculate_board_root(width: usize, height: usize, field_dimension: Vec2) -> Vec2 {
+        let x = - (width as f32 * field_dimension.x() / 2.0);
+        let y = - (height as f32 * field_dimension.y() / 2.0);
+        Vec2::new(x, y)
     }
 
     pub fn fields(&self) -> Fields {
@@ -54,13 +65,13 @@ impl Board {
             .collect()
     }
 
-    pub fn window_coordinates(&self, position: &Position) -> Vec3 {
+    pub fn coordinates_of_position(&self, position: &Position) -> Vec3 {
         let x = self.board_root.x() + (position.x() as f32) * self.field_dimension.x();
         let y = self.board_root.y() + (position.y() as f32) * self.field_dimension.y();
         Vec3::new(x, y, 0.0)
     }
 
-    pub fn calculate_position(&self, coordinates: &Vec3) -> Position {
+    pub fn position_of_coordinates(&self, coordinates: &Vec3) -> Position {
         let x = (coordinates.x() - self.board_root.x() + self.field_dimension.x() / 2.0) / self.field_dimension.x();
         let y = (coordinates.y() - self.board_root.y() + self.field_dimension.y() / 2.0) / self.field_dimension.y();
         Position::new(x as usize, y as usize)
@@ -120,7 +131,7 @@ impl Board {
     }
 
     fn coordinates_in_field_center(&self, coordinates: &Vec3, dimension: &Vec2, position: &Position, direction: &common::Direction) -> bool {
-        let position_coordinates = self.window_coordinates(position);
+        let position_coordinates = self.coordinates_of_position(position);
 
         match direction {
             Left | Right => {
@@ -165,7 +176,7 @@ fn create_board(mut commands: Commands, board: Res<Board>, mut materials: ResMut
 
         commands.spawn(SpriteComponents {
             material: materials.add(color_material),
-            transform: Transform::from_translation(board.window_coordinates(field.position)),
+            transform: Transform::from_translation(board.coordinates_of_position(field.position)),
             sprite: Sprite::new(board.field_dimension),
             ..Default::default()
         });
