@@ -149,8 +149,8 @@ impl Board {
         self.get_position_of_type(PacManSpawn)
     }
 
-    /// Return the position of one specific field type. The FieldType
-    /// should be exactly one on the map.
+    /// Return the position of one specific field type. Of the FieldType
+    /// should be exactly one on the map. If not, the program panics.
     fn get_position_of_type(&self, field_type: FieldType) -> &Position {
         let type_positions = self.fields.iter()
             .filter(|(_, t)| *t == &field_type)
@@ -160,5 +160,12 @@ impl Board {
             1 => type_positions[0],
             _ => panic!("Expected exactly one field with type {:?}", field_type)
         }
+    }
+
+    pub fn get_point_positions(&self) -> Vec<&Position> {
+        self.fields.iter()
+            .filter(|(_, t)| *t == &Point)
+            .map(|(pos, _)| pos)
+            .collect()
     }
 }

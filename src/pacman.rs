@@ -14,7 +14,7 @@ impl Plugin for PacmanPlugin {
     }
 }
 
-struct Pacman;
+pub struct Pacman;
 
 #[derive(Debug)]
 enum Movement {
