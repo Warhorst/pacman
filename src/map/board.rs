@@ -1,6 +1,5 @@
 use std::fs::File;
 
-use bevy::ecs::Commands;
 use bevy::prelude::*;
 
 use crate::common::{Direction::*, Position};
@@ -9,16 +8,11 @@ use crate::map::{FieldType, PositionTypeMap};
 use crate::map::FieldType::*;
 use crate::map::pacmap::PacMap;
 
-pub type Fields<'a> = Vec<Field<'a>>;
+pub(in crate::map) type Fields<'a> = Vec<Field<'a>>;
 
-pub struct BoardPlugin;
-
-impl Plugin for BoardPlugin {
-    fn build(&self, app: &mut AppBuilder) {
-        app
-            .add_resource(Board::new())
-            .add_startup_system(create_board.system());
-    }
+pub(in crate::map) struct Field<'a> {
+    pub position: &'a Position,
+    pub field_type: &'a FieldType,
 }
 
 /// The Board is a resource that provides methods to easily manipulate
@@ -27,17 +21,12 @@ pub struct Board {
     fields: PositionTypeMap,
     width: usize,
     height: usize,
-    field_dimension: Vec2,
+    pub(in crate::map) field_dimension: Vec2,
     board_root: Vec2,
 }
 
-pub struct Field<'a> {
-    position: &'a Position,
-    field_type: &'a FieldType,
-}
-
 impl Board {
-    fn new() -> Self {
+    pub(in crate::map) fn new() -> Self {
         let pacmap = PacMap::from_read(File::open("maps/default.pacmap").unwrap());
         let width = pacmap.width;
         let height = pacmap.height;
@@ -59,7 +48,7 @@ impl Board {
         Vec2::new(x, y)
     }
 
-    pub fn fields(&self) -> Fields {
+    pub(in crate::map) fn fields(&self) -> Fields {
         self.fields.iter()
             .map(|(position, field_type)| Field { position, field_type })
             .collect()
@@ -132,7 +121,6 @@ impl Board {
 
     fn coordinates_in_field_center(&self, coordinates: &Vec3, dimension: &Vec2, position: &Position, direction: &common::Direction) -> bool {
         let position_coordinates = self.coordinates_of_position(position);
-
         match direction {
             Left | Right => {
                 let y_center_range = (self.field_dimension.y() - dimension.y()) / 2.0;
@@ -150,35 +138,27 @@ impl Board {
     }
 
     pub fn get_left_tunnel_position(&self) -> &Position {
-        let left_tunnels: Vec<&Position> = self.fields.iter()
-            .filter(|(_, field_type)| *field_type == &LeftTunnel)
-            .map(|(position, _)| position)
-            .collect();
-        left_tunnels.get(0).expect("The board should contain one left tunnel")
+        self.get_position_of_type(LeftTunnel)
     }
 
     pub fn get_right_tunnel_position(&self) -> &Position {
-        let left_tunnels: Vec<&Position> = self.fields.iter()
-            .filter(|(_, field_type)| *field_type == &RightTunnel)
-            .map(|(position, _)| position)
-            .collect();
-        left_tunnels.get(0).expect("The board should contain one right tunnel")
+        self.get_position_of_type(RightTunnel)
     }
-}
 
-fn create_board(mut commands: Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
-    for field in board.fields() {
-        let color_material = match field.field_type {
-            Free => Color::rgb(0.0, 0.0, 0.0).into(),
-            Wall => Color::rgb(0.0, 0.0, 1.0).into(),
-            LeftTunnel | RightTunnel => Color::rgb(211.0, 211.0, 211.0).into()
-        };
+    pub fn get_pacman_spawn_position(&self) -> &Position {
+        self.get_position_of_type(PacManSpawn)
+    }
 
-        commands.spawn(SpriteComponents {
-            material: materials.add(color_material),
-            transform: Transform::from_translation(board.coordinates_of_position(field.position)),
-            sprite: Sprite::new(board.field_dimension),
-            ..Default::default()
-        });
+    /// Return the position of one specific field type. The FieldType
+    /// should be exactly one on the map.
+    fn get_position_of_type(&self, field_type: FieldType) -> &Position {
+        let type_positions = self.fields.iter()
+            .filter(|(_, t)| *t == &field_type)
+            .map(|(pos, _)| pos)
+            .collect::<Vec<_>>();
+        match type_positions.len() {
+            1 => type_positions[0],
+            _ => panic!("Expected exactly one field with type {:?}", field_type)
+        }
     }
 }

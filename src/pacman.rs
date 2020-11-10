@@ -22,8 +22,8 @@ enum Movement {
     Moving(Direction),
 }
 
-fn spawn_pacman(mut commands: Commands, mut materials: ResMut<Assets<ColorMaterial>>, board: Res<Board>) {
-    let start_position = Position::new(1, 1);
+fn spawn_pacman(mut commands: Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
+    let start_position = board.get_pacman_spawn_position().clone();
     let pacman_dimension = Vec2::new(10.0, 10.0);
     commands
         .spawn(SpriteComponents {

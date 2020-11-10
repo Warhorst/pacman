@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use map::board::BoardPlugin;
+use map::MapPlugin;
 use pacman::PacmanPlugin;
 
 mod common;
@@ -11,7 +11,7 @@ fn main() {
     App::build()
         .add_plugins(DefaultPlugins)
         .add_startup_system(init.system())
-        .add_plugin(BoardPlugin)
+        .add_plugin(MapPlugin)
         .add_plugin(PacmanPlugin)
         .run()
 }

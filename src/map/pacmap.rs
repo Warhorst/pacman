@@ -7,7 +7,7 @@ use crate::map::{FieldType, FieldTypeMatrix, PositionTypeMap};
 
 /// Holds width, height and a matrix with all fields of the map.
 #[derive(PartialOrd, PartialEq, Debug)]
-pub struct PacMap {
+pub(in crate::map) struct PacMap {
     pub field_types: FieldTypeMatrix,
     pub width: usize,
     pub height: usize
