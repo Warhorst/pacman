@@ -6,12 +6,14 @@ use map::MapPlugin;
 use pacman::PacmanPlugin;
 
 use crate::points::PointPlugin;
+use crate::score::ScorePlugin;
 
 mod common;
 mod pacman;
 mod map;
 mod points;
 mod interactions;
+mod score;
 
 fn main() {
     App::build()
@@ -24,14 +26,17 @@ fn main() {
         })
         .add_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
         .add_plugins(DefaultPlugins)
-        .add_startup_system(init.system())
         .add_plugin(MapPlugin)
         .add_plugin(PacmanPlugin)
         .add_plugin(PointPlugin)
         .add_plugin(InteractionsPlugin)
+        .add_plugin(ScorePlugin)
+        .add_startup_system(init.system())
         .run()
 }
 
 fn init(mut commands: Commands) {
-    commands.spawn(Camera2dComponents::default());
+    commands
+        .spawn(Camera2dComponents::default())
+        .spawn(UiCameraComponents::default());
 }

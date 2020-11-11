@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use crate::common::Position;
 use crate::pacman::Pacman;
 use crate::points::Point;
+use crate::score::Score;
 
 pub struct InteractionsPlugin;
 
@@ -13,10 +14,11 @@ impl Plugin for InteractionsPlugin {
     }
 }
 
-fn pacman_eat_points(mut commands: Commands, pacman_component: Query<With<Pacman, &Position>>, point_components: Query<With<Point, (Entity, &Position)>>) {
+fn pacman_eat_points(mut commands: Commands, mut score: ResMut<Score>, pacman_component: Query<With<Pacman, &Position>>, point_components: Query<With<Point, (Entity, &Position)>>) {
     for pacman_pos in pacman_component.iter() {
         for (entity, point_pos) in point_components.iter() {
             if pacman_pos == point_pos {
+                score.increment();
                 commands.despawn(entity);
             }
         }
