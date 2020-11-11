@@ -8,7 +8,6 @@ pub struct PacmanPlugin;
 impl Plugin for PacmanPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.add_startup_system(spawn_pacman.system())
-            .add_system(set_direction.system())
             .add_system(move_pacman.system())
             .add_system(walk_through_tunnel.system());
     }
@@ -37,28 +36,10 @@ fn spawn_pacman(mut commands: Commands, board: Res<Board>, mut materials: ResMut
         .with(start_position);
 }
 
-fn set_direction(keyboard_input: Res<Input<KeyCode>>, mut query: Query<(&Pacman, &mut Movement)>) {
-    for (_pacman, mut movement) in query.iter_mut() {
-        if keyboard_input.pressed(KeyCode::Left) {
-            *movement = Movement::Moving(Direction::Left)
-        }
+fn move_pacman(time: Res<Time>, keyboard_input: Res<Input<KeyCode>>, board: Res<Board>, mut query: Query<With<Pacman, (&mut Movement, &Sprite, &mut Position, &mut Transform)>>) {
+    for (mut movement, sprite, mut position, mut transform) in query.iter_mut() {
+        set_direction(&keyboard_input, &mut movement);
 
-        if keyboard_input.pressed(KeyCode::Right) {
-            *movement = Movement::Moving(Direction::Right)
-        }
-
-        if keyboard_input.pressed(KeyCode::Up) {
-            *movement = Movement::Moving(Direction::Up)
-        }
-
-        if keyboard_input.pressed(KeyCode::Down) {
-            *movement = Movement::Moving(Direction::Down)
-        }
-    }
-}
-
-fn move_pacman(time: Res<Time>, board: Res<Board>, mut query: Query<(&Pacman, &mut Movement, &Sprite, &mut Position, &mut Transform)>) {
-    for (_pacman, mut movement, sprite, mut position, mut transform) in query.iter_mut() {
         let direction = match *movement {
             Movement::Idle => return,
             Movement::Moving(dir) => dir
@@ -73,6 +54,24 @@ fn move_pacman(time: Res<Time>, board: Res<Board>, mut query: Query<(&Pacman, &m
         } else {
             center_position(&board, translation, &position, &direction)
         }
+    }
+}
+
+fn set_direction(keyboard_input: &Input<KeyCode>, movement: &mut Movement) {
+    if keyboard_input.pressed(KeyCode::Left) {
+        *movement = Movement::Moving(Direction::Left)
+    }
+
+    if keyboard_input.pressed(KeyCode::Right) {
+        *movement = Movement::Moving(Direction::Right)
+    }
+
+    if keyboard_input.pressed(KeyCode::Up) {
+        *movement = Movement::Moving(Direction::Up)
+    }
+
+    if keyboard_input.pressed(KeyCode::Down) {
+        *movement = Movement::Moving(Direction::Down)
     }
 }
 
@@ -130,8 +129,8 @@ fn center_position(board: &Board, translation: &mut Vec3, position: &Position, d
     }
 }
 
-fn walk_through_tunnel(board: Res<Board>, mut query: Query<(&Pacman, &Movement, &mut Position, &mut Transform)>) {
-    for(_pacman, movement, mut position, mut transform) in query.iter_mut() {
+fn walk_through_tunnel(board: Res<Board>, mut query: Query<With<Pacman, (&Movement, &mut Position, &mut Transform)>>) {
+    for (movement, mut position, mut transform) in query.iter_mut() {
         let direction = match movement {
             Movement::Idle => return,
             Movement::Moving(dir) => dir

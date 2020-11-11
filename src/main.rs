@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy::render::pass::ClearColor;
 
 use interactions::InteractionsPlugin;
 use map::MapPlugin;
@@ -14,6 +15,14 @@ mod interactions;
 
 fn main() {
     App::build()
+        .add_resource(WindowDescriptor {
+            width: 1000,
+            height: 700,
+            title: "PacMan".to_string(),
+            resizable: false,
+            ..Default::default()
+        })
+        .add_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
         .add_plugins(DefaultPlugins)
         .add_startup_system(init.system())
         .add_plugin(MapPlugin)

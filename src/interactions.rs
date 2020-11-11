@@ -13,9 +13,9 @@ impl Plugin for InteractionsPlugin {
     }
 }
 
-fn pacman_eat_points(mut commands: Commands, pacman_component: Query<(&Pacman, &Position)>, point_components: Query<(Entity, &Point, &Position)>) {
-    for (_pacman, pacman_pos) in pacman_component.iter() {
-        for (entity, _point, point_pos) in point_components.iter() {
+fn pacman_eat_points(mut commands: Commands, pacman_component: Query<With<Pacman, &Position>>, point_components: Query<With<Point, (Entity, &Position)>>) {
+    for pacman_pos in pacman_component.iter() {
+        for (entity, point_pos) in point_components.iter() {
             if pacman_pos == point_pos {
                 commands.despawn(entity);
             }
