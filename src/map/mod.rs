@@ -7,6 +7,7 @@ use bevy::property::serde::export::{Formatter, TryFrom};
 use FieldType::*;
 
 use crate::common::Position;
+use crate::constants::FIELD_DIMENSION;
 use crate::map::board::Board;
 
 pub mod board;
@@ -31,13 +32,15 @@ pub fn spawn_map(mut commands: Commands, board: Res<Board>, mut materials: ResMu
         let color_material = match field.field_type {
             Free | PacManSpawn | Point => Color::rgb(0.0, 0.0, 0.0).into(),
             Wall => Color::rgb(0.0, 0.0, 1.0).into(),
+            GhostWall => Color::rgb(0.0, 1.0, 0.0).into(),
+            GhostSpawn => Color::rgb(1.0, 0.0, 0.0).into(),
             LeftTunnel | RightTunnel => Color::rgb(0.9, 0.9, 0.9).into()
         };
 
         commands.spawn(SpriteComponents {
             material: materials.add(color_material),
             transform: Transform::from_translation(board.coordinates_of_position(field.position)),
-            sprite: Sprite::new(board.field_dimension),
+            sprite: Sprite::new(Vec2::new(FIELD_DIMENSION, FIELD_DIMENSION)),
             ..Default::default()
         });
     }
@@ -51,6 +54,8 @@ enum FieldType {
     Point,
     LeftTunnel,
     RightTunnel,
+    GhostWall,
+    GhostSpawn
 }
 
 impl TryFrom<char> for FieldType {
@@ -60,10 +65,12 @@ impl TryFrom<char> for FieldType {
         match value {
             ' ' => Ok(Free),
             'W' => Ok(Wall),
-            'P' => Ok(PacManSpawn),
+            'M' => Ok(PacManSpawn),
             '#' => Ok(Point),
-            'L' => Ok(LeftTunnel),
-            'R' => Ok(RightTunnel),
+            '[' => Ok(LeftTunnel),
+            ']' => Ok(RightTunnel),
+            '_' => Ok(GhostWall),
+            'G' => Ok(GhostSpawn),
             error_char => Err(FieldTypeFromCharError { error_char })
         }
     }

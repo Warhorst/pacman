@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::common::{Direction, Position};
+use crate::constants::{PACMAN_DIMENSION, PACMAN_SPEED};
 use crate::map::board::Board;
 
 pub struct PacmanPlugin;
@@ -23,7 +24,7 @@ enum Movement {
 
 fn spawn_pacman(mut commands: Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
     let start_position = board.get_pacman_spawn_position().clone();
-    let pacman_dimension = Vec2::new(10.0, 10.0);
+    let pacman_dimension = Vec2::new(PACMAN_DIMENSION, PACMAN_DIMENSION);
     commands
         .spawn(SpriteComponents {
             material: materials.add(Color::hex("FFEE00").unwrap().into()),
@@ -76,10 +77,9 @@ fn set_direction(keyboard_input: &Input<KeyCode>, movement: &mut Movement) {
 }
 
 fn move_in_direction(direction: &Direction, translation: &mut Vec3, delta_seconds: f32) {
-    let speed = 75.0;
     let (x, y) = get_modifiers_for_direction(direction);
-    *translation.x_mut() += delta_seconds * x * speed;
-    *translation.y_mut() += delta_seconds * y * speed;
+    *translation.x_mut() += delta_seconds * x * PACMAN_SPEED;
+    *translation.y_mut() += delta_seconds * y * PACMAN_SPEED;
 }
 
 fn get_modifiers_for_direction(direction: &Direction) -> (f32, f32) {

@@ -4,6 +4,7 @@ use bevy::prelude::*;
 
 use crate::common::{Direction::*, Position};
 use crate::common;
+use crate::constants::FIELD_DIMENSION;
 use crate::map::{FieldType, PositionTypeMap};
 use crate::map::FieldType::*;
 use crate::map::pacmap::PacMap;
@@ -21,7 +22,6 @@ pub struct Board {
     fields: PositionTypeMap,
     width: usize,
     height: usize,
-    pub(in crate::map) field_dimension: Vec2,
     board_root: Vec2,
 }
 
@@ -30,21 +30,19 @@ impl Board {
         let pacmap = PacMap::from_read(File::open("maps/default.pacmap").unwrap());
         let width = pacmap.width;
         let height = pacmap.height;
-        let field_dimension = Vec2::new(15.0, 15.0);
-        let board_root = Self::calculate_board_root(width, height, field_dimension);
+        let board_root = Self::calculate_board_root(width, height);
         Board {
             width,
             height,
             fields: pacmap.into_position_type_map(),
-            field_dimension,
             board_root,
         }
     }
 
     /// Calculate a board root where the board is always centered.
-    fn calculate_board_root(width: usize, height: usize, field_dimension: Vec2) -> Vec2 {
-        let x = - (width as f32 * field_dimension.x() / 2.0);
-        let y = - (height as f32 * field_dimension.y() / 2.0);
+    fn calculate_board_root(width: usize, height: usize) -> Vec2 {
+        let x = - (width as f32 * FIELD_DIMENSION / 2.0);
+        let y = - (height as f32 * FIELD_DIMENSION / 2.0);
         Vec2::new(x, y)
     }
 
@@ -55,14 +53,14 @@ impl Board {
     }
 
     pub fn coordinates_of_position(&self, position: &Position) -> Vec3 {
-        let x = self.board_root.x() + (position.x() as f32) * self.field_dimension.x();
-        let y = self.board_root.y() + (position.y() as f32) * self.field_dimension.y();
+        let x = self.board_root.x() + (position.x() as f32) * FIELD_DIMENSION;
+        let y = self.board_root.y() + (position.y() as f32) * FIELD_DIMENSION;
         Vec3::new(x, y, 0.0)
     }
 
     pub fn position_of_coordinates(&self, coordinates: &Vec3) -> Position {
-        let x = (coordinates.x() - self.board_root.x() + self.field_dimension.x() / 2.0) / self.field_dimension.x();
-        let y = (coordinates.y() - self.board_root.y() + self.field_dimension.y() / 2.0) / self.field_dimension.y();
+        let x = (coordinates.x() - self.board_root.x() + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
+        let y = (coordinates.y() - self.board_root.y() + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
         Position::new(x as usize, y as usize)
     }
 
@@ -114,7 +112,7 @@ impl Board {
     fn position_is_obstacle(&self, position: &Position) -> bool {
         let field_type = self.fields.get(position).unwrap();
         match field_type {
-            Wall => true,
+            Wall | GhostWall => true,
             _ => false,
         }
     }
@@ -123,13 +121,13 @@ impl Board {
         let position_coordinates = self.coordinates_of_position(position);
         match direction {
             Left | Right => {
-                let y_center_range = (self.field_dimension.y() - dimension.y()) / 2.0;
+                let y_center_range = (FIELD_DIMENSION - dimension.y()) / 2.0;
                 let y_start = position_coordinates.y() - y_center_range;
                 let y_end = position_coordinates.y() + y_center_range;
                 coordinates.y() >= y_start && coordinates.y() <= y_end
             },
             Up | Down => {
-                let x_center_range = (self.field_dimension.x() - dimension.x()) / 2.0;
+                let x_center_range = (FIELD_DIMENSION - dimension.x()) / 2.0;
                 let x_start = position_coordinates.x() - x_center_range;
                 let x_end = position_coordinates.x() + x_center_range;
                 coordinates.x() >= x_start && coordinates.x() <= x_end
