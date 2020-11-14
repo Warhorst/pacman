@@ -28,9 +28,17 @@ impl Plugin for MapPlugin {
 
 fn spawn_walls(mut commands: Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
     for position in board.get_wall_positions() {
-        let color_material = Color::rgb(0.0, 0.0, 1.0).into();
         commands.spawn(SpriteComponents {
-            material: materials.add(color_material),
+            material: materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
+            transform: Transform::from_translation(board.coordinates_of_position(position)),
+            sprite: Sprite::new(Vec2::new(WALL_DIMENSION, WALL_DIMENSION)),
+            ..Default::default()
+        });
+    }
+
+    for position in board.get_ghost_wall_positions() {
+        commands.spawn(SpriteComponents {
+            material: materials.add(Color::rgb(1.0, 1.0, 1.0).into()),
             transform: Transform::from_translation(board.coordinates_of_position(position)),
             sprite: Sprite::new(Vec2::new(WALL_DIMENSION, WALL_DIMENSION)),
             ..Default::default()

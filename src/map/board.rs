@@ -159,8 +159,16 @@ impl Board {
         self.get_positions_of_type(Wall)
     }
 
+    pub fn get_ghost_wall_positions(&self) -> Vec<&Position> {
+        self.get_positions_of_type(GhostWall)
+    }
+
     pub fn get_point_positions(&self) -> Vec<&Position> {
         self.get_positions_of_type(Point)
+    }
+
+    pub fn get_ghost_spawn_positions(&self) -> Vec<&Position> {
+        self.get_positions_of_type(GhostSpawn)
     }
 
     fn get_positions_of_type(&self, field_type: FieldType) -> Vec<&Position> {
