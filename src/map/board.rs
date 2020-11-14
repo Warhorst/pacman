@@ -5,6 +5,8 @@ use bevy::prelude::*;
 use crate::common::{Direction::*, Position};
 use crate::common;
 use crate::constants::{FIELD_DIMENSION, PACMAN_DIMENSION, USED_PACMAP_PATH, WALL_DIMENSION};
+use crate::ghosts::Ghost;
+use crate::ghosts::Ghost::*;
 use crate::map::{FieldType, PositionTypeMap};
 use crate::map::FieldType::*;
 use crate::map::pacmap::PacMap;
@@ -142,6 +144,10 @@ impl Board {
         self.get_position_of_type(PacManSpawn)
     }
 
+    pub fn get_corner_position_of(&self, ghost: Ghost) -> &Position {
+        self.get_position_of_type(GhostCorner(ghost))
+    }
+
     /// Return the position of one specific field type. Of the FieldType
     /// should be exactly one on the map. If not, the program panics.
     fn get_position_of_type(&self, field_type: FieldType) -> &Position {
@@ -156,7 +162,12 @@ impl Board {
     }
 
     pub fn get_wall_positions(&self) -> Vec<&Position> {
-        self.get_positions_of_type(Wall)
+        let mut walls = self.get_positions_of_type(Wall);
+        walls.push(self.get_corner_position_of(Blinky));
+        walls.push(self.get_corner_position_of(Pinky));
+        walls.push(self.get_corner_position_of(Inky));
+        walls.push(self.get_corner_position_of(Clyde));
+        walls
     }
 
     pub fn get_ghost_wall_positions(&self) -> Vec<&Position> {

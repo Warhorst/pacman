@@ -1,22 +1,21 @@
 use bevy::prelude::*;
 
-use Name::*;
+use Ghost::*;
 use State::*;
 
 use crate::common::Position;
 use crate::constants::GHOST_DIMENSION;
 use crate::map::board::Board;
 
-pub struct Ghost {
-    name: Name
-}
-
-pub enum Name {
+#[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]
+pub enum Ghost {
     Blinky,
     Pinky,
     Inky,
     Clyde,
 }
+
+pub struct Target(Option<Position>);
 
 /// The different states of a ghost#
 ///
@@ -35,26 +34,28 @@ pub struct GhostPlugin;
 
 impl Plugin for GhostPlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app.add_startup_system(spawn_ghosts.system());
+        app
+            .add_startup_system(spawn_ghosts.system())
+            .add_system(set_target.system());
+
     }
 }
 
 fn spawn_ghosts(mut commands: Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
     let spawn_positions = board.get_ghost_spawn_positions();
-    spawn_ghost(spawn_positions[0], Ghost { name: Blinky }, &mut commands, &board, &mut materials);
-    spawn_ghost(spawn_positions[1], Ghost { name: Pinky }, &mut commands, &board, &mut materials);
-    spawn_ghost(spawn_positions[2], Ghost { name: Inky }, &mut commands, &board, &mut materials);
-    spawn_ghost(spawn_positions[3], Ghost { name: Clyde }, &mut commands, &board, &mut materials)
+    spawn_ghost(spawn_positions[0], Blinky, &mut commands, &board, &mut materials);
+    spawn_ghost(spawn_positions[1], Pinky, &mut commands, &board, &mut materials);
+    spawn_ghost(spawn_positions[2], Inky, &mut commands, &board, &mut materials);
+    spawn_ghost(spawn_positions[3], Clyde, &mut commands, &board, &mut materials)
 }
 
-fn spawn_ghost(position: &Position, ghost: Ghost, commands: &mut Commands, board: &Res<Board>, mut materials: &mut ResMut<Assets<ColorMaterial>>) {
-    let color_material = match &ghost.name {
+fn spawn_ghost(position: &Position, ghost: Ghost, commands: &mut Commands, board: &Res<Board>, materials: &mut ResMut<Assets<ColorMaterial>>) {
+    let color_material = match ghost {
         Blinky => Color::hex("FF0000").unwrap().into(),
         Pinky => Color::hex("FFB8FF").unwrap().into(),
         Inky => Color::hex("00FFFF").unwrap().into(),
         Clyde => Color::hex("FFB852").unwrap().into(),
     };
-
     commands
         .spawn(SpriteComponents {
             material: materials.add(color_material),
@@ -63,5 +64,26 @@ fn spawn_ghost(position: &Position, ghost: Ghost, commands: &mut Commands, board
             ..Default::default()
         })
         .with(ghost)
-        .with(Chase);
+        .with(*position)
+        .with(Target(None))
+        .with(Scatter);
+}
+
+/// Set the ghosts target if he does not have one.
+fn set_target(board: Res<Board>, mut query: Query<(&Ghost, &mut Target, &State)>) {
+    for (ghost, mut target, state) in query.iter_mut() {
+        if target.0.is_some() {
+            continue
+        }
+
+        target.0 = match state {
+            Scatter => Some(get_scatter_target(&board, *ghost)),
+            _ => unimplemented!()
+        }
+    }
+}
+
+fn get_scatter_target(board: &Board, ghost: Ghost) -> Position {
+    println!("Set target of {:?}", ghost);
+    *board.get_corner_position_of(ghost)
 }

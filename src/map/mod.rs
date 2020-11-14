@@ -8,6 +8,8 @@ use FieldType::*;
 
 use crate::common::Position;
 use crate::constants::WALL_DIMENSION;
+use crate::ghosts::Ghost;
+use crate::ghosts::Ghost::{Blinky, Clyde, Inky, Pinky};
 use crate::map::board::Board;
 
 pub mod board;
@@ -55,7 +57,8 @@ enum FieldType {
     LeftTunnel,
     RightTunnel,
     GhostWall,
-    GhostSpawn
+    GhostSpawn,
+    GhostCorner(Ghost)
 }
 
 impl TryFrom<char> for FieldType {
@@ -71,6 +74,10 @@ impl TryFrom<char> for FieldType {
             ']' => Ok(RightTunnel),
             '_' => Ok(GhostWall),
             'G' => Ok(GhostSpawn),
+            'B' => Ok(GhostCorner(Blinky)),
+            'P' => Ok(GhostCorner(Pinky)),
+            'I' => Ok(GhostCorner(Inky)),
+            'C' => Ok(GhostCorner(Clyde)),
             error_char => Err(FieldTypeFromCharError { error_char })
         }
     }
