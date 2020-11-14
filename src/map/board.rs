@@ -4,7 +4,7 @@ use bevy::prelude::*;
 
 use crate::common::{Direction::*, Position};
 use crate::common;
-use crate::constants::FIELD_DIMENSION;
+use crate::constants::{FIELD_DIMENSION, USED_PACMAP_PATH};
 use crate::map::{FieldType, PositionTypeMap};
 use crate::map::FieldType::*;
 use crate::map::pacmap::PacMap;
@@ -27,7 +27,7 @@ pub struct Board {
 
 impl Board {
     pub(in crate::map) fn new() -> Self {
-        let pacmap = PacMap::from_read(File::open("maps/default.pacmap").unwrap());
+        let pacmap = PacMap::from_read(File::open(USED_PACMAP_PATH).unwrap());
         let width = pacmap.width;
         let height = pacmap.height;
         let board_root = Self::calculate_board_root(width, height);
