@@ -4,17 +4,10 @@ use bevy::prelude::*;
 
 use crate::common::{Direction::*, Position};
 use crate::common;
-use crate::constants::{FIELD_DIMENSION, USED_PACMAP_PATH};
+use crate::constants::{FIELD_DIMENSION, PACMAN_DIMENSION, USED_PACMAP_PATH, WALL_DIMENSION};
 use crate::map::{FieldType, PositionTypeMap};
 use crate::map::FieldType::*;
 use crate::map::pacmap::PacMap;
-
-pub(in crate::map) type Fields<'a> = Vec<Field<'a>>;
-
-pub(in crate::map) struct Field<'a> {
-    pub position: &'a Position,
-    pub field_type: &'a FieldType,
-}
 
 /// The Board is a resource that provides methods to easily manipulate
 /// entities on the map (pacman, ghosts, points, etc).
@@ -46,12 +39,6 @@ impl Board {
         Vec2::new(x, y)
     }
 
-    pub(in crate::map) fn fields(&self) -> Fields {
-        self.fields.iter()
-            .map(|(position, field_type)| Field { position, field_type })
-            .collect()
-    }
-
     pub fn coordinates_of_position(&self, position: &Position) -> Vec3 {
         let x = self.board_root.x() + (position.x() as f32) * FIELD_DIMENSION;
         let y = self.board_root.y() + (position.y() as f32) * FIELD_DIMENSION;
@@ -64,10 +51,16 @@ impl Board {
         Position::new(x as usize, y as usize)
     }
 
-    pub fn collides_with_obstacle(&self, position: &Position, direction: &common::Direction, coordinates: &Vec3, dimension: &Vec2) -> bool {
+    /// Tells if pacman will collide with the next position he is going for.
+    ///
+    /// Returns true if the next position is a obstacle like a wall or the ghost spawn. If not, the next
+    /// position might lead into a hallway. To avoid clipping into the wall, pacman should be in the center
+    /// of the current field. If not, return false.
+    /// Returns true if there is no next position.
+    pub fn going_to_collide_with_obstacle(&self, position: &Position, direction: &common::Direction, coordinates: &Vec3) -> bool {
         match self.position_in_direction(position, direction) {
             Some(pos) if self.position_is_obstacle(&pos) => true,
-            Some(pos) => !self.coordinates_in_field_center(coordinates, dimension, &pos, direction),
+            Some(pos) => !self.coordinates_in_field_center(coordinates, &pos, direction),
             None => true
         }
     }
@@ -117,19 +110,21 @@ impl Board {
         }
     }
 
-    fn coordinates_in_field_center(&self, coordinates: &Vec3, dimension: &Vec2, position: &Position, direction: &common::Direction) -> bool {
+    /// Determines if pacmans current coordinates are in the center of his current position. The center of the position is
+    /// its middle point with the width/height of the accumulated distance between pacman and the walls.
+    /// Assumes pacman is larger than a wall.
+    fn coordinates_in_field_center(&self, coordinates: &Vec3, position: &Position, direction: &common::Direction) -> bool {
         let position_coordinates = self.coordinates_of_position(position);
+        let pacman_wall_distance = PACMAN_DIMENSION - WALL_DIMENSION;
         match direction {
             Left | Right => {
-                let y_center_range = (FIELD_DIMENSION - dimension.y()) / 2.0;
-                let y_start = position_coordinates.y() - y_center_range;
-                let y_end = position_coordinates.y() + y_center_range;
+                let y_start = position_coordinates.y() - pacman_wall_distance;
+                let y_end = position_coordinates.y() + pacman_wall_distance;
                 coordinates.y() >= y_start && coordinates.y() <= y_end
             },
             Up | Down => {
-                let x_center_range = (FIELD_DIMENSION - dimension.x()) / 2.0;
-                let x_start = position_coordinates.x() - x_center_range;
-                let x_end = position_coordinates.x() + x_center_range;
+                let x_start = position_coordinates.x() - pacman_wall_distance;
+                let x_end = position_coordinates.x() + pacman_wall_distance;
                 coordinates.x() >= x_start && coordinates.x() <= x_end
             }
         }
@@ -160,9 +155,17 @@ impl Board {
         }
     }
 
+    pub fn get_wall_positions(&self) -> Vec<&Position> {
+        self.get_positions_of_type(Wall)
+    }
+
     pub fn get_point_positions(&self) -> Vec<&Position> {
+        self.get_positions_of_type(Point)
+    }
+
+    fn get_positions_of_type(&self, field_type: FieldType) -> Vec<&Position> {
         self.fields.iter()
-            .filter(|(_, t)| *t == &Point)
+            .filter(|(_, t)| *t == &field_type)
             .map(|(pos, _)| pos)
             .collect()
     }

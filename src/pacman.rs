@@ -37,8 +37,8 @@ fn spawn_pacman(mut commands: Commands, board: Res<Board>, mut materials: ResMut
         .with(start_position);
 }
 
-fn move_pacman(time: Res<Time>, keyboard_input: Res<Input<KeyCode>>, board: Res<Board>, mut query: Query<With<Pacman, (&mut Movement, &Sprite, &mut Position, &mut Transform)>>) {
-    for (mut movement, sprite, mut position, mut transform) in query.iter_mut() {
+fn move_pacman(time: Res<Time>, keyboard_input: Res<Input<KeyCode>>, board: Res<Board>, mut query: Query<With<Pacman, (&mut Movement, &mut Position, &mut Transform)>>) {
+    for (mut movement, mut position, mut transform) in query.iter_mut() {
         set_direction(&keyboard_input, &mut movement);
 
         let direction = match *movement {
@@ -50,7 +50,7 @@ fn move_pacman(time: Res<Time>, keyboard_input: Res<Input<KeyCode>>, board: Res<
         *position = board.position_of_coordinates(translation);
         move_in_direction(&direction, translation, time.delta_seconds);
 
-        if board.collides_with_obstacle(&position, &direction, translation, &sprite.size) {
+        if board.going_to_collide_with_obstacle(&position, &direction, translation) {
             process_collision(&board, &position, &direction, translation, &mut movement)
         } else {
             center_position(&board, translation, &position, &direction)

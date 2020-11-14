@@ -7,7 +7,7 @@ use bevy::property::serde::export::{Formatter, TryFrom};
 use FieldType::*;
 
 use crate::common::Position;
-use crate::constants::FIELD_DIMENSION;
+use crate::constants::WALL_DIMENSION;
 use crate::map::board::Board;
 
 pub mod board;
@@ -22,25 +22,17 @@ impl Plugin for MapPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app
             .add_resource(Board::new())
-            .add_startup_system(spawn_map.system());
+            .add_startup_system(spawn_walls.system());
     }
 }
 
-/// Spawn the map (walkable fields, walls, tunnels).
-pub fn spawn_map(mut commands: Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
-    for field in board.fields() {
-        let color_material = match field.field_type {
-            Free | PacManSpawn | Point => Color::rgb(0.0, 0.0, 0.0).into(),
-            Wall => Color::rgb(0.0, 0.0, 1.0).into(),
-            GhostWall => Color::rgb(0.0, 1.0, 0.0).into(),
-            GhostSpawn => Color::rgb(1.0, 0.0, 0.0).into(),
-            LeftTunnel | RightTunnel => Color::rgb(0.9, 0.9, 0.9).into()
-        };
-
+fn spawn_walls(mut commands: Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
+    for position in board.get_wall_positions() {
+        let color_material = Color::rgb(0.0, 0.0, 1.0).into();
         commands.spawn(SpriteComponents {
             material: materials.add(color_material),
-            transform: Transform::from_translation(board.coordinates_of_position(field.position)),
-            sprite: Sprite::new(Vec2::new(FIELD_DIMENSION, FIELD_DIMENSION)),
+            transform: Transform::from_translation(board.coordinates_of_position(position)),
+            sprite: Sprite::new(Vec2::new(WALL_DIMENSION, WALL_DIMENSION)),
             ..Default::default()
         });
     }
