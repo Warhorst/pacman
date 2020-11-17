@@ -38,6 +38,11 @@ fn spawn_pacman(mut commands: Commands, board: Res<Board>, mut materials: ResMut
         .with(start_position);
 }
 
+/// System for moving pacman around the map.
+///
+/// Pacman tries to move in the direction he is currently heading. If the next position
+/// is an obstacle, his movement might get limited once he reached it.
+/// Pacman will not move if he is currently Idle.
 fn move_pacman(time: Res<Time>, keyboard_input: Res<Input<KeyCode>>, board: Res<Board>, mut query: Query<With<Pacman, (&mut Movement, &mut Position, &mut Transform)>>) {
     for (mut movement, mut position, mut transform) in query.iter_mut() {
         set_direction(&keyboard_input, &mut movement);

@@ -67,7 +67,7 @@ impl Board {
         }
     }
 
-    fn position_in_direction(&self, position: &Position, direction: &common::Direction) -> Option<Position> {
+    pub fn position_in_direction(&self, position: &Position, direction: &common::Direction) -> Option<Position> {
         match direction {
             Up => self.position_up_of(position),
             Down => self.position_down_of(position),
