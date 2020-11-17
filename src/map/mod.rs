@@ -29,7 +29,7 @@ impl Plugin for MapPlugin {
 }
 
 fn spawn_walls(mut commands: Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
-    for position in board.get_wall_positions() {
+    for position in get_wall_positions(&board) {
         commands.spawn(SpriteComponents {
             material: materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
             transform: Transform::from_translation(board.coordinates_of_position(position)),
@@ -38,7 +38,7 @@ fn spawn_walls(mut commands: Commands, board: Res<Board>, mut materials: ResMut<
         });
     }
 
-    for position in board.get_ghost_wall_positions() {
+    for position in board.positions_of_type(GhostWall) {
         commands.spawn(SpriteComponents {
             material: materials.add(Color::rgb(1.0, 1.0, 1.0).into()),
             transform: Transform::from_translation(board.coordinates_of_position(position)),
@@ -48,8 +48,18 @@ fn spawn_walls(mut commands: Commands, board: Res<Board>, mut materials: ResMut<
     }
 }
 
+/// Return all positions of fields that are considered walls.
+fn get_wall_positions(board: &Board) -> Vec<&Position> {
+    let mut walls = board.positions_of_type(Wall);
+    walls.push(board.position_of_type(GhostCorner(Blinky)));
+    walls.push(board.position_of_type(GhostCorner(Pinky)));
+    walls.push(board.position_of_type(GhostCorner(Inky)));
+    walls.push(board.position_of_type(GhostCorner(Clyde)));
+    walls
+}
+
 #[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]
-enum FieldType {
+pub enum FieldType {
     Free,
     Wall,
     PacManSpawn,
@@ -84,7 +94,7 @@ impl TryFrom<char> for FieldType {
 }
 
 #[derive(Debug)]
-struct FieldTypeFromCharError {
+pub struct FieldTypeFromCharError {
     pub error_char: char
 }
 

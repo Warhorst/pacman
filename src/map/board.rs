@@ -132,25 +132,9 @@ impl Board {
         }
     }
 
-    pub fn get_left_tunnel_position(&self) -> &Position {
-        self.get_position_of_type(LeftTunnel)
-    }
-
-    pub fn get_right_tunnel_position(&self) -> &Position {
-        self.get_position_of_type(RightTunnel)
-    }
-
-    pub fn get_pacman_spawn_position(&self) -> &Position {
-        self.get_position_of_type(PacManSpawn)
-    }
-
-    pub fn get_corner_position_of(&self, ghost: Ghost) -> &Position {
-        self.get_position_of_type(GhostCorner(ghost))
-    }
-
     /// Return the position of one specific field type. Of the FieldType
     /// should be exactly one on the map. If not, the program panics.
-    fn get_position_of_type(&self, field_type: FieldType) -> &Position {
+    pub fn position_of_type(&self, field_type: FieldType) -> &Position {
         let type_positions = self.fields.iter()
             .filter(|(_, t)| *t == &field_type)
             .map(|(pos, _)| pos)
@@ -161,28 +145,7 @@ impl Board {
         }
     }
 
-    pub fn get_wall_positions(&self) -> Vec<&Position> {
-        let mut walls = self.get_positions_of_type(Wall);
-        walls.push(self.get_corner_position_of(Blinky));
-        walls.push(self.get_corner_position_of(Pinky));
-        walls.push(self.get_corner_position_of(Inky));
-        walls.push(self.get_corner_position_of(Clyde));
-        walls
-    }
-
-    pub fn get_ghost_wall_positions(&self) -> Vec<&Position> {
-        self.get_positions_of_type(GhostWall)
-    }
-
-    pub fn get_point_positions(&self) -> Vec<&Position> {
-        self.get_positions_of_type(Point)
-    }
-
-    pub fn get_ghost_spawn_positions(&self) -> Vec<&Position> {
-        self.get_positions_of_type(GhostSpawn)
-    }
-
-    fn get_positions_of_type(&self, field_type: FieldType) -> Vec<&Position> {
+    pub fn positions_of_type(&self, field_type: FieldType) -> Vec<&Position> {
         self.fields.iter()
             .filter(|(_, t)| *t == &field_type)
             .map(|(pos, _)| pos)

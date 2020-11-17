@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use crate::common::{Direction, Position};
 use crate::constants::{PACMAN_DIMENSION, PACMAN_SPEED};
 use crate::map::board::Board;
+use crate::map::FieldType::*;
 
 pub struct PacmanPlugin;
 
@@ -23,7 +24,7 @@ enum Movement {
 }
 
 fn spawn_pacman(mut commands: Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
-    let start_position = board.get_pacman_spawn_position().clone();
+    let start_position = board.position_of_type(PacManSpawn).clone();
     let pacman_dimension = Vec2::new(PACMAN_DIMENSION, PACMAN_DIMENSION);
     commands
         .spawn(SpriteComponents {
@@ -145,8 +146,8 @@ fn walk_through_tunnel(board: Res<Board>, mut query: Query<With<Pacman, (&Moveme
 }
 
 fn walk_through_right_tunnel(board: &Board, position: &mut Position, translation: &mut Vec3) {
-    let right_tunnel_position = board.get_right_tunnel_position();
-    let left_tunnel_position = board.get_left_tunnel_position();
+    let right_tunnel_position = board.position_of_type(RightTunnel);
+    let left_tunnel_position = board.position_of_type(LeftTunnel);
     match position == right_tunnel_position {
         false => return,
         true => {
@@ -157,8 +158,8 @@ fn walk_through_right_tunnel(board: &Board, position: &mut Position, translation
 }
 
 fn walk_through_left_tunnel(board: &Board, position: &mut Position, translation: &mut Vec3) {
-    let right_tunnel_position = board.get_right_tunnel_position();
-    let left_tunnel_position = board.get_left_tunnel_position();
+    let right_tunnel_position = board.position_of_type(RightTunnel);
+    let left_tunnel_position = board.position_of_type(LeftTunnel);
     match position == left_tunnel_position {
         false => return,
         true => {

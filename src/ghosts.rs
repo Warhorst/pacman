@@ -6,6 +6,7 @@ use State::*;
 use crate::common::Position;
 use crate::constants::GHOST_DIMENSION;
 use crate::map::board::Board;
+use crate::map::FieldType;
 
 #[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]
 pub enum Ghost {
@@ -42,7 +43,7 @@ impl Plugin for GhostPlugin {
 }
 
 fn spawn_ghosts(mut commands: Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
-    let spawn_positions = board.get_ghost_spawn_positions();
+    let spawn_positions = board.positions_of_type(FieldType::GhostSpawn);
     spawn_ghost(spawn_positions[0], Blinky, &mut commands, &board, &mut materials);
     spawn_ghost(spawn_positions[1], Pinky, &mut commands, &board, &mut materials);
     spawn_ghost(spawn_positions[2], Inky, &mut commands, &board, &mut materials);
@@ -85,5 +86,5 @@ fn set_target(board: Res<Board>, mut query: Query<(&Ghost, &Position, &mut Targe
 
 fn get_scatter_target(board: &Board, ghost: Ghost, position: &Position) -> Position {
     println!("Set target of {:?}", ghost);
-    *board.get_corner_position_of(ghost)
+    *position
 }
