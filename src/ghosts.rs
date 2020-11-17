@@ -70,20 +70,20 @@ fn spawn_ghost(position: &Position, ghost: Ghost, commands: &mut Commands, board
 }
 
 /// Set the ghosts target if he does not have one.
-fn set_target(board: Res<Board>, mut query: Query<(&Ghost, &mut Target, &State)>) {
-    for (ghost, mut target, state) in query.iter_mut() {
+fn set_target(board: Res<Board>, mut query: Query<(&Ghost, &Position, &mut Target, &State)>) {
+    for (ghost, position, mut target, state) in query.iter_mut() {
         if target.0.is_some() {
             continue
         }
 
         target.0 = match state {
-            Scatter => Some(get_scatter_target(&board, *ghost)),
+            Scatter => Some(get_scatter_target(&board, *ghost, position)),
             _ => unimplemented!()
         }
     }
 }
 
-fn get_scatter_target(board: &Board, ghost: Ghost) -> Position {
+fn get_scatter_target(board: &Board, ghost: Ghost, position: &Position) -> Position {
     println!("Set target of {:?}", ghost);
     *board.get_corner_position_of(ghost)
 }

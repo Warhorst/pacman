@@ -188,4 +188,9 @@ impl Board {
             .map(|(pos, _)| pos)
             .collect()
     }
+
+    /// Return all walkable neighbours of a given position with its direction attached to it.
+    pub fn get_walkable_neighbours(&self, position: &Position, direction: &common::Direction) -> Vec<(Position, Direction)> {
+        unimplemented!()
+    }
 }
