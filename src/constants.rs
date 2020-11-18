@@ -5,3 +5,4 @@ pub const PACMAN_SPEED: f32 = 75.0;
 pub const WALL_DIMENSION: f32 = 10.0;
 pub const POINT_DIMENSION: f32 = 3.0;
 pub const GHOST_DIMENSION: f32 = PACMAN_DIMENSION;
+pub const GHOST_SPEED: f32 = PACMAN_SPEED;

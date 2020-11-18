@@ -1,3 +1,5 @@
+use Direction::*;
+
 #[derive(Copy, Clone, Hash, Debug, Eq, PartialEq)]
 pub struct Position(usize, usize);
 
@@ -40,4 +42,15 @@ pub enum Direction {
     Down,
     Left,
     Right,
+}
+
+impl Direction {
+    pub fn opposite(&self) -> Direction {
+        match self {
+            Up => Down,
+            Down => Up,
+            Right => Left,
+            Left => Right
+        }
+    }
 }

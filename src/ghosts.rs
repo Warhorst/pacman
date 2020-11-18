@@ -3,10 +3,13 @@ use bevy::prelude::*;
 use Ghost::*;
 use State::*;
 
+use crate::common;
+use crate::common::Direction::*;
 use crate::common::Movement;
 use crate::common::Movement::*;
 use crate::common::Position;
 use crate::constants::GHOST_DIMENSION;
+use crate::constants::GHOST_SPEED;
 use crate::map::{FieldType, Neighbour};
 use crate::map::board::Board;
 use crate::map::FieldType::*;
@@ -40,7 +43,9 @@ impl Plugin for GhostPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app
             .add_startup_system(spawn_ghosts.system())
-            .add_system(set_target.system());
+            .add_system(set_target.system())
+            .add_system(update_position.system())
+            .add_system(move_ghosts.system());
 
     }
 }
@@ -74,6 +79,55 @@ fn spawn_ghost(position: &Position, ghost: Ghost, commands: &mut Commands, board
         .with(Scatter);
 }
 
+fn move_ghosts(time: Res<Time>, board: Res<Board>, mut query: Query<With<Ghost, (&Movement, &mut Target, &mut Transform)>>) {
+    for (movement, mut target, mut transform) in query.iter_mut() {
+        if target.0.is_none() {
+            continue
+        }
+        let direction = match movement {
+            Idle => continue,
+            Moving(dir) => dir
+        };
+
+        let target_coordinates = board.coordinates_of_position(&target.0.unwrap());
+        move_in_direction(&direction, &mut transform.translation, time.delta_seconds);
+        limit_movement(&direction, &mut transform.translation, &target_coordinates);
+        if transform.translation == target_coordinates {
+            target.0 = None;
+        }
+    }
+}
+
+fn move_in_direction(direction: &common::Direction, translation: &mut Vec3, delta_seconds: f32) {
+    let (x, y) = get_direction_modifiers(direction);
+    *translation.x_mut() += delta_seconds * x * GHOST_SPEED;
+    *translation.y_mut() += delta_seconds * y * GHOST_SPEED;
+}
+
+fn get_direction_modifiers(direction: &common::Direction) -> (f32, f32) {
+    match direction {
+        Up => (0.0, 1.0),
+        Down => (0.0, -1.0),
+        Left => (-1.0, 0.0),
+        Right => (1.0, 0.0)
+    }
+}
+
+fn limit_movement(direction: &common::Direction, translation: &mut Vec3, target_coordinates: &Vec3) {
+    match direction {
+        Up => *translation.y_mut() = translation.y().min(target_coordinates.y()),
+        Down => *translation.y_mut() = translation.y().max(target_coordinates.y()),
+        Left => *translation.x_mut() = translation.x().max(target_coordinates.x()),
+        Right => *translation.x_mut() = translation.x().min(target_coordinates.x()),
+    }
+}
+
+fn update_position(board: Res<Board>, mut query: Query<With<Ghost, (&mut Position, &Transform)>>) {
+    for (mut position, transform) in query.iter_mut() {
+        *position = board.position_of_coordinates(&transform.translation);
+    }
+}
+
 /// Set the ghosts target if he does not have one.
 fn set_target(board: Res<Board>, mut query: Query<(&Ghost, &Position, &mut Target, &mut Movement, &State)>) {
     for (ghost, position, mut target, mut movement, state) in query.iter_mut() {
@@ -97,13 +151,14 @@ fn set_target(board: Res<Board>, mut query: Query<(&Ghost, &Position, &mut Targe
 /// Return the neighbour position to go to when in state scatter.
 /// When in state scatter, the ghost tries to reach his specific ghost corner. Therefore,
 /// the next target of the ghost will be the position nearest to it.
+/// A ghost cannot go backwards when in state scatter.
 fn scatter_neighbour(board: &Board, ghost: Ghost, position: &Position, movement: &Movement) -> Option<Neighbour> {
     let ghost_corner_position = board.position_of_type(GhostCorner(ghost));
     let neighbours = board.neighbours_of(position);
     neighbours.into_iter()
         .filter(|neighbour| match movement {
             Idle => true,
-            Moving(dir) => neighbour.direction != *dir
+            Moving(dir) => neighbour.direction != dir.opposite()
         })
         .filter(|neighbour| !position_is_obstacle(board, &neighbour.position))
         .min_by(|n_a, n_b| ghost_corner_position.distance_to(&n_a.position).cmp(&ghost_corner_position.distance_to(&n_b.position)))
