@@ -2,10 +2,10 @@ use std::ops::DerefMut;
 
 use bevy::prelude::*;
 
-use Movement::*;
-
-use crate::common::{Direction, Position};
+use crate::common::Position;
 use crate::common::Direction::*;
+use crate::common::Movement;
+use crate::common::Movement::*;
 use crate::constants::PACMAN_DIMENSION;
 use crate::map::board::Board;
 use crate::map::FieldType::*;
@@ -24,12 +24,6 @@ impl Plugin for PacmanPlugin {
 }
 
 pub struct Pacman;
-
-#[derive(Debug)]
-pub enum Movement {
-    Idle,
-    Moving(Direction),
-}
 
 fn spawn_pacman(mut commands: Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
     let start_position = board.position_of_type(PacManSpawn).clone();

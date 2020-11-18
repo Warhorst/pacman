@@ -3,10 +3,13 @@ use bevy::prelude::*;
 use Ghost::*;
 use State::*;
 
+use crate::common::Movement;
+use crate::common::Movement::*;
 use crate::common::Position;
 use crate::constants::GHOST_DIMENSION;
+use crate::map::{FieldType, Neighbour};
 use crate::map::board::Board;
-use crate::map::FieldType;
+use crate::map::FieldType::*;
 
 #[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]
 pub enum Ghost {
@@ -67,24 +70,49 @@ fn spawn_ghost(position: &Position, ghost: Ghost, commands: &mut Commands, board
         .with(ghost)
         .with(*position)
         .with(Target(None))
+        .with(Idle)
         .with(Scatter);
 }
 
 /// Set the ghosts target if he does not have one.
-fn set_target(board: Res<Board>, mut query: Query<(&Ghost, &Position, &mut Target, &State)>) {
-    for (ghost, position, mut target, state) in query.iter_mut() {
+fn set_target(board: Res<Board>, mut query: Query<(&Ghost, &Position, &mut Target, &mut Movement, &State)>) {
+    for (ghost, position, mut target, mut movement, state) in query.iter_mut() {
         if target.0.is_some() {
             continue
         }
-
-        target.0 = match state {
-            Scatter => Some(get_scatter_target(&board, *ghost, position)),
+        let neighbour_to_move_to = match state {
+            Scatter => scatter_neighbour(&board, *ghost, position, &movement),
             _ => unimplemented!()
+        };
+        match neighbour_to_move_to {
+            Some(neighbour) => {
+                target.0 = Some(neighbour.position);
+                *movement = Moving(neighbour.direction)
+            },
+            None => panic!("A ghost has no new target to move to")
         }
     }
 }
 
-fn get_scatter_target(board: &Board, ghost: Ghost, position: &Position) -> Position {
-    println!("Set target of {:?}", ghost);
-    *position
+/// Return the neighbour position to go to when in state scatter.
+/// When in state scatter, the ghost tries to reach his specific ghost corner. Therefore,
+/// the next target of the ghost will be the position nearest to it.
+fn scatter_neighbour(board: &Board, ghost: Ghost, position: &Position, movement: &Movement) -> Option<Neighbour> {
+    let ghost_corner_position = board.position_of_type(GhostCorner(ghost));
+    let neighbours = board.neighbours_of(position);
+    neighbours.into_iter()
+        .filter(|neighbour| match movement {
+            Idle => true,
+            Moving(dir) => neighbour.direction != *dir
+        })
+        .filter(|neighbour| !position_is_obstacle(board, &neighbour.position))
+        .min_by(|n_a, n_b| ghost_corner_position.distance_to(&n_a.position).cmp(&ghost_corner_position.distance_to(&n_b.position)))
+}
+
+/// Returns if the given position is an obstacle for a ghost.
+fn position_is_obstacle(board: &Board, position: &Position) -> bool {
+    match board.type_of_position(position) {
+        Wall => true,
+        _ => false
+    }
 }

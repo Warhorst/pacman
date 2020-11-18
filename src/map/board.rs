@@ -5,10 +5,7 @@ use bevy::prelude::*;
 use crate::common::{Direction::*, Position};
 use crate::common;
 use crate::constants::{FIELD_DIMENSION, USED_PACMAP_PATH, WALL_DIMENSION};
-use crate::ghosts::Ghost;
-use crate::ghosts::Ghost::*;
-use crate::map::{FieldType, PositionTypeMap};
-use crate::map::FieldType::*;
+use crate::map::{FieldType, Neighbour, PositionTypeMap};
 use crate::map::pacmap::PacMap;
 
 /// The Board is a resource that provides methods to easily manipulate
@@ -36,8 +33,8 @@ impl Board {
 
     /// Calculate a board root where the board is always centered.
     fn calculate_board_root(width: usize, height: usize) -> Vec2 {
-        let x = - (width as f32 * FIELD_DIMENSION / 2.0);
-        let y = - (height as f32 * FIELD_DIMENSION / 2.0);
+        let x = -(width as f32 * FIELD_DIMENSION / 2.0);
+        let y = -(height as f32 * FIELD_DIMENSION / 2.0);
         Vec2::new(x, y)
     }
 
@@ -90,14 +87,6 @@ impl Board {
         }
     }
 
-    fn position_is_obstacle(&self, position: &Position) -> bool {
-        let field_type = self.fields.get(position).unwrap();
-        match field_type {
-            Wall | GhostWall => true,
-            _ => false,
-        }
-    }
-
     /// Determines if pacmans current coordinates are in the center of his current position. The center of the position is
     /// its middle point with the width/height of the accumulated distance between pacman and the walls.
     /// Assumes pacman is larger than a wall.
@@ -112,7 +101,7 @@ impl Board {
                 let y_start = position_coordinates.y() - entity_wall_distance;
                 let y_end = position_coordinates.y() + entity_wall_distance;
                 coordinates.y() >= y_start && coordinates.y() <= y_end
-            },
+            }
             Up | Down => {
                 let x_start = position_coordinates.x() - entity_wall_distance;
                 let x_end = position_coordinates.x() + entity_wall_distance;
@@ -143,5 +132,21 @@ impl Board {
 
     pub fn type_of_position(&self, position: &Position) -> &FieldType {
         self.fields.get(position).expect("The given position should be on the map.")
+    }
+
+    pub fn neighbours_of(&self, position: &Position) -> Vec<Neighbour> {
+        let neighbour_position_options = vec![
+            (Up, self.position_up_of(position)),
+            (Down, self.position_down_of(position)),
+            (Left, self.position_left_of(position)),
+            (Right, self.position_right_of(position)),
+        ];
+        neighbour_position_options.into_iter()
+            .filter(|(_, option)| option.is_some())
+            .map(|(dir, option)| match option {
+                Some(pos) => Neighbour::new(pos, *self.type_of_position(&pos), dir),
+                None => panic!()
+            })
+            .collect()
     }
 }

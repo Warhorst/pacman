@@ -28,7 +28,13 @@ impl Position {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Debug)]
+pub enum Movement {
+    Idle,
+    Moving(Direction),
+}
+
+#[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]
 pub enum Direction {
     Up,
     Down,

@@ -6,6 +6,7 @@ use bevy::property::serde::export::{Formatter, TryFrom};
 
 use FieldType::*;
 
+use crate::common;
 use crate::common::Position;
 use crate::constants::WALL_DIMENSION;
 use crate::ghosts::Ghost;
@@ -68,7 +69,7 @@ pub enum FieldType {
     RightTunnel,
     GhostWall,
     GhostSpawn,
-    GhostCorner(Ghost)
+    GhostCorner(Ghost),
 }
 
 impl TryFrom<char> for FieldType {
@@ -103,5 +104,19 @@ impl std::error::Error for FieldTypeFromCharError {}
 impl std::fmt::Display for FieldTypeFromCharError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "Unknown character: {}", self.error_char)
+    }
+}
+
+/// Represents the neighbour of a specific field, with ist type and the direction
+/// relative to the original position.
+pub struct Neighbour {
+    pub position: Position,
+    pub field_type: FieldType,
+    pub direction: common::Direction,
+}
+
+impl Neighbour {
+    pub fn new(position: Position, field_type: FieldType, direction: common::Direction) -> Self {
+        Neighbour { position, field_type, direction }
     }
 }

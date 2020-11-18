@@ -3,12 +3,12 @@ use bevy::prelude::*;
 use crate::common;
 use crate::common::Direction;
 use crate::common::Direction::*;
+use crate::common::Movement;
+use crate::common::Movement::*;
 use crate::common::Position;
 use crate::constants::{PACMAN_DIMENSION, PACMAN_SPEED};
 use crate::map::board::Board;
 use crate::map::FieldType::*;
-use crate::pacman::Movement;
-use crate::pacman::Movement::*;
 
 /// Moves pacman to his next position.
 pub struct Mover<'a> {
