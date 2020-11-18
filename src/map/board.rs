@@ -4,7 +4,7 @@ use bevy::prelude::*;
 
 use crate::common::{Direction::*, Position};
 use crate::common;
-use crate::constants::{FIELD_DIMENSION, PACMAN_DIMENSION, USED_PACMAP_PATH, WALL_DIMENSION};
+use crate::constants::{FIELD_DIMENSION, USED_PACMAP_PATH, WALL_DIMENSION};
 use crate::ghosts::Ghost;
 use crate::ghosts::Ghost::*;
 use crate::map::{FieldType, PositionTypeMap};
@@ -51,20 +51,6 @@ impl Board {
         let x = (coordinates.x() - self.board_root.x() + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
         let y = (coordinates.y() - self.board_root.y() + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
         Position::new(x as usize, y as usize)
-    }
-
-    /// Tells if pacman will collide with the next position he is going for.
-    ///
-    /// Returns true if the next position is a obstacle like a wall or the ghost spawn. If not, the next
-    /// position might lead into a hallway. To avoid clipping into the wall, pacman should be in the center
-    /// of the current field. If not, return false.
-    /// Returns true if there is no next position.
-    pub fn going_to_collide_with_obstacle(&self, position: &Position, direction: &common::Direction, coordinates: &Vec3) -> bool {
-        match self.position_in_direction(position, direction) {
-            Some(pos) if self.position_is_obstacle(&pos) => true,
-            Some(pos) => !self.coordinates_in_field_center(coordinates, &pos, direction),
-            None => true
-        }
     }
 
     pub fn position_in_direction(&self, position: &Position, direction: &common::Direction) -> Option<Position> {
@@ -115,18 +101,21 @@ impl Board {
     /// Determines if pacmans current coordinates are in the center of his current position. The center of the position is
     /// its middle point with the width/height of the accumulated distance between pacman and the walls.
     /// Assumes pacman is larger than a wall.
-    fn coordinates_in_field_center(&self, coordinates: &Vec3, position: &Position, direction: &common::Direction) -> bool {
+    pub fn are_coordinates_in_field_center(&self, direction: &common::Direction, position: &Position, coordinates: &Vec3, entity_dimension: f32) -> bool {
         let position_coordinates = self.coordinates_of_position(position);
-        let pacman_wall_distance = PACMAN_DIMENSION - WALL_DIMENSION;
+        let entity_wall_distance = match entity_dimension > WALL_DIMENSION {
+            true => entity_dimension - WALL_DIMENSION,
+            false => 0.0
+        };
         match direction {
             Left | Right => {
-                let y_start = position_coordinates.y() - pacman_wall_distance;
-                let y_end = position_coordinates.y() + pacman_wall_distance;
+                let y_start = position_coordinates.y() - entity_wall_distance;
+                let y_end = position_coordinates.y() + entity_wall_distance;
                 coordinates.y() >= y_start && coordinates.y() <= y_end
             },
             Up | Down => {
-                let x_start = position_coordinates.x() - pacman_wall_distance;
-                let x_end = position_coordinates.x() + pacman_wall_distance;
+                let x_start = position_coordinates.x() - entity_wall_distance;
+                let x_end = position_coordinates.x() + entity_wall_distance;
                 coordinates.x() >= x_start && coordinates.x() <= x_end
             }
         }
@@ -152,8 +141,7 @@ impl Board {
             .collect()
     }
 
-    /// Return all walkable neighbours of a given position with its direction attached to it.
-    pub fn get_walkable_neighbours(&self, position: &Position, direction: &common::Direction) -> Vec<(Position, Direction)> {
-        unimplemented!()
+    pub fn type_of_position(&self, position: &Position) -> &FieldType {
+        self.fields.get(position).expect("The given position should be on the map.")
     }
 }
