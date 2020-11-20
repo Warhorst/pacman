@@ -83,7 +83,7 @@ impl<'a> TargetSetter<'a> {
     fn set_target(&mut self, target_neighbour: Option<Neighbour>) {
         match target_neighbour {
             Some(neighbour) => {
-                self.target.0 = Some(neighbour.position);
+                self.target.set_to(neighbour.position);
                 *self.movement = Moving(neighbour.direction)
             }
             None => panic!("A ghost has no new target to move to")

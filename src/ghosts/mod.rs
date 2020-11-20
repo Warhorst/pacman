@@ -25,7 +25,35 @@ pub enum Ghost {
     Clyde,
 }
 
-pub struct Target(Option<Position>);
+pub struct Target {
+    target: Option<Position>
+}
+
+impl Target {
+    pub fn new() -> Self {
+        Target { target: None }
+    }
+
+    pub fn is_set(&self) -> bool {
+        self.target.is_some()
+    }
+
+    pub fn is_not_set(&self) -> bool {
+        !self.is_set()
+    }
+
+    pub fn set_to(&mut self, position: Position) {
+        self.target = Some(position)
+    }
+
+    pub fn get_position(&self) -> &Position {
+        &self.target.as_ref().expect("The target should be set at this point")
+    }
+
+    pub fn clear(&mut self) {
+        self.target = None
+    }
+}
 
 /// The different states of a ghost#
 ///
@@ -80,14 +108,14 @@ fn spawn_ghost(position: &Position, ghost: Ghost, commands: &mut Commands, board
         })
         .with(ghost)
         .with(*position)
-        .with(Target(None))
+        .with(Target::new())
         .with(Idle)
         .with(Spawned);
 }
 
 fn move_ghosts(time: Res<Time>, board: Res<Board>, mut query: Query<With<Ghost, (&Movement, &mut Target, &mut Transform)>>) {
     for (movement, mut target, mut transform) in query.iter_mut() {
-        if target.0.is_none() {
+        if target.is_not_set() {
             continue;
         }
         let direction = match movement {
@@ -95,11 +123,11 @@ fn move_ghosts(time: Res<Time>, board: Res<Board>, mut query: Query<With<Ghost, 
             Moving(dir) => dir
         };
 
-        let target_coordinates = board.coordinates_of_position(&target.0.unwrap());
+        let target_coordinates = board.coordinates_of_position(&target.get_position());
         move_in_direction(&direction, &mut transform.translation, time.delta_seconds);
         limit_movement(&direction, &mut transform.translation, &target_coordinates);
         if transform.translation == target_coordinates {
-            target.0 = None;
+            target.clear();
         }
     }
 }
@@ -145,7 +173,7 @@ fn update_state(board: Res<Board>, mut query: Query<With<Ghost, (&Position, &mut
 /// Set the ghosts target if he does not have one.
 fn set_target(board: Res<Board>, mut query: Query<(&Ghost, &Position, &mut Target, &mut Movement, &State)>) {
     for (ghost, position, mut target, mut movement, state) in query.iter_mut() {
-        if target.0.is_some() {
+        if target.is_set() {
             continue;
         }
 
