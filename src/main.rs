@@ -5,18 +5,20 @@ use interactions::InteractionsPlugin;
 use map::MapPlugin;
 use pacman::PacmanPlugin;
 
+use crate::dots::DotPlugin;
+use crate::events::EventPlugin;
 use crate::ghosts::GhostPlugin;
-use crate::points::PointPlugin;
 use crate::score::ScorePlugin;
 
 mod constants;
 mod common;
 mod pacman;
 mod map;
-mod points;
+mod dots;
 mod interactions;
 mod score;
 mod ghosts;
+mod events;
 
 fn main() {
     App::build()
@@ -31,10 +33,11 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(MapPlugin)
         .add_plugin(PacmanPlugin)
-        .add_plugin(PointPlugin)
+        .add_plugin(DotPlugin)
         .add_plugin(InteractionsPlugin)
         .add_plugin(ScorePlugin)
         .add_plugin(GhostPlugin)
+        .add_plugin(EventPlugin)
         .add_startup_system(init.system())
         .run()
 }

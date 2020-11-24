@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
-const POINTS_PER_POINT: usize = 10;
+use crate::constants::POINTS_PER_DOT;
+use crate::events::DotEatenEvent;
 
 pub struct ScorePlugin;
 
@@ -9,7 +10,8 @@ impl Plugin for ScorePlugin {
         app
             .add_resource(Score::new())
             .add_startup_system(create_scoreboard.system())
-            .add_system(update_scoreboard.system());
+            .add_system(update_scoreboard.system())
+            .add_system(add_points_for_eaten_dot.system());
     }
 }
 
@@ -25,7 +27,7 @@ impl Score {
     }
 
     pub fn increment(&mut self) {
-        self.points += POINTS_PER_POINT
+        self.points += POINTS_PER_DOT
     }
 
     pub fn get_points(&self) -> usize {
@@ -62,3 +64,8 @@ fn update_scoreboard(score: Res<Score>, mut query: Query<&mut Text>) {
     }
 }
 
+fn add_points_for_eaten_dot(mut score: ResMut<Score>, mut eaten_event_reader: Local<EventReader<DotEatenEvent>>, eaten_events: Res<Events<DotEatenEvent>>) {
+    for _ in eaten_event_reader.iter(&eaten_events) {
+        score.increment()
+    }
+}

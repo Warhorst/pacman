@@ -1,38 +1,45 @@
 use bevy::prelude::*;
 
 use crate::common::Position;
+use crate::dots::Dot;
+use crate::events::{DotEatenEvent, PacmanKilledEvent};
 use crate::ghosts::Ghost;
 use crate::pacman::Pacman;
-use crate::points::Point;
-use crate::score::Score;
 
 pub struct InteractionsPlugin;
 
-/// Plugin that controls interactions between actors from different categories.
+/// Plugin that fires events when specific interactions between entities happen.
 impl Plugin for InteractionsPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app
-            .add_system(pacman_eat_points.system())
+            .add_system(pacman_eat_dot.system())
             .add_system(ghost_hits_pacman.system());
     }
 }
 
-fn pacman_eat_points(mut commands: Commands, mut score: ResMut<Score>, pacman_component: Query<With<Pacman, &Position>>, point_components: Query<With<Point, (Entity, &Position)>>) {
-    for pacman_pos in pacman_component.iter() {
-        for (entity, point_pos) in point_components.iter() {
-            if pacman_pos == point_pos {
-                score.increment();
+fn pacman_eat_dot(mut commands: Commands,
+                  mut eaten_events: ResMut<Events<DotEatenEvent>>,
+                  pacman_positions: Query<With<Pacman, &Position>>,
+                  dot_positions: Query<With<Dot, (Entity, &Position)>>) {
+    for pacman_pos in pacman_positions.iter() {
+        for (entity, dot_pos) in dot_positions.iter() {
+            if pacman_pos == dot_pos {
                 commands.despawn(entity);
+                eaten_events.send(DotEatenEvent)
             }
         }
     }
 }
 
-fn ghost_hits_pacman(mut commands: Commands, pacman_query: Query<With<Pacman, (Entity, &Position)>>, ghost_query: Query<With<Ghost, &Position>>) {
+fn ghost_hits_pacman(mut commands: Commands,
+                     mut pacman_killed_events: ResMut<Events<PacmanKilledEvent>>,
+                     pacman_query: Query<With<Pacman, (Entity, &Position)>>,
+                     ghost_query: Query<With<Ghost, &Position>>) {
     for (pacman_entity, pacman_position) in pacman_query.iter() {
         for ghost_position in ghost_query.iter() {
             if pacman_position == ghost_position {
                 commands.despawn(pacman_entity);
+                pacman_killed_events.send(PacmanKilledEvent)
             }
         }
     }

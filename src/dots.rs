@@ -4,17 +4,18 @@ use crate::constants::POINT_DIMENSION;
 use crate::map::board::Board;
 use crate::map::FieldType;
 
-pub struct PointPlugin;
+pub struct DotPlugin;
 
-impl Plugin for PointPlugin {
+impl Plugin for DotPlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app.add_startup_system(spawn_points.system());
+        app
+            .add_startup_system(spawn_dots.system());
     }
 }
 
-pub struct Point;
+pub struct Dot;
 
-fn spawn_points(mut commands: Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
+fn spawn_dots(mut commands: Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
     let point_dimension = Vec2::new(POINT_DIMENSION, POINT_DIMENSION);
     for position in board.positions_of_type(FieldType::Point) {
         commands
@@ -24,7 +25,7 @@ fn spawn_points(mut commands: Commands, board: Res<Board>, mut materials: ResMut
                 sprite: Sprite::new(point_dimension),
                 ..Default::default()
             })
-            .with(Point)
+            .with(Dot)
             .with(position.clone());
     }
 }
