@@ -11,7 +11,7 @@ use crate::map::board::Board;
 use crate::map::FieldType::*;
 
 /// Moves pacman to his next position.
-pub struct Mover<'a> {
+pub (in crate::pacman) struct Mover<'a> {
     board: &'a Board,
     delta_seconds: f32,
     movement: &'a mut Movement,

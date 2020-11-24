@@ -9,7 +9,7 @@ use crate::map::FieldType::GhostCorner;
 use crate::map::Neighbour;
 
 /// Sets the next target for a ghost.
-pub struct TargetSetter<'a> {
+pub (in crate::ghosts) struct TargetSetter<'a> {
     board: &'a Board,
     target: &'a mut Target,
     movement: &'a mut Movement,

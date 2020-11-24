@@ -3,19 +3,18 @@ use bevy::prelude::*;
 use Ghost::*;
 use State::*;
 
-use crate::common;
-use crate::common::Direction::*;
 use crate::common::Movement;
 use crate::common::Movement::*;
 use crate::common::Position;
 use crate::constants::GHOST_DIMENSION;
-use crate::constants::GHOST_SPEED;
+use crate::ghosts::mover::Mover;
 use crate::ghosts::target_setter::TargetSetter;
-use crate::map::FieldType;
 use crate::map::board::Board;
+use crate::map::FieldType;
 use crate::map::FieldType::*;
 
 mod target_setter;
+mod mover;
 
 #[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]
 pub enum Ghost {
@@ -55,7 +54,7 @@ impl Target {
     }
 }
 
-/// The different states of a ghost#
+/// The different states of a ghost
 ///
 /// Spawned - just spawned, try to leave the spawn area
 /// Chase - use your hunting strategy to kill pacman
@@ -115,44 +114,8 @@ fn spawn_ghost(position: &Position, ghost: Ghost, commands: &mut Commands, board
 
 fn move_ghosts(time: Res<Time>, board: Res<Board>, mut query: Query<With<Ghost, (&Movement, &mut Target, &mut Transform)>>) {
     for (movement, mut target, mut transform) in query.iter_mut() {
-        if target.is_not_set() {
-            continue;
-        }
-        let direction = match movement {
-            Idle => continue,
-            Moving(dir) => dir
-        };
-
-        let target_coordinates = board.coordinates_of_position(&target.get_position());
-        move_in_direction(&direction, &mut transform.translation, time.delta_seconds);
-        limit_movement(&direction, &mut transform.translation, &target_coordinates);
-        if transform.translation == target_coordinates {
-            target.clear();
-        }
-    }
-}
-
-fn move_in_direction(direction: &common::Direction, translation: &mut Vec3, delta_seconds: f32) {
-    let (x, y) = get_direction_modifiers(direction);
-    *translation.x_mut() += delta_seconds * x * GHOST_SPEED;
-    *translation.y_mut() += delta_seconds * y * GHOST_SPEED;
-}
-
-fn get_direction_modifiers(direction: &common::Direction) -> (f32, f32) {
-    match direction {
-        Up => (0.0, 1.0),
-        Down => (0.0, -1.0),
-        Left => (-1.0, 0.0),
-        Right => (1.0, 0.0)
-    }
-}
-
-fn limit_movement(direction: &common::Direction, translation: &mut Vec3, target_coordinates: &Vec3) {
-    match direction {
-        Up => *translation.y_mut() = translation.y().min(target_coordinates.y()),
-        Down => *translation.y_mut() = translation.y().max(target_coordinates.y()),
-        Left => *translation.x_mut() = translation.x().max(target_coordinates.x()),
-        Right => *translation.x_mut() = translation.x().min(target_coordinates.x()),
+        let mut mover = Mover::new(&board, time.delta_seconds, movement, &mut target, &mut transform.translation);
+        mover.move_ghost()
     }
 }
 
