@@ -70,27 +70,32 @@ pub enum FieldType {
     GhostWall,
     GhostSpawn,
     GhostCorner(Ghost),
+    TunnelEntrance(usize),
+    TunnelDirection
 }
 
 impl TryFrom<char> for FieldType {
     type Error = FieldTypeFromCharError;
 
     fn try_from(value: char) -> Result<Self, Self::Error> {
-        match value {
-            ' ' => Ok(Free),
-            'W' => Ok(Wall),
-            'M' => Ok(PacManSpawn),
-            '#' => Ok(Point),
-            '[' => Ok(LeftTunnel),
-            ']' => Ok(RightTunnel),
-            '_' => Ok(GhostWall),
-            'G' => Ok(GhostSpawn),
-            'B' => Ok(GhostCorner(Blinky)),
-            'P' => Ok(GhostCorner(Pinky)),
-            'I' => Ok(GhostCorner(Inky)),
-            'C' => Ok(GhostCorner(Clyde)),
-            error_char => Err(FieldTypeFromCharError { error_char })
-        }
+        let field_type = match value {
+            ' ' => Free,
+            'W' => Wall,
+            'M' => PacManSpawn,
+            '#' => Point,
+            '[' => LeftTunnel,
+            ']' => RightTunnel,
+            '_' => GhostWall,
+            'G' => GhostSpawn,
+            'B' => GhostCorner(Blinky),
+            'P' => GhostCorner(Pinky),
+            'I' => GhostCorner(Inky),
+            'C' => GhostCorner(Clyde),
+            'T' => TunnelDirection,
+            c if c.is_numeric() => TunnelEntrance(c.to_digit(10).unwrap() as usize),
+            other => return Err(FieldTypeFromCharError { error_char: other })
+        };
+        Ok(field_type)
     }
 }
 
@@ -109,6 +114,7 @@ impl std::fmt::Display for FieldTypeFromCharError {
 
 /// Represents the neighbour of a specific field, with ist type and the direction
 /// relative to the original position.
+#[derive(Copy, Clone)]
 pub struct Neighbour {
     pub position: Position,
     pub field_type: FieldType,

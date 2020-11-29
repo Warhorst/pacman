@@ -5,7 +5,7 @@ use std::io::{BufRead, BufReader, Read};
 use crate::common::Position;
 use crate::map::{FieldType, FieldTypeMatrix, PositionTypeMap};
 
-/// Holds width, height and a matrix with all fields of the map.
+/// All fields of the map, organized in a 2d array.
 #[derive(PartialOrd, PartialEq, Debug)]
 pub(in crate::map) struct PacMap {
     pub field_types: FieldTypeMatrix,

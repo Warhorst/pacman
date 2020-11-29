@@ -124,8 +124,12 @@ impl Board {
     }
 
     pub fn positions_of_type(&self, field_type: FieldType) -> Vec<&Position> {
+        self.positions_of_type_filter(|ft| ft == &field_type)
+    }
+
+    pub fn positions_of_type_filter(&self, filter: impl Fn(&FieldType) -> bool) -> Vec<&Position> {
         self.fields.iter()
-            .filter(|(_, t)| *t == &field_type)
+            .filter(|(_, t)| filter(t))
             .map(|(pos, _)| pos)
             .collect()
     }

@@ -19,6 +19,7 @@ mod interactions;
 mod score;
 mod ghosts;
 mod events;
+mod tunnels;
 
 fn main() {
     App::build()
