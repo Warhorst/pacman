@@ -9,6 +9,7 @@ use crate::dots::DotPlugin;
 use crate::events::EventPlugin;
 use crate::ghosts::GhostPlugin;
 use crate::score::ScorePlugin;
+use crate::tunnels::TunnelPlugin;
 
 mod constants;
 mod common;
@@ -39,6 +40,7 @@ fn main() {
         .add_plugin(ScorePlugin)
         .add_plugin(GhostPlugin)
         .add_plugin(EventPlugin)
+        .add_plugin(TunnelPlugin)
         .add_startup_system(init.system())
         .run()
 }

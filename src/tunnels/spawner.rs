@@ -2,12 +2,11 @@ use std::collections::HashMap;
 
 use bevy::prelude::*;
 
-use crate::common::Direction;
-use crate::common::Position;
 use crate::map::{FieldType, Neighbour};
 use crate::map::board::Board;
 use crate::map::FieldType::*;
 use crate::tunnels::Tunnel;
+use crate::tunnels::TunnelEntrance;
 
 pub(in crate::tunnels) struct Spawner<'a> {
     commands: Commands,
@@ -19,18 +18,20 @@ impl<'a> Spawner<'a> {
         Spawner { commands, board }
     }
 
+    /// Get all tunnel entrances from the board and spawn them.
+    /// Note: Because there is currently no way to spawn an entity with a single component, a number is added too.
     pub fn spawn(&mut self) {
         self.create_tunnel_entrances().into_iter()
             .map(|(_, entrances)| entrances)
             .for_each(|entrances|  {
-                self.commands.spawn((Tunnel, entrances[0], entrances[1]));
+                self.commands.spawn((Tunnel::new(entrances[0], entrances[1]), 0));
             })
     }
 
     fn create_tunnel_entrances(&self) -> HashMap<usize, Vec<TunnelEntrance>> {
         let mut index_with_entrance = HashMap::new();
-        for tunnel_position in self.board.positions_of_type_filter(Self::field_type_is_tunnel_entrance) {
-            let tunnel_entrance_neighbours = self.board.neighbours_of(tunnel_position)
+        for tunnel_entrance_position in self.board.positions_of_type_filter(Self::field_type_is_tunnel_entrance) {
+            let tunnel_entrance_neighbours = self.board.neighbours_of(tunnel_entrance_position)
                 .into_iter()
                 .filter(Self::neighbour_is_type_entrance)
                 .collect::<Vec<_>>();
@@ -41,13 +42,13 @@ impl<'a> Spawner<'a> {
                 _ => panic!("A tunnel should not have more than one entrance as neighbour!")
             };
 
-            let tunnel_index = match self.board.type_of_position(tunnel_position) {
+            let tunnel_index = match self.board.type_of_position(tunnel_entrance_position) {
                 TunnelEntrance(index) => *index,
                 _ => panic!("The type of the tunnel position should be a tunnel.")
             };
 
             let entrance = TunnelEntrance {
-                position: *tunnel_position,
+                position: *tunnel_entrance_position,
                 entrance_direction: tunnel_entrance_neighbour.direction.opposite()
             };
 
@@ -73,10 +74,4 @@ impl<'a> Spawner<'a> {
             _ => false
         }
     }
-}
-
-#[derive(Copy, Clone)]
-struct TunnelEntrance {
-    position: Position,
-    entrance_direction: Direction
 }

@@ -2,10 +2,10 @@ use std::ops::DerefMut;
 
 use bevy::prelude::*;
 
-use crate::common::Position;
 use crate::common::Direction::*;
 use crate::common::Movement;
 use crate::common::Movement::*;
+use crate::common::Position;
 use crate::constants::PACMAN_DIMENSION;
 use crate::map::board::Board;
 use crate::map::FieldType::*;
@@ -18,8 +18,7 @@ pub struct PacmanPlugin;
 impl Plugin for PacmanPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.add_startup_system(spawn_pacman.system())
-            .add_system(move_pacman.system())
-            .add_system(walk_through_tunnel.system());
+            .add_system(move_pacman.system());
     }
 }
 
@@ -68,44 +67,5 @@ fn set_direction(keyboard_input: &Input<KeyCode>, movement: &mut Movement) {
 
     if keyboard_input.pressed(KeyCode::Down) {
         *movement = Moving(Down)
-    }
-}
-
-fn walk_through_tunnel(board: Res<Board>, mut query: Query<With<Pacman, (&Movement, &mut Position, &mut Transform)>>) {
-    for (movement, mut position, mut transform) in query.iter_mut() {
-        let direction = match movement {
-            Idle => return,
-            Moving(dir) => dir
-        };
-
-        match direction {
-            Up | Down => return,
-            Right => walk_through_right_tunnel(&board, &mut position, &mut transform.translation),
-            Left => walk_through_left_tunnel(&board, &mut position, &mut transform.translation)
-        }
-    }
-}
-
-fn walk_through_right_tunnel(board: &Board, position: &mut Position, translation: &mut Vec3) {
-    let right_tunnel_position = board.position_of_type(RightTunnel);
-    let left_tunnel_position = board.position_of_type(LeftTunnel);
-    match position == right_tunnel_position {
-        false => return,
-        true => {
-            *translation = board.coordinates_of_position(left_tunnel_position);
-            *position = *left_tunnel_position;
-        }
-    }
-}
-
-fn walk_through_left_tunnel(board: &Board, position: &mut Position, translation: &mut Vec3) {
-    let right_tunnel_position = board.position_of_type(RightTunnel);
-    let left_tunnel_position = board.position_of_type(LeftTunnel);
-    match position == left_tunnel_position {
-        false => return,
-        true => {
-            *translation = board.coordinates_of_position(right_tunnel_position);
-            *position = *right_tunnel_position;
-        }
     }
 }

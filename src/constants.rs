@@ -1,4 +1,4 @@
-pub const USED_PACMAP_PATH: &'static str = "maps/default_old.pacmap";
+pub const USED_PACMAP_PATH: &'static str = "maps/default.pacmap";
 pub const FIELD_DIMENSION: f32 = 15.0;
 pub const PACMAN_DIMENSION: f32 = 15.0;
 pub const PACMAN_SPEED: f32 = 75.0;
