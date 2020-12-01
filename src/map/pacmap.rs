@@ -77,11 +77,11 @@ mod tests {
 
     #[test]
     fn map_from_read_successful() {
-        let map_as_string = "WWWWW\nW W W\nL   R\nW   W\nWWWWW";
+        let map_as_string = "WWWWW\nW W W\nW   W\nW   W\nWWWWW";
         let field_types = vec![
             vec![Wall, Wall, Wall, Wall, Wall],
             vec![Wall, Free, Wall, Free, Wall],
-            vec![LeftTunnel, Free, Free, Free, RightTunnel],
+            vec![Wall, Free, Free, Free, Wall],
             vec![Wall, Free, Free, Free, Wall],
             vec![Wall, Wall, Wall, Wall, Wall],
         ];
@@ -99,15 +99,15 @@ mod tests {
     fn into_position_type_map_successful() {
         let pacmap = PacMap {
             field_types: vec![
-                vec![Wall, Wall, RightTunnel],
+                vec![Wall, Wall, Wall],
                 vec![Wall, Free, Wall],
-                vec![LeftTunnel, Wall, Wall],
+                vec![Wall, Wall, Wall],
             ],
             width: 3,
             height: 3
         };
         let expected_mappings = vec![
-            (Position::new(0, 0), LeftTunnel),
+            (Position::new(0, 0), Wall),
             (Position::new(1, 0), Wall),
             (Position::new(2, 0), Wall),
             (Position::new(0, 1), Wall),
@@ -115,7 +115,7 @@ mod tests {
             (Position::new(2, 1), Wall),
             (Position::new(0, 2), Wall),
             (Position::new(1, 2), Wall),
-            (Position::new(2, 2), RightTunnel),
+            (Position::new(2, 2), Wall),
         ];
         let position_type_map = pacmap.into_position_type_map();
         expected_mappings.into_iter()
