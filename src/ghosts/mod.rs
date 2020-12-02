@@ -7,6 +7,7 @@ use crate::common::Position;
 use crate::events::GhostPassedTunnel;
 use crate::ghosts::mover::Mover;
 use crate::ghosts::spawner::Spawner;
+use crate::ghosts::target_set_strategy::{ScatterStrategy, SpawnedStrategy};
 use crate::ghosts::target_setter::TargetSetter;
 use crate::map::board::Board;
 use crate::map::FieldType::*;
@@ -14,6 +15,7 @@ use crate::map::FieldType::*;
 mod target_setter;
 mod mover;
 mod spawner;
+mod target_set_strategy;
 
 #[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]
 pub enum Ghost {
@@ -115,14 +117,11 @@ fn update_state(board: Res<Board>, mut query: Query<With<Ghost, (&Position, &mut
 /// Set the ghosts target if he does not have one.
 fn set_target(board: Res<Board>, mut query: Query<(&Ghost, &Position, &mut Target, &mut Movement, &State)>) {
     for (ghost, position, mut target, mut movement, state) in query.iter_mut() {
-        if target.is_set() {
-            continue;
-        }
-
-        let mut target_setter = TargetSetter::new(&board, &mut target, &mut movement, &position);
+        let owned_movement = movement.clone();
+        let mut target_setter = TargetSetter::new(&mut target, &mut movement);
         match state {
-            Spawned => target_setter.set_spawn_target(),
-            Scatter => target_setter.set_scatter_target(ghost),
+            Spawned => target_setter.set_target(SpawnedStrategy::new(&board, &position, owned_movement)),
+            Scatter => target_setter.set_target(ScatterStrategy::new(&board, &position, owned_movement, &ghost)),
         }
     }
 }
