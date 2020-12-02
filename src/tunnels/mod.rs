@@ -3,7 +3,8 @@ use bevy::prelude::*;
 use spawner::Spawner;
 
 use crate::common::{Direction, MoveComponents, Movement, Position};
-use crate::ghosts::{Ghost, Target};
+use crate::events::GhostPassedTunnel;
+use crate::ghosts::Ghost;
 use crate::map::board::Board;
 use crate::map::FieldType::*;
 use crate::pacman::Pacman;
@@ -25,7 +26,7 @@ impl Plugin for TunnelPlugin {
 
 struct Tunnel {
     first_entrance: TunnelEntrance,
-    second_entrance: TunnelEntrance
+    second_entrance: TunnelEntrance,
 }
 
 impl Tunnel {
@@ -49,17 +50,20 @@ fn pacman_enters_tunnel(board: Res<Board>,
                         mut pacman_query: Query<With<Pacman, MoveComponents>>) {
     for (mut transform, mut position, mut movement) in pacman_query.iter_mut() {
         for tunnel in tunnel_query.iter() {
-            Mover::new(&board, tunnel, &mut transform.translation, &mut position, &mut movement).move_pacman_through_tunnel()
+            Mover::new(&board, tunnel, &mut transform.translation, &mut position, &mut movement).move_entity_through_tunnel();
         }
     }
 }
 
 fn ghost_enters_tunnel(board: Res<Board>,
+                       mut ghost_passes_tunnel_events: ResMut<Events<GhostPassedTunnel>>,
                        tunnel_query: Query<&Tunnel>,
-                       mut ghost_query: Query<With<Ghost, (&mut Transform, &mut Position, &mut Movement, &mut Target)>>) {
-    for (mut transform, mut position, mut movement, mut target) in ghost_query.iter_mut() {
+                       mut ghost_query: Query<With<Ghost, (Entity, &mut Transform, &mut Position, &mut Movement)>>) {
+    for (entity, mut transform, mut position, mut movement) in ghost_query.iter_mut() {
         for tunnel in tunnel_query.iter() {
-            Mover::new(&board, tunnel, &mut transform.translation, &mut position, &mut movement).move_ghost_through_tunnel(&mut target)
+            if Mover::new(&board, tunnel, &mut transform.translation, &mut position, &mut movement).move_entity_through_tunnel() {
+                ghost_passes_tunnel_events.send(GhostPassedTunnel { entity })
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ use State::*;
 
 use crate::common::Movement;
 use crate::common::Position;
+use crate::events::GhostPassedTunnel;
 use crate::ghosts::mover::Mover;
 use crate::ghosts::spawner::Spawner;
 use crate::ghosts::target_setter::TargetSetter;
@@ -77,7 +78,8 @@ impl Plugin for GhostPlugin {
             .add_system(set_target.system())
             .add_system(update_position.system())
             .add_system(update_state.system())
-            .add_system(move_ghosts.system());
+            .add_system(move_ghosts.system())
+            .add_system(ghost_passed_tunnel.system());
     }
 }
 
@@ -121,6 +123,18 @@ fn set_target(board: Res<Board>, mut query: Query<(&Ghost, &Position, &mut Targe
         match state {
             Spawned => target_setter.set_spawn_target(),
             Scatter => target_setter.set_scatter_target(ghost),
+        }
+    }
+}
+
+fn ghost_passed_tunnel(mut ghost_passed_event_reader: Local<EventReader<GhostPassedTunnel>>,
+                       ghost_passed_events: Res<Events<GhostPassedTunnel>>,
+                       mut query: Query<With<Ghost, (Entity, &mut Target)>>) {
+    for event in ghost_passed_event_reader.iter(&ghost_passed_events) {
+        for (entity, mut target) in query.iter_mut() {
+            if entity == event.entity {
+                target.clear()
+            }
         }
     }
 }

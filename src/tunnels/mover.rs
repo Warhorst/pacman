@@ -2,7 +2,6 @@ use bevy::prelude::*;
 
 use crate::common::{Movement, Position};
 use crate::common::Movement::*;
-use crate::ghosts::Target;
 use crate::map::board::Board;
 use crate::tunnels::{Tunnel, TunnelEntrance};
 
@@ -24,21 +23,15 @@ impl<'a> Mover<'a> {
         Mover { board, tunnel, entity_translation, entity_position, entity_movement }
     }
 
-    pub fn move_pacman_through_tunnel(&mut self) {
+    /// Move an entity through a tunnel if it moves into it.
+    /// Returns false if the entity does not move into the tunnel
+    pub fn move_entity_through_tunnel(&mut self) -> bool {
         let end = match self.get_outgoing_tunnel() {
-            None => return,
+            None => return false,
             Some(path) => path
         };
         self.teleport_entity_to_tunnel_end(end);
-    }
-
-    pub fn move_ghost_through_tunnel(&mut self, target: &mut Target) {
-        let end = match self.get_outgoing_tunnel() {
-            None => return,
-            Some(path) => path
-        };
-        self.teleport_entity_to_tunnel_end(end);
-        target.clear()
+        true
     }
 
     /// If the spectated entity currently moves into a tunnel,
