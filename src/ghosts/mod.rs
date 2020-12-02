@@ -1,20 +1,18 @@
 use bevy::prelude::*;
 
-use Ghost::*;
 use State::*;
 
 use crate::common::Movement;
-use crate::common::Movement::*;
 use crate::common::Position;
-use crate::constants::GHOST_DIMENSION;
 use crate::ghosts::mover::Mover;
+use crate::ghosts::spawner::Spawner;
 use crate::ghosts::target_setter::TargetSetter;
 use crate::map::board::Board;
-use crate::map::FieldType;
 use crate::map::FieldType::*;
 
 mod target_setter;
 mod mover;
+mod spawner;
 
 #[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]
 pub enum Ghost {
@@ -83,39 +81,18 @@ impl Plugin for GhostPlugin {
     }
 }
 
-fn spawn_ghosts(mut commands: Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
-    let spawn_positions = board.positions_of_type(FieldType::GhostSpawn);
-    spawn_ghost(spawn_positions[0], Blinky, &mut commands, &board, &mut materials);
-    spawn_ghost(spawn_positions[1], Pinky, &mut commands, &board, &mut materials);
-    spawn_ghost(spawn_positions[2], Inky, &mut commands, &board, &mut materials);
-    spawn_ghost(spawn_positions[3], Clyde, &mut commands, &board, &mut materials)
-}
-
-fn spawn_ghost(position: &Position, ghost: Ghost, commands: &mut Commands, board: &Res<Board>, materials: &mut ResMut<Assets<ColorMaterial>>) {
-    let color_material = match ghost {
-        Blinky => Color::hex("FF0000").unwrap().into(),
-        Pinky => Color::hex("FFB8FF").unwrap().into(),
-        Inky => Color::hex("00FFFF").unwrap().into(),
-        Clyde => Color::hex("FFB852").unwrap().into(),
-    };
-    commands
-        .spawn(SpriteComponents {
-            material: materials.add(color_material),
-            transform: Transform::from_translation(board.coordinates_of_position(position)),
-            sprite: Sprite::new(Vec2::new(GHOST_DIMENSION, GHOST_DIMENSION)),
-            ..Default::default()
-        })
-        .with(ghost)
-        .with(*position)
-        .with(Target::new())
-        .with(Idle)
-        .with(Spawned);
+fn spawn_ghosts(commands: Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
+    Spawner::new(commands, &board, &mut materials).spawn()
 }
 
 fn move_ghosts(time: Res<Time>, board: Res<Board>, mut query: Query<With<Ghost, (&Movement, &mut Target, &mut Transform)>>) {
     for (movement, mut target, mut transform) in query.iter_mut() {
-        let mut mover = Mover::new(&board, time.delta_seconds, movement, &mut target, &mut transform.translation);
-        mover.move_ghost()
+        Mover::new(&board,
+                   time.delta_seconds,
+                   movement,
+                   &mut target,
+                   &mut transform.translation)
+            .move_ghost();
     }
 }
 

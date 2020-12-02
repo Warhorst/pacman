@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use spawner::Spawner;
 
-use crate::common::{Direction, Movement, Position};
+use crate::common::{Direction, MoveComponents, Movement, Position};
 use crate::ghosts::{Ghost, Target};
 use crate::map::board::Board;
 use crate::map::FieldType::*;
@@ -46,7 +46,7 @@ fn spawn_tunnels(commands: Commands, board: Res<Board>) {
 
 fn pacman_enters_tunnel(board: Res<Board>,
                         tunnel_query: Query<&Tunnel>,
-                        mut pacman_query: Query<With<Pacman, (&mut Transform, &mut Position, &mut Movement)>>) {
+                        mut pacman_query: Query<With<Pacman, MoveComponents>>) {
     for (mut transform, mut position, mut movement) in pacman_query.iter_mut() {
         for tunnel in tunnel_query.iter() {
             Mover::new(&board, tunnel, &mut transform.translation, &mut position, &mut movement).move_pacman_through_tunnel()
