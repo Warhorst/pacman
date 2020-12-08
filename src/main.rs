@@ -10,6 +10,7 @@ use crate::events::EventPlugin;
 use crate::ghosts::GhostPlugin;
 use crate::score::ScorePlugin;
 use crate::tunnels::TunnelPlugin;
+use crate::level::LevelPlugin;
 
 mod constants;
 mod common;
@@ -21,6 +22,7 @@ mod score;
 mod ghosts;
 mod events;
 mod tunnels;
+mod level;
 
 fn main() {
     App::build()
@@ -41,6 +43,7 @@ fn main() {
         .add_plugin(GhostPlugin)
         .add_plugin(EventPlugin)
         .add_plugin(TunnelPlugin)
+        .add_plugin(LevelPlugin)
         .add_startup_system(init.system())
         .run()
 }

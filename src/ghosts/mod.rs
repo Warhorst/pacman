@@ -16,6 +16,7 @@ mod target_setter;
 mod mover;
 mod spawner;
 mod target_set_strategy;
+mod state;
 
 #[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]
 pub enum Ghost {
@@ -62,8 +63,8 @@ impl Target {
 /// Scatter - be inactive and return to your home corner
 /// Eaten - return to the home to respawn
 /// Frightened - you are vulnerable, dodge pacman
-#[derive(Debug, PartialOrd, PartialEq)]
-enum State {
+#[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]
+pub enum State {
     Spawned,
     // Chase,
     Scatter,
