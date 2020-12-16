@@ -66,10 +66,10 @@ impl Target {
 #[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]
 pub enum State {
     Spawned,
-    // Chase,
+    Chase,
     Scatter,
-    // Eaten,
-    // Frightened,
+    Eaten,
+    Frightened,
 }
 
 pub struct GhostPlugin;

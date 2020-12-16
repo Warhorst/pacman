@@ -1,19 +1,41 @@
 use bevy::prelude::*;
 use crate::ghosts::State;
+use crate::ghosts::State::*;
 use std::thread::current;
 use crate::level::Level;
 use std::collections::HashMap;
 
-pub struct StateChanger {
-
+pub struct ActiveState {
+    current_state: State,
+    schedule: Schedule,
+    schedule_paused: bool
 }
 
-impl StateChanger {
+impl ActiveState {
+    pub fn new(schedule: Schedule) -> Self {
+        ActiveState {
+            current_state: schedule.get_active_state(),
+            schedule,
+            schedule_paused: false
+        }
+    }
 
+    pub fn set_eaten(&mut self) {
+        self.set_off_schedule_state(Eaten)
+    }
+
+    pub fn set_frightened(&mut self) {
+        self.set_off_schedule_state(Frightened)
+    }
+
+    fn set_off_schedule_state(&mut self, state: State) {
+        self.current_state = state;
+        self.schedule_paused = true
+    }
 }
 
-/// A schedule of phases.
-/// Returns the state of the currently active phase.
+/// A schedule of states a ghost should accept in a specific
+/// order and after a specific time.
 pub struct Schedule {
     level: Level,
     phases: Vec<Phase>,
@@ -29,15 +51,25 @@ impl Schedule {
         }
     }
 
-    /// Update the schedule and return the currently active state.
-    pub fn update_and_get_state(&mut self, delta_seconds: f32) -> State {
-        if self.current_phase().finished_after_update(delta_seconds) {
-            self.switch_to_next_phase();
-        }
+    pub fn get_active_state(&self) -> State {
         self.current_phase().active_state
     }
 
-    fn current_phase(&mut self) -> &mut Phase {
+    /// Update the schedule and returns if the current phase was finished.
+    /// Switches the phase if necessary.
+    pub fn finished_after_update(&mut self, delta_seconds: f32) -> bool {
+        if self.current_phase_mut().finished_after_update(delta_seconds) {
+            self.switch_to_next_phase();
+            return true
+        }
+        false
+    }
+
+    fn current_phase(&self) -> &Phase {
+        &self.phases[self.current_phase_index]
+    }
+
+    fn current_phase_mut(&mut self) -> &mut Phase {
         &mut self.phases[self.current_phase_index]
     }
 
@@ -127,8 +159,10 @@ mod tests {
             Phase::new(2.0, Spawned),
             Phase::last(Scatter)
         ]);
-        assert_eq!(Spawned, schedule.update_and_get_state(1.0));
-        assert_eq!(Scatter, schedule.update_and_get_state(1.0));
+        assert_eq!(false, schedule.finished_after_update(1.0));
+        assert_eq!(Spawned, schedule.get_active_state());
+        assert_eq!(true, schedule.finished_after_update(1.0));
+        assert_eq!(Scatter, schedule.get_active_state());
     }
 
     /// The last phase should be active when the previous ended, the last
@@ -139,9 +173,12 @@ mod tests {
             Phase::new(1.0, Spawned),
             Phase::last(Scatter)
         ]);
-        assert_eq!(Scatter, schedule.update_and_get_state(1.0));
-        assert_eq!(Scatter, schedule.update_and_get_state(1.0));
-        assert_eq!(Scatter, schedule.update_and_get_state(1.0));
+        assert_eq!(true, schedule.finished_after_update(1.0));
+        assert_eq!(Scatter, schedule.get_active_state());
+        assert_eq!(true, schedule.finished_after_update(1.0));
+        assert_eq!(Scatter, schedule.get_active_state());
+        assert_eq!(true, schedule.finished_after_update(1.0));
+        assert_eq!(Scatter, schedule.get_active_state());
     }
 
     #[test]
@@ -150,8 +187,10 @@ mod tests {
             Phase::new(2.0, Spawned),
             Phase::last(Scatter)
         ]);
-        assert_eq!(Scatter, schedule.update_and_get_state(3.0));
+        assert_eq!(true, schedule.finished_after_update(3.0));
+        assert_eq!(Scatter, schedule.get_active_state());
         schedule.reset();
-        assert_eq!(Spawned, schedule.update_and_get_state(1.0));
+        assert_eq!(false, schedule.finished_after_update(1.0));
+        assert_eq!(Spawned, schedule.get_active_state());
     }
 }
