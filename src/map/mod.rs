@@ -30,7 +30,7 @@ impl Plugin for MapPlugin {
     }
 }
 
-fn spawn_walls(mut commands: &mut Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
+fn spawn_walls(commands: &mut Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
     for position in get_wall_positions(&board) {
         commands.spawn(SpriteBundle {
             material: materials.add(Color::rgb(0.0, 0.0, 1.0).into()),

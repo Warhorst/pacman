@@ -17,7 +17,7 @@ impl Plugin for InteractionsPlugin {
     }
 }
 
-fn pacman_eat_dot(mut commands: &mut Commands,
+fn pacman_eat_dot(commands: &mut Commands,
                   mut eaten_events: ResMut<Events<DotEatenEvent>>,
                   pacman_positions: Query<&Position, With<Pacman>>,
                   dot_positions: Query<(Entity, &Position), With<Dot>>) {
@@ -31,7 +31,7 @@ fn pacman_eat_dot(mut commands: &mut Commands,
     }
 }
 
-fn ghost_hits_pacman(mut commands: &mut Commands,
+fn ghost_hits_pacman(commands: &mut Commands,
                      mut pacman_killed_events: ResMut<Events<PacmanKilledEvent>>,
                      pacman_query: Query<(Entity, &Position), With<Pacman>>,
                      ghost_query: Query<&Position, With<Ghost>>) {

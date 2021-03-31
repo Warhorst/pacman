@@ -1,5 +1,3 @@
-use bevy::prelude::Timer;
-
 use crate::common::Position;
 use crate::ghosts::components::{Schedule, State};
 use crate::map::board::Board;

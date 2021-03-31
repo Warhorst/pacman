@@ -12,7 +12,6 @@ use crate::ghosts::state_setter::StateSetter;
 use crate::ghosts::target_set_strategy::{ScatterStrategy, SpawnedStrategy};
 use crate::ghosts::target_setter::TargetSetter;
 use crate::map::board::Board;
-use crate::map::FieldType::*;
 
 use self::components::State::*;
 use self::components::State;

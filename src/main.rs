@@ -8,7 +8,6 @@ use pacman::PacmanPlugin;
 use crate::dots::DotPlugin;
 use crate::events::EventPlugin;
 use crate::ghosts::GhostPlugin;
-use crate::level::LevelPlugin;
 use crate::score::ScorePlugin;
 use crate::tunnels::TunnelPlugin;
 
@@ -22,7 +21,6 @@ mod score;
 mod ghosts;
 mod events;
 mod tunnels;
-mod level;
 
 fn main() {
     App::build()
@@ -43,12 +41,12 @@ fn main() {
         .add_plugin(GhostPlugin)
         .add_plugin(EventPlugin)
         .add_plugin(TunnelPlugin)
-        .add_plugin(LevelPlugin)
         .add_startup_system(init.system())
         .run()
 }
 
-fn init(mut commands: &mut Commands) {
+fn init(commands: &mut Commands) {
     commands
-        .spawn(Camera2dBundle::default());
+        .spawn(Camera2dBundle::default())
+        .spawn(CameraUiBundle::default());
 }

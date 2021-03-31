@@ -35,7 +35,7 @@ impl Score {
     }
 }
 
-fn create_scoreboard(mut commands: &mut Commands, asset_server: Res<AssetServer>) {
+fn create_scoreboard(commands: &mut Commands, asset_server: Res<AssetServer>) {
     commands.spawn(TextBundle {
         text: Text {
             font: asset_server.load("fonts/FiraSans-Bold.ttf"),

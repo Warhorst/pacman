@@ -15,7 +15,7 @@ impl Plugin for DotPlugin {
 
 pub struct Dot;
 
-fn spawn_dots(mut commands: &mut Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
+fn spawn_dots(commands: &mut Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
     let point_dimension = Vec2::new(POINT_DIMENSION, POINT_DIMENSION);
     for position in board.positions_of_type(FieldType::Point) {
         commands
