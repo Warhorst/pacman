@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::common::Position;
 use crate::dots::Dot;
 use crate::events::{DotEatenEvent, PacmanKilledEvent};
-use crate::ghosts::Ghost;
+use crate::ghosts::components::Ghost;
 use crate::pacman::Pacman;
 
 pub struct InteractionsPlugin;

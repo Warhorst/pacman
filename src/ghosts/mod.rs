@@ -1,76 +1,28 @@
 use bevy::prelude::*;
 
+use components::Schedule;
+
 use crate::common::Movement;
 use crate::common::Position;
 use crate::events::GhostPassedTunnel;
+use crate::ghosts::components::{Ghost, Target};
 use crate::ghosts::mover::Mover;
 use crate::ghosts::spawner::Spawner;
+use crate::ghosts::state_setter::StateSetter;
 use crate::ghosts::target_set_strategy::{ScatterStrategy, SpawnedStrategy};
 use crate::ghosts::target_setter::TargetSetter;
 use crate::map::board::Board;
 use crate::map::FieldType::*;
 
-use self::State::*;
+use self::components::State::*;
+use self::components::State;
 
+pub mod components;
 mod target_setter;
 mod mover;
 mod spawner;
 mod target_set_strategy;
-mod state;
-
-#[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]
-pub enum Ghost {
-    Blinky,
-    Pinky,
-    Inky,
-    Clyde,
-}
-
-pub struct Target {
-    target: Option<Position>
-}
-
-impl Target {
-    pub fn new() -> Self {
-        Target { target: None }
-    }
-
-    pub fn is_set(&self) -> bool {
-        self.target.is_some()
-    }
-
-    pub fn is_not_set(&self) -> bool {
-        !self.is_set()
-    }
-
-    pub fn set_to(&mut self, position: Position) {
-        self.target = Some(position)
-    }
-
-    pub fn get_position(&self) -> &Position {
-        &self.target.as_ref().expect("The target should be set at this point")
-    }
-
-    pub fn clear(&mut self) {
-        self.target = None
-    }
-}
-
-/// The different states of a ghost
-///
-/// Spawned - just spawned, try to leave the spawn area
-/// Chase - use your hunting strategy to kill pacman
-/// Scatter - be inactive and return to your home corner
-/// Eaten - return to the home to respawn
-/// Frightened - you are vulnerable, dodge pacman
-#[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]
-pub enum State {
-    Spawned,
-    Chase,
-    Scatter,
-    Eaten,
-    Frightened,
-}
+mod state_setter;
 
 pub struct GhostPlugin;
 
@@ -107,11 +59,9 @@ fn update_position(board: Res<Board>, mut query: Query<(&mut Position, &Transfor
     }
 }
 
-fn update_state(board: Res<Board>, mut query: Query<(&Position, &mut State), With<Ghost>>) {
-    for (position, mut state) in query.iter_mut() {
-        if *state == Spawned && *board.type_of_position(position) == GhostWall {
-            *state = Scatter
-        }
+fn update_state(time: Res<Time>, board: Res<Board>, mut query: Query<(&Position, &mut State, &mut Schedule), With<Ghost>>) {
+    for (position, mut state, mut schedule) in query.iter_mut() {
+        StateSetter::new(&mut state, position, &mut schedule, &board, time.delta_seconds()).set_next_state();
     }
 }
 

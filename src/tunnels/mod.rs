@@ -4,7 +4,7 @@ use spawner::Spawner;
 
 use crate::common::{Direction, MoveComponents, Movement, Position};
 use crate::events::GhostPassedTunnel;
-use crate::ghosts::Ghost;
+use crate::ghosts::components::Ghost;
 use crate::map::board::Board;
 use crate::map::FieldType::*;
 use crate::pacman::Pacman;

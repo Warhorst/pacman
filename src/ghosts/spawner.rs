@@ -2,10 +2,13 @@ use bevy::prelude::*;
 
 use crate::common::{Movement, Position};
 use crate::constants::GHOST_DIMENSION;
-use crate::ghosts::{Ghost, State, Target};
-use crate::ghosts::Ghost::*;
+use crate::ghosts::components::{Ghost, Phase, State, Target};
+use crate::ghosts::components::Ghost::*;
+use crate::ghosts::components::State::{Chase, Scatter};
 use crate::map::board::Board;
 use crate::map::FieldType;
+
+use super::components::Schedule;
 
 pub(in crate::ghosts) struct Spawner<'a> {
     commands: &'a mut Commands,
@@ -44,6 +47,15 @@ impl<'a> Spawner<'a> {
             .with(*position)
             .with(Target::new())
             .with(Movement::Idle)
-            .with(State::Spawned);
+            .with(State::Spawned)
+            .with(Spawner::create_default_schedule());
+    }
+
+    fn create_default_schedule() -> Schedule {
+        let mut phases = Vec::new();
+        phases.push(Phase::new(Scatter, 10.0));
+        phases.push(Phase::new(Chase, 10.0));
+        phases.push(Phase::new(Scatter, 10.0));
+        Schedule::new(phases)
     }
 }
