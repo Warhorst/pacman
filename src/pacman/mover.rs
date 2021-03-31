@@ -52,8 +52,8 @@ impl<'a> Mover<'a> {
     fn calculate_new_coordinates(&self, direction: &common::Direction) -> Vec3 {
         let (x, y) = self.get_modifiers_for_direction(direction);
         let mut new_coordinates = *self.pacman_coordinates;
-        *new_coordinates.x_mut() += self.delta_seconds * x * PACMAN_SPEED;
-        *new_coordinates.y_mut() += self.delta_seconds * y * PACMAN_SPEED;
+        new_coordinates.x += self.delta_seconds * x * PACMAN_SPEED;
+        new_coordinates.y += self.delta_seconds * y * PACMAN_SPEED;
         new_coordinates
     }
 
@@ -93,21 +93,21 @@ impl<'a> Mover<'a> {
     /// Because the next field is an obstacle, pacman can not go beyond his current field.
     fn limit_movement(&self, direction: &Direction, field_coordinates: &Vec3, new_coordinates: &mut Vec3) {
         match direction {
-            Up => *new_coordinates.y_mut() = new_coordinates.y().min(field_coordinates.y()),
-            Down => *new_coordinates.y_mut() = new_coordinates.y().max(field_coordinates.y()),
-            Left => *new_coordinates.x_mut() = new_coordinates.x().max(field_coordinates.x()),
-            Right => *new_coordinates.x_mut() = new_coordinates.x().min(field_coordinates.x())
+            Up => new_coordinates.y = new_coordinates.y.min(field_coordinates.y),
+            Down => new_coordinates.y = new_coordinates.y.max(field_coordinates.y),
+            Left => new_coordinates.x = new_coordinates.x.max(field_coordinates.x),
+            Right => new_coordinates.x = new_coordinates.x.min(field_coordinates.x)
         }
     }
 
     /// If pacman is at a border, he can not go further and stop.
     fn stop_if_at_border(&self, direction: &Direction, field_coordinates: &Vec3, new_coordinates: &mut Vec3, movement: &mut Movement) {
         match direction {
-            Up | Down => if field_coordinates.y() == new_coordinates.y() {
+            Up | Down => if field_coordinates.y == new_coordinates.y {
                 *movement = Idle
             }
             ,
-            Left | Right => if field_coordinates.x() == new_coordinates.x() {
+            Left | Right => if field_coordinates.x == new_coordinates.x {
                 *movement = Idle
             }
         }
@@ -118,8 +118,8 @@ impl<'a> Mover<'a> {
     fn center_position(&self, direction: &common::Direction, new_position: &Position, new_coordinates: &mut Vec3) {
         let position_coordinates = self.board.coordinates_of_position(new_position);
         match direction {
-            Up | Down => *new_coordinates.x_mut() = position_coordinates.x(),
-            Left | Right => *new_coordinates.y_mut() = position_coordinates.y()
+            Up | Down => new_coordinates.x = position_coordinates.x,
+            Left | Right => new_coordinates.y = position_coordinates.y
         }
     }
 }

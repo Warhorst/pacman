@@ -41,13 +41,13 @@ struct TunnelEntrance {
     entrance_direction: Direction,
 }
 
-fn spawn_tunnels(commands: Commands, board: Res<Board>) {
+fn spawn_tunnels(commands: &mut Commands, board: Res<Board>) {
     Spawner::new(commands, &board).spawn()
 }
 
 fn pacman_enters_tunnel(board: Res<Board>,
                         tunnel_query: Query<&Tunnel>,
-                        mut pacman_query: Query<With<Pacman, MoveComponents>>) {
+                        mut pacman_query: Query<MoveComponents, With<Pacman>>) {
     for (mut transform, mut position, mut movement) in pacman_query.iter_mut() {
         for tunnel in tunnel_query.iter() {
             Mover::new(&board, tunnel, &mut transform.translation, &mut position, &mut movement).move_entity_through_tunnel();
@@ -58,7 +58,7 @@ fn pacman_enters_tunnel(board: Res<Board>,
 fn ghost_enters_tunnel(board: Res<Board>,
                        mut ghost_passes_tunnel_events: ResMut<Events<GhostPassedTunnel>>,
                        tunnel_query: Query<&Tunnel>,
-                       mut ghost_query: Query<With<Ghost, (Entity, &mut Transform, &mut Position, &mut Movement)>>) {
+                       mut ghost_query: Query<(Entity, &mut Transform, &mut Position, &mut Movement), With<Ghost>>) {
     for (entity, mut transform, mut position, mut movement) in ghost_query.iter_mut() {
         for tunnel in tunnel_query.iter() {
             if Mover::new(&board, tunnel, &mut transform.translation, &mut position, &mut movement).move_entity_through_tunnel() {

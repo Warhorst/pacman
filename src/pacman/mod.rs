@@ -24,16 +24,16 @@ impl Plugin for PacmanPlugin {
     }
 }
 
-fn spawn_pacman(commands: Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
+fn spawn_pacman(commands: &mut Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
     Spawner::new(commands, &board, &mut materials).spawn()
 }
 
 fn move_pacman(time: Res<Time>,
                board: Res<Board>,
-               mut query: Query<With<Pacman, MoveComponents>>) {
+               mut query: Query<MoveComponents, With<Pacman>>) {
     for (mut transform, mut position, mut movement) in query.iter_mut() {
         Mover::new(&board,
-                   time.delta_seconds,
+                   time.delta_seconds(),
                    movement.deref_mut(),
                    position.deref_mut(),
                    &mut transform.translation)
@@ -42,7 +42,7 @@ fn move_pacman(time: Res<Time>,
 }
 
 fn set_direction(keyboard_input: Res<Input<KeyCode>>,
-                 mut query: Query<With<Pacman, &mut Movement>>) {
+                 mut query: Query<&mut Movement, With<Pacman>>) {
     for mut movement in query.iter_mut() {
         if keyboard_input.pressed(KeyCode::Left) {
             *movement = Moving(Left)

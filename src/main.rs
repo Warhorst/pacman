@@ -8,9 +8,9 @@ use pacman::PacmanPlugin;
 use crate::dots::DotPlugin;
 use crate::events::EventPlugin;
 use crate::ghosts::GhostPlugin;
+use crate::level::LevelPlugin;
 use crate::score::ScorePlugin;
 use crate::tunnels::TunnelPlugin;
-use crate::level::LevelPlugin;
 
 mod constants;
 mod common;
@@ -27,8 +27,8 @@ mod level;
 fn main() {
     App::build()
         .add_resource(WindowDescriptor {
-            width: 1000,
-            height: 700,
+            width: 1000.0,
+            height: 700.0,
             title: "PacMan".to_string(),
             resizable: false,
             ..Default::default()
@@ -48,8 +48,7 @@ fn main() {
         .run()
 }
 
-fn init(mut commands: Commands) {
+fn init(mut commands: &mut Commands) {
     commands
-        .spawn(Camera2dComponents::default())
-        .spawn(UiCameraComponents::default());
+        .spawn(Camera2dBundle::default());
 }

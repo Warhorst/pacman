@@ -17,10 +17,10 @@ impl Plugin for InteractionsPlugin {
     }
 }
 
-fn pacman_eat_dot(mut commands: Commands,
+fn pacman_eat_dot(mut commands: &mut Commands,
                   mut eaten_events: ResMut<Events<DotEatenEvent>>,
-                  pacman_positions: Query<With<Pacman, &Position>>,
-                  dot_positions: Query<With<Dot, (Entity, &Position)>>) {
+                  pacman_positions: Query<&Position, With<Pacman>>,
+                  dot_positions: Query<(Entity, &Position), With<Dot>>) {
     for pacman_pos in pacman_positions.iter() {
         for (entity, dot_pos) in dot_positions.iter() {
             if pacman_pos == dot_pos {
@@ -31,10 +31,10 @@ fn pacman_eat_dot(mut commands: Commands,
     }
 }
 
-fn ghost_hits_pacman(mut commands: Commands,
+fn ghost_hits_pacman(mut commands: &mut Commands,
                      mut pacman_killed_events: ResMut<Events<PacmanKilledEvent>>,
-                     pacman_query: Query<With<Pacman, (Entity, &Position)>>,
-                     ghost_query: Query<With<Ghost, &Position>>) {
+                     pacman_query: Query<(Entity, &Position), With<Pacman>>,
+                     ghost_query: Query<&Position, With<Ghost>>) {
     for (pacman_entity, pacman_position) in pacman_query.iter() {
         for ghost_position in ghost_query.iter() {
             if pacman_position == ghost_position {

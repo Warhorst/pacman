@@ -7,13 +7,13 @@ use crate::map::FieldType::PacManSpawn;
 use crate::pacman::Pacman;
 
 pub (in crate::pacman) struct Spawner<'a> {
-    commands: Commands,
+    commands: &'a mut Commands,
     board: &'a Board,
     materials: &'a mut Assets<ColorMaterial>
 }
 
 impl<'a> Spawner<'a> {
-    pub fn new(commands: Commands, board: &'a Board, materials: &'a mut Assets<ColorMaterial>) -> Self {
+    pub fn new(commands: &'a mut Commands, board: &'a Board, materials: &'a mut Assets<ColorMaterial>) -> Self {
         Spawner { commands, board, materials }
     }
 
@@ -21,7 +21,7 @@ impl<'a> Spawner<'a> {
         let start_position = self.board.position_of_type(PacManSpawn).clone();
         let pacman_dimension = Vec2::new(PACMAN_DIMENSION, PACMAN_DIMENSION);
         self.commands
-            .spawn(SpriteComponents {
+            .spawn(SpriteBundle {
                 material: self.materials.add(Color::hex("FFEE00").unwrap().into()),
                 transform: Transform::from_translation(self.board.coordinates_of_position(&start_position)),
                 sprite: Sprite::new(pacman_dimension),

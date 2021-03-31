@@ -39,14 +39,14 @@ impl Board {
     }
 
     pub fn coordinates_of_position(&self, position: &Position) -> Vec3 {
-        let x = self.board_root.x() + (position.x() as f32) * FIELD_DIMENSION;
-        let y = self.board_root.y() + (position.y() as f32) * FIELD_DIMENSION;
+        let x = self.board_root.x + (position.x() as f32) * FIELD_DIMENSION;
+        let y = self.board_root.y + (position.y() as f32) * FIELD_DIMENSION;
         Vec3::new(x, y, 0.0)
     }
 
     pub fn position_of_coordinates(&self, coordinates: &Vec3) -> Position {
-        let x = (coordinates.x() - self.board_root.x() + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
-        let y = (coordinates.y() - self.board_root.y() + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
+        let x = (coordinates.x - self.board_root.x + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
+        let y = (coordinates.y - self.board_root.y + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
         Position::new(x as usize, y as usize)
     }
 
@@ -98,14 +98,14 @@ impl Board {
         };
         match direction {
             Left | Right => {
-                let y_start = position_coordinates.y() - entity_wall_distance;
-                let y_end = position_coordinates.y() + entity_wall_distance;
-                coordinates.y() >= y_start && coordinates.y() <= y_end
+                let y_start = position_coordinates.y - entity_wall_distance;
+                let y_end = position_coordinates.y + entity_wall_distance;
+                coordinates.y >= y_start && coordinates.y <= y_end
             }
             Up | Down => {
-                let x_start = position_coordinates.x() - entity_wall_distance;
-                let x_end = position_coordinates.x() + entity_wall_distance;
-                coordinates.x() >= x_start && coordinates.x() <= x_end
+                let x_start = position_coordinates.x - entity_wall_distance;
+                let x_end = position_coordinates.x + entity_wall_distance;
+                coordinates.x >= x_start && coordinates.x <= x_end
             }
         }
     }

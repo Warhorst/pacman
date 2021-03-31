@@ -1,9 +1,11 @@
+use std::collections::HashMap;
+use std::thread::current;
+
 use bevy::prelude::*;
+
 use crate::ghosts::State;
 use crate::ghosts::State::*;
-use std::thread::current;
 use crate::level::Level;
-use std::collections::HashMap;
 
 pub struct ActiveState {
     current_state: State,
@@ -111,10 +113,10 @@ impl Phase {
 
     /// Updates this phase and returns true if it ended
     fn finished_after_update(&mut self, delta_seconds: f32) -> bool {
-        match self.timer.finished {
+        match self.timer.finished() {
             false => {
                 self.timer.tick(delta_seconds);
-                self.timer.finished
+                self.timer.finished()
             },
             true => true
         }
@@ -127,10 +129,11 @@ impl Phase {
 
 #[cfg(test)]
 mod tests {
-    use super::Phase;
     use crate::ghosts::State::*;
     use crate::ghosts::state::Schedule;
     use crate::level::Level;
+
+    use super::Phase;
 
     #[test]
     fn phase_finished_after_set_time() {

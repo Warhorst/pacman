@@ -9,12 +9,12 @@ use crate::tunnels::Tunnel;
 use crate::tunnels::TunnelEntrance;
 
 pub(in crate::tunnels) struct Spawner<'a> {
-    commands: Commands,
+    commands: &'a mut Commands,
     board: &'a Board
 }
 
 impl<'a> Spawner<'a> {
-    pub fn new(commands: Commands, board: &'a Board) -> Self {
+    pub fn new(commands: &'a mut Commands, board: &'a Board) -> Self {
         Spawner { commands, board }
     }
 

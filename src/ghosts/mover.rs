@@ -42,8 +42,8 @@ impl <'a> Mover<'a> {
 
     fn move_in_direction(&mut self, direction: &common::Direction) {
         let (x, y) = self.get_direction_modifiers(direction);
-        *self.ghost_coordinates.x_mut() += self.delta_seconds * x * GHOST_SPEED;
-        *self.ghost_coordinates.y_mut() += self.delta_seconds * y * GHOST_SPEED;
+        self.ghost_coordinates.x += self.delta_seconds * x * GHOST_SPEED;
+        self.ghost_coordinates.y += self.delta_seconds * y * GHOST_SPEED;
     }
 
     fn get_direction_modifiers(&self, direction: &common::Direction) -> (f32, f32) {
@@ -58,10 +58,10 @@ impl <'a> Mover<'a> {
     /// The ghost should not move over its target.
     fn limit_movement(&mut self, direction: &common::Direction, target_coordinates: &Vec3) {
         match direction {
-            Up => *self.ghost_coordinates.y_mut() = self.ghost_coordinates.y().min(target_coordinates.y()),
-            Down => *self.ghost_coordinates.y_mut() = self.ghost_coordinates.y().max(target_coordinates.y()),
-            Left => *self.ghost_coordinates.x_mut() = self.ghost_coordinates.x().max(target_coordinates.x()),
-            Right => *self.ghost_coordinates.x_mut() = self.ghost_coordinates.x().min(target_coordinates.x()),
+            Up => self.ghost_coordinates.y = self.ghost_coordinates.y.min(target_coordinates.y),
+            Down => self.ghost_coordinates.y = self.ghost_coordinates.y.max(target_coordinates.y),
+            Left => self.ghost_coordinates.x = self.ghost_coordinates.x.max(target_coordinates.x),
+            Right => self.ghost_coordinates.x = self.ghost_coordinates.x.min(target_coordinates.x),
         }
     }
 }

@@ -1,7 +1,5 @@
 use bevy::prelude::*;
 
-use State::*;
-
 use crate::common::Movement;
 use crate::common::Position;
 use crate::events::GhostPassedTunnel;
@@ -11,6 +9,8 @@ use crate::ghosts::target_set_strategy::{ScatterStrategy, SpawnedStrategy};
 use crate::ghosts::target_setter::TargetSetter;
 use crate::map::board::Board;
 use crate::map::FieldType::*;
+
+use self::State::*;
 
 mod target_setter;
 mod mover;
@@ -86,14 +86,14 @@ impl Plugin for GhostPlugin {
     }
 }
 
-fn spawn_ghosts(commands: Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
+fn spawn_ghosts(commands: &mut Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
     Spawner::new(commands, &board, &mut materials).spawn()
 }
 
-fn move_ghosts(time: Res<Time>, board: Res<Board>, mut query: Query<With<Ghost, (&Movement, &mut Target, &mut Transform)>>) {
+fn move_ghosts(time: Res<Time>, board: Res<Board>, mut query: Query<(&Movement, &mut Target, &mut Transform), With<Ghost>>) {
     for (movement, mut target, mut transform) in query.iter_mut() {
         Mover::new(&board,
-                   time.delta_seconds,
+                   time.delta_seconds(),
                    movement,
                    &mut target,
                    &mut transform.translation)
@@ -101,13 +101,13 @@ fn move_ghosts(time: Res<Time>, board: Res<Board>, mut query: Query<With<Ghost, 
     }
 }
 
-fn update_position(board: Res<Board>, mut query: Query<With<Ghost, (&mut Position, &Transform)>>) {
+fn update_position(board: Res<Board>, mut query: Query<(&mut Position, &Transform), With<Ghost>>) {
     for (mut position, transform) in query.iter_mut() {
         *position = board.position_of_coordinates(&transform.translation);
     }
 }
 
-fn update_state(board: Res<Board>, mut query: Query<With<Ghost, (&Position, &mut State)>>) {
+fn update_state(board: Res<Board>, mut query: Query<(&Position, &mut State), With<Ghost>>) {
     for (position, mut state) in query.iter_mut() {
         if *state == Spawned && *board.type_of_position(position) == GhostWall {
             *state = Scatter
@@ -123,13 +123,14 @@ fn set_target(board: Res<Board>, mut query: Query<(&Ghost, &Position, &mut Targe
         match state {
             Spawned => target_setter.set_target(SpawnedStrategy::new(&board, &position, owned_movement)),
             Scatter => target_setter.set_target(ScatterStrategy::new(&board, &position, owned_movement, &ghost)),
+            _ => ()
         }
     }
 }
 
 fn ghost_passed_tunnel(mut ghost_passed_event_reader: Local<EventReader<GhostPassedTunnel>>,
                        ghost_passed_events: Res<Events<GhostPassedTunnel>>,
-                       mut query: Query<With<Ghost, (Entity, &mut Target)>>) {
+                       mut query: Query<(Entity, &mut Target), With<Ghost>>) {
     for event in ghost_passed_event_reader.iter(&ghost_passed_events) {
         for (entity, mut target) in query.iter_mut() {
             if entity == event.entity {
