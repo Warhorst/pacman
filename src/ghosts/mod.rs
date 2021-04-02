@@ -9,18 +9,16 @@ use crate::ghosts::components::{Ghost, Target};
 use crate::ghosts::mover::Mover;
 use crate::ghosts::spawner::Spawner;
 use crate::ghosts::state_setter::StateSetter;
-use crate::ghosts::target_set_strategy::{ScatterStrategy, SpawnedStrategy};
 use crate::ghosts::target_setter::TargetSetter;
 use crate::map::board::Board;
+use crate::pacman::Pacman;
 
-use self::components::State::*;
 use self::components::State;
 
 pub mod components;
 mod target_setter;
 mod mover;
 mod spawner;
-mod target_set_strategy;
 mod state_setter;
 
 pub struct GhostPlugin;
@@ -65,14 +63,12 @@ fn update_state(time: Res<Time>, board: Res<Board>, mut query: Query<(&Position,
 }
 
 /// Set the ghosts target if he does not have one.
-fn set_target(board: Res<Board>, mut query: Query<(&Ghost, &Position, &mut Target, &mut Movement, &State)>) {
-    for (ghost, position, mut target, mut movement, state) in query.iter_mut() {
-        let owned_movement = movement.clone();
-        let mut target_setter = TargetSetter::new(&mut target, &mut movement);
-        match state {
-            Spawned => target_setter.set_target(SpawnedStrategy::new(&board, &position, owned_movement)),
-            Scatter => target_setter.set_target(ScatterStrategy::new(&board, &position, owned_movement, &ghost)),
-            _ => ()
+fn set_target(board: Res<Board>,
+              mut ghost_query: Query<(&Ghost, &Position, &mut Target, &mut Movement, &State)>,
+              pacman_query: Query<&Position, With<Pacman>>) {
+    for (ghost, ghost_position, mut target, mut movement, state) in ghost_query.iter_mut() {
+        for pacman_position in pacman_query.iter() {
+            TargetSetter::new(&mut target, state, &mut movement, ghost, ghost_position, pacman_position, &board).set_target()
         }
     }
 }
