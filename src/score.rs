@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::constants::POINTS_PER_DOT;
-use crate::events::DotEatenEvent;
+use crate::events::DotEaten;
 
 pub struct ScorePlugin;
 
@@ -66,8 +66,8 @@ fn update_scoreboard(score: Res<Score>, mut query: Query<&mut Text>) {
 }
 
 fn add_points_for_eaten_dot(mut score: ResMut<Score>,
-                            mut eaten_event_reader: Local<EventReader<DotEatenEvent>>,
-                            eaten_events: Res<Events<DotEatenEvent>>) {
+                            mut eaten_event_reader: Local<EventReader<DotEaten>>,
+                            eaten_events: Res<Events<DotEaten>>) {
     for _ in eaten_event_reader.iter(&eaten_events) {
         score.increment()
     }

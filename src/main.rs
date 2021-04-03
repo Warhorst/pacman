@@ -6,6 +6,7 @@ use map::MapPlugin;
 use pacman::PacmanPlugin;
 
 use crate::dots::DotPlugin;
+use crate::energizer::EnergizerPlugin;
 use crate::events::EventPlugin;
 use crate::ghosts::GhostPlugin;
 use crate::score::ScorePlugin;
@@ -21,6 +22,7 @@ mod score;
 mod ghosts;
 mod events;
 mod tunnels;
+mod energizer;
 
 fn main() {
     App::build()
@@ -41,6 +43,7 @@ fn main() {
         .add_plugin(GhostPlugin)
         .add_plugin(EventPlugin)
         .add_plugin(TunnelPlugin)
+        .add_plugin(EnergizerPlugin)
         .add_startup_system(init.system())
         .run()
 }

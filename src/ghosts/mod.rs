@@ -4,7 +4,7 @@ use components::Schedule;
 
 use crate::common::Movement;
 use crate::common::Position;
-use crate::events::GhostPassedTunnel;
+use crate::events::{EnergizerEaten, GhostPassedTunnel};
 use crate::ghosts::components::{Ghost, Target};
 use crate::ghosts::mover::Mover;
 use crate::ghosts::spawner::Spawner;
@@ -14,6 +14,7 @@ use crate::map::board::Board;
 use crate::pacman::Pacman;
 
 use self::components::State;
+use self::components::State::*;
 
 pub mod components;
 mod target_setter;
@@ -31,7 +32,8 @@ impl Plugin for GhostPlugin {
             .add_system(update_position.system())
             .add_system(update_state.system())
             .add_system(move_ghosts.system())
-            .add_system(ghost_passed_tunnel.system());
+            .add_system(ghost_passed_tunnel.system())
+            .add_system(make_ghosts_vulnerable.system());
     }
 }
 
@@ -62,13 +64,12 @@ fn update_state(time: Res<Time>, board: Res<Board>, mut query: Query<(&Position,
     }
 }
 
-/// Set the ghosts target if he does not have one.
 fn set_target(board: Res<Board>,
               mut ghost_query: Query<(&Ghost, &Position, &mut Target, &mut Movement, &State)>,
               pacman_query: Query<&Position, With<Pacman>>) {
     for (ghost, ghost_position, mut target, mut movement, state) in ghost_query.iter_mut() {
         for pacman_position in pacman_query.iter() {
-            TargetSetter::new(&mut target, state, &mut movement, ghost, ghost_position, pacman_position, &board).set_target()
+            TargetSetter::new(&board, &ghost_position, &mut movement, &mut target, &state, &ghost, pacman_position).set_target()
         }
     }
 }
@@ -81,6 +82,18 @@ fn ghost_passed_tunnel(mut ghost_passed_event_reader: Local<EventReader<GhostPas
             if entity == event.entity {
                 target.clear()
             }
+        }
+    }
+}
+
+fn make_ghosts_vulnerable(mut energizer_eaten_event_reader: Local<EventReader<EnergizerEaten>>,
+                          energizer_eaten_events: Res<Events<EnergizerEaten>>,
+                          mut query: Query<(&mut Target, &mut Movement, &mut State), With<Ghost>>) {
+    for _ in energizer_eaten_event_reader.iter(&energizer_eaten_events) {
+        for (mut target, mut movement, mut state) in query.iter_mut() {
+            target.clear();
+            movement.reverse();
+            *state = Frightened
         }
     }
 }

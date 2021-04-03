@@ -70,7 +70,8 @@ pub enum FieldType {
     GhostSpawn,
     GhostCorner(Ghost),
     TunnelEntrance(usize),
-    TunnelDirection
+    TunnelDirection,
+    Energizer
 }
 
 impl TryFrom<char> for FieldType {
@@ -89,6 +90,7 @@ impl TryFrom<char> for FieldType {
             'I' => GhostCorner(Inky),
             'C' => GhostCorner(Clyde),
             'T' => TunnelDirection,
+            'E' => Energizer,
             c if c.is_numeric() => TunnelEntrance(c.to_digit(10).unwrap() as usize),
             other => return Err(FieldTypeFromCharError { error_char: other })
         };

@@ -21,7 +21,7 @@ impl<'a> StateSetter<'a> {
     pub fn set_next_state(&mut self) {
         match self.state {
             Frightened | Eaten => return,
-            Spawned => if *self.board.type_of_position(self.position) == GhostWall {
+            Spawned => if self.board.type_of_position(self.position) == &GhostWall {
                 self.update_and_set_state()
             }
             _ => self.update_and_set_state()
