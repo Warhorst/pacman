@@ -5,6 +5,7 @@ use interactions::InteractionsPlugin;
 use map::MapPlugin;
 use pacman::PacmanPlugin;
 
+use crate::debug::DebugPlugin;
 use crate::dots::DotPlugin;
 use crate::energizer::EnergizerPlugin;
 use crate::events::EventPlugin;
@@ -23,6 +24,7 @@ mod ghosts;
 mod events;
 mod tunnels;
 mod energizer;
+mod debug;
 
 fn main() {
     App::build()
@@ -44,6 +46,7 @@ fn main() {
         .add_plugin(EventPlugin)
         .add_plugin(TunnelPlugin)
         .add_plugin(EnergizerPlugin)
+        .add_plugin(DebugPlugin)
         .add_startup_system(init.system())
         .run()
 }

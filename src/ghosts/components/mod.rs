@@ -35,6 +35,10 @@ impl Target {
         &self.target.as_ref().expect("The target should be set at this point")
     }
 
+    pub fn get_position_opt(&self) -> &Option<Position> {
+        &self.target
+    }
+
     pub fn clear(&mut self) {
         self.target = None
     }
