@@ -1,5 +1,7 @@
 use std::cmp::Ordering;
 
+use bevy::prelude::Vec3;
+
 use crate::common::{Movement, Position};
 use crate::common::Movement::*;
 use crate::ghosts::components::{Ghost, State};
@@ -20,6 +22,7 @@ pub(in crate::ghosts) struct TargetSetter<'a> {
     state: &'a State,
     ghost: &'a Ghost,
     pacman_position: &'a Position,
+    coordinates: Vec3
 }
 
 impl<'a> TargetSetter<'a> {
@@ -32,14 +35,20 @@ impl<'a> TargetSetter<'a> {
         current_target: &'a mut Target,
         state: &'a State,
         ghost: &'a Ghost,
-        pacman_position: &'a Position
+        pacman_position: &'a Position,
+        coordinates: Vec3
     ) -> Self {
-        TargetSetter { board, ghost_position, movement, current_target, state, ghost, pacman_position }
+        TargetSetter { board, ghost_position, movement, current_target, state, ghost, pacman_position, coordinates }
     }
 
     pub fn set_target(&mut self) {
         if self.current_target.is_set() {
             return;
+        }
+
+        if !self.movement.is_idle() && self.board.coordinates_directing_to_center(self.movement.get_direction(), self.coordinates) {
+            self.current_target.set_to(self.board.position_of_coordinates(&self.coordinates));
+            return
         }
 
         let next_target_neighbour = match self.state {

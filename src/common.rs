@@ -52,6 +52,13 @@ impl Movement {
         }
     }
 
+    pub fn is_idle(&self) -> bool {
+        match self {
+            Idle => true,
+            _ => false
+        }
+    }
+
     pub fn reverse(&mut self) {
         match self {
             Idle => return,

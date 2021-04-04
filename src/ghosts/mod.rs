@@ -66,11 +66,11 @@ fn update_state(time: Res<Time>, board: Res<Board>, mut query: Query<(&Position,
 }
 
 fn set_target(board: Res<Board>,
-              mut ghost_query: Query<(&Ghost, &Position, &mut Target, &mut Movement, &State)>,
+              mut ghost_query: Query<(&Ghost, &Position, &mut Target, &mut Movement, &State, &Transform)>,
               pacman_query: Query<&Position, With<Pacman>>) {
-    for (ghost, ghost_position, mut target, mut movement, state) in ghost_query.iter_mut() {
+    for (ghost, ghost_position, mut target, mut movement, state, transform) in ghost_query.iter_mut() {
         for pacman_position in pacman_query.iter() {
-            TargetSetter::new(&board, &ghost_position, &mut movement, &mut target, &state, &ghost, pacman_position).set_target()
+            TargetSetter::new(&board, &ghost_position, &mut movement, &mut target, &state, &ghost, pacman_position, transform.translation).set_target()
         }
     }
 }
@@ -89,18 +89,12 @@ fn ghost_passed_tunnel(mut ghost_passed_event_reader: Local<EventReader<GhostPas
 
 fn make_ghosts_vulnerable(mut energizer_eaten_event_reader: Local<EventReader<EnergizerEaten>>,
                           energizer_eaten_events: Res<Events<EnergizerEaten>>,
-                          board: Res<Board>,
-                          mut query: Query<(&mut Target, &mut Movement, &mut State, &Transform), With<Ghost>>) {
+                          mut query: Query<(&mut Target, &mut Movement, &mut State), With<Ghost>>) {
     for _ in energizer_eaten_event_reader.iter(&energizer_eaten_events) {
-        for (mut target, mut movement, mut state, transform) in query.iter_mut() {
+        for (mut target, mut movement, mut state) in query.iter_mut() {
             target.clear();
             movement.reverse();
             *state = Frightened;
-
-            // TODO this seems like general target troubleshooting and should be moved to a more general system.
-            if board.coordinates_directing_to_center(movement.get_direction(), transform.translation) {
-                target.set_to(board.position_of_coordinates(&transform.translation))
-            }
         }
     }
 }
