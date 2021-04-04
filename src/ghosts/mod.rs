@@ -52,6 +52,7 @@ fn move_ghosts(time: Res<Time>, board: Res<Board>, mut query: Query<(&Movement, 
     }
 }
 
+/// TODO: Position is useless as component, remove
 fn update_position(board: Res<Board>, mut query: Query<(&mut Position, &Transform), With<Ghost>>) {
     for (mut position, transform) in query.iter_mut() {
         *position = board.position_of_coordinates(&transform.translation);
@@ -88,12 +89,18 @@ fn ghost_passed_tunnel(mut ghost_passed_event_reader: Local<EventReader<GhostPas
 
 fn make_ghosts_vulnerable(mut energizer_eaten_event_reader: Local<EventReader<EnergizerEaten>>,
                           energizer_eaten_events: Res<Events<EnergizerEaten>>,
-                          mut query: Query<(&mut Target, &mut Movement, &mut State), With<Ghost>>) {
+                          board: Res<Board>,
+                          mut query: Query<(&mut Target, &mut Movement, &mut State, &Transform), With<Ghost>>) {
     for _ in energizer_eaten_event_reader.iter(&energizer_eaten_events) {
-        for (mut target, mut movement, mut state) in query.iter_mut() {
+        for (mut target, mut movement, mut state, transform) in query.iter_mut() {
             target.clear();
             movement.reverse();
-            *state = Frightened
+            *state = Frightened;
+
+            // TODO this seems like general target troubleshooting and should be moved to a more general system.
+            if board.coordinates_directing_to_center(movement.get_direction(), transform.translation) {
+                target.set_to(board.position_of_coordinates(&transform.translation))
+            }
         }
     }
 }

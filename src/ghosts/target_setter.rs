@@ -23,6 +23,8 @@ pub(in crate::ghosts) struct TargetSetter<'a> {
 }
 
 impl<'a> TargetSetter<'a> {
+    // How many components do we need?
+    // Rügenwalder.jpg
     pub fn new(
         board: &'a Board,
         ghost_position: &'a Position,

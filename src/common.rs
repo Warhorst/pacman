@@ -45,6 +45,13 @@ pub enum Movement {
 }
 
 impl Movement {
+    pub fn get_direction(&self) -> &Direction {
+        match self {
+            Idle => panic!("Movement is Idle!"),
+            Moving(dir) => dir
+        }
+    }
+
     pub fn reverse(&mut self) {
         match self {
             Idle => return,
