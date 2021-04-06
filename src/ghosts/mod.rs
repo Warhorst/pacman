@@ -12,6 +12,7 @@ use crate::ghosts::state_setter::StateSetter;
 use crate::ghosts::target_setter::TargetSetter;
 use crate::map::board::Board;
 use crate::pacman::Pacman;
+use crate::random::Random;
 
 use self::components::State;
 use self::components::State::*;
@@ -66,11 +67,12 @@ fn update_state(time: Res<Time>, board: Res<Board>, mut query: Query<(&Position,
 }
 
 fn set_target(board: Res<Board>,
-              mut ghost_query: Query<(&Ghost, &Position, &mut Target, &mut Movement, &State, &Transform)>,
+              random: Res<Random>,
+              mut ghost_query: Query<(&Ghost, &mut Target, &mut Movement, &State, &Transform)>,
               pacman_query: Query<&Position, With<Pacman>>) {
-    for (ghost, ghost_position, mut target, mut movement, state, transform) in ghost_query.iter_mut() {
+    for (ghost, mut target, mut movement, state, transform) in ghost_query.iter_mut() {
         for pacman_position in pacman_query.iter() {
-            TargetSetter::new(&board, &ghost_position, &mut movement, &mut target, &state, &ghost, pacman_position, transform.translation).set_target()
+            TargetSetter::new(&board, &random, &mut movement, &mut target, &state, &ghost, pacman_position, transform.translation).set_target()
         }
     }
 }

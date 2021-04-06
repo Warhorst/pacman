@@ -10,6 +10,7 @@ use crate::dots::DotPlugin;
 use crate::energizer::EnergizerPlugin;
 use crate::events::EventPlugin;
 use crate::ghosts::GhostPlugin;
+use crate::random::RandomPlugin;
 use crate::score::ScorePlugin;
 use crate::tunnels::TunnelPlugin;
 
@@ -25,6 +26,7 @@ mod events;
 mod tunnels;
 mod energizer;
 mod debug;
+mod random;
 
 fn main() {
     App::build()
@@ -46,6 +48,7 @@ fn main() {
         .add_plugin(EventPlugin)
         .add_plugin(TunnelPlugin)
         .add_plugin(EnergizerPlugin)
+        .add_plugin(RandomPlugin)
         .add_plugin(DebugPlugin)
         .add_startup_system(init.system())
         .run()

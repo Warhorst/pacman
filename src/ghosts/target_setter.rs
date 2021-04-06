@@ -9,6 +9,7 @@ use crate::ghosts::Target;
 use crate::map::board::Board;
 use crate::map::FieldType::{GhostCorner, GhostSpawn, GhostWall, Wall};
 use crate::map::Neighbour;
+use crate::random::Random;
 
 use super::components::Ghost::*;
 use super::components::State::*;
@@ -16,7 +17,8 @@ use super::components::State::*;
 /// Sets the next target for a ghost.
 pub(in crate::ghosts) struct TargetSetter<'a> {
     board: &'a Board,
-    ghost_position: &'a Position,
+    random: &'a Random,
+    ghost_position: Position,
     movement: &'a mut Movement,
     current_target: &'a mut Target,
     state: &'a State,
@@ -30,7 +32,7 @@ impl<'a> TargetSetter<'a> {
     // Rügenwalder.jpg
     pub fn new(
         board: &'a Board,
-        ghost_position: &'a Position,
+        random: &'a Random,
         movement: &'a mut Movement,
         current_target: &'a mut Target,
         state: &'a State,
@@ -38,7 +40,7 @@ impl<'a> TargetSetter<'a> {
         pacman_position: &'a Position,
         coordinates: Vec3
     ) -> Self {
-        TargetSetter { board, ghost_position, movement, current_target, state, ghost, pacman_position, coordinates }
+        TargetSetter { board, random, ghost_position: board.position_of_coordinates(&coordinates), movement, current_target, state, ghost, pacman_position, coordinates }
     }
 
     pub fn set_target(&mut self) {
@@ -71,9 +73,9 @@ impl<'a> TargetSetter<'a> {
     fn determine_spawned_target_neighbour(&self) -> Option<Neighbour> {
         let ghost_wall_positions = self.board.positions_of_type(GhostWall);
         let nearest_wall_position = ghost_wall_positions.into_iter()
-            .min_by(|pos_a, pos_b| minimal_distance_to_positions(self.ghost_position, pos_a, pos_b))
+            .min_by(|pos_a, pos_b| minimal_distance_to_positions(&self.ghost_position, pos_a, pos_b))
             .expect("There should at least be one ghost wall on the map");
-        self.board.neighbours_of(self.ghost_position)
+        self.board.neighbours_of(&self.ghost_position)
             .into_iter()
             .filter(|neighbour| neighbour_not_in_opposite_direction(self.movement, neighbour))
             .filter(|neighbour| self.neighbour_is_no_wall_in_spawn(neighbour))
@@ -81,7 +83,7 @@ impl<'a> TargetSetter<'a> {
     }
 
     fn neighbour_is_no_wall_in_spawn(&self, neighbour: &Neighbour) -> bool {
-        match *self.board.type_of_position(self.ghost_position) == GhostWall {
+        match *self.board.type_of_position(&self.ghost_position) == GhostWall {
             true => neighbour.field_type != Wall && neighbour.field_type != GhostSpawn,
             false => neighbour.field_type != Wall
         }
@@ -89,7 +91,7 @@ impl<'a> TargetSetter<'a> {
 
     fn determine_scatter_target_neighbour(&self) -> Option<Neighbour> {
         let ghost_corner_position = self.board.position_of_type(GhostCorner(*self.ghost));
-        self.board.neighbours_of(self.ghost_position)
+        self.board.neighbours_of(&self.ghost_position)
             .into_iter()
             .filter(|neighbour| neighbour_not_in_opposite_direction(self.movement, neighbour))
             .filter(|neighbour| self.neighbour_is_no_wall(&neighbour.position))
@@ -104,7 +106,7 @@ impl<'a> TargetSetter<'a> {
     }
 
     fn get_blinky_target(&self) -> Option<Neighbour> {
-        self.board.neighbours_of(self.ghost_position)
+        self.board.neighbours_of(&self.ghost_position)
             .into_iter()
             .filter(|neighbour| neighbour_not_in_opposite_direction(self.movement, neighbour))
             .filter(|neighbour| self.neighbour_is_no_wall(&neighbour.position))
@@ -112,7 +114,7 @@ impl<'a> TargetSetter<'a> {
     }
 
     fn determine_frightened_target_neighbour(&self) -> Option<Neighbour> {
-        let possible_neighbours: Vec<Neighbour> = self.board.neighbours_of(self.ghost_position)
+        let possible_neighbours: Vec<Neighbour> = self.board.neighbours_of(&self.ghost_position)
             .into_iter()
             .filter(|neighbour| neighbour_not_in_opposite_direction(self.movement, neighbour))
             .filter(|neighbour| self.neighbour_is_no_wall(&neighbour.position))
@@ -121,8 +123,7 @@ impl<'a> TargetSetter<'a> {
         match possible_neighbours.len() {
             0 => None,
             1 => Some(possible_neighbours[0]),
-            // TODO ask RNGesus
-            _ => Some(possible_neighbours[0])
+            len => Some(possible_neighbours[self.random.zero_to(len)])
         }
     }
 
