@@ -30,7 +30,6 @@ impl Plugin for GhostPlugin {
         app
             .add_startup_system(spawn_ghosts.system())
             .add_system(set_target.system())
-            .add_system(update_position.system())
             .add_system(update_state.system())
             .add_system(move_ghosts.system())
             .add_system(ghost_passed_tunnel.system())
@@ -42,21 +41,17 @@ fn spawn_ghosts(commands: &mut Commands, board: Res<Board>, mut materials: ResMu
     Spawner::new(commands, &board, &mut materials).spawn()
 }
 
-fn move_ghosts(time: Res<Time>, board: Res<Board>, mut query: Query<(&Movement, &mut Target, &mut Transform), With<Ghost>>) {
-    for (movement, mut target, mut transform) in query.iter_mut() {
+fn move_ghosts(time: Res<Time>,
+               board: Res<Board>,
+               mut query: Query<(&Movement, &mut Position, &mut Target, &mut Transform), With<Ghost>>) {
+    for (movement, mut position, mut target, mut transform) in query.iter_mut() {
         Mover::new(&board,
                    time.delta_seconds(),
                    movement,
+                   &mut position,
                    &mut target,
                    &mut transform.translation)
             .move_ghost();
-    }
-}
-
-/// TODO: Position is useless as component, remove
-fn update_position(board: Res<Board>, mut query: Query<(&mut Position, &Transform), With<Ghost>>) {
-    for (mut position, transform) in query.iter_mut() {
-        *position = board.position_of_coordinates(&transform.translation);
     }
 }
 

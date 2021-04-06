@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 
 use crate::common;
+use crate::common::{Movement, Position};
 use crate::common::Direction::*;
-use crate::common::Movement;
 use crate::common::Movement::*;
 use crate::constants::GHOST_SPEED;
 use crate::ghosts::Target;
@@ -13,13 +13,19 @@ pub (in crate::ghosts) struct Mover<'a> {
     board: &'a Board,
     delta_seconds: f32,
     movement: &'a Movement,
+    position: &'a mut Position,
     target: &'a mut Target,
     ghost_coordinates: &'a mut Vec3,
 }
 
 impl <'a> Mover<'a> {
-    pub fn new(board: &'a Board, delta_seconds: f32, movement: &'a Movement, target: &'a mut Target, ghost_coordinates: &'a mut Vec3) -> Self {
-        Mover { board, delta_seconds, movement, target, ghost_coordinates }
+    pub fn new(board: &'a Board,
+               delta_seconds: f32,
+               movement: &'a Movement,
+               position: &'a mut Position,
+               target: &'a mut Target,
+               ghost_coordinates: &'a mut Vec3) -> Self {
+        Mover { board, delta_seconds, movement, position, target, ghost_coordinates }
     }
 
     pub fn move_ghost(&mut self) {
@@ -38,6 +44,7 @@ impl <'a> Mover<'a> {
         if *self.ghost_coordinates == target_coordinates {
             self.target.clear();
         }
+        *self.position = self.board.position_of_coordinates(self.ghost_coordinates)
     }
 
     fn move_in_direction(&mut self, direction: &common::Direction) {
