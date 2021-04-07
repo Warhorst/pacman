@@ -24,7 +24,7 @@ impl Plugin for PacmanPlugin {
     }
 }
 
-fn spawn_pacman(commands: &mut Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
+fn spawn_pacman(commands: Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
     Spawner::new(commands, &board, &mut materials).spawn()
 }
 

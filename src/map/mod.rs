@@ -25,14 +25,15 @@ pub struct MapPlugin;
 impl Plugin for MapPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app
-            .add_resource(Board::new())
+            .insert_resource(Board::new())
             .add_startup_system(spawn_walls.system());
     }
 }
 
-fn spawn_walls(commands: &mut Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
+fn spawn_walls(mut commands: Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
     for position in get_wall_positions(&board) {
-        commands.spawn(SpriteBundle {
+        commands.spawn()
+            .insert_bundle(SpriteBundle {
             material: materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
             transform: Transform::from_translation(board.coordinates_of_position(position)),
             sprite: Sprite::new(Vec2::new(WALL_DIMENSION, WALL_DIMENSION)),
@@ -41,7 +42,8 @@ fn spawn_walls(commands: &mut Commands, board: Res<Board>, mut materials: ResMut
     }
 
     for position in board.positions_of_type(GhostWall) {
-        commands.spawn(SpriteBundle {
+        commands.spawn()
+            .insert(SpriteBundle {
             material: materials.add(Color::rgb(1.0, 1.0, 1.0).into()),
             transform: Transform::from_translation(board.coordinates_of_position(position)),
             sprite: Sprite::new(Vec2::new(WALL_DIMENSION, WALL_DIMENSION)),

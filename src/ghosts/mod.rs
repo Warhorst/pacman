@@ -37,7 +37,7 @@ impl Plugin for GhostPlugin {
     }
 }
 
-fn spawn_ghosts(commands: &mut Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
+fn spawn_ghosts(commands: Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
     Spawner::new(commands, &board, &mut materials).spawn()
 }
 
@@ -57,7 +57,7 @@ fn move_ghosts(time: Res<Time>,
 
 fn update_state(time: Res<Time>, board: Res<Board>, mut query: Query<(&Position, &mut State, &mut Schedule), With<Ghost>>) {
     for (position, mut state, mut schedule) in query.iter_mut() {
-        StateSetter::new(&mut state, position, &mut schedule, &board, time.delta_seconds()).set_next_state();
+        StateSetter::new(&mut state, position, &mut schedule, &board, time.delta()).set_next_state();
     }
 }
 
@@ -72,10 +72,9 @@ fn set_target(board: Res<Board>,
     }
 }
 
-fn ghost_passed_tunnel(mut ghost_passed_event_reader: Local<EventReader<GhostPassedTunnel>>,
-                       ghost_passed_events: Res<Events<GhostPassedTunnel>>,
+fn ghost_passed_tunnel(mut event_reader: EventReader<GhostPassedTunnel>,
                        mut query: Query<(Entity, &mut Target), With<Ghost>>) {
-    for event in ghost_passed_event_reader.iter(&ghost_passed_events) {
+    for event in event_reader.iter() {
         for (entity, mut target) in query.iter_mut() {
             if entity == event.entity {
                 target.clear()
@@ -84,10 +83,9 @@ fn ghost_passed_tunnel(mut ghost_passed_event_reader: Local<EventReader<GhostPas
     }
 }
 
-fn make_ghosts_vulnerable(mut energizer_eaten_event_reader: Local<EventReader<EnergizerEaten>>,
-                          energizer_eaten_events: Res<Events<EnergizerEaten>>,
+fn make_ghosts_vulnerable(mut event_reader: EventReader<EnergizerEaten>,
                           mut query: Query<(&mut Target, &mut Movement, &mut State), With<Ghost>>) {
-    for _ in energizer_eaten_event_reader.iter(&energizer_eaten_events) {
+    for _ in event_reader.iter() {
         for (mut target, mut movement, mut state) in query.iter_mut() {
             target.clear();
             movement.reverse();

@@ -9,22 +9,21 @@ use crate::tunnels::Tunnel;
 use crate::tunnels::TunnelEntrance;
 
 pub(in crate::tunnels) struct Spawner<'a> {
-    commands: &'a mut Commands,
+    commands: Commands<'a>,
     board: &'a Board
 }
 
 impl<'a> Spawner<'a> {
-    pub fn new(commands: &'a mut Commands, board: &'a Board) -> Self {
+    pub fn new(commands: Commands<'a>, board: &'a Board) -> Self {
         Spawner { commands, board }
     }
 
     /// Get all tunnel entrances from the board and spawn them.
-    /// Note: Because there is currently no way to spawn an entity with a single component, a number is added too.
     pub fn spawn(&mut self) {
         self.create_tunnel_entrances().into_iter()
             .map(|(_, entrances)| entrances)
             .for_each(|entrances|  {
-                self.commands.spawn((Tunnel::new(entrances[0], entrances[1]), 0));
+                self.commands.spawn().insert(Tunnel::new(entrances[0], entrances[1]));
             })
     }
 

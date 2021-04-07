@@ -5,7 +5,7 @@ pub struct RandomPlugin;
 
 impl Plugin for RandomPlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app.add_resource(Random);
+        app.insert_resource(Random);
     }
 }
 

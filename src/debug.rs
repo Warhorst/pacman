@@ -8,7 +8,7 @@ pub struct DebugPlugin;
 impl Plugin for DebugPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app
-            .add_resource(DebugInfoTimer::new())
+            .insert_resource(DebugInfoTimer::new())
             .add_system(print_debug_data.system());
     }
 }
@@ -28,7 +28,7 @@ impl DebugInfoTimer {
 fn print_debug_data(mut debug_timer: ResMut<DebugInfoTimer>,
                     time: Res<Time>,
                     ghost_query: Query<(&Ghost, &Position, &Target, &Movement, &State)>) {
-    debug_timer.timer.tick(time.delta_seconds());
+    debug_timer.timer.tick(time.delta());
     if !debug_timer.timer.finished() {
         return;
     }

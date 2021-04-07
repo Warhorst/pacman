@@ -30,14 +30,14 @@ mod random;
 
 fn main() {
     App::build()
-        .add_resource(WindowDescriptor {
+        .insert_resource(WindowDescriptor {
             width: 1000.0,
             height: 700.0,
             title: "PacMan".to_string(),
             resizable: false,
             ..Default::default()
         })
-        .add_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
+        .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
         .add_plugins(DefaultPlugins)
         .add_plugin(MapPlugin)
         .add_plugin(PacmanPlugin)
@@ -54,8 +54,8 @@ fn main() {
         .run()
 }
 
-fn init(commands: &mut Commands) {
-    commands
-        .spawn(Camera2dBundle::default())
-        .spawn(CameraUiBundle::default());
+fn init(mut commands: Commands) {
+    commands.spawn()
+        .insert_bundle(OrthographicCameraBundle::new_2d());
+        // .spawn(CameraUiBundle::default());
 }

@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use bevy::prelude::Timer;
 
 use crate::common::Position;
@@ -72,8 +74,8 @@ impl Schedule {
         Schedule { phases }
     }
 
-    pub fn state_after_tick(&mut self, delta_time: f32) -> State {
-        self.current_phase().progress(delta_time);
+    pub fn state_after_tick(&mut self, elapsed_time: Duration) -> State {
+        self.current_phase().progress(elapsed_time);
         if self.current_phase().is_finished() {
             self.start_next_phase()
         }
@@ -105,8 +107,8 @@ impl Phase {
         }
     }
 
-    pub fn progress(&mut self, delta_time: f32) {
-        self.remaining_time.tick(delta_time);
+    pub fn progress(&mut self, elapsed_time: Duration) {
+        self.remaining_time.tick(elapsed_time);
     }
 
     pub fn is_finished(&self) -> bool {

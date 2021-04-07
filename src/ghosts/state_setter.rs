@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use crate::common::Position;
 use crate::ghosts::components::{Schedule, State};
 use crate::map::board::Board;
@@ -10,12 +12,12 @@ pub struct StateSetter<'a> {
     position: &'a Position,
     schedule: &'a mut Schedule,
     board: &'a Board,
-    delta_time: f32,
+    elapsed_time: Duration,
 }
 
 impl<'a> StateSetter<'a> {
-    pub fn new(state: &'a mut State, position: &'a Position, schedule: &'a mut Schedule, board: &'a Board, delta_time: f32) -> Self {
-        StateSetter { state, position, schedule, board, delta_time }
+    pub fn new(state: &'a mut State, position: &'a Position, schedule: &'a mut Schedule, board: &'a Board, elapsed_time: Duration) -> Self {
+        StateSetter { state, position, schedule, board, elapsed_time }
     }
 
     pub fn set_next_state(&mut self) {
@@ -29,6 +31,6 @@ impl<'a> StateSetter<'a> {
     }
 
     fn update_and_set_state(&mut self) {
-        *self.state = self.schedule.state_after_tick(self.delta_time)
+        *self.state = self.schedule.state_after_tick(self.elapsed_time)
     }
 }

@@ -8,7 +8,7 @@ pub struct ScorePlugin;
 impl Plugin for ScorePlugin {
     fn build(&self, app: &mut AppBuilder) {
         app
-            .add_resource(Score::new())
+            .insert_resource(Score::new())
             .add_startup_system(create_scoreboard.system())
             .add_system(update_scoreboard.system())
             .add_system(add_points_for_eaten_dot.system());
@@ -35,40 +35,32 @@ impl Score {
     }
 }
 
-fn create_scoreboard(commands: &mut Commands, asset_server: Res<AssetServer>) {
-    commands.spawn(TextBundle {
-        text: Text {
-            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-            value: "Score:".to_string(),
-            style: TextStyle {
-                color: Color::rgb(1.0, 1.0, 1.0),
-                font_size: 40.0,
-                ..Default::default()
-            },
-        },
-        style: Style {
-            position_type: PositionType::Absolute,
-            position: Rect {
-                top: Val::Px(5.0),
-                left: Val::Px(5.0),
-                ..Default::default()
-            },
-            ..Default::default()
-        },
+fn create_scoreboard(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.spawn_bundle(Text2dBundle {
+        text: Text::with_section("Score".to_string(),
+                                 TextStyle {
+                                     font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                     font_size: 40.0,
+                                     color: Color::rgb(1.0, 1.0, 1.0),
+                                 },
+                                 TextAlignment {
+                                     vertical: VerticalAlign::Center,
+                                     horizontal: HorizontalAlign::Center,
+                                 }),
+        transform: Transform::from_xyz(-430.0, 300.0, 0.0),
         ..Default::default()
     });
 }
 
 fn update_scoreboard(score: Res<Score>, mut query: Query<&mut Text>) {
     for mut text in query.iter_mut() {
-        text.value = format!("Score: {}", score.get_points())
+        text.sections[0].value = format!("Score: {}", score.get_points())
     }
 }
 
 fn add_points_for_eaten_dot(mut score: ResMut<Score>,
-                            mut eaten_event_reader: Local<EventReader<DotEaten>>,
-                            eaten_events: Res<Events<DotEaten>>) {
-    for _ in eaten_event_reader.iter(&eaten_events) {
+                            mut event_reader: EventReader<DotEaten>) {
+    for _ in event_reader.iter() {
         score.increment()
     }
 }

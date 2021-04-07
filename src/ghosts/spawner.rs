@@ -11,13 +11,13 @@ use crate::map::FieldType;
 use super::components::Schedule;
 
 pub(in crate::ghosts) struct Spawner<'a> {
-    commands: &'a mut Commands,
+    commands: Commands<'a>,
     board: &'a Board,
     materials: &'a mut Assets<ColorMaterial>,
 }
 
 impl<'a> Spawner<'a> {
-    pub fn new(commands: &'a mut Commands, board: &'a Board, materials: &'a mut Assets<ColorMaterial>) -> Self {
+    pub fn new(commands: Commands<'a>, board: &'a Board, materials: &'a mut Assets<ColorMaterial>) -> Self {
         Spawner { commands, board, materials }
     }
 
@@ -37,18 +37,19 @@ impl<'a> Spawner<'a> {
             Clyde => Color::hex("FFB852").unwrap().into(),
         };
         self.commands
-            .spawn(SpriteBundle {
+            .spawn()
+            .insert_bundle(SpriteBundle {
                 material: self.materials.add(color_material),
                 transform: Transform::from_translation(self.board.coordinates_of_position(position)),
                 sprite: Sprite::new(Vec2::new(GHOST_DIMENSION, GHOST_DIMENSION)),
                 ..Default::default()
             })
-            .with(ghost)
-            .with(*position)
-            .with(Target::new())
-            .with(Movement::Idle)
-            .with(State::Spawned)
-            .with(Spawner::create_default_schedule());
+            .insert(ghost)
+            .insert(*position)
+            .insert(Target::new())
+            .insert(Movement::Idle)
+            .insert(State::Spawned)
+            .insert(Spawner::create_default_schedule());
     }
 
     fn create_default_schedule() -> Schedule {
