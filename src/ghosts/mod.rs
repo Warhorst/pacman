@@ -9,27 +9,25 @@ use crate::ghosts::components::{Ghost, Target};
 use crate::ghosts::mover::Mover;
 use crate::ghosts::spawner::Spawner;
 use crate::ghosts::state_setter::StateSetter;
-use crate::ghosts::target_setter::TargetSetter;
+use crate::ghosts::target_set::TargetSetPlugin;
 use crate::map::board::Board;
-use crate::pacman::Pacman;
-use crate::random::Random;
 
 use self::components::State;
 use self::components::State::*;
 
 pub mod components;
-mod target_setter;
 mod mover;
 mod spawner;
 mod state_setter;
+mod target_set;
 
 pub struct GhostPlugin;
 
 impl Plugin for GhostPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app
+            .add_plugin(TargetSetPlugin)
             .add_startup_system(spawn_ghosts.system())
-            .add_system(set_target.system())
             .add_system(update_state.system())
             .add_system(move_ghosts.system())
             .add_system(ghost_passed_tunnel.system())
@@ -58,17 +56,6 @@ fn move_ghosts(time: Res<Time>,
 fn update_state(time: Res<Time>, board: Res<Board>, mut query: Query<(&Position, &mut State, &mut Schedule), With<Ghost>>) {
     for (position, mut state, mut schedule) in query.iter_mut() {
         StateSetter::new(&mut state, position, &mut schedule, &board, time.delta()).set_next_state();
-    }
-}
-
-fn set_target(board: Res<Board>,
-              random: Res<Random>,
-              mut ghost_query: Query<(&Ghost, &mut Target, &mut Movement, &State, &Transform)>,
-              pacman_query: Query<&Position, With<Pacman>>) {
-    for (ghost, mut target, mut movement, state, transform) in ghost_query.iter_mut() {
-        for pacman_position in pacman_query.iter() {
-            TargetSetter::new(&board, &random, &mut movement, &mut target, &state, &ghost, pacman_position, transform.translation).set_target()
-        }
     }
 }
 
