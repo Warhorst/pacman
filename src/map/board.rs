@@ -4,7 +4,6 @@ use bevy::prelude::*;
 
 use crate::common::{Direction::*, Position};
 use crate::common;
-use crate::common::Direction;
 use crate::constants::{FIELD_DIMENSION, USED_PACMAP_PATH, WALL_DIMENSION};
 use crate::map::{FieldType, Neighbour, PositionTypeMap};
 use crate::map::pacmap::PacMap;
@@ -153,20 +152,5 @@ impl Board {
                 None => panic!()
             })
             .collect()
-    }
-
-    /// Does the entity with given movement and coordinates move in the direction of
-    /// the coordinates position?
-    pub fn coordinates_directing_to_center(&self,
-                                           direction: &Direction,
-                                           coordinates: Vec3) -> bool {
-        let position_center = self.coordinates_of_position(&self.position_of_coordinates(&coordinates));
-        let difference = position_center - coordinates;
-        match direction {
-            Up => difference.y > 0.0,
-            Down => difference.y < 0.0,
-            Left => difference.x < 0.0,
-            Right => difference.x > 0.0,
-        }
     }
 }
