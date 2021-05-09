@@ -2,6 +2,7 @@ use std::time::Duration;
 
 use crate::common::Position;
 use crate::ghosts::components::{Schedule, State};
+use crate::ghosts::FrightenedTimer;
 use crate::map::board::Board;
 use crate::map::FieldType::GhostWall;
 
@@ -12,17 +13,21 @@ pub struct StateSetter<'a> {
     position: &'a Position,
     schedule: &'a mut Schedule,
     board: &'a Board,
+    frightened_timer: &'a mut FrightenedTimer,
     elapsed_time: Duration,
 }
 
 impl<'a> StateSetter<'a> {
-    pub fn new(state: &'a mut State, position: &'a Position, schedule: &'a mut Schedule, board: &'a Board, elapsed_time: Duration) -> Self {
-        StateSetter { state, position, schedule, board, elapsed_time }
+    pub fn new(state: &'a mut State, position: &'a Position, schedule: &'a mut Schedule, board: &'a Board, frightened_timer: &'a mut FrightenedTimer, elapsed_time: Duration) -> Self {
+        StateSetter { state, position, schedule, board, frightened_timer, elapsed_time }
     }
 
     pub fn set_next_state(&mut self) {
         match self.state {
-            Frightened | Eaten => return,
+            Frightened => if self.frightened_timer.is_finished() {
+                *self.state = self.schedule.current_state()
+            },
+            Eaten => return,
             Spawned => if self.board.type_of_position(self.position) == &GhostWall {
                 self.update_and_set_state()
             }

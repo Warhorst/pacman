@@ -75,14 +75,22 @@ impl Schedule {
     }
 
     pub fn state_after_tick(&mut self, elapsed_time: Duration) -> State {
-        self.current_phase().progress(elapsed_time);
+        self.current_phase_mut().progress(elapsed_time);
         if self.current_phase().is_finished() {
             self.start_next_phase()
         }
         self.current_phase().active_state
     }
 
-    fn current_phase(&mut self) -> &mut Phase {
+    pub fn current_state(&self) -> State {
+        self.current_phase().active_state
+    }
+
+    fn current_phase(&self) -> &Phase {
+        &self.phases[0]
+    }
+
+    fn current_phase_mut(&mut self) -> &mut Phase {
         &mut self.phases[0]
     }
 
