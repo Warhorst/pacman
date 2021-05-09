@@ -11,6 +11,8 @@
 
 ## UI
 - add a main menu
+- add a game over screen
+- add a highscore screen
 
 ## Graphic
 - replace colorful squares with textures
@@ -19,5 +21,4 @@
 ## Bugfixes/Refactorings
 - fix the ghost-freeze when pacman eats an energizer
     - hint on this one: the original ghost-AI does NOT turn around instantly, they first to the next target tile
-- refactor the state setter in a similar manner as the target setter
-- refactor the mover in a similar manner as the target setter
+- refactor the ghost mover in a similar manner as the target setter

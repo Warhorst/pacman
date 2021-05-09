@@ -4,6 +4,7 @@ use bevy::prelude::*;
 
 use crate::common::{Movement, Position};
 use crate::common::Movement::*;
+use crate::events::EnergizerEaten;
 use crate::ghosts::components::{Ghost, Target};
 use crate::ghosts::components::Ghost::*;
 use crate::ghosts::components::State;
@@ -16,9 +17,12 @@ use crate::random::Random;
 
 /// TODO: where to put this fix?
 /// if !self.movement.is_idle() && self.board.coordinates_directing_to_center(self.movement.get_direction(), self.coordinates) {
-//      self.current_target.set_to(self.board.position_of_coordinates(&self.coordinates));
-//      return
-//  }
+///      self.current_target.set_to(self.board.position_of_coordinates(&self.coordinates));
+///      return
+///  }
+///
+/// Solution: The original pacman-ghost do not turn around instantly. Instead, they reach their next target before doing so
+
 pub struct TargetSetPlugin;
 
 impl Plugin for TargetSetPlugin {
@@ -29,7 +33,8 @@ impl Plugin for TargetSetPlugin {
             .add_system(determine_spawned_target.system())
             .add_system(determine_scatter_target.system())
             .add_system(determine_blinky_chase_target.system())
-            .add_system(determine_frightened_target.system());
+            .add_system(determine_frightened_target.system())
+            .add_system(clear_target_when_pacman_ate_energizer.system());
     }
 }
 
@@ -140,6 +145,17 @@ fn determine_frightened_target(
             len => Some(possible_neighbours[random.zero_to(len)])
         };
         event_writer.send(TargetUpdate(entity, next_target_neighbour))
+    }
+}
+
+fn clear_target_when_pacman_ate_energizer(
+    mut event_reader: EventReader<EnergizerEaten>,
+    mut query: Query<&mut Target, With<Ghost>>
+) {
+    for _ in event_reader.iter() {
+        for mut target in query.iter_mut() {
+            target.clear();
+        }
     }
 }
 
