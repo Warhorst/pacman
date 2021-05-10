@@ -5,8 +5,6 @@ use crate::common::{Movement, Position};
 use crate::common::Direction::*;
 use crate::common::Movement::*;
 use crate::constants::GHOST_SPEED;
-use crate::events::EnergizerEaten;
-use crate::ghosts::components::Ghost;
 use crate::ghosts::target::Target;
 use crate::map::board::Board;
 
@@ -15,8 +13,7 @@ pub struct MovePlugin;
 impl Plugin for MovePlugin {
     fn build(&self, app: &mut AppBuilder) {
         app
-            .add_system(move_ghost.system())
-            .add_system(reverse_movement_when_pacman_ate_energizer.system());
+            .add_system(move_ghost.system());
     }
 }
 
@@ -44,17 +41,6 @@ fn move_ghost(
             target.clear();
         }
         *position = board.position_of_coordinates(coordinates)
-    }
-}
-
-fn reverse_movement_when_pacman_ate_energizer(
-    mut event_reader: EventReader<EnergizerEaten>,
-    mut query: Query<&mut Movement, With<Ghost>>,
-) {
-    for _ in event_reader.iter() {
-        for mut movement in query.iter_mut() {
-            movement.reverse();
-        }
     }
 }
 
