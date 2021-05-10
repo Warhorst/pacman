@@ -1,7 +1,9 @@
 use bevy::prelude::*;
 
 use crate::common::{Movement, Position};
-use crate::ghosts::components::{Ghost, State, Target};
+use crate::ghosts::components::Ghost;
+use crate::ghosts::state::State;
+use crate::ghosts::target::Target;
 
 pub struct DebugPlugin;
 

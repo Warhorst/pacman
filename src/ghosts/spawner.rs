@@ -2,13 +2,15 @@ use bevy::prelude::*;
 
 use crate::common::{Movement, Position};
 use crate::constants::GHOST_DIMENSION;
-use crate::ghosts::components::{Ghost, Phase, State, Target};
+use crate::ghosts::components::Ghost;
 use crate::ghosts::components::Ghost::*;
-use crate::ghosts::components::State::{Chase, Scatter};
+use crate::ghosts::state::Phase;
+use crate::ghosts::state::Schedule;
+use crate::ghosts::state::State;
+use crate::ghosts::state::State::*;
+use crate::ghosts::target::Target;
 use crate::map::board::Board;
 use crate::map::FieldType;
-
-use super::components::Schedule;
 
 pub(in crate::ghosts) struct Spawner<'a> {
     commands: Commands<'a>,

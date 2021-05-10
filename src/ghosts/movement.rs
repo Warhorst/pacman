@@ -7,7 +7,7 @@ use crate::common::Movement::*;
 use crate::constants::GHOST_SPEED;
 use crate::events::EnergizerEaten;
 use crate::ghosts::components::Ghost;
-use crate::ghosts::Target;
+use crate::ghosts::target::Target;
 use crate::map::board::Board;
 
 pub struct MovePlugin;

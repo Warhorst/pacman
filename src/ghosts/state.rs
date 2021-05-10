@@ -4,11 +4,89 @@ use bevy::prelude::*;
 
 use crate::common::Position;
 use crate::events::EnergizerEaten;
-use crate::ghosts::components::{Ghost, Schedule, State};
+use crate::ghosts::components::Ghost;
 use crate::map::board::Board;
 use crate::map::FieldType::GhostWall;
 
-use super::components::State::*;
+use self::State::*;
+
+/// The different states of a ghost
+///
+/// Spawned - just spawned, try to leave the spawn area
+/// Chase - use your hunting strategy to kill pacman
+/// Scatter - be inactive and return to your home corner
+/// Eaten - return to the home to respawn
+/// Frightened - you are vulnerable, dodge pacman
+#[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]
+pub enum State {
+    Spawned,
+    Chase,
+    Scatter,
+    Eaten,
+    Frightened,
+}
+
+/// The schedule of a ghost determines the state the ghost has after a certain time passed
+/// on a certain level.
+/// The last phase of a schedule will be active until the level ends, even if its timer is finished.
+pub struct Schedule {
+    phases: Vec<Phase>
+}
+
+impl Schedule {
+    pub fn new(phases: Vec<Phase>) -> Self {
+        Schedule { phases }
+    }
+
+    pub fn state_after_tick(&mut self, elapsed_time: Duration) -> State {
+        self.current_phase_mut().progress(elapsed_time);
+        if self.current_phase().is_finished() {
+            self.start_next_phase()
+        }
+        self.current_phase().active_state
+    }
+
+    pub fn current_state(&self) -> State {
+        self.current_phase().active_state
+    }
+
+    fn current_phase(&self) -> &Phase {
+        &self.phases[0]
+    }
+
+    fn current_phase_mut(&mut self) -> &mut Phase {
+        &mut self.phases[0]
+    }
+
+    fn start_next_phase(&mut self) {
+        if self.phases.len() > 1 {
+            self.phases.remove(0);
+        }
+    }
+}
+
+/// A Phase is a time range where a specific state for a specific ghost is active.
+pub struct Phase {
+    active_state: State,
+    remaining_time: Timer
+}
+
+impl Phase {
+    pub fn new(active_state: State, duration: f32) -> Self {
+        Phase {
+            active_state,
+            remaining_time : Timer::from_seconds(duration, false)
+        }
+    }
+
+    pub fn progress(&mut self, elapsed_time: Duration) {
+        self.remaining_time.tick(elapsed_time);
+    }
+
+    pub fn is_finished(&self) -> bool {
+        self.remaining_time.finished()
+    }
+}
 
 pub struct StateSetPlugin;
 

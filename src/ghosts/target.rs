@@ -5,23 +5,49 @@ use bevy::prelude::*;
 use crate::common::{Movement, Position};
 use crate::common::Movement::*;
 use crate::events::EnergizerEaten;
-use crate::ghosts::components::{Ghost, Target};
+use crate::ghosts::components::Ghost;
 use crate::ghosts::components::Ghost::*;
-use crate::ghosts::components::State;
-use crate::ghosts::components::State::*;
+use crate::ghosts::state::State;
+use crate::ghosts::state::State::*;
 use crate::map::board::Board;
 use crate::map::FieldType::*;
 use crate::map::Neighbour;
 use crate::pacman::Pacman;
 use crate::random::Random;
 
-/// TODO: where to put this fix?
-/// if !self.movement.is_idle() && self.board.coordinates_directing_to_center(self.movement.get_direction(), self.coordinates) {
-///      self.current_target.set_to(self.board.position_of_coordinates(&self.coordinates));
-///      return
-///  }
-///
-/// Solution: The original pacman-ghost do not turn around instantly. Instead, they reach their next target before doing so
+pub struct Target {
+    target: Option<Position>
+}
+
+impl Target {
+    pub fn new() -> Self {
+        Target { target: None }
+    }
+
+    pub fn is_set(&self) -> bool {
+        self.target.is_some()
+    }
+
+    pub fn is_not_set(&self) -> bool {
+        !self.is_set()
+    }
+
+    pub fn set_to(&mut self, position: Position) {
+        self.target = Some(position)
+    }
+
+    pub fn get_position(&self) -> &Position {
+        &self.target.as_ref().expect("The target should be set at this point")
+    }
+
+    pub fn get_position_opt(&self) -> &Option<Position> {
+        &self.target
+    }
+
+    pub fn clear(&mut self) {
+        self.target = None
+    }
+}
 
 pub struct TargetSetPlugin;
 

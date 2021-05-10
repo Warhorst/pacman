@@ -1,18 +1,18 @@
 use bevy::prelude::*;
 
 use crate::events::GhostPassedTunnel;
-use crate::ghosts::components::{Ghost, Target};
-use crate::ghosts::r#move::MovePlugin;
+use crate::ghosts::components::Ghost;
+use crate::ghosts::movement::MovePlugin;
 use crate::ghosts::spawner::Spawner;
-use crate::ghosts::state_set::StateSetPlugin;
-use crate::ghosts::target_set::TargetSetPlugin;
+use crate::ghosts::state::StateSetPlugin;
+use crate::ghosts::target::{Target, TargetSetPlugin};
 use crate::map::board::Board;
 
 pub mod components;
-mod r#move;
-mod spawner;
-mod state_set;
-mod target_set;
+pub mod movement;
+pub mod spawner;
+pub mod state;
+pub mod target;
 
 pub struct GhostPlugin;
 
