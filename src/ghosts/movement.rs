@@ -5,31 +5,59 @@ use crate::common::{Movement, Position};
 use crate::common::Direction::*;
 use crate::common::Movement::*;
 use crate::constants::GHOST_SPEED;
+use crate::events::EnergizerEaten;
+use crate::ghosts::components::Ghost;
 use crate::ghosts::target::Target;
 use crate::map::board::Board;
+
+/// Indicates that a ghost should turn around after reaching its target.
+pub struct MovementReverseMarker {
+    set: bool,
+}
+
+impl MovementReverseMarker {
+    pub fn new() -> Self {
+        MovementReverseMarker {
+            set: false
+        }
+    }
+
+    pub fn set(&mut self) {
+        self.set = true
+    }
+
+    pub fn unset(&mut self) {
+        self.set = false
+    }
+
+    pub fn is_set(&self) -> bool {
+        self.set
+    }
+}
 
 pub struct MovePlugin;
 
 impl Plugin for MovePlugin {
     fn build(&self, app: &mut AppBuilder) {
         app
-            .add_system(move_ghost.system());
+            .add_system(move_ghost.system())
+            .add_system(mark_movement_to_reverse_after_pacman_ate_energizer.system());
     }
 }
 
 fn move_ghost(
     time: Res<Time>,
     board: Res<Board>,
-    mut query: Query<(&Movement, &mut Position, &mut Target, &mut Transform)>,
+    mut query: Query<(&mut Movement, &mut Position, &mut Target, &mut Transform, &mut MovementReverseMarker)>,
 ) {
-    for (movement, mut position, mut target, mut transform) in query.iter_mut() {
+    for (mut movement, mut position, mut target, mut transform, mut movement_reverse_marker) in query.iter_mut() {
         if target.is_not_set() {
             return;
         }
 
         let mut coordinates = &mut transform.translation;
         let delta_seconds = time.delta_seconds();
-        let direction = match movement {
+        let direction = match *movement {
             Idle => return,
             Moving(dir) => dir
         };
@@ -39,8 +67,23 @@ fn move_ghost(
         limit_movement(&mut coordinates, &direction, &target_coordinates);
         if *coordinates == target_coordinates {
             target.clear();
+            if movement_reverse_marker.is_set() {
+                movement.reverse();
+                movement_reverse_marker.unset();
+            }
         }
         *position = board.position_of_coordinates(coordinates)
+    }
+}
+
+fn mark_movement_to_reverse_after_pacman_ate_energizer(
+    mut event_reader: EventReader<EnergizerEaten>,
+    mut query: Query<&mut MovementReverseMarker, With<Ghost>>,
+) {
+    for _ in event_reader.iter() {
+        for mut movement_reverse_marker in query.iter_mut() {
+            movement_reverse_marker.set()
+        }
     }
 }
 

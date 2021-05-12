@@ -4,6 +4,7 @@ use crate::common::{Movement, Position};
 use crate::constants::GHOST_DIMENSION;
 use crate::ghosts::components::Ghost;
 use crate::ghosts::components::Ghost::*;
+use crate::ghosts::movement::MovementReverseMarker;
 use crate::ghosts::state::Phase;
 use crate::ghosts::state::Schedule;
 use crate::ghosts::state::State;
@@ -51,6 +52,7 @@ impl<'a> Spawner<'a> {
             .insert(Target::new())
             .insert(Movement::Idle)
             .insert(State::Spawned)
+            .insert(MovementReverseMarker::new())
             .insert(Spawner::create_default_schedule());
     }
 

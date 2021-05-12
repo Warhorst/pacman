@@ -1,6 +1,7 @@
 use bevy::prelude::Transform;
 
 use Direction::*;
+use Movement::*;
 
 /// A type alias for the typical components when processing movement.
 /// A component bundle might be preferable, but the transform is created
@@ -41,6 +42,15 @@ impl Position {
 pub enum Movement {
     Idle,
     Moving(Direction),
+}
+
+impl Movement {
+    pub fn reverse(&mut self) {
+        match self {
+            Idle => return,
+            Moving(dir) => *self = Moving(dir.opposite())
+        }
+    }
 }
 
 #[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]

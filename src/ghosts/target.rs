@@ -4,7 +4,6 @@ use bevy::prelude::*;
 
 use crate::common::{Movement, Position};
 use crate::common::Movement::*;
-use crate::events::EnergizerEaten;
 use crate::ghosts::components::Ghost;
 use crate::ghosts::components::Ghost::*;
 use crate::ghosts::state::State;
@@ -17,14 +16,12 @@ use crate::random::Random;
 
 pub struct Target {
     target: Option<Position>,
-    turn_around_when_reached: bool,
 }
 
 impl Target {
     pub fn new() -> Self {
         Target {
             target: None,
-            turn_around_when_reached: false,
         }
     }
 
@@ -36,17 +33,8 @@ impl Target {
         !self.is_set()
     }
 
-    pub fn turn_around_when_reached(&self) -> bool {
-        self.turn_around_when_reached
-    }
-
     pub fn set_to(&mut self, position: Position) {
         self.target = Some(position);
-        self.turn_around_when_reached = false
-    }
-
-    pub fn set_to_turn_around_when_reached(&mut self) {
-        self.turn_around_when_reached = true
     }
 
     pub fn get_position(&self) -> &Position {
@@ -72,8 +60,7 @@ impl Plugin for TargetSetPlugin {
             .add_system(determine_spawned_target.system())
             .add_system(determine_scatter_target.system())
             .add_system(determine_blinky_chase_target.system())
-            .add_system(determine_frightened_target.system())
-            .add_system(mark_target_to_turn_around_when_pacman_ate_energizer.system());
+            .add_system(determine_frightened_target.system());
     }
 }
 
@@ -121,8 +108,7 @@ fn determine_spawned_target(
             nearest_wall_position,
             &board,
             movement,
-            |neighbour| neighbour_is_no_wall_in_spawn(&board, position, neighbour),
-            target.turn_around_when_reached()
+            |neighbour| neighbour_is_no_wall_in_spawn(&board, position, neighbour)
         );
         event_writer.send(TargetUpdate(entity, next_target_neighbour))
     }
@@ -142,8 +128,7 @@ fn determine_scatter_target(
             ghost_corner_position,
             &board,
             movement,
-            |neighbour| neighbour_is_no_wall(&board, &neighbour.position),
-            target.turn_around_when_reached()
+            |neighbour| neighbour_is_no_wall(&board, &neighbour.position)
         );
         event_writer.send(TargetUpdate(entity, next_target_neighbour))
     }
@@ -164,8 +149,7 @@ fn determine_blinky_chase_target(
                 pacman_position,
                 &board,
                 movement,
-                |neighbour| neighbour_is_no_wall(&board, &neighbour.position),
-                target.turn_around_when_reached()
+                |neighbour| neighbour_is_no_wall(&board, &neighbour.position)
             );
             event_writer.send(TargetUpdate(entity, next_target_neighbour))
         }
@@ -185,8 +169,7 @@ fn determine_frightened_target(
             position,
             &board,
             movement,
-            |neighbour| neighbour_is_no_wall(&board, &neighbour.position),
-            target.turn_around_when_reached()
+            |neighbour| neighbour_is_no_wall(&board, &neighbour.position)
         );
 
         let next_target_neighbour = match possible_neighbours.len() {
@@ -198,27 +181,15 @@ fn determine_frightened_target(
     }
 }
 
-fn mark_target_to_turn_around_when_pacman_ate_energizer(
-    mut event_reader: EventReader<EnergizerEaten>,
-    mut query: Query<&mut Target, With<Ghost>>,
-) {
-    for _ in event_reader.iter() {
-        for mut target in query.iter_mut() {
-            target.set_to_turn_around_when_reached();
-        }
-    }
-}
-
 fn get_possible_neighbours<F: Fn(&Neighbour) -> bool>(
     ghost_position: &Position,
     board: &Board,
     movement: &Movement,
-    field_filter: F,
-    turn_around: bool
+    field_filter: F
 ) -> Vec<Neighbour> {
     board.neighbours_of(ghost_position)
         .into_iter()
-        .filter(|neighbour| neighbour_not_in_opposite_direction(movement, neighbour, turn_around))
+        .filter(|neighbour| neighbour_not_in_opposite_direction(movement, neighbour))
         .filter(|neighbour| (field_filter)(neighbour))
         .collect()
 }
@@ -228,10 +199,9 @@ fn get_neighbour_nearest_to_target<F: Fn(&Neighbour) -> bool>(
     target_position: &Position,
     board: &Board,
     movement: &Movement,
-    field_filter: F,
-    turn_around: bool
+    field_filter: F
 ) -> Option<Neighbour> {
-    get_possible_neighbours(ghost_position, board, movement, field_filter, turn_around)
+    get_possible_neighbours(ghost_position, board, movement, field_filter)
         .into_iter()
         .min_by(|n_a, n_b| minimal_distance_to_neighbours(target_position, n_a, n_b))
 }
@@ -250,11 +220,10 @@ fn neighbour_is_no_wall(board: &Board, neighbour_position: &Position) -> bool {
     }
 }
 
-fn neighbour_not_in_opposite_direction(movement: &Movement, neighbour: &Neighbour, turn_around: bool) -> bool {
-    match (*movement, turn_around) {
-        (Idle, _) => true,
-        (Moving(dir), false) => neighbour.direction != dir.opposite(),
-        (Moving(dir), true) => neighbour.direction != dir,
+fn neighbour_not_in_opposite_direction(movement: &Movement, neighbour: &Neighbour) -> bool {
+    match *movement {
+        Idle => true,
+        Moving(dir) => neighbour.direction != dir.opposite()
     }
 }
 

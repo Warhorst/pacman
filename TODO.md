@@ -21,5 +21,3 @@
 - animations
 
 ## Bugfixes/Refactorings
-- fix the ghost-freeze when pacman eats an energizer
-    - hint on this one: the original ghost-AI does NOT turn around instantly, they first to the next target tile
