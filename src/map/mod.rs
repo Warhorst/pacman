@@ -10,8 +10,8 @@ use FieldType::*;
 use crate::common;
 use crate::common::Position;
 use crate::constants::WALL_DIMENSION;
-use crate::ghosts::components::Ghost;
-use crate::ghosts::components::Ghost::{Blinky, Clyde, Inky, Pinky};
+use crate::ghosts::Ghost;
+use crate::ghosts::Ghost::*;
 use crate::map::board::Board;
 
 pub mod board;

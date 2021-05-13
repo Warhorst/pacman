@@ -2,8 +2,8 @@ use bevy::prelude::*;
 
 use crate::common::{Movement, Position};
 use crate::constants::GHOST_DIMENSION;
-use crate::ghosts::components::Ghost;
-use crate::ghosts::components::Ghost::*;
+use crate::ghosts::Ghost;
+use crate::ghosts::Ghost::*;
 use crate::ghosts::movement::MovementReverseMarker;
 use crate::ghosts::state::Phase;
 use crate::ghosts::state::Schedule;

@@ -4,8 +4,8 @@ use bevy::prelude::*;
 
 use crate::common::{Movement, Position};
 use crate::common::Movement::*;
-use crate::ghosts::components::Ghost;
-use crate::ghosts::components::Ghost::*;
+use crate::ghosts::Ghost;
+use crate::ghosts::Ghost::*;
 use crate::ghosts::state::State;
 use crate::ghosts::state::State::*;
 use crate::map::board::Board;

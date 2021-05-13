@@ -5,12 +5,12 @@ use bevy::prelude::*;
 use crate::common::{MoveComponents, Movement, Position};
 use crate::common::Direction::*;
 use crate::common::Movement::*;
+use crate::ghosts::Ghost;
+use crate::ghosts::state::State;
+use crate::ghosts::state::State::*;
 use crate::map::board::Board;
 use crate::pacman::mover::Mover;
 use crate::pacman::spawner::Spawner;
-use crate::ghosts::components::Ghost;
-use crate::ghosts::state::State;
-use crate::ghosts::state::State::*;
 
 mod mover;
 mod spawner;
@@ -79,7 +79,7 @@ fn ghost_hits_pacman(
 ) {
     for (pacman_entity, pacman_position) in pacman_query.iter() {
         for (ghost_position, state) in ghost_query.iter() {
-            if pacman_position == ghost_position && state != &Frightened {
+            if pacman_position == ghost_position && !vec![&Frightened, &Eaten].contains(&state) {
                 commands.entity(pacman_entity).despawn();
                 event_writer.send(PacmanKilled)
             }

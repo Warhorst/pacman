@@ -3,12 +3,13 @@ use std::time::Duration;
 use bevy::prelude::*;
 
 use crate::common::Position;
-use crate::ghosts::components::Ghost;
+use crate::energizer::EnergizerEaten;
+use crate::ghosts::Ghost;
 use crate::map::board::Board;
 use crate::map::FieldType::GhostWall;
+use crate::pacman::Pacman;
 
 use self::State::*;
-use crate::energizer::EnergizerEaten;
 
 /// The different states of a ghost
 ///
@@ -26,11 +27,15 @@ pub enum State {
     Frightened,
 }
 
+pub(super) struct GhostEaten {
+    pub entity: Entity,
+}
+
 /// The schedule of a ghost determines the state the ghost has after a certain time passed
 /// on a certain level.
 /// The last phase of a schedule will be active until the level ends, even if its timer is finished.
 pub struct Schedule {
-    phases: Vec<Phase>
+    phases: Vec<Phase>,
 }
 
 impl Schedule {
@@ -68,14 +73,14 @@ impl Schedule {
 /// A Phase is a time range where a specific state for a specific ghost is active.
 pub struct Phase {
     active_state: State,
-    remaining_time: Timer
+    remaining_time: Timer,
 }
 
 impl Phase {
     pub fn new(active_state: State, duration: f32) -> Self {
         Phase {
             active_state,
-            remaining_time : Timer::from_seconds(duration, false)
+            remaining_time: Timer::from_seconds(duration, false),
         }
     }
 
@@ -93,11 +98,13 @@ pub struct StateSetPlugin;
 impl Plugin for StateSetPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app
+            .add_event::<GhostEaten>()
             .insert_resource(FrightenedTimer::new())
             .add_system(set_frightened_next_state.system())
             .add_system(set_spawned_next_state.system())
             .add_system(set_chase_and_scatter_next_state.system())
-            .add_system(set_frightened_when_pacman_ate_energizer.system());
+            .add_system(set_frightened_when_pacman_ate_energizer.system())
+            .add_system(set_eaten_when_hit_by_pacman.system());
     }
 }
 
@@ -176,6 +183,21 @@ fn set_frightened_when_pacman_ate_energizer(
         frightened_timer.start();
         for mut state in query.iter_mut() {
             *state = Frightened;
+        }
+    }
+}
+
+fn set_eaten_when_hit_by_pacman(
+    mut event_writer: EventWriter<GhostEaten>,
+    mut ghost_query: Query<(Entity, &Position, &mut State), With<Ghost>>,
+    pacman_query: Query<&Position, With<Pacman>>,
+) {
+    for (entity, ghost_position, mut state) in ghost_query.iter_mut() {
+        for pacman_position in pacman_query.iter() {
+            if *state == Frightened && ghost_position == pacman_position {
+                *state = Eaten;
+                event_writer.send(GhostEaten { entity })
+            }
         }
     }
 }

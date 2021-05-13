@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use spawner::Spawner;
 
 use crate::common::{Direction, MoveComponents, Movement, Position};
-use crate::ghosts::components::Ghost;
+use crate::ghosts::Ghost;
 use crate::map::board::Board;
 use crate::map::FieldType::*;
 use crate::pacman::Pacman;

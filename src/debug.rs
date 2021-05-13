@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::common::{Movement, Position};
-use crate::ghosts::components::Ghost;
+use crate::ghosts::Ghost;
 use crate::ghosts::state::State;
 use crate::ghosts::target::Target;
 
