@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::ghosts::movement::MovePlugin;
+use crate::ghosts::schedule::SchedulePlugin;
 use crate::ghosts::spawner::Spawner;
 use crate::ghosts::state::StateSetPlugin;
 use crate::ghosts::target::{Target, TargetSetPlugin};
@@ -11,6 +12,7 @@ pub mod movement;
 pub mod spawner;
 pub mod state;
 pub mod target;
+mod schedule;
 
 #[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]
 pub enum Ghost {
@@ -28,6 +30,7 @@ impl Plugin for GhostPlugin {
             .add_plugin(MovePlugin)
             .add_plugin(TargetSetPlugin)
             .add_plugin(StateSetPlugin)
+            .add_plugin(SchedulePlugin)
             .add_startup_system(spawn_ghosts.system())
             .add_system(ghost_passed_tunnel.system());
     }

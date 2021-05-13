@@ -5,10 +5,7 @@ use crate::constants::GHOST_DIMENSION;
 use crate::ghosts::Ghost;
 use crate::ghosts::Ghost::*;
 use crate::ghosts::movement::MovementReverseMarker;
-use crate::ghosts::state::Phase;
-use crate::ghosts::state::Schedule;
 use crate::ghosts::state::State;
-use crate::ghosts::state::State::*;
 use crate::ghosts::target::Target;
 use crate::map::board::Board;
 use crate::map::FieldType;
@@ -52,15 +49,6 @@ impl<'a> Spawner<'a> {
             .insert(Target::new())
             .insert(Movement::Idle)
             .insert(State::Spawned)
-            .insert(MovementReverseMarker::new())
-            .insert(Spawner::create_default_schedule());
-    }
-
-    fn create_default_schedule() -> Schedule {
-        let mut phases = Vec::new();
-        phases.push(Phase::new(Scatter, 10.0));
-        phases.push(Phase::new(Chase, 10.0));
-        phases.push(Phase::new(Scatter, 10.0));
-        Schedule::new(phases)
+            .insert(MovementReverseMarker::new());
     }
 }

@@ -5,6 +5,7 @@ use bevy::prelude::*;
 use crate::common::Position;
 use crate::energizer::EnergizerEaten;
 use crate::ghosts::Ghost;
+use crate::ghosts::schedule::Schedule;
 use crate::map::board::Board;
 use crate::map::FieldType::{GhostSpawn, GhostWall};
 use crate::pacman::Pacman;
@@ -31,68 +32,6 @@ pub(super) struct GhostEaten {
     pub entity: Entity,
 }
 
-/// The schedule of a ghost determines the state the ghost has after a certain time passed
-/// on a certain level.
-/// The last phase of a schedule will be active until the level ends, even if its timer is finished.
-pub struct Schedule {
-    phases: Vec<Phase>,
-}
-
-impl Schedule {
-    pub fn new(phases: Vec<Phase>) -> Self {
-        Schedule { phases }
-    }
-
-    pub fn state_after_tick(&mut self, elapsed_time: Duration) -> State {
-        self.current_phase_mut().progress(elapsed_time);
-        if self.current_phase().is_finished() {
-            self.start_next_phase()
-        }
-        self.current_phase().active_state
-    }
-
-    pub fn current_state(&self) -> State {
-        self.current_phase().active_state
-    }
-
-    fn current_phase(&self) -> &Phase {
-        &self.phases[0]
-    }
-
-    fn current_phase_mut(&mut self) -> &mut Phase {
-        &mut self.phases[0]
-    }
-
-    fn start_next_phase(&mut self) {
-        if self.phases.len() > 1 {
-            self.phases.remove(0);
-        }
-    }
-}
-
-/// A Phase is a time range where a specific state for a specific ghost is active.
-pub struct Phase {
-    active_state: State,
-    remaining_time: Timer,
-}
-
-impl Phase {
-    pub fn new(active_state: State, duration: f32) -> Self {
-        Phase {
-            active_state,
-            remaining_time: Timer::from_seconds(duration, false),
-        }
-    }
-
-    pub fn progress(&mut self, elapsed_time: Duration) {
-        self.remaining_time.tick(elapsed_time);
-    }
-
-    pub fn is_finished(&self) -> bool {
-        self.remaining_time.finished()
-    }
-}
-
 pub struct StateSetPlugin;
 
 impl Plugin for StateSetPlugin {
@@ -104,6 +43,7 @@ impl Plugin for StateSetPlugin {
             .add_system(set_spawned_next_state.system())
             .add_system(set_chase_and_scatter_next_state.system())
             .add_system(set_eaten_next_state.system())
+            .add_system(update_frightened_timer.system())
             .add_system(set_frightened_when_pacman_ate_energizer.system())
             .add_system(set_eaten_when_hit_by_pacman.system());
     }
@@ -134,44 +74,42 @@ impl FrightenedTimer {
     }
 }
 
-fn set_frightened_next_state(
-    time: Res<Time>,
-    mut frightened_timer: ResMut<FrightenedTimer>,
-    mut query: Query<(&mut State, &Schedule), With<Ghost>>,
+fn set_spawned_next_state(
+    schedule: Res<Schedule>,
+    board: Res<Board>,
+    mut query: Query<(&mut State, &Position), With<Ghost>>,
 ) {
-    frightened_timer.tick(time.delta());
+    for (mut state, position) in query.iter_mut() {
+        if *state != Spawned { continue; }
 
-    for (mut state, schedule) in query.iter_mut() {
-        if *state != Frightened { continue; }
-
-        if frightened_timer.is_finished() {
+        if board.type_of_position(position) == &GhostWall {
             *state = schedule.current_state()
         }
     }
 }
 
-fn set_spawned_next_state(
-    time: Res<Time>,
-    board: Res<Board>,
-    mut query: Query<(&mut State, &mut Schedule, &Position), With<Ghost>>,
+fn set_chase_and_scatter_next_state(
+    schedule: Res<Schedule>,
+    mut query: Query<&mut State, With<Ghost>>,
 ) {
-    for (mut state, mut schedule, position) in query.iter_mut() {
-        if *state != Spawned { continue; }
+    for mut state in query.iter_mut() {
+        if *state != Chase && *state != Scatter { continue; }
 
-        if board.type_of_position(position) == &GhostWall {
-            *state = update_and_get_state(time.delta(), &mut schedule)
-        }
+        *state = schedule.current_state();
     }
 }
 
-fn set_chase_and_scatter_next_state(
-    time: Res<Time>,
-    mut query: Query<(&mut State, &mut Schedule), With<Ghost>>,
+fn set_frightened_next_state(
+    schedule: Res<Schedule>,
+    frightened_timer: Res<FrightenedTimer>,
+    mut query: Query<&mut State, With<Ghost>>,
 ) {
-    for (mut state, mut schedule) in query.iter_mut() {
-        if *state != Chase && *state != Scatter { continue; }
+    for mut state in query.iter_mut() {
+        if *state != Frightened { continue; }
 
-        *state = update_and_get_state(time.delta(), &mut schedule)
+        if frightened_timer.is_finished() {
+            *state = schedule.current_state()
+        }
     }
 }
 
@@ -183,6 +121,15 @@ fn set_eaten_next_state(
         if board.type_of_position(position) == &GhostSpawn {
             *state = Spawned
         }
+    }
+}
+
+fn update_frightened_timer(
+    time: Res<Time>,
+    mut timer: ResMut<FrightenedTimer>
+) {
+    if !timer.is_finished() {
+        timer.tick(time.delta())
     }
 }
 
@@ -214,8 +161,4 @@ fn set_eaten_when_hit_by_pacman(
             }
         }
     }
-}
-
-fn update_and_get_state(elapsed_time: Duration, schedule: &mut Schedule) -> State {
-    schedule.state_after_tick(elapsed_time)
 }
