@@ -6,7 +6,7 @@ use crate::common::Position;
 use crate::energizer::EnergizerEaten;
 use crate::ghosts::Ghost;
 use crate::map::board::Board;
-use crate::map::FieldType::GhostWall;
+use crate::map::FieldType::{GhostSpawn, GhostWall};
 use crate::pacman::Pacman;
 
 use self::State::*;
@@ -103,6 +103,7 @@ impl Plugin for StateSetPlugin {
             .add_system(set_frightened_next_state.system())
             .add_system(set_spawned_next_state.system())
             .add_system(set_chase_and_scatter_next_state.system())
+            .add_system(set_eaten_next_state.system())
             .add_system(set_frightened_when_pacman_ate_energizer.system())
             .add_system(set_eaten_when_hit_by_pacman.system());
     }
@@ -168,9 +169,20 @@ fn set_chase_and_scatter_next_state(
     mut query: Query<(&mut State, &mut Schedule), With<Ghost>>,
 ) {
     for (mut state, mut schedule) in query.iter_mut() {
-        if !(*state == Chase || *state == Scatter) { continue; }
+        if *state != Chase && *state != Scatter { continue; }
 
         *state = update_and_get_state(time.delta(), &mut schedule)
+    }
+}
+
+fn set_eaten_next_state(
+    board: Res<Board>,
+    mut query: Query<(&mut State, &Position)>
+) {
+    for (mut state, position) in query.iter_mut() {
+        if board.type_of_position(position) == &GhostSpawn {
+            *state = Spawned
+        }
     }
 }
 
@@ -182,7 +194,9 @@ fn set_frightened_when_pacman_ate_energizer(
     for _ in event_reader.iter() {
         frightened_timer.start();
         for mut state in query.iter_mut() {
-            *state = Frightened;
+            if *state != Eaten {
+                *state = Frightened;
+            }
         }
     }
 }

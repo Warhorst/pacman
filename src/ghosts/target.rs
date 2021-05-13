@@ -60,7 +60,8 @@ impl Plugin for TargetSetPlugin {
             .add_system(determine_spawned_target.system())
             .add_system(determine_scatter_target.system())
             .add_system(determine_blinky_chase_target.system())
-            .add_system(determine_frightened_target.system());
+            .add_system(determine_frightened_target.system())
+            .add_system(determine_eaten_target.system());
     }
 }
 
@@ -108,7 +109,7 @@ fn determine_spawned_target(
             nearest_wall_position,
             &board,
             movement,
-            |neighbour| neighbour_is_no_wall_in_spawn(&board, position, neighbour)
+            |neighbour| neighbour_is_no_wall_in_spawn(&board, position, neighbour),
         );
         event_writer.send(TargetUpdate(entity, next_target_neighbour))
     }
@@ -128,7 +129,7 @@ fn determine_scatter_target(
             ghost_corner_position,
             &board,
             movement,
-            |neighbour| neighbour_is_no_wall(&board, &neighbour.position)
+            |neighbour| neighbour_is_no_wall(&board, &neighbour.position),
         );
         event_writer.send(TargetUpdate(entity, next_target_neighbour))
     }
@@ -137,10 +138,10 @@ fn determine_scatter_target(
 fn determine_blinky_chase_target(
     mut event_writer: EventWriter<TargetUpdate>,
     board: Res<Board>,
-    blink_query: Query<(Entity, &Ghost, &Target, &Movement, &Position, &State)>,
+    blinky_query: Query<(Entity, &Ghost, &Target, &Movement, &Position, &State)>,
     pacman_query: Query<&Position, With<Pacman>>,
 ) {
-    for (entity, ghost, target, movement, blinky_position, state) in blink_query.iter() {
+    for (entity, ghost, target, movement, blinky_position, state) in blinky_query.iter() {
         for pacman_position in pacman_query.iter() {
             if target.is_set() || ghost != &Blinky || state != &Chase { continue; }
 
@@ -149,7 +150,7 @@ fn determine_blinky_chase_target(
                 pacman_position,
                 &board,
                 movement,
-                |neighbour| neighbour_is_no_wall(&board, &neighbour.position)
+                |neighbour| neighbour_is_no_wall(&board, &neighbour.position),
             );
             event_writer.send(TargetUpdate(entity, next_target_neighbour))
         }
@@ -169,7 +170,7 @@ fn determine_frightened_target(
             position,
             &board,
             movement,
-            |neighbour| neighbour_is_no_wall(&board, &neighbour.position)
+            |neighbour| neighbour_is_no_wall(&board, &neighbour.position),
         );
 
         let next_target_neighbour = match possible_neighbours.len() {
@@ -181,11 +182,35 @@ fn determine_frightened_target(
     }
 }
 
+fn determine_eaten_target(
+    mut event_writer: EventWriter<TargetUpdate>,
+    board: Res<Board>,
+    query: Query<(Entity, &Target, &Movement, &Position, &State)>,
+) {
+    for (entity, target, movement, position, state) in query.iter() {
+        if target.is_set() || state != &Eaten { continue; }
+
+        let ghost_spawn_positions = board.positions_of_type(GhostSpawn);
+        let nearest_spawn_position = &ghost_spawn_positions.iter()
+            .min_by(|pos_a, pos_b| minimal_distance_to_positions(&position, pos_a, pos_b))
+            .expect("There should at least be one ghost spawn on the map");
+
+        let next_target_neighbour = get_neighbour_nearest_to_target(
+            position,
+            nearest_spawn_position,
+            &board,
+            movement,
+            |neighbour| neighbour_is_no_normal_wall(&board, &neighbour.position),
+        );
+        event_writer.send(TargetUpdate(entity, next_target_neighbour))
+    }
+}
+
 fn get_possible_neighbours<F: Fn(&Neighbour) -> bool>(
     ghost_position: &Position,
     board: &Board,
     movement: &Movement,
-    field_filter: F
+    field_filter: F,
 ) -> Vec<Neighbour> {
     board.neighbours_of(ghost_position)
         .into_iter()
@@ -199,7 +224,7 @@ fn get_neighbour_nearest_to_target<F: Fn(&Neighbour) -> bool>(
     target_position: &Position,
     board: &Board,
     movement: &Movement,
-    field_filter: F
+    field_filter: F,
 ) -> Option<Neighbour> {
     get_possible_neighbours(ghost_position, board, movement, field_filter)
         .into_iter()
@@ -216,6 +241,13 @@ fn neighbour_is_no_wall_in_spawn(board: &Board, ghost_position: &Position, neigh
 fn neighbour_is_no_wall(board: &Board, neighbour_position: &Position) -> bool {
     match board.type_of_position(neighbour_position) {
         Wall | GhostWall => false,
+        _ => true
+    }
+}
+
+fn neighbour_is_no_normal_wall(board: &Board, neighbour_position: &Position) -> bool {
+    match board.type_of_position(neighbour_position) {
+        Wall => false,
         _ => true
     }
 }

@@ -1,10 +1,10 @@
 # TODO
 ## Gameplay
-- an eaten ghost changes to Eaten-State and moves to the ghost house
-- implement Movement-Reverse when changing from state to state
+- implement Movement-Reverse when changing from state to state (other transitions than any to frightened)
 - implement Pinky-Chase
 - implement Inky-Chase
 - implement Clyde-Chase
+- the schedule might be global (check and change)
 - implement correct ghost house mechanics
 - pacman has lives and can respawn
 - the fruit can spawn
@@ -21,3 +21,4 @@
 - animations
 
 ## Bugfixes/Refactorings
+- ghost sometimes dont turn around when an energizer is eaten

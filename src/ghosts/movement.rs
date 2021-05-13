@@ -51,9 +51,7 @@ fn move_ghost(
     mut query: Query<(&mut Movement, &mut Position, &mut Target, &mut Transform, &mut MovementReverseMarker)>,
 ) {
     for (mut movement, mut position, mut target, mut transform, mut movement_reverse_marker) in query.iter_mut() {
-        if target.is_not_set() {
-            return;
-        }
+        if target.is_not_set() { continue; }
 
         let mut coordinates = &mut transform.translation;
         let delta_seconds = time.delta_seconds();
