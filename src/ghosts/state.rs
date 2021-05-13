@@ -3,12 +3,12 @@ use std::time::Duration;
 use bevy::prelude::*;
 
 use crate::common::Position;
-use crate::events::EnergizerEaten;
 use crate::ghosts::components::Ghost;
 use crate::map::board::Board;
 use crate::map::FieldType::GhostWall;
 
 use self::State::*;
+use crate::energizer::EnergizerEaten;
 
 /// The different states of a ghost
 ///

@@ -3,7 +3,6 @@ use bevy::prelude::*;
 use spawner::Spawner;
 
 use crate::common::{Direction, MoveComponents, Movement, Position};
-use crate::events::GhostPassedTunnel;
 use crate::ghosts::components::Ghost;
 use crate::map::board::Board;
 use crate::map::FieldType::*;
@@ -18,6 +17,7 @@ pub struct TunnelPlugin;
 impl Plugin for TunnelPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app
+            .add_event::<GhostPassedTunnel>()
             .add_startup_system(spawn_tunnels.system())
             .add_system(pacman_enters_tunnel.system())
             .add_system(ghost_enters_tunnel.system());
@@ -33,6 +33,12 @@ impl Tunnel {
     pub fn new(first_entrance: TunnelEntrance, second_entrance: TunnelEntrance) -> Self {
         Tunnel { first_entrance, second_entrance }
     }
+}
+
+/// Fired when a ghost moved through a tunnel.
+/// Saves the entity of the ghost.
+pub struct GhostPassedTunnel {
+    pub entity: Entity
 }
 
 #[derive(Copy, Clone, Debug)]

@@ -5,10 +5,10 @@ use crate::common::{Movement, Position};
 use crate::common::Direction::*;
 use crate::common::Movement::*;
 use crate::constants::GHOST_SPEED;
-use crate::events::EnergizerEaten;
 use crate::ghosts::components::Ghost;
 use crate::ghosts::target::Target;
 use crate::map::board::Board;
+use crate::energizer::EnergizerEaten;
 
 /// Indicates that a ghost should turn around after reaching its target.
 pub struct MovementReverseMarker {

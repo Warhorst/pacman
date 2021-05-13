@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::constants::POINTS_PER_DOT;
-use crate::events::DotEaten;
+use crate::dots::DotEaten;
 
 pub struct ScorePlugin;
 
