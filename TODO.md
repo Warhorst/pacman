@@ -4,7 +4,6 @@
 - implement Pinky-Chase
 - implement Inky-Chase
 - implement Clyde-Chase
-- make the schedule global
 - implement correct ghost house mechanics
 - pacman has lives and can respawn
 - the fruit can spawn
