@@ -1,6 +1,5 @@
 # TODO
 ## Gameplay
-- implement Movement-Reverse when changing from state to state (other transitions than any to frightened)
 - implement Pinky-Chase
 - implement Inky-Chase
 - implement Clyde-Chase
@@ -21,3 +20,4 @@
 
 ## Bugfixes/Refactorings
 - ghost sometimes dont turn around when an energizer is eaten
+- events seem to be a bit scattered across the code. Improve organization

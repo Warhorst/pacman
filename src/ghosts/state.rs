@@ -28,7 +28,16 @@ pub enum State {
     Frightened,
 }
 
+/// Event
+/// Send when a ghost was eaten by pacman.
+/// TODO: Why here?
 pub(super) struct GhostEaten {
+    pub entity: Entity,
+}
+
+/// Event
+/// Send when a phase change occurred that indicates that ghost that change on schedule shall turn around.
+pub(super) struct SchedulePhaseChanged {
     pub entity: Entity,
 }
 
@@ -38,6 +47,7 @@ impl Plugin for StateSetPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app
             .add_event::<GhostEaten>()
+            .add_event::<SchedulePhaseChanged>()
             .insert_resource(FrightenedTimer::new())
             .add_system(set_frightened_next_state.system())
             .add_system(set_spawned_next_state.system())
@@ -90,12 +100,16 @@ fn set_spawned_next_state(
 
 fn set_chase_and_scatter_next_state(
     schedule: Res<Schedule>,
-    mut query: Query<&mut State, With<Ghost>>,
+    mut event_writer: EventWriter<SchedulePhaseChanged>,
+    mut query: Query<(Entity, &mut State), With<Ghost>>,
 ) {
-    for mut state in query.iter_mut() {
+    for (entity, mut state) in query.iter_mut() {
         if *state != Chase && *state != Scatter { continue; }
 
-        *state = schedule.current_state();
+        if *state != schedule.current_state() {
+            *state = schedule.current_state();
+            event_writer.send(SchedulePhaseChanged { entity })
+        }
     }
 }
 
@@ -115,7 +129,7 @@ fn set_frightened_next_state(
 
 fn set_eaten_next_state(
     board: Res<Board>,
-    mut query: Query<(&mut State, &Position)>
+    mut query: Query<(&mut State, &Position)>,
 ) {
     for (mut state, position) in query.iter_mut() {
         if board.type_of_position(position) == &GhostSpawn {
@@ -126,7 +140,7 @@ fn set_eaten_next_state(
 
 fn update_frightened_timer(
     time: Res<Time>,
-    mut timer: ResMut<FrightenedTimer>
+    mut timer: ResMut<FrightenedTimer>,
 ) {
     if !timer.is_finished() {
         timer.tick(time.delta())

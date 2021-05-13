@@ -97,6 +97,8 @@ fn create_default_schedule() -> Schedule {
     phases.push(Phase::new(Scatter, 10.0));
     phases.push(Phase::new(Chase, 10.0));
     phases.push(Phase::new(Scatter, 10.0));
+    phases.push(Phase::new(Chase, 10.0));
+    phases.push(Phase::new(Scatter, 10.0));
     Schedule::new(phases)
 }
 

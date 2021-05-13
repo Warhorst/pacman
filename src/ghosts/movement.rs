@@ -7,6 +7,7 @@ use crate::common::Movement::*;
 use crate::constants::GHOST_SPEED;
 use crate::energizer::EnergizerEaten;
 use crate::ghosts::Ghost;
+use crate::ghosts::state::SchedulePhaseChanged;
 use crate::ghosts::target::Target;
 use crate::map::board::Board;
 
@@ -41,7 +42,8 @@ impl Plugin for MovePlugin {
     fn build(&self, app: &mut AppBuilder) {
         app
             .add_system(move_ghost.system())
-            .add_system(mark_movement_to_reverse_after_pacman_ate_energizer.system());
+            .add_system(mark_movement_to_reverse_after_pacman_ate_energizer.system())
+            .add_system(mark_movement_to_reverse_when_schedule_phase_changed.system());
     }
 }
 
@@ -81,6 +83,19 @@ fn mark_movement_to_reverse_after_pacman_ate_energizer(
     for _ in event_reader.iter() {
         for mut movement_reverse_marker in query.iter_mut() {
             movement_reverse_marker.set()
+        }
+    }
+}
+
+fn mark_movement_to_reverse_when_schedule_phase_changed(
+    mut event_reader: EventReader<SchedulePhaseChanged>,
+    mut query: Query<(Entity, &mut MovementReverseMarker), With<Ghost>>
+) {
+    for event in event_reader.iter() {
+        for (entity, mut movement_reverse_marker) in query.iter_mut() {
+            if event.entity == entity {
+                movement_reverse_marker.set()
+            }
         }
     }
 }
