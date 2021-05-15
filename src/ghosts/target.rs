@@ -3,6 +3,7 @@ use std::cmp::Ordering;
 use bevy::prelude::*;
 
 use crate::common::{Movement, Position};
+use crate::common::Direction::*;
 use crate::common::Movement::*;
 use crate::ghosts::Ghost;
 use crate::ghosts::Ghost::*;
@@ -60,6 +61,7 @@ impl Plugin for TargetSetPlugin {
             .add_system(determine_spawned_target.system())
             .add_system(determine_scatter_target.system())
             .add_system(determine_blinky_chase_target.system())
+            .add_system(determine_pinky_chase_target.system())
             .add_system(determine_frightened_target.system())
             .add_system(determine_eaten_target.system());
     }
@@ -153,6 +155,47 @@ fn determine_blinky_chase_target(
                 |neighbour| neighbour_is_no_wall(&board, &neighbour.position),
             );
             event_writer.send(TargetUpdate(entity, next_target_neighbour))
+        }
+    }
+}
+
+fn determine_pinky_chase_target(
+    mut event_writer: EventWriter<TargetUpdate>,
+    board: Res<Board>,
+    pinky_query: Query<(Entity, &Ghost, &Target, &Movement, &Position, &State)>,
+    pacman_query: Query<(&Position, &Movement), With<Pacman>>,
+) {
+    for (entity, ghost, target, pinky_movement, pinky_position, state) in pinky_query.iter() {
+        for (pacman_position, pacman_movement) in pacman_query.iter() {
+            if target.is_set() || ghost != &Pinky || state != &Chase { continue; }
+
+            let next_target_neighbour = get_neighbour_nearest_to_target(
+                pinky_position,
+                &calculate_pinky_target_position(pacman_position, pacman_movement),
+                &board,
+                pinky_movement,
+                |neighbour| neighbour_is_no_wall(&board, &neighbour.position),
+            );
+            event_writer.send(TargetUpdate(entity, next_target_neighbour))
+        }
+    }
+}
+
+/// Return the pinky target position 4 fields in pacmans direction.
+/// If pacman is idle, the field to its right is choosen.
+fn calculate_pinky_target_position(
+    pacman_position: &Position,
+    pacman_movement: &Movement
+) -> Position {
+    let x = pacman_position.x();
+    let y = pacman_position.y();
+    match *pacman_movement {
+        Idle => Position::new(x + 4, y),
+        Moving(dir) => match dir {
+            Up => Position::new(x, y + 4),
+            Down => Position::new(x, y - 4),
+            Left => Position::new(x - 4, y),
+            Right => Position::new(x + 4, y)
         }
     }
 }
