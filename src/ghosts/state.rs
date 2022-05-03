@@ -19,7 +19,7 @@ use self::State::*;
 /// Scatter - be inactive and return to your home corner
 /// Eaten - return to the home to respawn
 /// Frightened - you are vulnerable, dodge pacman
-#[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]
+#[derive(Copy, Clone, Component, Debug, PartialOrd, PartialEq)]
 pub enum State {
     Spawned,
     Chase,
@@ -44,18 +44,18 @@ pub(super) struct SchedulePhaseChanged {
 pub struct StateSetPlugin;
 
 impl Plugin for StateSetPlugin {
-    fn build(&self, app: &mut AppBuilder) {
+    fn build(&self, app: &mut App) {
         app
             .add_event::<GhostEaten>()
             .add_event::<SchedulePhaseChanged>()
             .insert_resource(FrightenedTimer::new())
-            .add_system(set_frightened_next_state.system())
-            .add_system(set_spawned_next_state.system())
-            .add_system(set_chase_and_scatter_next_state.system())
-            .add_system(set_eaten_next_state.system())
-            .add_system(update_frightened_timer.system())
-            .add_system(set_frightened_when_pacman_ate_energizer.system())
-            .add_system(set_eaten_when_hit_by_pacman.system());
+            .add_system(set_frightened_next_state)
+            .add_system(set_spawned_next_state)
+            .add_system(set_chase_and_scatter_next_state)
+            .add_system(set_eaten_next_state)
+            .add_system(update_frightened_timer)
+            .add_system(set_frightened_when_pacman_ate_energizer)
+            .add_system(set_eaten_when_hit_by_pacman);
     }
 }
 

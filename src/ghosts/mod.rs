@@ -14,7 +14,7 @@ pub mod state;
 pub mod target;
 mod schedule;
 
-#[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]
+#[derive(Copy, Clone, Component, Debug, PartialOrd, PartialEq)]
 pub enum Ghost {
     Blinky,
     Pinky,
@@ -25,19 +25,19 @@ pub enum Ghost {
 pub struct GhostPlugin;
 
 impl Plugin for GhostPlugin {
-    fn build(&self, app: &mut AppBuilder) {
+    fn build(&self, app: &mut App) {
         app
             .add_plugin(MovePlugin)
             .add_plugin(TargetSetPlugin)
             .add_plugin(StateSetPlugin)
             .add_plugin(SchedulePlugin)
-            .add_startup_system(spawn_ghosts.system())
-            .add_system(ghost_passed_tunnel.system());
+            .add_startup_system(spawn_ghosts)
+            .add_system(ghost_passed_tunnel);
     }
 }
 
-fn spawn_ghosts(commands: Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
-    Spawner::new(commands, &board, &mut materials).spawn()
+fn spawn_ghosts(commands: Commands, board: Res<Board>) {
+    Spawner::new(commands, &board).spawn()
 }
 
 fn ghost_passed_tunnel(mut event_reader: EventReader<GhostPassedTunnel>,

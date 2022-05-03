@@ -12,6 +12,7 @@ use crate::ghosts::target::Target;
 use crate::map::board::Board;
 
 /// Indicates that a ghost should turn around after reaching its target.
+#[derive(Component)]
 pub struct MovementReverseMarker {
     set: bool,
 }
@@ -39,11 +40,11 @@ impl MovementReverseMarker {
 pub struct MovePlugin;
 
 impl Plugin for MovePlugin {
-    fn build(&self, app: &mut AppBuilder) {
+    fn build(&self, app: &mut App) {
         app
-            .add_system(move_ghost.system())
-            .add_system(mark_movement_to_reverse_after_pacman_ate_energizer.system())
-            .add_system(mark_movement_to_reverse_when_schedule_phase_changed.system());
+            .add_system(move_ghost)
+            .add_system(mark_movement_to_reverse_after_pacman_ate_energizer)
+            .add_system(mark_movement_to_reverse_when_schedule_phase_changed);
     }
 }
 

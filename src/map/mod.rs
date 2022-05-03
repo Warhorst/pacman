@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::fmt::Formatter;
 
-use bevy::app::{AppBuilder, Plugin};
+use bevy::app::Plugin;
 use bevy::prelude::*;
 
 use FieldType::*;
@@ -23,32 +23,38 @@ type PositionTypeMap = HashMap<Position, FieldType>;
 pub struct MapPlugin;
 
 impl Plugin for MapPlugin {
-    fn build(&self, app: &mut AppBuilder) {
+    fn build(&self, app: &mut App) {
         app
             .insert_resource(Board::new())
-            .add_startup_system(spawn_walls.system());
+            .add_startup_system(spawn_walls);
     }
 }
 
-fn spawn_walls(mut commands: Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
+fn spawn_walls(mut commands: Commands, board: Res<Board>) {
     for position in get_wall_positions(&board) {
         commands.spawn()
             .insert_bundle(SpriteBundle {
-            material: materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
-            transform: Transform::from_translation(board.coordinates_of_position(position)),
-            sprite: Sprite::new(Vec2::new(WALL_DIMENSION, WALL_DIMENSION)),
-            ..Default::default()
-        });
+                sprite: Sprite {
+                    color: Color::rgb(0.0, 0.0, 1.0),
+                    custom_size: Some(Vec2::new(WALL_DIMENSION, WALL_DIMENSION)),
+                    ..default()
+                },
+                transform: Transform::from_translation(board.coordinates_of_position(position)),
+                ..Default::default()
+            });
     }
 
     for position in board.positions_of_type(GhostWall) {
         commands.spawn()
-            .insert(SpriteBundle {
-            material: materials.add(Color::rgb(1.0, 1.0, 1.0).into()),
-            transform: Transform::from_translation(board.coordinates_of_position(position)),
-            sprite: Sprite::new(Vec2::new(WALL_DIMENSION, WALL_DIMENSION)),
-            ..Default::default()
-        });
+            .insert_bundle(SpriteBundle {
+                sprite: Sprite {
+                    color: Color::rgb(1.0, 1.0, 1.0),
+                    custom_size: Some(Vec2::new(WALL_DIMENSION, WALL_DIMENSION)),
+                    ..default()
+                },
+                transform: Transform::from_translation(board.coordinates_of_position(position)),
+                ..Default::default()
+            });
     }
 }
 
@@ -73,7 +79,7 @@ pub enum FieldType {
     GhostCorner(Ghost),
     TunnelEntrance(usize),
     TunnelDirection,
-    Energizer
+    Energizer,
 }
 
 impl TryFrom<char> for FieldType {
@@ -102,7 +108,7 @@ impl TryFrom<char> for FieldType {
 
 #[derive(Debug)]
 pub struct FieldTypeFromCharError {
-    pub error_char: char
+    pub error_char: char,
 }
 
 impl std::error::Error for FieldTypeFromCharError {}

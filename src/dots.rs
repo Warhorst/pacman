@@ -9,27 +9,31 @@ use crate::pacman::Pacman;
 pub struct DotPlugin;
 
 impl Plugin for DotPlugin {
-    fn build(&self, app: &mut AppBuilder) {
+    fn build(&self, app: &mut App) {
         app
             .add_event::<DotEaten>()
-            .add_startup_system(spawn_dots.system())
-            .add_system(pacman_eat_dot.system());
+            .add_startup_system(spawn_dots)
+            .add_system(pacman_eat_dot);
     }
 }
 
+#[derive(Component)]
 pub struct Dot;
 
 /// Fired when pacman eats a dot.
 pub struct DotEaten;
 
-fn spawn_dots(mut commands: Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
+fn spawn_dots(mut commands: Commands, board: Res<Board>) {
     let point_dimension = Vec2::new(POINT_DIMENSION, POINT_DIMENSION);
     for position in board.positions_of_type(FieldType::Point) {
         commands.spawn()
             .insert_bundle(SpriteBundle {
-                material: materials.add(Color::rgb(1.0, 1.0, 1.0).into()),
+                sprite: Sprite {
+                    color: Color::rgb(1.0, 1.0, 1.0),
+                    custom_size: Some(point_dimension),
+                    ..default()
+                },
                 transform: Transform::from_translation(board.coordinates_of_position(position)),
-                sprite: Sprite::new(point_dimension),
                 ..Default::default()
             })
             .insert(Dot)

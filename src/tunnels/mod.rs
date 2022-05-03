@@ -15,15 +15,16 @@ mod spawner;
 pub struct TunnelPlugin;
 
 impl Plugin for TunnelPlugin {
-    fn build(&self, app: &mut AppBuilder) {
+    fn build(&self, app: &mut App) {
         app
             .add_event::<GhostPassedTunnel>()
-            .add_startup_system(spawn_tunnels.system())
-            .add_system(pacman_enters_tunnel.system())
-            .add_system(ghost_enters_tunnel.system());
+            .add_startup_system(spawn_tunnels)
+            .add_system(pacman_enters_tunnel)
+            .add_system(ghost_enters_tunnel);
     }
 }
 
+#[derive(Component)]
 struct Tunnel {
     first_entrance: TunnelEntrance,
     second_entrance: TunnelEntrance,

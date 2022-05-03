@@ -15,6 +15,7 @@ use crate::map::Neighbour;
 use crate::pacman::Pacman;
 use crate::random::Random;
 
+#[derive(Component)]
 pub struct Target {
     target: Option<Position>,
 }
@@ -54,16 +55,16 @@ impl Target {
 pub struct TargetSetPlugin;
 
 impl Plugin for TargetSetPlugin {
-    fn build(&self, app: &mut AppBuilder) {
+    fn build(&self, app: &mut App) {
         app
             .add_event::<TargetUpdate>()
-            .add_system(update_targets.system())
-            .add_system(determine_spawned_target.system())
-            .add_system(determine_scatter_target.system())
-            .add_system(determine_blinky_chase_target.system())
-            .add_system(determine_pinky_chase_target.system())
-            .add_system(determine_frightened_target.system())
-            .add_system(determine_eaten_target.system());
+            .add_system(update_targets)
+            .add_system(determine_spawned_target)
+            .add_system(determine_scatter_target)
+            .add_system(determine_blinky_chase_target)
+            .add_system(determine_pinky_chase_target)
+            .add_system(determine_frightened_target)
+            .add_system(determine_eaten_target);
     }
 }
 

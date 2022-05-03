@@ -8,10 +8,10 @@ use crate::ghosts::target::Target;
 pub struct DebugPlugin;
 
 impl Plugin for DebugPlugin {
-    fn build(&self, app: &mut AppBuilder) {
+    fn build(&self, app: &mut App) {
         app
             .insert_resource(DebugInfoTimer::new())
-            .add_system(print_debug_data.system());
+            .add_system(print_debug_data);
     }
 }
 

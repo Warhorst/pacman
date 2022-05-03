@@ -6,12 +6,12 @@ use crate::dots::DotEaten;
 pub struct ScorePlugin;
 
 impl Plugin for ScorePlugin {
-    fn build(&self, app: &mut AppBuilder) {
+    fn build(&self, app: &mut App) {
         app
             .insert_resource(Score::new())
-            .add_startup_system(create_scoreboard.system())
-            .add_system(update_scoreboard.system())
-            .add_system(add_points_for_eaten_dot.system());
+            .add_startup_system(create_scoreboard)
+            .add_system(update_scoreboard)
+            .add_system(add_points_for_eaten_dot);
     }
 }
 

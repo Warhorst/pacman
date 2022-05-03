@@ -15,6 +15,7 @@ use crate::pacman::spawner::Spawner;
 mod mover;
 mod spawner;
 
+#[derive(Component)]
 pub struct Pacman;
 
 /// Fired when pacman was killed by a ghost.
@@ -23,18 +24,18 @@ pub struct PacmanKilled;
 pub struct PacmanPlugin;
 
 impl Plugin for PacmanPlugin {
-    fn build(&self, app: &mut AppBuilder) {
+    fn build(&self, app: &mut App) {
         app
             .add_event::<PacmanKilled>()
-            .add_startup_system(spawn_pacman.system())
-            .add_system(move_pacman.system())
-            .add_system(set_direction.system())
-            .add_system(ghost_hits_pacman.system());
+            .add_startup_system(spawn_pacman)
+            .add_system(move_pacman)
+            .add_system(set_direction)
+            .add_system(ghost_hits_pacman);
     }
 }
 
-fn spawn_pacman(commands: Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
-    Spawner::new(commands, &board, &mut materials).spawn()
+fn spawn_pacman(commands: Commands, board: Res<Board>) {
+    Spawner::new(commands, &board).spawn()
 }
 
 fn move_pacman(time: Res<Time>,

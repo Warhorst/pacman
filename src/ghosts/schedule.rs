@@ -71,11 +71,11 @@ pub(super) struct PhaseChanged;
 pub(super) struct SchedulePlugin;
 
 impl Plugin for SchedulePlugin {
-    fn build(&self, app: &mut AppBuilder) {
+    fn build(&self, app: &mut App) {
         app
             .add_event::<PhaseChanged>()
             .insert_resource(create_default_schedule())
-            .add_system(update_schedule.system());
+            .add_system(update_schedule);
     }
 }
 

@@ -9,28 +9,32 @@ use crate::common::Position;
 pub struct EnergizerPlugin;
 
 impl Plugin for EnergizerPlugin {
-    fn build(&self, app: &mut AppBuilder) {
+    fn build(&self, app: &mut App) {
         app
             .add_event::<EnergizerEaten>()
-            .add_startup_system(spawn_energizer.system())
-            .add_system(pacman_eat_energizer.system());
+            .add_startup_system(spawn_energizer)
+            .add_system(pacman_eat_energizer);
     }
 }
 
 /// An energizer that allows pacman to eat ghosts.
+#[derive(Component)]
 pub struct Energizer;
 
 /// Fired when pacman eats an energizer.
 pub struct EnergizerEaten;
 
-fn spawn_energizer(mut commands: Commands, board: Res<Board>, mut materials: ResMut<Assets<ColorMaterial>>) {
+fn spawn_energizer(mut commands: Commands, board: Res<Board>) {
     let point_dimension = Vec2::new(ENERGIZER_DIMENSION, ENERGIZER_DIMENSION);
     for position in board.positions_of_type(FieldType::Energizer) {
         commands.spawn()
             .insert_bundle(SpriteBundle {
-                material: materials.add(Color::rgb(0.9, 0.0, 0.9).into()),
+                sprite: Sprite {
+                    color: Color::rgb(0.9, 0.0, 0.9),
+                    custom_size: Some(point_dimension),
+                    ..default()
+                },
                 transform: Transform::from_translation(board.coordinates_of_position(position)),
-                sprite: Sprite::new(point_dimension),
                 ..Default::default()
             })
             .insert(Energizer)

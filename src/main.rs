@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy::render::pass::ClearColor;
 
 use map::MapPlugin;
 use pacman::PacmanPlugin;
@@ -25,7 +24,7 @@ mod debug;
 mod random;
 
 fn main() {
-    App::build()
+    App::new()
         .insert_resource(WindowDescriptor {
             width: 1000.0,
             height: 700.0,
@@ -44,12 +43,11 @@ fn main() {
         .add_plugin(EnergizerPlugin)
         .add_plugin(RandomPlugin)
         .add_plugin(DebugPlugin)
-        .add_startup_system(init.system())
+        .add_startup_system(init)
         .run()
 }
 
 fn init(mut commands: Commands) {
     commands.spawn()
         .insert_bundle(OrthographicCameraBundle::new_2d());
-        // .spawn(CameraUiBundle::default());
 }

@@ -1,6 +1,6 @@
-use bevy::prelude::Transform;
+use bevy::prelude::*;
 
-use Direction::*;
+use crate::common::Direction::*;
 use Movement::*;
 
 /// A type alias for the typical components when processing movement.
@@ -8,7 +8,7 @@ use Movement::*;
 /// with the SpriteComponents.
 pub type MoveComponents<'a> = (&'a mut Transform, &'a mut Position, &'a mut Movement);
 
-#[derive(Copy, Clone, Hash, Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Component, Hash, Debug, Eq, PartialEq)]
 pub struct Position(usize, usize);
 
 impl Position {
@@ -38,7 +38,7 @@ impl Position {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Component, Clone, Debug)]
 pub enum Movement {
     Idle,
     Moving(Direction),
