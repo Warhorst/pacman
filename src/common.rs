@@ -45,6 +45,15 @@ pub enum Movement {
 }
 
 impl Movement {
+    /// Get the direction of the movement without an idle check.
+    /// Useful for entities that will never go idle (like ghosts).
+    pub fn get_direction(&self) -> &Direction {
+        match self {
+            Idle => panic!("Expected direction"),
+            Moving(d) => d
+        }
+    }
+
     pub fn reverse(&mut self) {
         match self {
             Idle => return,

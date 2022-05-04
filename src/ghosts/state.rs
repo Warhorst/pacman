@@ -2,13 +2,15 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 
-use crate::common::Position;
+use crate::common::{Movement, Position};
 use crate::energizer::EnergizerEaten;
 use crate::ghosts::Ghost;
 use crate::ghosts::schedule::Schedule;
+use crate::ghosts::target::Target;
 use crate::map::board::Board;
 use crate::map::FieldType::{GhostSpawn, GhostWall};
 use crate::pacman::Pacman;
+use crate::common::Direction::*;
 
 use self::State::*;
 
@@ -28,26 +30,11 @@ pub enum State {
     Frightened,
 }
 
-/// Event
-/// Send when a ghost was eaten by pacman.
-/// TODO: Why here?
-pub(super) struct GhostEaten {
-    pub entity: Entity,
-}
-
-/// Event
-/// Send when a phase change occurred that indicates that ghost that change on schedule shall turn around.
-pub(super) struct SchedulePhaseChanged {
-    pub entity: Entity,
-}
-
 pub struct StateSetPlugin;
 
 impl Plugin for StateSetPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_event::<GhostEaten>()
-            .add_event::<SchedulePhaseChanged>()
             .insert_resource(FrightenedTimer::new())
             .add_system(set_frightened_next_state)
             .add_system(set_spawned_next_state)
@@ -100,15 +87,13 @@ fn set_spawned_next_state(
 
 fn set_chase_and_scatter_next_state(
     schedule: Res<Schedule>,
-    mut event_writer: EventWriter<SchedulePhaseChanged>,
-    mut query: Query<(Entity, &mut State), With<Ghost>>,
+    mut query: Query<&mut State, With<Ghost>>,
 ) {
-    for (entity, mut state) in query.iter_mut() {
+    for mut state in query.iter_mut() {
         if *state != Chase && *state != Scatter { continue; }
 
         if *state != schedule.current_state() {
             *state = schedule.current_state();
-            event_writer.send(SchedulePhaseChanged { entity })
         }
     }
 }
@@ -148,30 +133,38 @@ fn update_frightened_timer(
 }
 
 fn set_frightened_when_pacman_ate_energizer(
-    mut event_reader: EventReader<EnergizerEaten>,
+    event_reader: EventReader<EnergizerEaten>,
     mut frightened_timer: ResMut<FrightenedTimer>,
-    mut query: Query<&mut State, With<Ghost>>,
+    mut query: Query<(&mut State, &mut Movement, &mut Target), With<Ghost>>,
 ) {
-    for _ in event_reader.iter() {
-        frightened_timer.start();
-        for mut state in query.iter_mut() {
-            if *state != Eaten {
-                *state = Frightened;
-            }
-        }
+    if event_reader.is_empty() { return; }
+    frightened_timer.start();
+
+    for (mut state, mut movement, mut target) in query.iter_mut() {
+        if *state != Chase && *state != Scatter { continue; }
+
+        *state = Frightened;
+
+        let position_ghost_came_from = match movement.get_direction() {
+            Up => Position::new(target.x(), target.y() - 1),
+            Down => Position::new(target.x(), target.y() + 1),
+            Left => Position::new(target.x() + 1, target.y()),
+            Right => Position::new(target.x() - 1, target.y())
+        };
+
+        movement.reverse();
+        *target = Target(position_ghost_came_from);
     }
 }
 
 fn set_eaten_when_hit_by_pacman(
-    mut event_writer: EventWriter<GhostEaten>,
-    mut ghost_query: Query<(Entity, &Position, &mut State), With<Ghost>>,
+    mut ghost_query: Query<(&Position, &mut State), With<Ghost>>,
     pacman_query: Query<&Position, With<Pacman>>,
 ) {
-    for (entity, ghost_position, mut state) in ghost_query.iter_mut() {
+    for (ghost_position, mut state) in ghost_query.iter_mut() {
         for pacman_position in pacman_query.iter() {
             if *state == Frightened && ghost_position == pacman_position {
                 *state = Eaten;
-                event_writer.send(GhostEaten { entity })
             }
         }
     }

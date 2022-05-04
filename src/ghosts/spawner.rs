@@ -4,9 +4,7 @@ use crate::common::{Movement, Position};
 use crate::constants::GHOST_DIMENSION;
 use crate::ghosts::Ghost;
 use crate::ghosts::Ghost::*;
-use crate::ghosts::movement::MovementReverseMarker;
 use crate::ghosts::state::State;
-use crate::ghosts::target::Target;
 use crate::map::board::Board;
 use crate::map::FieldType;
 
@@ -48,9 +46,8 @@ impl<'a> Spawner<'a> {
             })
             .insert(ghost)
             .insert(*position)
-            .insert(Target::new())
+            // .insert(Target::new())
             .insert(Movement::Idle)
-            .insert(State::Spawned)
-            .insert(MovementReverseMarker::new());
+            .insert(State::Spawned);
     }
 }

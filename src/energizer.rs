@@ -25,13 +25,13 @@ pub struct Energizer;
 pub struct EnergizerEaten;
 
 fn spawn_energizer(mut commands: Commands, board: Res<Board>) {
-    let point_dimension = Vec2::new(ENERGIZER_DIMENSION, ENERGIZER_DIMENSION);
+    let energizer_dimension = Vec2::new(ENERGIZER_DIMENSION, ENERGIZER_DIMENSION);
     for position in board.positions_of_type(FieldType::Energizer) {
         commands.spawn()
             .insert_bundle(SpriteBundle {
                 sprite: Sprite {
                     color: Color::rgb(0.9, 0.0, 0.9),
-                    custom_size: Some(point_dimension),
+                    custom_size: Some(energizer_dimension),
                     ..default()
                 },
                 transform: Transform::from_translation(board.coordinates_of_position(position)),

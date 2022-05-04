@@ -1,3 +1,5 @@
+extern crate core;
+
 use bevy::prelude::*;
 
 use map::MapPlugin;

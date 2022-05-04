@@ -4,7 +4,7 @@ use crate::ghosts::movement::MovePlugin;
 use crate::ghosts::schedule::SchedulePlugin;
 use crate::ghosts::spawner::Spawner;
 use crate::ghosts::state::StateSetPlugin;
-use crate::ghosts::target::{Target, TargetSetPlugin};
+use crate::ghosts::target::{Target, TargetPlugin};
 use crate::map::board::Board;
 use crate::tunnels::GhostPassedTunnel;
 
@@ -28,7 +28,7 @@ impl Plugin for GhostPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_plugin(MovePlugin)
-            .add_plugin(TargetSetPlugin)
+            .add_plugin(TargetPlugin)
             .add_plugin(StateSetPlugin)
             .add_plugin(SchedulePlugin)
             .add_startup_system(spawn_ghosts)
@@ -40,12 +40,15 @@ fn spawn_ghosts(commands: Commands, board: Res<Board>) {
     Spawner::new(commands, &board).spawn()
 }
 
-fn ghost_passed_tunnel(mut event_reader: EventReader<GhostPassedTunnel>,
-                       mut query: Query<(Entity, &mut Target), With<Ghost>>) {
+fn ghost_passed_tunnel(
+    mut commands: Commands,
+    mut event_reader: EventReader<GhostPassedTunnel>,
+    mut query: Query<Entity, With<Ghost>>,
+) {
     for event in event_reader.iter() {
-        for (entity, mut target) in query.iter_mut() {
+        for entity in query.iter_mut() {
             if entity == event.entity {
-                target.clear()
+                commands.entity(entity).remove::<Target>();
             }
         }
     }

@@ -5,57 +5,24 @@ use crate::common::{Movement, Position};
 use crate::common::Direction::*;
 use crate::common::Movement::*;
 use crate::constants::GHOST_SPEED;
-use crate::energizer::EnergizerEaten;
-use crate::ghosts::Ghost;
-use crate::ghosts::state::SchedulePhaseChanged;
 use crate::ghosts::target::Target;
 use crate::map::board::Board;
-
-/// Indicates that a ghost should turn around after reaching its target.
-#[derive(Component)]
-pub struct MovementReverseMarker {
-    set: bool,
-}
-
-impl MovementReverseMarker {
-    pub fn new() -> Self {
-        MovementReverseMarker {
-            set: false
-        }
-    }
-
-    pub fn set(&mut self) {
-        self.set = true
-    }
-
-    pub fn unset(&mut self) {
-        self.set = false
-    }
-
-    pub fn is_set(&self) -> bool {
-        self.set
-    }
-}
 
 pub struct MovePlugin;
 
 impl Plugin for MovePlugin {
     fn build(&self, app: &mut App) {
-        app
-            .add_system(move_ghost)
-            .add_system(mark_movement_to_reverse_after_pacman_ate_energizer)
-            .add_system(mark_movement_to_reverse_when_schedule_phase_changed);
+        app.add_system(move_ghost);
     }
 }
 
 fn move_ghost(
+    mut commands: Commands,
     time: Res<Time>,
     board: Res<Board>,
-    mut query: Query<(&mut Movement, &mut Position, &mut Target, &mut Transform, &mut MovementReverseMarker)>,
+    mut query: Query<(Entity, &Movement, &mut Position, &Target, &mut Transform)>,
 ) {
-    for (mut movement, mut position, mut target, mut transform, mut movement_reverse_marker) in query.iter_mut() {
-        if target.is_not_set() { continue; }
-
+    for (entity, movement, mut position, target, mut transform) in query.iter_mut() {
         let mut coordinates = &mut transform.translation;
         let delta_seconds = time.delta_seconds();
         let direction = match *movement {
@@ -63,41 +30,13 @@ fn move_ghost(
             Moving(dir) => dir
         };
 
-        let target_coordinates = board.coordinates_of_position(target.get_position());
+        let target_coordinates = board.coordinates_of_position(target);
         move_in_direction(&mut coordinates, delta_seconds, &direction);
         limit_movement(&mut coordinates, &direction, &target_coordinates);
         if *coordinates == target_coordinates {
-            target.clear();
-            if movement_reverse_marker.is_set() {
-                movement.reverse();
-                movement_reverse_marker.unset();
-            }
+            commands.entity(entity).remove::<Target>();
         }
         *position = board.position_of_coordinates(coordinates)
-    }
-}
-
-fn mark_movement_to_reverse_after_pacman_ate_energizer(
-    mut event_reader: EventReader<EnergizerEaten>,
-    mut query: Query<&mut MovementReverseMarker, With<Ghost>>,
-) {
-    for _ in event_reader.iter() {
-        for mut movement_reverse_marker in query.iter_mut() {
-            movement_reverse_marker.set()
-        }
-    }
-}
-
-fn mark_movement_to_reverse_when_schedule_phase_changed(
-    mut event_reader: EventReader<SchedulePhaseChanged>,
-    mut query: Query<(Entity, &mut MovementReverseMarker), With<Ghost>>
-) {
-    for event in event_reader.iter() {
-        for (entity, mut movement_reverse_marker) in query.iter_mut() {
-            if event.entity == entity {
-                movement_reverse_marker.set()
-            }
-        }
     }
 }
 
