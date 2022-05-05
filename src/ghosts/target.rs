@@ -23,17 +23,17 @@ pub struct TargetPlugin;
 impl Plugin for TargetPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_system(determine_spawned_target)
-            .add_system(determine_scatter_target)
-            .add_system(determine_blinky_chase_target)
-            .add_system(determine_pinky_chase_target)
-            .add_system(determine_frightened_target)
-            .add_system(determine_eaten_target)
+            .add_system(set_spawned_target)
+            .add_system(set_scatter_target)
+            .add_system(set_blinky_chase_target)
+            .add_system(set_pinky_chase_target)
+            .add_system(set_frightened_target)
+            .add_system(set_eaten_target)
         ;
     }
 }
 
-fn determine_spawned_target(
+fn set_spawned_target(
     mut commands: Commands,
     board: Res<Board>,
     mut query: Query<(Entity, &mut Movement, &Position, &State), Without<Target>>,
@@ -58,7 +58,7 @@ fn determine_spawned_target(
     }
 }
 
-fn determine_scatter_target(
+fn set_scatter_target(
     mut commands: Commands,
     board: Res<Board>,
     mut query: Query<(Entity, &Ghost, &mut Movement, &Position, &State), Without<Target>>,
@@ -79,7 +79,7 @@ fn determine_scatter_target(
     }
 }
 
-fn determine_blinky_chase_target(
+fn set_blinky_chase_target(
     mut commands: Commands,
     board: Res<Board>,
     mut blinky_query: Query<(Entity, &Ghost, &mut Movement, &Position, &State), Without<Target>>,
@@ -102,7 +102,7 @@ fn determine_blinky_chase_target(
     }
 }
 
-fn determine_pinky_chase_target(
+fn set_pinky_chase_target(
     mut commands: Commands,
     board: Res<Board>,
     mut pinky_query: Query<(Entity, &Ghost, &mut Movement, &Position, &State), (Without<Pacman>, Without<Target>)>,
@@ -144,7 +144,7 @@ fn calculate_pinky_target_position(
     }
 }
 
-fn determine_frightened_target(
+fn set_frightened_target(
     mut commands: Commands,
     board: Res<Board>,
     random: Res<Random>,
@@ -170,7 +170,7 @@ fn determine_frightened_target(
     }
 }
 
-fn determine_eaten_target(
+fn set_eaten_target(
     mut commands: Commands,
     board: Res<Board>,
     mut query: Query<(Entity, &mut Movement, &Position, &State), Without<Target>>,

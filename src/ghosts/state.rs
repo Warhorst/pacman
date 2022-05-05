@@ -42,6 +42,7 @@ impl Plugin for StateSetPlugin {
             .add_system(set_eaten_next_state)
             .add_system(update_frightened_timer)
             .add_system(set_frightened_when_pacman_ate_energizer)
+            .add_system(set_frightened_when_pacman_ate_energizer_and_ghost_has_no_target)
             .add_system(set_eaten_when_hit_by_pacman);
     }
 }
@@ -154,6 +155,22 @@ fn set_frightened_when_pacman_ate_energizer(
 
         movement.reverse();
         *target = Target(position_ghost_came_from);
+    }
+}
+
+fn set_frightened_when_pacman_ate_energizer_and_ghost_has_no_target(
+    event_reader: EventReader<EnergizerEaten>,
+    mut frightened_timer: ResMut<FrightenedTimer>,
+    mut query: Query<(&mut State, &mut Movement), (With<Ghost>, Without<Target>)>,
+) {
+    if event_reader.is_empty() { return; }
+    frightened_timer.start();
+
+    for (mut state, mut movement) in query.iter_mut() {
+        if *state != Chase && *state != Scatter { continue; }
+
+        *state = Frightened;
+        movement.reverse();
     }
 }
 
