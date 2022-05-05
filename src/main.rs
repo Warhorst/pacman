@@ -1,5 +1,6 @@
 extern crate core;
 
+use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
 
 use map::MapPlugin;
@@ -44,7 +45,9 @@ fn main() {
         .add_plugin(TunnelPlugin)
         .add_plugin(EnergizerPlugin)
         .add_plugin(RandomPlugin)
-        .add_plugin(DebugPlugin)
+        // .add_plugin(DebugPlugin)
+        .add_plugin(LogDiagnosticsPlugin::default())
+        .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .add_startup_system(init)
         .run()
 }

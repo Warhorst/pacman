@@ -7,7 +7,6 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 (This is a WIP list of things to implement. Will be updated frequently)
 
 ### Pacman
-- slow down when eating a dot
 - slow down when eating an energizer
 - speed up based on level and time
 - "waka waka" animation + sound when eating dots (very important)
