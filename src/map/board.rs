@@ -2,7 +2,7 @@ use std::fs::File;
 
 use bevy::prelude::*;
 
-use crate::common::{MoveDirection::*, Position};
+use crate::common::{MoveDirection::*, MoveDirection, Position};
 use crate::common;
 use crate::constants::{FIELD_DIMENSION, USED_PACMAP_PATH, WALL_DIMENSION};
 use crate::map::{FieldType, Neighbour, PositionTypeMap};
@@ -152,5 +152,16 @@ impl Board {
                 None => panic!()
             })
             .collect()
+    }
+
+    pub fn neighbour_behind(&self, position: &Position, direction: &MoveDirection) -> Neighbour {
+        let position = (match direction.opposite() {
+            Up => self.position_up_of(position),
+            Down => self.position_down_of(position),
+            Left => self.position_left_of(position),
+            Right => self.position_right_of(position)
+        }).unwrap();
+
+        Neighbour::new(position, *self.type_of_position(&position), direction.opposite())
     }
 }

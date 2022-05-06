@@ -53,8 +53,8 @@ fn set_spawned_target(
             |neighbour| neighbour_is_no_wall_in_spawn(&board, position, neighbour),
         );
 
-        *direction = next_target_neighbour.unwrap().direction;
-        commands.entity(entity).insert(Target(next_target_neighbour.unwrap().position));
+        *direction = next_target_neighbour.direction;
+        commands.entity(entity).insert(Target(next_target_neighbour.position));
     }
 }
 
@@ -74,8 +74,8 @@ fn set_scatter_target(
             &direction,
             |neighbour| neighbour_is_no_wall(&board, &neighbour.position),
         );
-        *direction = next_target_neighbour.unwrap().direction;
-        commands.entity(entity).insert(Target(next_target_neighbour.unwrap().position));
+        *direction = next_target_neighbour.direction;
+        commands.entity(entity).insert(Target(next_target_neighbour.position));
     }
 }
 
@@ -96,8 +96,8 @@ fn set_blinky_chase_target(
                 &direction,
                 |neighbour| neighbour_is_no_wall(&board, &neighbour.position),
             );
-            *direction = next_target_neighbour.unwrap().direction;
-            commands.entity(entity).insert(Target(next_target_neighbour.unwrap().position));
+            *direction = next_target_neighbour.direction;
+            commands.entity(entity).insert(Target(next_target_neighbour.position));
         }
     }
 }
@@ -119,8 +119,8 @@ fn set_pinky_chase_target(
                 &pinky_direction,
                 |neighbour| neighbour_is_no_wall(&board, &neighbour.position),
             );
-            *pinky_direction = next_target_neighbour.unwrap().direction;
-            commands.entity(entity).insert(Target(next_target_neighbour.unwrap().position));
+            *pinky_direction = next_target_neighbour.direction;
+            commands.entity(entity).insert(Target(next_target_neighbour.position));
         }
     }
 }
@@ -158,12 +158,12 @@ fn set_frightened_target(
         );
 
         let next_target_neighbour = match possible_neighbours.len() {
-            0 => None,
-            1 => Some(possible_neighbours[0]),
-            len => Some(possible_neighbours[random.zero_to(len)])
+            0 => board.neighbour_behind(&position, &direction),
+            1 => possible_neighbours[0],
+            len => possible_neighbours[random.zero_to(len)]
         };
-        *direction = next_target_neighbour.unwrap().direction;
-        commands.entity(entity).insert(Target(next_target_neighbour.unwrap().position));
+        *direction = next_target_neighbour.direction;
+        commands.entity(entity).insert(Target(next_target_neighbour.position));
     }
 }
 
@@ -187,8 +187,8 @@ fn set_eaten_target(
             &direction,
             |neighbour| neighbour_is_no_normal_wall(&board, &neighbour.position),
         );
-        *direction = next_target_neighbour.unwrap().direction;
-        commands.entity(entity).insert(Target(next_target_neighbour.unwrap().position));
+        *direction = next_target_neighbour.direction;
+        commands.entity(entity).insert(Target(next_target_neighbour.position));
     }
 }
 
@@ -198,10 +198,11 @@ fn get_neighbour_nearest_to_target<F: Fn(&Neighbour) -> bool>(
     board: &Board,
     direction: &MoveDirection,
     field_filter: F,
-) -> Option<Neighbour> {
+) -> Neighbour {
     get_possible_neighbours(ghost_position, board, direction, field_filter)
         .into_iter()
         .min_by(|n_a, n_b| minimal_distance_to_neighbours(target_position, n_a, n_b))
+        .unwrap_or_else(|| board.neighbour_behind(ghost_position, direction))
 }
 
 fn get_possible_neighbours<F: Fn(&Neighbour) -> bool>(
