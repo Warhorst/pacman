@@ -10,7 +10,7 @@ use crate::ghosts::target::Target;
 use crate::map::board::Board;
 use crate::map::FieldType::{GhostSpawn, GhostWall};
 use crate::pacman::Pacman;
-use crate::common::Direction::*;
+use crate::common::MoveDirection::*;
 
 use self::State::*;
 

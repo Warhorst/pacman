@@ -27,7 +27,8 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 - different ghost behaviour based on level/time
 
 ### Tunnels
-- ghosts disappear before getting teleported
+- pacman/ghosts disappear before getting teleported
+- ghost get slower in tunnels
 
 ### Fruit
 - enable fruit spawn

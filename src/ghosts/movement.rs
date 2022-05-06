@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::common;
 use crate::common::{Movement, Position};
-use crate::common::Direction::*;
+use crate::common::MoveDirection::*;
 use crate::common::Movement::*;
 use crate::constants::GHOST_SPEED;
 use crate::ghosts::target::Target;
@@ -40,13 +40,13 @@ fn move_ghost(
     }
 }
 
-fn move_in_direction(coordinates: &mut Vec3, delta_seconds: f32, direction: &common::Direction) {
+fn move_in_direction(coordinates: &mut Vec3, delta_seconds: f32, direction: &common::MoveDirection) {
     let (x, y) = get_direction_modifiers(direction);
     coordinates.x += delta_seconds * x * GHOST_SPEED;
     coordinates.y += delta_seconds * y * GHOST_SPEED;
 }
 
-fn get_direction_modifiers(direction: &common::Direction) -> (f32, f32) {
+fn get_direction_modifiers(direction: &common::MoveDirection) -> (f32, f32) {
     match direction {
         Up => (0.0, 1.0),
         Down => (0.0, -1.0),
@@ -56,7 +56,7 @@ fn get_direction_modifiers(direction: &common::Direction) -> (f32, f32) {
 }
 
 /// The ghost should not move over its target.
-fn limit_movement(coordinates: &mut Vec3, direction: &common::Direction, target_coordinates: &Vec3) {
+fn limit_movement(coordinates: &mut Vec3, direction: &common::MoveDirection, target_coordinates: &Vec3) {
     match direction {
         Up => coordinates.y = coordinates.y.min(target_coordinates.y),
         Down => coordinates.y = coordinates.y.max(target_coordinates.y),

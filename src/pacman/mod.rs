@@ -4,7 +4,7 @@ use std::time::Duration;
 use bevy::prelude::*;
 
 use crate::common::{MoveComponents, Movement, Position};
-use crate::common::Direction::*;
+use crate::common::MoveDirection::*;
 use crate::common::Movement::*;
 use crate::dots::DotEaten;
 use crate::ghosts::Ghost;

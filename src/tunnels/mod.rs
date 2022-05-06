@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use spawner::Spawner;
 
-use crate::common::{Direction, MoveComponents, Movement, Position};
+use crate::common::{MoveDirection, MoveComponents, Movement, Position};
 use crate::ghosts::Ghost;
 use crate::map::board::Board;
 use crate::map::FieldType::*;
@@ -45,7 +45,7 @@ pub struct GhostPassedTunnel {
 #[derive(Copy, Clone, Debug)]
 struct TunnelEntrance {
     position: Position,
-    entrance_direction: Direction,
+    entrance_direction: MoveDirection,
 }
 
 fn spawn_tunnels(commands: Commands, board: Res<Board>) {

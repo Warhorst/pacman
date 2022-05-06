@@ -2,7 +2,7 @@ use std::fs::File;
 
 use bevy::prelude::*;
 
-use crate::common::{Direction::*, Position};
+use crate::common::{MoveDirection::*, Position};
 use crate::common;
 use crate::constants::{FIELD_DIMENSION, USED_PACMAP_PATH, WALL_DIMENSION};
 use crate::map::{FieldType, Neighbour, PositionTypeMap};
@@ -50,7 +50,7 @@ impl Board {
         Position::new(x as usize, y as usize)
     }
 
-    pub fn position_in_direction(&self, position: &Position, direction: &common::Direction) -> Option<Position> {
+    pub fn position_in_direction(&self, position: &Position, direction: &common::MoveDirection) -> Option<Position> {
         match direction {
             Up => self.position_up_of(position),
             Down => self.position_down_of(position),
@@ -90,7 +90,7 @@ impl Board {
     /// Determines if pacmans current coordinates are in the center of his current position. The center of the position is
     /// its middle point with the width/height of the accumulated distance between pacman and the walls.
     /// Assumes pacman is larger than a wall.
-    pub fn are_coordinates_in_field_center(&self, direction: &common::Direction, position: &Position, coordinates: &Vec3, entity_dimension: f32) -> bool {
+    pub fn are_coordinates_in_field_center(&self, direction: &common::MoveDirection, position: &Position, coordinates: &Vec3, entity_dimension: f32) -> bool {
         let position_coordinates = self.coordinates_of_position(position);
         let entity_wall_distance = match entity_dimension > WALL_DIMENSION {
             true => entity_dimension - WALL_DIMENSION,

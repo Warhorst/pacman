@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 
 use crate::common;
-use crate::common::Direction;
-use crate::common::Direction::*;
+use crate::common::MoveDirection;
+use crate::common::MoveDirection::*;
 use crate::common::Movement;
 use crate::common::Movement::*;
 use crate::common::Position;
@@ -49,7 +49,7 @@ impl<'a> Mover<'a> {
     }
 
     /// Calculate pacmans new coordinates on the window based on his speed and the time.
-    fn calculate_new_coordinates(&self, direction: &common::Direction) -> Vec3 {
+    fn calculate_new_coordinates(&self, direction: &common::MoveDirection) -> Vec3 {
         let (x, y) = self.get_modifiers_for_direction(direction);
         let mut new_coordinates = *self.pacman_coordinates;
         new_coordinates.x += self.delta_seconds * x * PACMAN_SPEED;
@@ -57,7 +57,7 @@ impl<'a> Mover<'a> {
         new_coordinates
     }
 
-    fn get_modifiers_for_direction(&self, direction: &Direction) -> (f32, f32) {
+    fn get_modifiers_for_direction(&self, direction: &MoveDirection) -> (f32, f32) {
         match direction {
             Up => (0.0, 1.0),
             Down => (0.0, -1.0),
@@ -67,7 +67,7 @@ impl<'a> Mover<'a> {
     }
 
     /// Determine if pacman will collide with an obstacle if he is going further in his current direction.
-    fn is_going_to_collide_with_obstacle(&self, direction: &common::Direction, new_position: &Position, new_coordinates: &Vec3) -> bool {
+    fn is_going_to_collide_with_obstacle(&self, direction: &common::MoveDirection, new_position: &Position, new_coordinates: &Vec3) -> bool {
         match self.board.position_in_direction(new_position, direction) {
             Some(pos) if self.position_is_obstacle(&pos) => true,
             Some(pos) => !self.board.are_coordinates_in_field_center(direction, &pos, new_coordinates, PACMAN_DIMENSION),
@@ -84,14 +84,14 @@ impl<'a> Mover<'a> {
     }
 
     /// Limit pacmans movement if he reached an obstacle and stop him.
-    fn process_collision(&self, direction: &common::Direction, new_position: &Position, new_coordinates: &mut Vec3, new_movement: &mut Movement) {
+    fn process_collision(&self, direction: &common::MoveDirection, new_position: &Position, new_coordinates: &mut Vec3, new_movement: &mut Movement) {
         let field_coordinates = self.board.coordinates_of_position(new_position);
         self.limit_movement(direction, &field_coordinates, new_coordinates);
         self.stop_if_at_border(direction, &field_coordinates, new_coordinates, new_movement)
     }
 
     /// Because the next field is an obstacle, pacman can not go beyond his current field.
-    fn limit_movement(&self, direction: &Direction, field_coordinates: &Vec3, new_coordinates: &mut Vec3) {
+    fn limit_movement(&self, direction: &MoveDirection, field_coordinates: &Vec3, new_coordinates: &mut Vec3) {
         match direction {
             Up => new_coordinates.y = new_coordinates.y.min(field_coordinates.y),
             Down => new_coordinates.y = new_coordinates.y.max(field_coordinates.y),
@@ -101,7 +101,7 @@ impl<'a> Mover<'a> {
     }
 
     /// If pacman is at a border, he can not go further and stop.
-    fn stop_if_at_border(&self, direction: &Direction, field_coordinates: &Vec3, new_coordinates: &mut Vec3, movement: &mut Movement) {
+    fn stop_if_at_border(&self, direction: &MoveDirection, field_coordinates: &Vec3, new_coordinates: &mut Vec3, movement: &mut Movement) {
         match direction {
             Up | Down => if field_coordinates.y == new_coordinates.y {
                 *movement = Idle
@@ -115,7 +115,7 @@ impl<'a> Mover<'a> {
 
     /// Center pacmans current position in the middle of his current field.
     /// The purpose of this method is to keep equally sized gaps to the hallway pacman is currently passing.
-    fn center_position(&self, direction: &common::Direction, new_position: &Position, new_coordinates: &mut Vec3) {
+    fn center_position(&self, direction: &common::MoveDirection, new_position: &Position, new_coordinates: &mut Vec3) {
         let position_coordinates = self.board.coordinates_of_position(new_position);
         match direction {
             Up | Down => new_coordinates.x = position_coordinates.x,

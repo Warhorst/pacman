@@ -3,7 +3,8 @@ use std::cmp::Ordering;
 use bevy::prelude::*;
 
 use crate::common::{Movement, Position};
-use crate::common::Direction::*;
+use crate::common::MoveDirection;
+use crate::common::MoveDirection::*;
 use crate::common::Movement::*;
 use crate::ghosts::Ghost;
 use crate::ghosts::Ghost::*;
@@ -49,7 +50,7 @@ fn set_spawned_target(
             position,
             nearest_wall_position,
             &board,
-            &movement,
+            &movement.get_direction(),
             |neighbour| neighbour_is_no_wall_in_spawn(&board, position, neighbour),
         );
 
@@ -71,7 +72,7 @@ fn set_scatter_target(
             position,
             ghost_corner_position,
             &board,
-            &movement,
+            &movement.get_direction(),
             |neighbour| neighbour_is_no_wall(&board, &neighbour.position),
         );
         *movement = Moving(next_target_neighbour.unwrap().direction);
@@ -93,7 +94,7 @@ fn set_blinky_chase_target(
                 blinky_position,
                 pacman_position,
                 &board,
-                &movement,
+                &movement.get_direction(),
                 |neighbour| neighbour_is_no_wall(&board, &neighbour.position),
             );
             *movement = Moving(next_target_neighbour.unwrap().direction);
@@ -116,7 +117,7 @@ fn set_pinky_chase_target(
                 pinky_position,
                 &calculate_pinky_target_position(pacman_position, pacman_movement),
                 &board,
-                &pinky_movement,
+                &pinky_movement.get_direction(),
                 |neighbour| neighbour_is_no_wall(&board, &neighbour.position),
             );
             *pinky_movement = Moving(next_target_neighbour.unwrap().direction);
@@ -156,7 +157,7 @@ fn set_frightened_target(
         let possible_neighbours = get_possible_neighbours(
             position,
             &board,
-            &movement,
+            &movement.get_direction(),
             |neighbour| neighbour_is_no_wall(&board, &neighbour.position),
         );
 
@@ -187,7 +188,7 @@ fn set_eaten_target(
             position,
             nearest_spawn_position,
             &board,
-            &movement,
+            &movement.get_direction(),
             |neighbour| neighbour_is_no_normal_wall(&board, &neighbour.position),
         );
         *movement = Moving(next_target_neighbour.unwrap().direction);
@@ -195,29 +196,29 @@ fn set_eaten_target(
     }
 }
 
-fn get_possible_neighbours<F: Fn(&Neighbour) -> bool>(
-    ghost_position: &Position,
-    board: &Board,
-    movement: &Movement,
-    field_filter: F,
-) -> Vec<Neighbour> {
-    board.neighbours_of(ghost_position)
-        .into_iter()
-        .filter(|neighbour| neighbour_not_in_opposite_direction(movement, neighbour))
-        .filter(|neighbour| (field_filter)(neighbour))
-        .collect()
-}
-
 fn get_neighbour_nearest_to_target<F: Fn(&Neighbour) -> bool>(
     ghost_position: &Position,
     target_position: &Position,
     board: &Board,
-    movement: &Movement,
+    direction: &MoveDirection,
     field_filter: F,
 ) -> Option<Neighbour> {
-    get_possible_neighbours(ghost_position, board, movement, field_filter)
+    get_possible_neighbours(ghost_position, board, direction, field_filter)
         .into_iter()
         .min_by(|n_a, n_b| minimal_distance_to_neighbours(target_position, n_a, n_b))
+}
+
+fn get_possible_neighbours<F: Fn(&Neighbour) -> bool>(
+    ghost_position: &Position,
+    board: &Board,
+    direction: &MoveDirection,
+    field_filter: F,
+) -> Vec<Neighbour> {
+    board.neighbours_of(ghost_position)
+        .into_iter()
+        .filter(|neighbour| neighbour_not_in_opposite_direction(direction, neighbour))
+        .filter(|neighbour| (field_filter)(neighbour))
+        .collect()
 }
 
 fn neighbour_is_no_wall_in_spawn(board: &Board, ghost_position: &Position, neighbour: &Neighbour) -> bool {
@@ -241,11 +242,8 @@ fn neighbour_is_no_normal_wall(board: &Board, neighbour_position: &Position) -> 
     }
 }
 
-fn neighbour_not_in_opposite_direction(movement: &Movement, neighbour: &Neighbour) -> bool {
-    match *movement {
-        Idle => true,
-        Moving(dir) => neighbour.direction != dir.opposite()
-    }
+fn neighbour_not_in_opposite_direction(direction: &MoveDirection, neighbour: &Neighbour) -> bool {
+    neighbour.direction != direction.opposite()
 }
 
 fn minimal_distance_to_neighbours(big_target: &Position, neighbour_a: &Neighbour, neighbour_b: &Neighbour) -> Ordering {

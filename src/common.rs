@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::common::Direction::*;
+use crate::common::MoveDirection::*;
 use Movement::*;
 
 /// A type alias for the typical components when processing movement.
@@ -41,13 +41,13 @@ impl Position {
 #[derive(Copy, Component, Clone, Debug)]
 pub enum Movement {
     Idle,
-    Moving(Direction),
+    Moving(MoveDirection),
 }
 
 impl Movement {
     /// Get the direction of the movement without an idle check.
     /// Useful for entities that will never go idle (like ghosts).
-    pub fn get_direction(&self) -> &Direction {
+    pub fn get_direction(&self) -> &MoveDirection {
         match self {
             Idle => panic!("Expected direction"),
             Moving(d) => d
@@ -63,20 +63,24 @@ impl Movement {
 }
 
 #[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]
-pub enum Direction {
+pub enum MoveDirection {
     Up,
     Down,
     Left,
     Right,
 }
 
-impl Direction {
-    pub fn opposite(&self) -> Direction {
+impl MoveDirection {
+    pub fn opposite(&self) -> MoveDirection {
         match self {
             Up => Down,
             Down => Up,
             Right => Left,
             Left => Right
         }
+    }
+
+    pub fn reverse(&mut self) {
+        *self = self.opposite()
     }
 }

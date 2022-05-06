@@ -125,11 +125,11 @@ impl std::fmt::Display for FieldTypeFromCharError {
 pub struct Neighbour {
     pub position: Position,
     pub field_type: FieldType,
-    pub direction: common::Direction,
+    pub direction: common::MoveDirection,
 }
 
 impl Neighbour {
-    pub fn new(position: Position, field_type: FieldType, direction: common::Direction) -> Self {
+    pub fn new(position: Position, field_type: FieldType, direction: common::MoveDirection) -> Self {
         Neighbour { position, field_type, direction }
     }
 }
