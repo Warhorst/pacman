@@ -8,30 +8,20 @@ pub struct ScorePlugin;
 impl Plugin for ScorePlugin {
     fn build(&self, app: &mut App) {
         app
-            .insert_resource(Score::new())
+            .insert_resource(Score(0))
             .add_startup_system(create_scoreboard)
             .add_system(update_scoreboard)
             .add_system(add_points_for_eaten_dot);
     }
 }
 
-pub struct Score {
-    points: usize
-}
+/// Resource that saves how many points the player has collected so far
+#[derive(Deref, DerefMut)]
+pub struct Score(usize);
 
 impl Score {
-    fn new() -> Self {
-        Score {
-            points: 0
-        }
-    }
-
     pub fn increment(&mut self) {
-        self.points += POINTS_PER_DOT
-    }
-
-    pub fn get_points(&self) -> usize {
-        self.points
+        **self += POINTS_PER_DOT
     }
 }
 
@@ -54,7 +44,7 @@ fn create_scoreboard(mut commands: Commands, asset_server: Res<AssetServer>) {
 
 fn update_scoreboard(score: Res<Score>, mut query: Query<&mut Text>) {
     for mut text in query.iter_mut() {
-        text.sections[0].value = format!("Score: {}", score.get_points())
+        text.sections[0].value = format!("Score: {}", **score)
     }
 }
 

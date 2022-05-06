@@ -20,8 +20,6 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 - animations
 
 ### Lifecycle
-- pacman has lives
-- pacman can respawn and loses a live in the process
 - ghosts enter the game depending on the current level/time
 - the game ends if pacman dies without remaining lives
 - different ghost behaviour based on level/time

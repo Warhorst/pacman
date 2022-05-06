@@ -9,6 +9,7 @@ use crate::dots::DotEaten;
 use crate::ghosts::Ghost;
 use crate::ghosts::state::State;
 use crate::ghosts::state::State::*;
+use crate::lives::Life;
 use crate::map::board::Board;
 use crate::pacman::mover::Mover;
 use crate::pacman::spawner::Spawner;
@@ -70,6 +71,7 @@ impl Plugin for PacmanPlugin {
             .add_system(pacman_hits_ghost_and_might_get_killed)
             .add_system(stop_pacman_when_a_dot_was_eaten)
             .add_system(update_pacman_stop_timer)
+            .add_system(respawn_pacman_wen_he_died_and_has_lives)
         ;
     }
 }
@@ -167,4 +169,17 @@ fn update_pacman_stop_timer(
     for entity in query.iter() {
         commands.entity(entity).remove::<Stop>();
     }
+}
+
+fn respawn_pacman_wen_he_died_and_has_lives(
+    commands: Commands,
+    board: Res<Board>,
+    event_reader: EventReader<PacmanKilled>,
+    query: Query<&Life>,
+) {
+    if event_reader.is_empty() { return; }
+
+    if query.iter().count() == 0 { return; }
+
+    Spawner::new(commands, &board).spawn()
 }
