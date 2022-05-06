@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 
-use crate::common::{Movement, Position};
-use crate::common::Movement::*;
+use crate::common::{MoveDirection, Position};
 use crate::map::board::Board;
 use crate::tunnels::{Tunnel, TunnelEntrance};
 
@@ -9,18 +8,20 @@ use crate::tunnels::{Tunnel, TunnelEntrance};
 pub(in crate::tunnels) struct Mover<'a> {
     board: &'a Board,
     tunnel: &'a Tunnel,
-    entity_translation: &'a mut  Vec3,
+    entity_translation: &'a mut Vec3,
     entity_position: &'a mut Position,
-    entity_movement: &'a mut Movement,
+    entity_direction: &'a mut MoveDirection,
 }
 
 impl<'a> Mover<'a> {
-    pub fn new(board: &'a Board,
-               tunnel: &'a Tunnel,
-               entity_translation: &'a mut Vec3,
-               entity_position: &'a mut Position,
-               entity_movement: &'a mut Movement) -> Self {
-        Mover { board, tunnel, entity_translation, entity_position, entity_movement }
+    pub fn new(
+        board: &'a Board,
+        tunnel: &'a Tunnel,
+        entity_translation: &'a mut Vec3,
+        entity_position: &'a mut Position,
+        entity_direction: &'a mut MoveDirection,
+    ) -> Self {
+        Mover { board, tunnel, entity_translation, entity_position, entity_direction }
     }
 
     /// Move an entity through a tunnel if it moves into it.
@@ -42,16 +43,16 @@ impl<'a> Mover<'a> {
             pos if pos == self.tunnel.second_entrance.position => TunnelPath::new(self.tunnel.second_entrance, self.tunnel.first_entrance),
             _ => return None
         };
-        match &self.entity_movement {
-            Moving(dir) if dir == &path.start.entrance_direction => Some(path.end),
-            _ => None
+        match  self.entity_direction == &path.start.entrance_direction {
+            true => Some(path.end),
+            false => None
         }
     }
 
     fn teleport_entity_to_tunnel_end(&mut self, end: TunnelEntrance) {
         *self.entity_position = end.position.clone();
         *self.entity_translation = self.board.coordinates_of_position(&end.position);
-        *self.entity_movement = Moving(end.entrance_direction.opposite());
+        *self.entity_direction = end.entrance_direction.opposite();
     }
 }
 

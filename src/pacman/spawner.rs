@@ -1,6 +1,6 @@
 use bevy::prelude::*;
+use crate::common::MoveDirection;
 
-use crate::common::Movement;
 use crate::constants::PACMAN_DIMENSION;
 use crate::map::board::Board;
 use crate::map::FieldType::PacManSpawn;
@@ -30,7 +30,7 @@ impl<'a> Spawner<'a> {
                 ..Default::default()
             })
             .insert(Pacman)
-            .insert(Movement::Idle)
+            .insert(MoveDirection::Up)
             .insert(start_position);
     }
 }

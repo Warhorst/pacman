@@ -1,12 +1,11 @@
 use bevy::prelude::*;
 
 use crate::common::MoveDirection::*;
-use Movement::*;
 
 /// A type alias for the typical components when processing movement.
 /// A component bundle might be preferable, but the transform is created
 /// with the SpriteComponents.
-pub type MoveComponents<'a> = (&'a mut Transform, &'a mut Position, &'a mut Movement);
+pub type MoveComponents<'a> = (&'a mut Transform, &'a mut Position, &'a mut MoveDirection);
 
 #[derive(Copy, Clone, Component, Hash, Debug, Eq, PartialEq)]
 pub struct Position(usize, usize);
@@ -38,31 +37,7 @@ impl Position {
     }
 }
 
-#[derive(Copy, Component, Clone, Debug)]
-pub enum Movement {
-    Idle,
-    Moving(MoveDirection),
-}
-
-impl Movement {
-    /// Get the direction of the movement without an idle check.
-    /// Useful for entities that will never go idle (like ghosts).
-    pub fn get_direction(&self) -> &MoveDirection {
-        match self {
-            Idle => panic!("Expected direction"),
-            Moving(d) => d
-        }
-    }
-
-    pub fn reverse(&mut self) {
-        match self {
-            Idle => return,
-            Moving(dir) => *self = Moving(dir.opposite())
-        }
-    }
-}
-
-#[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]
+#[derive(Copy, Clone, Component, Debug, PartialOrd, PartialEq)]
 pub enum MoveDirection {
     Up,
     Down,

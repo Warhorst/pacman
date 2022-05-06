@@ -3,9 +3,8 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 
-use crate::common::{MoveComponents, Movement, Position};
+use crate::common::{MoveComponents, MoveDirection, Position};
 use crate::common::MoveDirection::*;
-use crate::common::Movement::*;
 use crate::dots::DotEaten;
 use crate::ghosts::Ghost;
 use crate::ghosts::state::State;
@@ -96,23 +95,23 @@ fn move_pacman_if_not_stopped(
 
 fn set_direction_based_on_keyboard_input(
     keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<&mut Movement, With<Pacman>>,
+    mut query: Query<&mut MoveDirection, With<Pacman>>,
 ) {
-    for mut movement in query.iter_mut() {
+    for mut direction in query.iter_mut() {
         if keyboard_input.pressed(KeyCode::Left) {
-            *movement = Moving(Left)
+            *direction = Left
         }
 
         if keyboard_input.pressed(KeyCode::Right) {
-            *movement = Moving(Right)
+            *direction = Right
         }
 
         if keyboard_input.pressed(KeyCode::Up) {
-            *movement = Moving(Up)
+            *direction = Up
         }
 
         if keyboard_input.pressed(KeyCode::Down) {
-            *movement = Moving(Down)
+            *direction = Down
         }
     }
 }
@@ -143,7 +142,7 @@ fn pacman_hits_ghost_and_might_get_killed(
 /// with a fixed duration is used instead.
 fn stop_pacman_when_a_dot_was_eaten(
     mut commands: Commands,
-    mut event_reader: EventReader<DotEaten>,
+    event_reader: EventReader<DotEaten>,
     mut pacman_stop_timer: ResMut<PacmanStopTimer>,
     query: Query<Entity, With<Pacman>>,
 ) {

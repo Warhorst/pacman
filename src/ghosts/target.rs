@@ -2,10 +2,9 @@ use std::cmp::Ordering;
 
 use bevy::prelude::*;
 
-use crate::common::{Movement, Position};
+use crate::common::Position;
 use crate::common::MoveDirection;
 use crate::common::MoveDirection::*;
-use crate::common::Movement::*;
 use crate::ghosts::Ghost;
 use crate::ghosts::Ghost::*;
 use crate::ghosts::state::State;
@@ -37,9 +36,9 @@ impl Plugin for TargetPlugin {
 fn set_spawned_target(
     mut commands: Commands,
     board: Res<Board>,
-    mut query: Query<(Entity, &mut Movement, &Position, &State), Without<Target>>,
+    mut query: Query<(Entity, &mut MoveDirection, &Position, &State), Without<Target>>,
 ) {
-    for (entity, mut movement, position, state) in query.iter_mut() {
+    for (entity, mut direction, position, state) in query.iter_mut() {
         if state != &Spawned { continue; }
 
         let ghost_wall_positions = board.positions_of_type(GhostWall);
@@ -50,11 +49,11 @@ fn set_spawned_target(
             position,
             nearest_wall_position,
             &board,
-            &movement.get_direction(),
+            &direction,
             |neighbour| neighbour_is_no_wall_in_spawn(&board, position, neighbour),
         );
 
-        *movement = Moving(next_target_neighbour.unwrap().direction);
+        *direction = next_target_neighbour.unwrap().direction;
         commands.entity(entity).insert(Target(next_target_neighbour.unwrap().position));
     }
 }
@@ -62,9 +61,9 @@ fn set_spawned_target(
 fn set_scatter_target(
     mut commands: Commands,
     board: Res<Board>,
-    mut query: Query<(Entity, &Ghost, &mut Movement, &Position, &State), Without<Target>>,
+    mut query: Query<(Entity, &Ghost, &mut MoveDirection, &Position, &State), Without<Target>>,
 ) {
-    for (entity, ghost, mut movement, position, state) in query.iter_mut() {
+    for (entity, ghost, mut direction, position, state) in query.iter_mut() {
         if state != &Scatter { continue; }
 
         let ghost_corner_position = board.position_of_type(GhostCorner(*ghost));
@@ -72,10 +71,10 @@ fn set_scatter_target(
             position,
             ghost_corner_position,
             &board,
-            &movement.get_direction(),
+            &direction,
             |neighbour| neighbour_is_no_wall(&board, &neighbour.position),
         );
-        *movement = Moving(next_target_neighbour.unwrap().direction);
+        *direction = next_target_neighbour.unwrap().direction;
         commands.entity(entity).insert(Target(next_target_neighbour.unwrap().position));
     }
 }
@@ -83,10 +82,10 @@ fn set_scatter_target(
 fn set_blinky_chase_target(
     mut commands: Commands,
     board: Res<Board>,
-    mut blinky_query: Query<(Entity, &Ghost, &mut Movement, &Position, &State), Without<Target>>,
+    mut blinky_query: Query<(Entity, &Ghost, &mut MoveDirection, &Position, &State), Without<Target>>,
     pacman_query: Query<&Position, With<Pacman>>,
 ) {
-    for (entity, ghost, mut movement, blinky_position, state) in blinky_query.iter_mut() {
+    for (entity, ghost, mut direction, blinky_position, state) in blinky_query.iter_mut() {
         for pacman_position in pacman_query.iter() {
             if ghost != &Blinky || state != &Chase { continue; }
 
@@ -94,10 +93,10 @@ fn set_blinky_chase_target(
                 blinky_position,
                 pacman_position,
                 &board,
-                &movement.get_direction(),
+                &direction,
                 |neighbour| neighbour_is_no_wall(&board, &neighbour.position),
             );
-            *movement = Moving(next_target_neighbour.unwrap().direction);
+            *direction = next_target_neighbour.unwrap().direction;
             commands.entity(entity).insert(Target(next_target_neighbour.unwrap().position));
         }
     }
@@ -106,21 +105,21 @@ fn set_blinky_chase_target(
 fn set_pinky_chase_target(
     mut commands: Commands,
     board: Res<Board>,
-    mut pinky_query: Query<(Entity, &Ghost, &mut Movement, &Position, &State), (Without<Pacman>, Without<Target>)>,
-    pacman_query: Query<(&Position, &Movement), With<Pacman>>,
+    mut pinky_query: Query<(Entity, &Ghost, &mut MoveDirection, &Position, &State), (Without<Pacman>, Without<Target>)>,
+    pacman_query: Query<(&Position, &MoveDirection), With<Pacman>>,
 ) {
-    for (entity, ghost, mut pinky_movement, pinky_position, state) in pinky_query.iter_mut() {
-        for (pacman_position, pacman_movement) in pacman_query.iter() {
+    for (entity, ghost, mut pinky_direction, pinky_position, state) in pinky_query.iter_mut() {
+        for (pacman_position, pacman_direction) in pacman_query.iter() {
             if ghost != &Pinky || state != &Chase { continue; }
 
             let next_target_neighbour = get_neighbour_nearest_to_target(
                 pinky_position,
-                &calculate_pinky_target_position(pacman_position, pacman_movement),
+                &calculate_pinky_target_position(pacman_position, pacman_direction),
                 &board,
-                &pinky_movement.get_direction(),
+                &pinky_direction,
                 |neighbour| neighbour_is_no_wall(&board, &neighbour.position),
             );
-            *pinky_movement = Moving(next_target_neighbour.unwrap().direction);
+            *pinky_direction = next_target_neighbour.unwrap().direction;
             commands.entity(entity).insert(Target(next_target_neighbour.unwrap().position));
         }
     }
@@ -130,18 +129,15 @@ fn set_pinky_chase_target(
 /// If pacman is idle, the field to its right is choosen.
 fn calculate_pinky_target_position(
     pacman_position: &Position,
-    pacman_movement: &Movement,
+    pacman_direction: &MoveDirection,
 ) -> Position {
     let x = pacman_position.x();
     let y = pacman_position.y();
-    match *pacman_movement {
-        Idle => Position::new(x + 4, y),
-        Moving(dir) => match dir {
-            Up => Position::new(x, y + 4),
-            Down => Position::new(x, y - 4),
-            Left => Position::new(x - 4, y),
-            Right => Position::new(x + 4, y)
-        }
+    match pacman_direction {
+        Up => Position::new(x, y + 4),
+        Down => Position::new(x, y - 4),
+        Left => Position::new(x - 4, y),
+        Right => Position::new(x + 4, y)
     }
 }
 
@@ -149,15 +145,15 @@ fn set_frightened_target(
     mut commands: Commands,
     board: Res<Board>,
     random: Res<Random>,
-    mut query: Query<(Entity, &mut Movement, &Position, &State), Without<Target>>,
+    mut query: Query<(Entity, &mut MoveDirection, &Position, &State), Without<Target>>,
 ) {
-    for (entity, mut movement, position, state) in query.iter_mut() {
+    for (entity, mut direction, position, state) in query.iter_mut() {
         if state != &Frightened { continue; }
 
         let possible_neighbours = get_possible_neighbours(
             position,
             &board,
-            &movement.get_direction(),
+            &direction,
             |neighbour| neighbour_is_no_wall(&board, &neighbour.position),
         );
 
@@ -166,7 +162,7 @@ fn set_frightened_target(
             1 => Some(possible_neighbours[0]),
             len => Some(possible_neighbours[random.zero_to(len)])
         };
-        *movement = Moving(next_target_neighbour.unwrap().direction);
+        *direction = next_target_neighbour.unwrap().direction;
         commands.entity(entity).insert(Target(next_target_neighbour.unwrap().position));
     }
 }
@@ -174,9 +170,9 @@ fn set_frightened_target(
 fn set_eaten_target(
     mut commands: Commands,
     board: Res<Board>,
-    mut query: Query<(Entity, &mut Movement, &Position, &State), Without<Target>>,
+    mut query: Query<(Entity, &mut MoveDirection, &Position, &State), Without<Target>>,
 ) {
-    for (entity, mut movement, position, state) in query.iter_mut() {
+    for (entity, mut direction, position, state) in query.iter_mut() {
         if state != &Eaten { continue; }
 
         let ghost_spawn_positions = board.positions_of_type(GhostSpawn);
@@ -188,10 +184,10 @@ fn set_eaten_target(
             position,
             nearest_spawn_position,
             &board,
-            &movement.get_direction(),
+            &direction,
             |neighbour| neighbour_is_no_normal_wall(&board, &neighbour.position),
         );
-        *movement = Moving(next_target_neighbour.unwrap().direction);
+        *direction = next_target_neighbour.unwrap().direction;
         commands.entity(entity).insert(Target(next_target_neighbour.unwrap().position));
     }
 }

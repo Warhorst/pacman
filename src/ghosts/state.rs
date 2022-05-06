@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 
-use crate::common::{Movement, Position};
+use crate::common::{MoveDirection, Position};
 use crate::energizer::EnergizerEaten;
 use crate::ghosts::Ghost;
 use crate::ghosts::schedule::Schedule;
@@ -136,24 +136,24 @@ fn update_frightened_timer(
 fn set_frightened_when_pacman_ate_energizer(
     event_reader: EventReader<EnergizerEaten>,
     mut frightened_timer: ResMut<FrightenedTimer>,
-    mut query: Query<(&mut State, &mut Movement, &mut Target), With<Ghost>>,
+    mut query: Query<(&mut State, &mut MoveDirection, &mut Target), With<Ghost>>,
 ) {
     if event_reader.is_empty() { return; }
     frightened_timer.start();
 
-    for (mut state, mut movement, mut target) in query.iter_mut() {
+    for (mut state, mut direction, mut target) in query.iter_mut() {
         if *state != Chase && *state != Scatter { continue; }
 
         *state = Frightened;
 
-        let position_ghost_came_from = match movement.get_direction() {
+        let position_ghost_came_from = match *direction {
             Up => Position::new(target.x(), target.y() - 1),
             Down => Position::new(target.x(), target.y() + 1),
             Left => Position::new(target.x() + 1, target.y()),
             Right => Position::new(target.x() - 1, target.y())
         };
 
-        movement.reverse();
+        direction.reverse();
         *target = Target(position_ghost_came_from);
     }
 }
@@ -161,16 +161,16 @@ fn set_frightened_when_pacman_ate_energizer(
 fn set_frightened_when_pacman_ate_energizer_and_ghost_has_no_target(
     event_reader: EventReader<EnergizerEaten>,
     mut frightened_timer: ResMut<FrightenedTimer>,
-    mut query: Query<(&mut State, &mut Movement), (With<Ghost>, Without<Target>)>,
+    mut query: Query<(&mut State, &mut MoveDirection), (With<Ghost>, Without<Target>)>,
 ) {
     if event_reader.is_empty() { return; }
     frightened_timer.start();
 
-    for (mut state, mut movement) in query.iter_mut() {
+    for (mut state, mut direction) in query.iter_mut() {
         if *state != Chase && *state != Scatter { continue; }
 
         *state = Frightened;
-        movement.reverse();
+        direction.reverse();
     }
 }
 

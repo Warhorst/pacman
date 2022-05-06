@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::common::{Movement, Position};
+use crate::common::{MoveDirection, Position};
 use crate::ghosts::Ghost;
 use crate::ghosts::state::State;
 
@@ -15,7 +15,7 @@ impl Plugin for DebugPlugin {
 }
 
 struct DebugInfoTimer {
-    pub timer: Timer
+    pub timer: Timer,
 }
 
 impl DebugInfoTimer {
@@ -26,9 +26,11 @@ impl DebugInfoTimer {
     }
 }
 
-fn print_debug_data(mut debug_timer: ResMut<DebugInfoTimer>,
-                    time: Res<Time>,
-                    ghost_query: Query<(&Ghost, &Position, &Movement, &State)>) {
+fn print_debug_data(
+    mut debug_timer: ResMut<DebugInfoTimer>,
+    time: Res<Time>,
+    ghost_query: Query<(&Ghost, &Position, &MoveDirection, &State)>,
+) {
     debug_timer.timer.tick(time.delta());
     if !debug_timer.timer.finished() {
         return;
@@ -36,12 +38,12 @@ fn print_debug_data(mut debug_timer: ResMut<DebugInfoTimer>,
 
     println!();
 
-    for (ghost, position, movement, state) in ghost_query.iter() {
+    for (ghost, position, direction, state) in ghost_query.iter() {
         println!("{}",
                  format!("Ghost: {:?}, position: {:?}, movement: {:?}, state: {:?}",
                          ghost,
                          position,
-                         movement,
+                         direction,
                          state
                  )
         )

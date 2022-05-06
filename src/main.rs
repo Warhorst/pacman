@@ -6,7 +6,6 @@ use bevy::prelude::*;
 use map::MapPlugin;
 use pacman::PacmanPlugin;
 
-use crate::debug::DebugPlugin;
 use crate::dots::DotPlugin;
 use crate::energizer::EnergizerPlugin;
 use crate::ghosts::GhostPlugin;

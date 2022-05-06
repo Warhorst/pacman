@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use spawner::Spawner;
 
-use crate::common::{MoveDirection, MoveComponents, Movement, Position};
+use crate::common::{MoveDirection, MoveComponents, Position};
 use crate::ghosts::Ghost;
 use crate::map::board::Board;
 use crate::map::FieldType::*;
@@ -65,10 +65,10 @@ fn pacman_enters_tunnel(board: Res<Board>,
 fn ghost_enters_tunnel(board: Res<Board>,
                        mut event_writer: EventWriter<GhostPassedTunnel>,
                        tunnel_query: Query<&Tunnel>,
-                       mut ghost_query: Query<(Entity, &mut Transform, &mut Position, &mut Movement), With<Ghost>>) {
-    for (entity, mut transform, mut position, mut movement) in ghost_query.iter_mut() {
+                       mut ghost_query: Query<(Entity, &mut Transform, &mut Position, &mut MoveDirection), With<Ghost>>) {
+    for (entity, mut transform, mut position, mut direction) in ghost_query.iter_mut() {
         for tunnel in tunnel_query.iter() {
-            if Mover::new(&board, tunnel, &mut transform.translation, &mut position, &mut movement).move_entity_through_tunnel() {
+            if Mover::new(&board, tunnel, &mut transform.translation, &mut position, &mut direction).move_entity_through_tunnel() {
                 event_writer.send(GhostPassedTunnel { entity })
             }
         }

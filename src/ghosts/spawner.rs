@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::common::{Movement, Position};
+use crate::common::Position;
 use crate::common::MoveDirection::Up;
 use crate::constants::GHOST_DIMENSION;
 use crate::ghosts::Ghost;
@@ -47,7 +47,7 @@ impl<'a> Spawner<'a> {
             })
             .insert(ghost)
             .insert(*position)
-            .insert(Movement::Moving(Up))
+            .insert(Up)
             .insert(State::Spawned);
     }
 }
