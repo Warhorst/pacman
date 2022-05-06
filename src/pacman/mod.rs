@@ -11,6 +11,7 @@ use crate::ghosts::state::State;
 use crate::ghosts::state::State::*;
 use crate::lives::Life;
 use crate::map::board::Board;
+use crate::map::FieldType::PacManSpawn;
 use crate::pacman::mover::Mover;
 use crate::pacman::spawner::Spawner;
 
@@ -71,7 +72,7 @@ impl Plugin for PacmanPlugin {
             .add_system(pacman_hits_ghost_and_might_get_killed)
             .add_system(stop_pacman_when_a_dot_was_eaten)
             .add_system(update_pacman_stop_timer)
-            .add_system(respawn_pacman_wen_he_died_and_has_lives)
+            .add_system(reset_pacman_when_he_died_and_has_lives)
         ;
     }
 }
@@ -119,15 +120,13 @@ fn set_direction_based_on_keyboard_input(
 }
 
 fn pacman_hits_ghost_and_might_get_killed(
-    mut commands: Commands,
     mut event_writer: EventWriter<PacmanKilled>,
-    pacman_query: Query<(Entity, &Position), With<Pacman>>,
+    pacman_query: Query<&Position, With<Pacman>>,
     ghost_query: Query<(&Position, &State), With<Ghost>>,
 ) {
-    for (pacman_entity, pacman_position) in pacman_query.iter() {
+    for pacman_position in pacman_query.iter() {
         for (ghost_position, state) in ghost_query.iter() {
             if pacman_position == ghost_position && !vec![&Frightened, &Eaten].contains(&state) {
-                commands.entity(pacman_entity).despawn();
                 event_writer.send(PacmanKilled)
             }
         }
@@ -171,15 +170,19 @@ fn update_pacman_stop_timer(
     }
 }
 
-fn respawn_pacman_wen_he_died_and_has_lives(
-    commands: Commands,
+fn reset_pacman_when_he_died_and_has_lives(
     board: Res<Board>,
     event_reader: EventReader<PacmanKilled>,
-    query: Query<&Life>,
+    live_query: Query<&Life>,
+    mut pacman_query: Query<&mut Transform, With<Pacman>>
 ) {
     if event_reader.is_empty() { return; }
 
-    if query.iter().count() == 0 { return; }
+    if live_query.iter().count() == 0 { return; }
 
-    Spawner::new(commands, &board).spawn()
+    for mut transform in pacman_query.iter_mut() {
+        let pacman_start = board.coordinates_of_position(&board.position_of_type(PacManSpawn));
+        *transform = Transform::from_xyz(pacman_start.x, pacman_start.y, pacman_start.z);
+    }
+
 }

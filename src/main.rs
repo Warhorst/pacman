@@ -9,6 +9,7 @@ use pacman::PacmanPlugin;
 use crate::dots::DotPlugin;
 use crate::energizer::EnergizerPlugin;
 use crate::ghosts::GhostPlugin;
+use crate::level::LevelPlugin;
 use crate::lives::LivesPlugin;
 use crate::random::RandomPlugin;
 use crate::score::ScorePlugin;
@@ -26,6 +27,7 @@ mod energizer;
 mod debug;
 mod random;
 mod lives;
+mod level;
 
 fn main() {
     App::new()
@@ -47,6 +49,7 @@ fn main() {
         .add_plugin(EnergizerPlugin)
         .add_plugin(RandomPlugin)
         .add_plugin(LivesPlugin)
+        .add_plugin(LevelPlugin)
         .add_plugin(LogDiagnosticsPlugin::default())
         .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .add_startup_system(init)

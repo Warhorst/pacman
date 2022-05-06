@@ -12,16 +12,22 @@ impl Plugin for DotPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<DotEaten>()
+            .add_event::<AllDotsEaten>()
             .add_startup_system(spawn_dots)
-            .add_system(pacman_eat_dot);
+            .add_system(pacman_eat_dot)
+            .add_system(send_event_when_all_dots_are_eaten)
+        ;
     }
 }
 
 #[derive(Component)]
 pub struct Dot;
 
-/// Fired when pacman eats a dot.
+/// Event. Fired when pacman eats a dot.
 pub struct DotEaten;
+
+/// Event. Fired when all dots are eaten.
+pub struct AllDotsEaten;
 
 fn spawn_dots(mut commands: Commands, board: Res<Board>) {
     let point_dimension = Vec2::new(POINT_DIMENSION, POINT_DIMENSION);
@@ -55,4 +61,13 @@ fn pacman_eat_dot(
             }
         }
     }
+}
+
+fn send_event_when_all_dots_are_eaten(
+    mut event_writer: EventWriter<AllDotsEaten>,
+    query: Query<&Dot>,
+) {
+    if query.iter().count() > 0 { return; }
+
+    event_writer.send(AllDotsEaten);
 }

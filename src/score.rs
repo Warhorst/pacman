@@ -25,7 +25,13 @@ impl Score {
     }
 }
 
-fn create_scoreboard(mut commands: Commands, asset_server: Res<AssetServer>) {
+#[derive(Component)]
+pub struct Scoreboard;
+
+fn create_scoreboard(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+) {
     commands.spawn_bundle(Text2dBundle {
         text: Text::with_section("Score".to_string(),
                                  TextStyle {
@@ -39,10 +45,14 @@ fn create_scoreboard(mut commands: Commands, asset_server: Res<AssetServer>) {
                                  }),
         transform: Transform::from_xyz(-430.0, 300.0, 0.0),
         ..Default::default()
-    });
+    })
+        .insert(Scoreboard);
 }
 
-fn update_scoreboard(score: Res<Score>, mut query: Query<&mut Text>) {
+fn update_scoreboard(
+    score: Res<Score>,
+    mut query: Query<&mut Text, With<Scoreboard>>
+) {
     for mut text in query.iter_mut() {
         text.sections[0].value = format!("Score: {}", **score)
     }
