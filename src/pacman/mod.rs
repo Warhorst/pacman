@@ -86,12 +86,15 @@ fn move_pacman_if_not_stopped(
     board: Res<Board>,
     mut query: Query<MoveComponents, (With<Pacman>, Without<Stop>)>,
 ) {
-    for (mut transform, mut position, mut movement) in query.iter_mut() {
-        Mover::new(&board,
-                   time.delta_seconds(),
-                   movement.deref_mut(),
-                   position.deref_mut(),
-                   &mut transform.translation)
+    for (mut transform, mut position, mut movement, speed) in query.iter_mut() {
+        Mover::new(
+            &board,
+            time.delta_seconds(),
+            movement.deref_mut(),
+            position.deref_mut(),
+            &mut transform.translation,
+            speed,
+        )
             .move_pacman()
     }
 }
@@ -174,7 +177,7 @@ fn reset_pacman_when_he_died_and_has_lives(
     board: Res<Board>,
     event_reader: EventReader<PacmanKilled>,
     live_query: Query<&Life>,
-    mut pacman_query: Query<&mut Transform, With<Pacman>>
+    mut pacman_query: Query<&mut Transform, With<Pacman>>,
 ) {
     if event_reader.is_empty() { return; }
 
@@ -184,5 +187,4 @@ fn reset_pacman_when_he_died_and_has_lives(
         let pacman_start = board.coordinates_of_position(&board.position_of_type(PacManSpawn));
         *transform = Transform::from_xyz(pacman_start.x, pacman_start.y, pacman_start.z);
     }
-
 }

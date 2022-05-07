@@ -55,7 +55,7 @@ fn spawn_tunnels(commands: Commands, board: Res<Board>) {
 fn pacman_enters_tunnel(board: Res<Board>,
                         tunnel_query: Query<&Tunnel>,
                         mut pacman_query: Query<MoveComponents, With<Pacman>>) {
-    for (mut transform, mut position, mut movement) in pacman_query.iter_mut() {
+    for (mut transform, mut position, mut movement, _) in pacman_query.iter_mut() {
         for tunnel in tunnel_query.iter() {
             Mover::new(&board, tunnel, &mut transform.translation, &mut position, &mut movement).move_entity_through_tunnel();
         }

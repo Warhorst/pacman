@@ -2,12 +2,13 @@ use bevy::prelude::*;
 
 use crate::common::Position;
 use crate::common::MoveDirection::Up;
-use crate::constants::GHOST_DIMENSION;
+use crate::constants::{GHOST_DIMENSION, GHOST_SPEED};
 use crate::ghosts::Ghost;
 use crate::ghosts::Ghost::*;
 use crate::ghosts::state::State;
 use crate::map::board::Board;
 use crate::map::FieldType;
+use crate::speed::Speed;
 
 pub(in crate::ghosts) struct Spawner<'a> {
     commands: Commands<'a, 'a>,
@@ -48,6 +49,7 @@ impl<'a> Spawner<'a> {
             .insert(ghost)
             .insert(*position)
             .insert(Up)
+            .insert(Speed(GHOST_SPEED))
             .insert(State::Spawned);
     }
 }

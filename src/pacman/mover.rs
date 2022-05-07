@@ -1,11 +1,13 @@
+use std::ops::Deref;
 use bevy::prelude::*;
 
 use crate::common::MoveDirection;
 use crate::common::MoveDirection::*;
 use crate::common::Position;
-use crate::constants::{PACMAN_DIMENSION, PACMAN_SPEED};
+use crate::constants::PACMAN_DIMENSION;
 use crate::map::board::Board;
 use crate::map::FieldType::*;
+use crate::speed::Speed;
 
 /// Moves pacman to his next position.
 pub (in crate::pacman) struct Mover<'a> {
@@ -13,12 +15,14 @@ pub (in crate::pacman) struct Mover<'a> {
     delta_seconds: f32,
     direction: &'a MoveDirection,
     pacman_position: &'a mut Position,
-    pacman_coordinates: &'a mut Vec3
+    pacman_coordinates: &'a mut Vec3,
+    speed: &'a Speed
 }
 
 impl<'a> Mover<'a> {
-    pub fn new(board: &'a Board, delta_seconds: f32, direction: &'a MoveDirection, pacman_position: &'a mut Position, pacman_coordinates: &'a mut Vec3) -> Self {
-        Mover { board, delta_seconds, direction, pacman_position, pacman_coordinates }
+    // TODO: Refactor (again). Maybe world queries will help: https://bevyengine.org/news/bevy-0-7/#worldquery-derives
+    pub fn new(board: &'a Board, delta_seconds: f32, direction: &'a MoveDirection, pacman_position: &'a mut Position, pacman_coordinates: &'a mut Vec3, speed: &'a Speed) -> Self {
+        Mover { board, delta_seconds, direction, pacman_position, pacman_coordinates, speed }
     }
 
     /// Move pacman by updating his movement, position and coordinates.
@@ -42,8 +46,8 @@ impl<'a> Mover<'a> {
     fn calculate_new_coordinates(&self, direction: &MoveDirection) -> Vec3 {
         let (x, y) = self.get_modifiers_for_direction(direction);
         let mut new_coordinates = *self.pacman_coordinates;
-        new_coordinates.x += self.delta_seconds * x * PACMAN_SPEED;
-        new_coordinates.y += self.delta_seconds * y * PACMAN_SPEED;
+        new_coordinates.x += self.delta_seconds * x * self.speed.deref();
+        new_coordinates.y += self.delta_seconds * y * self.speed.deref();
         new_coordinates
     }
 

@@ -1,10 +1,11 @@
 use bevy::prelude::*;
 use crate::common::MoveDirection;
 
-use crate::constants::PACMAN_DIMENSION;
+use crate::constants::{PACMAN_DIMENSION, PACMAN_SPEED};
 use crate::map::board::Board;
 use crate::map::FieldType::PacManSpawn;
 use crate::pacman::Pacman;
+use crate::speed::Speed;
 
 pub (in crate::pacman) struct Spawner<'a> {
     commands: Commands<'a, 'a>,
@@ -31,6 +32,7 @@ impl<'a> Spawner<'a> {
             })
             .insert(Pacman)
             .insert(MoveDirection::Up)
+            .insert(Speed(PACMAN_SPEED))
             .insert(start_position);
     }
 }

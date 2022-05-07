@@ -13,6 +13,7 @@ use crate::level::LevelPlugin;
 use crate::lives::LivesPlugin;
 use crate::random::RandomPlugin;
 use crate::score::ScorePlugin;
+use crate::speed::SpeedPlugin;
 use crate::tunnels::TunnelPlugin;
 
 mod constants;
@@ -28,6 +29,7 @@ mod debug;
 mod random;
 mod lives;
 mod level;
+mod speed;
 
 fn main() {
     App::new()
@@ -50,6 +52,7 @@ fn main() {
         .add_plugin(RandomPlugin)
         .add_plugin(LivesPlugin)
         .add_plugin(LevelPlugin)
+        .add_plugin(SpeedPlugin)
         .add_plugin(LogDiagnosticsPlugin::default())
         .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .add_startup_system(init)
