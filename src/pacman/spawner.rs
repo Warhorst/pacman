@@ -2,19 +2,21 @@ use bevy::prelude::*;
 use crate::common::MoveDirection;
 
 use crate::constants::{PACMAN_DIMENSION, PACMAN_SPEED};
+use crate::level::Level;
 use crate::map::board::Board;
 use crate::map::FieldType::PacManSpawn;
 use crate::pacman::Pacman;
-use crate::speed::Speed;
+use crate::speed::{Speed, SpeedByLevel};
 
 pub (in crate::pacman) struct Spawner<'a> {
     commands: Commands<'a, 'a>,
     board: &'a Board,
+    speed_by_level: &'a SpeedByLevel
 }
 
 impl<'a> Spawner<'a> {
-    pub fn new(commands: Commands<'a, 'a>, board: &'a Board) -> Self {
-        Spawner { commands, board }
+    pub fn new(commands: Commands<'a, 'a>, board: &'a Board, speed_by_level: &'a SpeedByLevel) -> Self {
+        Self { commands, board, speed_by_level }
     }
 
     pub fn spawn(&mut self) {
@@ -32,7 +34,8 @@ impl<'a> Spawner<'a> {
             })
             .insert(Pacman)
             .insert(MoveDirection::Up)
-            .insert(Speed(PACMAN_SPEED))
+            // TODO replace with real level resource when this god dammit spawner struct gets removed
+            .insert(self.speed_by_level.get_pacman_speed_by_level(&Level(1)))
             .insert(start_position);
     }
 }

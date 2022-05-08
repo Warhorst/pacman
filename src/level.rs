@@ -13,11 +13,10 @@ impl Plugin for LevelPlugin {
     }
 }
 
-#[derive(Deref, DerefMut)]
-pub struct Level(usize);
+#[derive(Deref, DerefMut, Ord, PartialOrd, Eq, PartialEq)]
+pub struct Level(pub usize);
 
 impl Level {
-
     fn increase(&mut self) {
         **self += 1
     }

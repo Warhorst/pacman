@@ -14,6 +14,7 @@ use crate::map::board::Board;
 use crate::map::FieldType::PacManSpawn;
 use crate::pacman::mover::Mover;
 use crate::pacman::spawner::Spawner;
+use crate::speed::SpeedByLevel;
 
 mod mover;
 mod spawner;
@@ -77,8 +78,12 @@ impl Plugin for PacmanPlugin {
     }
 }
 
-fn spawn_pacman(commands: Commands, board: Res<Board>) {
-    Spawner::new(commands, &board).spawn()
+fn spawn_pacman(
+    commands: Commands,
+    board: Res<Board>,
+    speed_by_level: Res<SpeedByLevel>
+) {
+    Spawner::new(commands, &board, &speed_by_level).spawn()
 }
 
 fn move_pacman_if_not_stopped(
