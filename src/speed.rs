@@ -14,6 +14,7 @@ impl Plugin for SpeedPlugin {
         app
             .insert_resource(SpeedByLevel::new())
             .add_system(update_ghost_speed_when_state_changed)
+            .add_system(update_ghost_speed_when_state_changed)
         ;
     }
 }
@@ -80,11 +81,6 @@ impl LevelRangeSpeed {
     pub fn level_in_range(&self, level: &Level) -> bool {
         self.range.contains(&level)
     }
-}
-
-struct SpeedModifiers {
-    pub pacman: f32,
-    pub ghost: f32,
 }
 
 // TODO: I try out change detection with this one. to keep the app consistent,

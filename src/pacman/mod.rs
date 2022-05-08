@@ -1,9 +1,8 @@
-use std::ops::DerefMut;
 use std::time::Duration;
 
 use bevy::prelude::*;
 
-use crate::common::{MoveComponents, MoveDirection, Position};
+use crate::common::{MoveDirection, Position};
 use crate::common::MoveDirection::*;
 use crate::dots::DotEaten;
 use crate::ghosts::Ghost;
@@ -12,12 +11,11 @@ use crate::ghosts::state::State::*;
 use crate::lives::Life;
 use crate::map::board::Board;
 use crate::map::FieldType::PacManSpawn;
-use crate::pacman::mover::Mover;
-use crate::pacman::spawner::Spawner;
-use crate::speed::SpeedByLevel;
+use crate::pacman::mover::move_pacman_if_not_stopped;
+use crate::pacman::spawn::spawn_pacman;
 
 mod mover;
-mod spawner;
+mod spawn;
 
 /// Marker component for a pacman entity.
 #[derive(Component)]
@@ -75,32 +73,6 @@ impl Plugin for PacmanPlugin {
             .add_system(update_pacman_stop_timer)
             .add_system(reset_pacman_when_he_died_and_has_lives)
         ;
-    }
-}
-
-fn spawn_pacman(
-    commands: Commands,
-    board: Res<Board>,
-    speed_by_level: Res<SpeedByLevel>
-) {
-    Spawner::new(commands, &board, &speed_by_level).spawn()
-}
-
-fn move_pacman_if_not_stopped(
-    time: Res<Time>,
-    board: Res<Board>,
-    mut query: Query<MoveComponents, (With<Pacman>, Without<Stop>)>,
-) {
-    for (mut transform, mut position, mut movement, speed) in query.iter_mut() {
-        Mover::new(
-            &board,
-            time.delta_seconds(),
-            movement.deref_mut(),
-            position.deref_mut(),
-            &mut transform.translation,
-            speed,
-        )
-            .move_pacman()
     }
 }
 
