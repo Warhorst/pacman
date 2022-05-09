@@ -2,14 +2,13 @@ use bevy::prelude::*;
 
 use crate::ghosts::movement::MovePlugin;
 use crate::ghosts::schedule::SchedulePlugin;
-use crate::ghosts::spawner::Spawner;
+use crate::ghosts::spawn::spawn_ghosts;
 use crate::ghosts::state::StateSetPlugin;
 use crate::ghosts::target::{Target, TargetPlugin};
-use crate::map::board::Board;
 use crate::tunnels::GhostPassedTunnel;
 
 pub mod movement;
-pub mod spawner;
+pub mod spawn;
 pub mod state;
 pub mod target;
 mod schedule;
@@ -34,10 +33,6 @@ impl Plugin for GhostPlugin {
             .add_startup_system(spawn_ghosts)
             .add_system(ghost_passed_tunnel);
     }
-}
-
-fn spawn_ghosts(commands: Commands, board: Res<Board>) {
-    Spawner::new(commands, &board).spawn()
 }
 
 fn ghost_passed_tunnel(

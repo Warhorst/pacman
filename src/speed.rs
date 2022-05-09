@@ -14,7 +14,8 @@ impl Plugin for SpeedPlugin {
         app
             .insert_resource(SpeedByLevel::new())
             .add_system(update_ghost_speed_when_state_changed)
-            .add_system(update_ghost_speed_when_state_changed)
+            .add_system(update_pacman_speed_when_level_changed)
+            .add_system(update_ghost_speed_when_level_changed)
         ;
     }
 }
@@ -87,12 +88,16 @@ impl LevelRangeSpeed {
 //  a "way to go" (events or change detection) should be choosen for each system.
 //  Currently, it's mostly events.
 fn update_ghost_speed_when_state_changed(
+    level: Res<Level>,
+    speed_by_level: Res<SpeedByLevel>,
     mut query: Query<(&mut Speed, &State), (With<Ghost>, Changed<State>)>
 ) {
+    let normal_speed = speed_by_level.get_ghost_speed_by_level(&level);
+
     for (mut speed, state) in query.iter_mut() {
         match state {
-            Frightened => **speed *= 0.5,
-            _ => **speed = GHOST_SPEED
+            Frightened => **speed = *normal_speed * 0.5,
+            _ => *speed = normal_speed
         }
     }
 }
@@ -106,5 +111,17 @@ fn update_pacman_speed_when_level_changed(
 
     for mut speed in query.iter_mut() {
         *speed = speed_by_level.get_pacman_speed_by_level(&level)
+    }
+}
+
+fn update_ghost_speed_when_level_changed(
+    speed_by_level: Res<SpeedByLevel>,
+    level: Res<Level>,
+    mut query: Query<&mut Speed, With<Ghost>>,
+) {
+    if !level.is_changed() { return; }
+
+    for mut speed in query.iter_mut() {
+        *speed = speed_by_level.get_ghost_speed_by_level(&level)
     }
 }

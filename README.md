@@ -9,6 +9,7 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 ### Pacman
 - slow down when eating an energizer
 - "waka waka" animation + sound when eating dots (very important)
+- speed up when eating energizers
 
 ### Ghosts
 - implement chase for Inky (the cyan ghost)

@@ -11,10 +11,10 @@ use crate::ghosts::state::State::*;
 use crate::lives::Life;
 use crate::map::board::Board;
 use crate::map::FieldType::PacManSpawn;
-use crate::pacman::mover::move_pacman_if_not_stopped;
+use crate::pacman::movement::move_pacman_if_not_stopped;
 use crate::pacman::spawn::spawn_pacman;
 
-mod mover;
+mod movement;
 mod spawn;
 
 /// Marker component for a pacman entity.
