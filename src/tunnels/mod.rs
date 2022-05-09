@@ -20,7 +20,7 @@ impl Plugin for TunnelPlugin {
     }
 }
 
-#[derive(Component, Debug)]
+#[derive(Copy, Clone, Component, Debug)]
 struct Tunnel {
     first_entrance: TunnelEntrance,
     second_entrance: TunnelEntrance,

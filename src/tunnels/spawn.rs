@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 
 use bevy::prelude::*;
+use crate::common::Position;
+use crate::constants::FIELD_DIMENSION;
 
 use crate::map::{FieldType, Neighbour};
 use crate::map::board::Board;
@@ -12,11 +14,53 @@ pub (in crate::tunnels) fn spawn_tunnels(
     mut commands: Commands,
     board: Res<Board>
 ) {
+    // TODO: This is only a bad workaround, as the board always returns z = 0.0
+    let get_transform = |pos: Position| -> Transform {
+        let mut translation = board.coordinates_of_position(&pos);
+        translation.z = 1.0;
+        Transform::from_translation(translation)
+    };
+
     create_tunnel_entrances(&board).into_iter()
         .map(|(_, entrances)| entrances)
         .for_each(|entrances|  {
             commands.spawn().insert(Tunnel::new(entrances[0], entrances[1]));
-        })
+
+            commands.spawn()
+                .insert_bundle(SpriteBundle {
+                    sprite: Sprite {
+                        color: Color::rgb(0.0, 0.0, 0.0),
+                        custom_size: Some(Vec2::new(FIELD_DIMENSION, FIELD_DIMENSION)),
+                        ..default()
+                    },
+                    transform: (get_transform)(entrances[0].position),
+                    ..Default::default()
+                });
+
+            commands.spawn()
+                .insert_bundle(SpriteBundle {
+                    sprite: Sprite {
+                        color: Color::rgb(0.0, 0.0, 0.0),
+                        custom_size: Some(Vec2::new(FIELD_DIMENSION, FIELD_DIMENSION)),
+                        ..default()
+                    },
+                    transform: (get_transform)(entrances[1].position),
+                    ..Default::default()
+                });
+        });
+
+    for pos in board.positions_of_type(TunnelOpening) {
+        commands.spawn()
+            .insert_bundle(SpriteBundle {
+                sprite: Sprite {
+                    color: Color::rgb(0.0, 0.0, 0.0),
+                    custom_size: Some(Vec2::new(FIELD_DIMENSION, FIELD_DIMENSION)),
+                    ..default()
+                },
+                transform: (get_transform)(*pos),
+                ..Default::default()
+            });
+    }
 }
 
 fn create_tunnel_entrances(board: &Board) -> HashMap<usize, Vec<TunnelEntrance>> {
@@ -24,7 +68,7 @@ fn create_tunnel_entrances(board: &Board) -> HashMap<usize, Vec<TunnelEntrance>>
     for tunnel_entrance_position in board.positions_of_type_filter(field_type_is_tunnel_entrance) {
         let tunnel_entrance_neighbours = board.neighbours_of(tunnel_entrance_position)
             .into_iter()
-            .filter(neighbour_is_type_entrance)
+            .filter(neighbour_type_is_opening)
             .collect::<Vec<_>>();
 
         let tunnel_entrance_neighbour = match tunnel_entrance_neighbours.len() {
@@ -59,9 +103,9 @@ fn field_type_is_tunnel_entrance(field_type: &FieldType) -> bool {
     }
 }
 
-fn neighbour_is_type_entrance(neighbour: &Neighbour) -> bool {
+fn neighbour_type_is_opening(neighbour: &Neighbour) -> bool {
     match neighbour.field_type {
-        TunnelDirection => true,
+        TunnelOpening => true,
         _ => false
     }
 }

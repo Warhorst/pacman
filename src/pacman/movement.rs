@@ -71,7 +71,7 @@ fn is_going_to_collide_with_obstacle(board: &Board, direction: &MoveDirection, n
 /// Tells if the given position is an obstacle for pacman.
 fn position_is_obstacle(board: &Board, position: &Position) -> bool {
     match board.type_of_position(position) {
-        Wall | GhostWall => true,
+        Wall | GhostWall | InvisibleWall => true,
         _ => false
     }
 }

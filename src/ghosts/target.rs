@@ -227,7 +227,7 @@ fn neighbour_is_no_wall_in_spawn(board: &Board, ghost_position: &Position, neigh
 
 fn neighbour_is_no_wall(board: &Board, neighbour_position: &Position) -> bool {
     match board.type_of_position(neighbour_position) {
-        Wall | GhostWall => false,
+        Wall | GhostWall | InvisibleWall => false,
         _ => true
     }
 }

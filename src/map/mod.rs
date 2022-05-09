@@ -31,7 +31,7 @@ impl Plugin for MapPlugin {
 }
 
 fn spawn_walls(mut commands: Commands, board: Res<Board>) {
-    for position in get_wall_positions(&board) {
+    for position in board.positions_of_type(Wall) {
         commands.spawn()
             .insert_bundle(SpriteBundle {
                 sprite: Sprite {
@@ -58,16 +58,6 @@ fn spawn_walls(mut commands: Commands, board: Res<Board>) {
     }
 }
 
-/// Return all positions of fields that are considered walls.
-fn get_wall_positions(board: &Board) -> Vec<&Position> {
-    let mut walls = board.positions_of_type(Wall);
-    walls.push(board.position_of_type(GhostCorner(Blinky)));
-    walls.push(board.position_of_type(GhostCorner(Pinky)));
-    walls.push(board.position_of_type(GhostCorner(Inky)));
-    walls.push(board.position_of_type(GhostCorner(Clyde)));
-    walls
-}
-
 #[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]
 pub enum FieldType {
     Free,
@@ -78,7 +68,9 @@ pub enum FieldType {
     GhostSpawn,
     GhostCorner(Ghost),
     TunnelEntrance(usize),
-    TunnelDirection,
+    TunnelOpening,
+    TunnelHallway,
+    InvisibleWall,
     Energizer,
 }
 
@@ -97,7 +89,9 @@ impl TryFrom<char> for FieldType {
             'P' => GhostCorner(Pinky),
             'I' => GhostCorner(Inky),
             'C' => GhostCorner(Clyde),
-            'T' => TunnelDirection,
+            'T' => TunnelOpening,
+            'H' => TunnelHallway,
+            'V' => InvisibleWall,
             'E' => Energizer,
             c if c.is_numeric() => TunnelEntrance(c.to_digit(10).unwrap() as usize),
             other => return Err(FieldTypeFromCharError { error_char: other })
