@@ -1,12 +1,6 @@
 use bevy::prelude::*;
 
 use crate::common::MoveDirection::*;
-use crate::speed::Speed;
-
-/// A type alias for the typical components when processing movement.
-/// A component bundle might be preferable, but the transform is created
-/// with the SpriteComponents.
-pub type MoveComponents<'a> = (&'a mut Transform, &'a mut Position, &'a mut MoveDirection, &'a Speed);
 
 #[derive(Copy, Clone, Component, Hash, Debug, Eq, PartialEq)]
 pub struct Position(usize, usize);

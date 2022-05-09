@@ -42,7 +42,7 @@ fn ghost_passed_tunnel(
 ) {
     for event in event_reader.iter() {
         for entity in query.iter_mut() {
-            if entity == event.entity {
+            if entity == **event {
                 commands.entity(entity).remove::<Target>();
             }
         }

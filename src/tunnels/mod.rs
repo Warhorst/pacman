@@ -1,16 +1,12 @@
 use bevy::prelude::*;
 
-use spawner::Spawner;
-
-use crate::common::{MoveDirection, MoveComponents, Position};
-use crate::ghosts::Ghost;
-use crate::map::board::Board;
+use crate::common::{MoveDirection, Position};
 use crate::map::FieldType::*;
-use crate::pacman::Pacman;
-use crate::tunnels::mover::Mover;
+use crate::tunnels::movement::{move_ghost_trough_tunnel, move_pacman_through_tunnel};
+use crate::tunnels::spawn::spawn_tunnels;
 
-mod mover;
-mod spawner;
+mod movement;
+mod spawn;
 
 pub struct TunnelPlugin;
 
@@ -19,12 +15,12 @@ impl Plugin for TunnelPlugin {
         app
             .add_event::<GhostPassedTunnel>()
             .add_startup_system(spawn_tunnels)
-            .add_system(pacman_enters_tunnel)
-            .add_system(ghost_enters_tunnel);
+            .add_system(move_pacman_through_tunnel)
+            .add_system(move_ghost_trough_tunnel);
     }
 }
 
-#[derive(Component)]
+#[derive(Component, Debug)]
 struct Tunnel {
     first_entrance: TunnelEntrance,
     second_entrance: TunnelEntrance,
@@ -36,41 +32,12 @@ impl Tunnel {
     }
 }
 
-/// Fired when a ghost moved through a tunnel.
-/// Saves the entity of the ghost.
-pub struct GhostPassedTunnel {
-    pub entity: Entity
-}
+/// Event. Fired when a ghost moved through a tunnel.
+#[derive(Deref, DerefMut)]
+pub struct GhostPassedTunnel(pub Entity);
 
 #[derive(Copy, Clone, Debug)]
 struct TunnelEntrance {
     position: Position,
     entrance_direction: MoveDirection,
-}
-
-fn spawn_tunnels(commands: Commands, board: Res<Board>) {
-    Spawner::new(commands, &board).spawn()
-}
-
-fn pacman_enters_tunnel(board: Res<Board>,
-                        tunnel_query: Query<&Tunnel>,
-                        mut pacman_query: Query<MoveComponents, With<Pacman>>) {
-    for (mut transform, mut position, mut movement, _) in pacman_query.iter_mut() {
-        for tunnel in tunnel_query.iter() {
-            Mover::new(&board, tunnel, &mut transform.translation, &mut position, &mut movement).move_entity_through_tunnel();
-        }
-    }
-}
-
-fn ghost_enters_tunnel(board: Res<Board>,
-                       mut event_writer: EventWriter<GhostPassedTunnel>,
-                       tunnel_query: Query<&Tunnel>,
-                       mut ghost_query: Query<(Entity, &mut Transform, &mut Position, &mut MoveDirection), With<Ghost>>) {
-    for (entity, mut transform, mut position, mut direction) in ghost_query.iter_mut() {
-        for tunnel in tunnel_query.iter() {
-            if Mover::new(&board, tunnel, &mut transform.translation, &mut position, &mut direction).move_entity_through_tunnel() {
-                event_writer.send(GhostPassedTunnel { entity })
-            }
-        }
-    }
 }
