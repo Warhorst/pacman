@@ -5,6 +5,7 @@ use bevy::prelude::*;
 use crate::common::{MoveDirection::*, MoveDirection, Position};
 use crate::common;
 use crate::constants::{FIELD_DIMENSION, USED_PACMAP_PATH, WALL_DIMENSION};
+use FieldType::*;
 use crate::map::{FieldType, Neighbour, PositionTypeMap};
 use crate::map::pacmap::PacMap;
 
@@ -50,7 +51,7 @@ impl Board {
         Position::new(x as usize, y as usize)
     }
 
-    pub fn position_in_direction(&self, position: &Position, direction: &common::MoveDirection) -> Option<Position> {
+    pub fn position_in_direction(&self, position: &Position, direction: &MoveDirection) -> Option<Position> {
         match direction {
             Up => self.position_up_of(position),
             Down => self.position_down_of(position),
@@ -90,7 +91,7 @@ impl Board {
     /// Determines if pacmans current coordinates are in the center of his current position. The center of the position is
     /// its middle point with the width/height of the accumulated distance between pacman and the walls.
     /// Assumes pacman is larger than a wall.
-    pub fn are_coordinates_in_field_center(&self, direction: &common::MoveDirection, position: &Position, coordinates: &Vec3, entity_dimension: f32) -> bool {
+    pub fn are_coordinates_in_field_center(&self, direction: &MoveDirection, position: &Position, coordinates: &Vec3, entity_dimension: f32) -> bool {
         let position_coordinates = self.coordinates_of_position(position);
         let entity_wall_distance = match entity_dimension > WALL_DIMENSION {
             true => entity_dimension - WALL_DIMENSION,
@@ -163,5 +164,12 @@ impl Board {
         }).unwrap();
 
         Neighbour::new(position, *self.type_of_position(&position), direction.opposite())
+    }
+
+    pub fn position_is_tunnel(&self, position: &Position) -> bool {
+        match self.type_of_position(position) {
+            TunnelOpening | TunnelHallway | TunnelEntrance(_) => true,
+            _ => false
+        }
     }
 }

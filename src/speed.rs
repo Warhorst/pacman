@@ -1,10 +1,12 @@
 use std::ops::RangeInclusive;
 use bevy::prelude::*;
+use crate::common::Position;
 use crate::constants::{GHOST_SPEED, PACMAN_SPEED};
 use crate::ghosts::Ghost;
-use crate::ghosts::state::State;
+use crate::ghosts::state::{FrightenedTimer, State};
 use crate::ghosts::state::State::Frightened;
 use crate::level::Level;
+use crate::map::board::Board;
 use crate::pacman::Pacman;
 
 pub struct SpeedPlugin;
@@ -13,9 +15,8 @@ impl Plugin for SpeedPlugin {
     fn build(&self, app: &mut App) {
         app
             .insert_resource(SpeedByLevel::new())
-            .add_system(update_ghost_speed_when_state_changed)
-            .add_system(update_pacman_speed_when_level_changed)
-            .add_system(update_ghost_speed_when_level_changed)
+            .add_system(update_ghost_speed)
+            .add_system(update_pacman_speed)
         ;
     }
 }
@@ -25,24 +26,54 @@ impl Plugin for SpeedPlugin {
 pub struct Speed(pub f32);
 
 pub struct SpeedByLevel {
-    pacman_ranges: Vec<LevelRangeSpeed>,
-    ghost_ranges: Vec<LevelRangeSpeed>,
+    pacman_ranges: Vec<PacmanLevelRangeSpeed>,
+    ghost_ranges: Vec<GhostLevelRangeSpeed>,
 }
 
 impl SpeedByLevel {
+    /// Creates the default settings for speed by level.
+    /// Taken from https://www.gamedeveloper.com/design/the-pac-man-dossier
     pub fn new() -> Self {
         let pacman_ranges = vec![
-            LevelRangeSpeed::new(Level(1)..=Level(1), Speed(0.8 * PACMAN_SPEED)),
-            LevelRangeSpeed::new(Level(2)..=Level(4), Speed(0.9 * PACMAN_SPEED)),
-            LevelRangeSpeed::new(Level(5)..=Level(20), Speed(1.0 * PACMAN_SPEED)),
-            LevelRangeSpeed::new(Level(21)..=Level(65000), Speed(0.9 * PACMAN_SPEED)),
+            PacmanLevelRangeSpeed::new(Level(1)..=Level(1), PacmanSpeed {
+                normal: Speed(0.8 * PACMAN_SPEED),
+                frightened: Speed(0.9 * PACMAN_SPEED)
+            }),
+            PacmanLevelRangeSpeed::new(Level(2)..=Level(4), PacmanSpeed {
+                normal: Speed(0.9 * PACMAN_SPEED),
+                frightened: Speed(0.95 * PACMAN_SPEED)
+            }),
+            PacmanLevelRangeSpeed::new(Level(5)..=Level(20), PacmanSpeed {
+                normal: Speed(1.0 * PACMAN_SPEED),
+                frightened: Speed(1.0 * PACMAN_SPEED)
+            }),
+            PacmanLevelRangeSpeed::new(Level(21)..=Level(usize::MAX), PacmanSpeed {
+                normal: Speed(0.9 * PACMAN_SPEED),
+                frightened: Speed(0.9 * PACMAN_SPEED)
+            }),
         ];
 
         let ghost_ranges = vec![
-            LevelRangeSpeed::new(Level(1)..=Level(1), Speed(0.75 * GHOST_SPEED)),
-            LevelRangeSpeed::new(Level(2)..=Level(4), Speed(0.85 * GHOST_SPEED)),
-            LevelRangeSpeed::new(Level(5)..=Level(20), Speed(0.95 * GHOST_SPEED)),
-            LevelRangeSpeed::new(Level(21)..=Level(65000), Speed(0.95 * GHOST_SPEED)),
+            GhostLevelRangeSpeed::new(Level(1)..=Level(1), GhostSpeed {
+                normal: Speed(0.75 * GHOST_SPEED),
+                frightened: Speed(0.5 * GHOST_SPEED),
+                tunnel: Speed(0.4 * GHOST_SPEED)
+            }),
+            GhostLevelRangeSpeed::new(Level(2)..=Level(4), GhostSpeed {
+                normal: Speed(0.85 * GHOST_SPEED),
+                frightened: Speed(0.55 * GHOST_SPEED),
+                tunnel: Speed(0.45 * GHOST_SPEED)
+            }),
+            GhostLevelRangeSpeed::new(Level(5)..=Level(20), GhostSpeed {
+                normal: Speed(0.95 * GHOST_SPEED),
+                frightened: Speed(0.6 * GHOST_SPEED),
+                tunnel: Speed(0.5 * GHOST_SPEED)
+            }),
+            GhostLevelRangeSpeed::new(Level(21)..=Level(usize::MAX), GhostSpeed {
+                normal: Speed(0.95 * GHOST_SPEED),
+                frightened: Speed(0.95 * GHOST_SPEED),
+                tunnel: Speed(0.5 * GHOST_SPEED)
+            }),
         ];
 
         SpeedByLevel {
@@ -51,77 +82,91 @@ impl SpeedByLevel {
         }
     }
 
-    pub fn get_pacman_speed_by_level(&self, level: &Level) -> Speed {
-        Self::get_speed_for_level(self.pacman_ranges.iter(), level)
+    pub fn for_pacman(&self, level: &Level) -> &PacmanSpeed {
+        self.pacman_ranges.iter()
+            .find_map(|PacmanLevelRangeSpeed {range, pacman_speed}| match range.contains(level) {
+                true => Some(pacman_speed),
+                false => None
+            })
+            .expect("For the given level was no speed assigned")
     }
 
-    pub fn get_ghost_speed_by_level(&self, level: &Level) -> Speed {
-        Self::get_speed_for_level(self.ghost_ranges.iter(), level)
-    }
-
-    fn get_speed_for_level<'a, I: IntoIterator<Item=&'a LevelRangeSpeed>>(iter: I, level: &Level) -> Speed {
-        iter.into_iter()
-            .find_map(|r| match r.level_in_range(level) {
-                true => Some(r.speed),
+    pub fn for_ghosts(&self, level: &Level) -> &GhostSpeed {
+        self.ghost_ranges.iter()
+            .find_map(|GhostLevelRangeSpeed {range, ghost_speed}| match range.contains(level) {
+                true => Some(ghost_speed),
                 false => None
             })
             .expect("For the given level was no speed assigned")
     }
 }
 
-struct LevelRangeSpeed {
+struct PacmanLevelRangeSpeed {
     range: RangeInclusive<Level>,
-    speed: Speed,
+    pacman_speed: PacmanSpeed
 }
 
-impl LevelRangeSpeed {
-    pub fn new(range: RangeInclusive<Level>, speed: Speed) -> Self {
-        Self { range, speed }
-    }
-
-    pub fn level_in_range(&self, level: &Level) -> bool {
-        self.range.contains(&level)
+impl PacmanLevelRangeSpeed {
+    pub fn new(range: RangeInclusive<Level>, pacman_speed: PacmanSpeed) -> Self {
+        Self { range, pacman_speed }
     }
 }
 
-// TODO: I try out change detection with this one. to keep the app consistent,
-//  a "way to go" (events or change detection) should be choosen for each system.
-//  Currently, it's mostly events.
-fn update_ghost_speed_when_state_changed(
+pub struct PacmanSpeed {
+    pub normal: Speed,
+    pub frightened: Speed
+}
+
+struct GhostLevelRangeSpeed {
+    range: RangeInclusive<Level>,
+    ghost_speed: GhostSpeed
+}
+
+impl GhostLevelRangeSpeed {
+    pub fn new(range: RangeInclusive<Level>, ghost_speed: GhostSpeed) -> Self {
+        Self { range, ghost_speed }
+    }
+}
+
+pub struct GhostSpeed {
+    pub normal: Speed,
+    pub frightened: Speed,
+    pub tunnel: Speed
+}
+
+fn update_ghost_speed(
+    board: Res<Board>,
     level: Res<Level>,
     speed_by_level: Res<SpeedByLevel>,
-    mut query: Query<(&mut Speed, &State), (With<Ghost>, Changed<State>)>
+    mut query: Query<(&Position, &mut Speed, &State), With<Ghost>>
 ) {
-    let normal_speed = speed_by_level.get_ghost_speed_by_level(&level);
+    for (position, mut speed, state) in query.iter_mut() {
+        let ghost_speed = speed_by_level.for_ghosts(&level);
 
-    for (mut speed, state) in query.iter_mut() {
-        match state {
-            Frightened => **speed = *normal_speed * 0.5,
-            _ => *speed = normal_speed
+        if board.position_is_tunnel(&position) {
+            *speed = ghost_speed.tunnel;
+        } else if state == &Frightened {
+            *speed = ghost_speed.frightened
+        } else {
+            *speed = ghost_speed.normal
         }
     }
 }
 
-fn update_pacman_speed_when_level_changed(
-    speed_by_level: Res<SpeedByLevel>,
+// TODO: The FrightenedTimer is always active when the game starts, letting pacman walk at higher speeds
+fn update_pacman_speed(
     level: Res<Level>,
+    speed_by_level: Res<SpeedByLevel>,
+    frightened_timer: Res<FrightenedTimer>,
     mut query: Query<&mut Speed, With<Pacman>>,
 ) {
-    if !level.is_changed() { return; }
-
     for mut speed in query.iter_mut() {
-        *speed = speed_by_level.get_pacman_speed_by_level(&level)
-    }
-}
+        let pacman_speed = speed_by_level.for_pacman(&level);
 
-fn update_ghost_speed_when_level_changed(
-    speed_by_level: Res<SpeedByLevel>,
-    level: Res<Level>,
-    mut query: Query<&mut Speed, With<Ghost>>,
-) {
-    if !level.is_changed() { return; }
-
-    for mut speed in query.iter_mut() {
-        *speed = speed_by_level.get_ghost_speed_by_level(&level)
+        if !frightened_timer.is_finished() {
+            *speed = pacman_speed.frightened;
+        } else {
+            *speed = pacman_speed.normal;
+        }
     }
 }

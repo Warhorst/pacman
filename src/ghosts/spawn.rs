@@ -52,6 +52,6 @@ fn spawn_ghost(
         .insert(ghost)
         .insert(*position)
         .insert(Up)
-        .insert(speed_by_level.get_ghost_speed_by_level(level))
+        .insert(speed_by_level.for_ghosts(level).normal)
         .insert(State::Spawned);
 }

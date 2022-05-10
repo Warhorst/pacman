@@ -28,6 +28,6 @@ pub (in crate::pacman) fn spawn_pacman(
         })
         .insert(Pacman)
         .insert(MoveDirection::Up)
-        .insert(speed_by_level.get_pacman_speed_by_level(&level))
+        .insert(speed_by_level.for_pacman(&level).normal)
         .insert(start_position);
 }

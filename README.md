@@ -9,14 +9,12 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 ### Pacman
 - slow down when eating an energizer
 - "waka waka" animation + sound when eating dots (very important)
-- speed up when eating energizers
 
 ### Ghosts
 - implement chase for Inky (the cyan ghost)
 - implement chase for Clyde (the orange ghost)
-- speed up based on level/time
-- slow down when entering tunnels
 - leave ghost house based on eaten dots and time
+- frightened time is based on the current level
 - change appearance based on state
 - animations
 
