@@ -14,7 +14,6 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 - implement chase for Inky (the cyan ghost)
 - implement chase for Clyde (the orange ghost)
 - leave ghost house based on eaten dots and time
-- frightened time is based on the current level
 - change appearance based on state
 - animations
 
@@ -22,10 +21,6 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 - ghosts enter the game depending on the current level/time
 - the game ends if pacman dies without remaining lives
 - different ghost behaviour based on level/time
-
-### Tunnels
-- pacman/ghosts disappear before getting teleported
-- ghost get slower in tunnels
 
 ### Fruit
 - enable fruit spawn

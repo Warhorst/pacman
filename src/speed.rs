@@ -153,17 +153,16 @@ fn update_ghost_speed(
     }
 }
 
-// TODO: The FrightenedTimer is always active when the game starts, letting pacman walk at higher speeds
 fn update_pacman_speed(
     level: Res<Level>,
     speed_by_level: Res<SpeedByLevel>,
-    frightened_timer: Res<FrightenedTimer>,
+    frightened_timer: Option<Res<FrightenedTimer>>,
     mut query: Query<&mut Speed, With<Pacman>>,
 ) {
     for mut speed in query.iter_mut() {
         let pacman_speed = speed_by_level.for_pacman(&level);
 
-        if !frightened_timer.is_finished() {
+        if frightened_timer.is_some() {
             *speed = pacman_speed.frightened;
         } else {
             *speed = pacman_speed.normal;
