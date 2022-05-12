@@ -3,7 +3,6 @@ use std::fs::File;
 use bevy::prelude::*;
 
 use crate::common::{MoveDirection::*, MoveDirection, Position};
-use crate::common;
 use crate::constants::{FIELD_DIMENSION, USED_PACMAP_PATH, WALL_DIMENSION};
 use FieldType::*;
 use crate::map::{FieldType, Neighbour, PositionTypeMap};

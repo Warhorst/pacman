@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use crate::common::MoveDirection;
 
 use crate::constants::PACMAN_DIMENSION;
 use crate::level::Level;
@@ -27,7 +26,6 @@ pub (in crate::pacman) fn spawn_pacman(
             ..Default::default()
         })
         .insert(Pacman)
-        .insert(MoveDirection::Up)
         .insert(speed_by_level.for_pacman(&level).normal)
         .insert(start_position);
 }
