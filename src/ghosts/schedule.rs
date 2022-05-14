@@ -1,8 +1,18 @@
 use bevy::prelude::*;
 use bevy::utils::Duration;
 
-use crate::ghosts::state::State;
-use crate::ghosts::state::State::*;
+use self::State::*;
+
+pub(super) struct SchedulePlugin;
+
+impl Plugin for SchedulePlugin {
+    fn build(&self, app: &mut App) {
+        app
+            .add_event::<PhaseChanged>()
+            .insert_resource(create_default_schedule())
+            .add_system(update_schedule);
+    }
+}
 
 /// The schedule of a ghost determines the state the ghost has after a certain time passed
 /// on a certain level.
@@ -68,15 +78,12 @@ impl Phase {
 
 pub(super) struct PhaseChanged;
 
-pub(super) struct SchedulePlugin;
-
-impl Plugin for SchedulePlugin {
-    fn build(&self, app: &mut App) {
-        app
-            .add_event::<PhaseChanged>()
-            .insert_resource(create_default_schedule())
-            .add_system(update_schedule);
-    }
+/// Spawned - just spawned, try to leave the spawn area
+/// Chase - use your hunting strategy to kill pacman
+#[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]
+pub enum State {
+    ChaseState,
+    ScatterState,
 }
 
 fn update_schedule(
@@ -94,11 +101,11 @@ fn update_schedule(
 
 fn create_default_schedule() -> Schedule {
     let mut phases = Vec::new();
-    phases.push(Phase::new(Scatter, 10.0));
-    phases.push(Phase::new(Chase, 10.0));
-    phases.push(Phase::new(Scatter, 10.0));
-    phases.push(Phase::new(Chase, 10.0));
-    phases.push(Phase::new(Scatter, 10.0));
+    phases.push(Phase::new(ScatterState, 10.0));
+    phases.push(Phase::new(ChaseState, 10.0));
+    phases.push(Phase::new(ScatterState, 10.0));
+    phases.push(Phase::new(ChaseState, 10.0));
+    phases.push(Phase::new(ScatterState, 10.0));
     Schedule::new(phases)
 }
 

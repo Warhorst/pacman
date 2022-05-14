@@ -6,7 +6,6 @@ use crate::constants::GHOST_DIMENSION;
 use crate::ghosts::Ghost;
 use crate::ghosts::Ghost::*;
 use crate::ghosts::state::Spawned;
-use crate::ghosts::state::State::Scatter;
 use crate::level::Level;
 use crate::map::board::Board;
 use crate::map::FieldType;
@@ -54,6 +53,5 @@ fn spawn_ghost(
         .insert(*position)
         .insert(Up)
         .insert(speed_by_level.for_ghosts(level).normal)
-        .insert(Scatter) // TODO this is a placeholder until the state enum is fully removed
         .insert(Spawned);
 }

@@ -2,7 +2,6 @@ use bevy::prelude::*;
 
 use crate::common::{MoveDirection, Position};
 use crate::ghosts::Ghost;
-use crate::ghosts::state::State;
 
 pub struct DebugPlugin;
 
@@ -29,7 +28,7 @@ impl DebugInfoTimer {
 fn print_debug_data(
     mut debug_timer: ResMut<DebugInfoTimer>,
     time: Res<Time>,
-    ghost_query: Query<(&Ghost, &Position, &MoveDirection, &State)>,
+    ghost_query: Query<(&Ghost, &Position, &MoveDirection)>,
 ) {
     debug_timer.timer.tick(time.delta());
     if !debug_timer.timer.finished() {
@@ -38,13 +37,12 @@ fn print_debug_data(
 
     println!();
 
-    for (ghost, position, direction, state) in ghost_query.iter() {
+    for (ghost, position, direction) in ghost_query.iter() {
         println!("{}",
-                 format!("Ghost: {:?}, position: {:?}, movement: {:?}, state: {:?}",
+                 format!("Ghost: {:?}, position: {:?}, movement: {:?}",
                          ghost,
                          position,
                          direction,
-                         state
                  )
         )
     }

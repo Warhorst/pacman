@@ -12,8 +12,7 @@ use crate::map::FieldType::{GhostSpawn, GhostWall};
 use crate::pacman::Pacman;
 use crate::common::MoveDirection::*;
 use crate::level::Level;
-
-use self::State::*;
+use crate::ghosts::schedule::State::*;
 
 pub struct StatePlugin;
 
@@ -22,7 +21,7 @@ impl Plugin for StatePlugin {
         app
             .add_system(update_frightened_state)
             .add_system(update_spawned_state)
-            .add_system(set_chase_and_scatter_next_state)
+            .add_system(update_chase_and_scatter_state)
             .add_system(update_eaten_state)
             .add_system(update_frightened_timer)
             .add_system(set_frightened_when_pacman_ate_energizer)
@@ -31,15 +30,13 @@ impl Plugin for StatePlugin {
     }
 }
 
-/// The different states of a ghost
-///
-/// Spawned - just spawned, try to leave the spawn area
-/// Chase - use your hunting strategy to kill pacman
-#[derive(Copy, Clone, Component, Debug, PartialOrd, PartialEq)]
-pub enum State {
-    Chase,
-    Scatter,
-}
+/// Indicates that a ghost is currently moving to its home
+#[derive(Component)]
+pub struct Scatter;
+
+/// Indicates that a ghost is currently hunting pacman
+#[derive(Component)]
+pub struct Chase;
 
 /// Indicates that a ghost is currently frightened.
 #[derive(Component)]
@@ -83,28 +80,26 @@ impl FrightenedTimer {
 
 fn update_spawned_state(
     mut commands: Commands,
-    schedule: Res<Schedule>,
     board: Res<Board>,
-    mut query: Query<(Entity, &mut State, &Position), (With<Ghost>, With<Spawned>, Without<Frightened>, Without<Eaten>)>,
+    mut query: Query<(Entity, &Position), (With<Ghost>, With<Spawned>, Without<Frightened>, Without<Eaten>)>,
 ) {
-    for (entity, mut state, position) in query.iter_mut() {
+    for (entity, position) in query.iter_mut() {
         if board.type_of_position(position) == &GhostWall {
             commands.entity(entity).remove::<Spawned>();
-            *state = schedule.current_state()
         }
     }
 }
 
-fn set_chase_and_scatter_next_state(
+fn update_chase_and_scatter_state(
+    mut commands: Commands,
     schedule: Res<Schedule>,
-    mut query: Query<&mut State, (With<Ghost>, Without<Frightened>, Without<Eaten>, Without<Spawned>)>,
+    query: Query<Entity, With<Ghost>>,
 ) {
-    for mut state in query.iter_mut() {
-        if *state != Chase && *state != Scatter { continue; }
-
-        if *state != schedule.current_state() {
-            *state = schedule.current_state();
-        }
+    for entity in query.iter() {
+        match schedule.current_state() {
+            ChaseState => commands.entity(entity).remove::<Scatter>().insert(Chase),
+            ScatterState => commands.entity(entity).remove::<Chase>().insert(Scatter)
+        };
     }
 }
 
@@ -157,15 +152,13 @@ fn set_frightened_when_pacman_ate_energizer(
     mut commands: Commands,
     level: Res<Level>,
     event_reader: EventReader<EnergizerEaten>,
-    mut query: Query<(Entity, &State, &mut MoveDirection, &mut Target), (With<Ghost>, Without<Frightened>, Without<Eaten>, Without<Spawned>)>,
+    mut query: Query<(Entity, &mut MoveDirection, &mut Target), (With<Ghost>, Without<Frightened>, Without<Eaten>, Without<Spawned>)>,
 ) {
     if event_reader.is_empty() { return; }
 
     commands.insert_resource(FrightenedTimer::start(&level));
 
-    for (entity, state, mut direction, mut target) in query.iter_mut() {
-        if *state != Chase && *state != Scatter { continue; }
-
+    for (entity, mut direction, mut target) in query.iter_mut() {
         commands.entity(entity).insert(Frightened);
 
         let position_ghost_came_from = match *direction {
@@ -184,15 +177,13 @@ fn set_frightened_when_pacman_ate_energizer_and_ghost_has_no_target(
     mut commands: Commands,
     level: Res<Level>,
     event_reader: EventReader<EnergizerEaten>,
-    mut query: Query<(Entity, &State, &mut MoveDirection), (With<Ghost>, Without<Target>, Without<Frightened>, Without<Eaten>, Without<Spawned>)>,
+    mut query: Query<(Entity, &mut MoveDirection), (With<Ghost>, Without<Target>, Without<Frightened>, Without<Eaten>, Without<Spawned>)>,
 ) {
     if event_reader.is_empty() { return; }
 
     commands.insert_resource(FrightenedTimer::start(&level));
 
-    for (entity, state, mut direction) in query.iter_mut() {
-        if *state != Chase && *state != Scatter { continue; }
-
+    for (entity, mut direction) in query.iter_mut() {
         commands.entity(entity).insert(Frightened);
         direction.reverse();
     }

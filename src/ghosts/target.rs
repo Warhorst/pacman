@@ -7,8 +7,7 @@ use crate::common::MoveDirection;
 use crate::common::MoveDirection::*;
 use crate::ghosts::Ghost;
 use crate::ghosts::Ghost::*;
-use crate::ghosts::state::{Eaten, Frightened, Spawned, State};
-use crate::ghosts::state::State::*;
+use crate::ghosts::state::{Chase, Eaten, Frightened, Scatter, Spawned};
 use crate::map::board::Board;
 use crate::map::FieldType::*;
 use crate::map::Neighbour;
@@ -59,11 +58,9 @@ fn set_spawned_target(
 fn set_scatter_target(
     mut commands: Commands,
     board: Res<Board>,
-    mut query: Query<(Entity, &Ghost, &mut MoveDirection, &Position, &State), (Without<Frightened>, Without<Eaten>, Without<Spawned>, Without<Target>)>,
+    mut query: Query<(Entity, &Ghost, &mut MoveDirection, &Position), (With<Scatter>, Without<Frightened>, Without<Eaten>, Without<Spawned>, Without<Target>)>,
 ) {
-    for (entity, ghost, mut direction, position, state) in query.iter_mut() {
-        if state != &Scatter { continue; }
-
+    for (entity, ghost, mut direction, position) in query.iter_mut() {
         let ghost_corner_position = board.position_of_type(GhostCorner(*ghost));
         let next_target_neighbour = get_neighbour_nearest_to_target(
             position,
@@ -80,12 +77,12 @@ fn set_scatter_target(
 fn set_blinky_chase_target(
     mut commands: Commands,
     board: Res<Board>,
-    mut blinky_query: Query<(Entity, &Ghost, &mut MoveDirection, &Position, &State), (Without<Frightened>, Without<Eaten>, Without<Spawned>, Without<Target>)>,
+    mut blinky_query: Query<(Entity, &Ghost, &mut MoveDirection, &Position), (With<Chase>, Without<Frightened>, Without<Eaten>, Without<Spawned>, Without<Target>)>,
     pacman_query: Query<&Position, With<Pacman>>,
 ) {
-    for (entity, ghost, mut direction, blinky_position, state) in blinky_query.iter_mut() {
+    for (entity, ghost, mut direction, blinky_position) in blinky_query.iter_mut() {
         for pacman_position in pacman_query.iter() {
-            if ghost != &Blinky || state != &Chase { continue; }
+            if ghost != &Blinky  { continue; }
 
             let next_target_neighbour = get_neighbour_nearest_to_target(
                 blinky_position,
@@ -100,15 +97,16 @@ fn set_blinky_chase_target(
     }
 }
 
+// TODO: Bug. Pacman might not have a movement direction, which causes pinky to stand still when in chase.
 fn set_pinky_chase_target(
     mut commands: Commands,
     board: Res<Board>,
-    mut pinky_query: Query<(Entity, &Ghost, &mut MoveDirection, &Position, &State), (Without<Frightened>, Without<Eaten>, Without<Spawned>, Without<Pacman>, Without<Target>)>,
+    mut pinky_query: Query<(Entity, &Ghost, &mut MoveDirection, &Position), (With<Chase>, Without<Frightened>, Without<Eaten>, Without<Spawned>, Without<Pacman>, Without<Target>)>,
     pacman_query: Query<(&Position, &MoveDirection), With<Pacman>>,
 ) {
-    for (entity, ghost, mut pinky_direction, pinky_position, state) in pinky_query.iter_mut() {
+    for (entity, ghost, mut pinky_direction, pinky_position) in pinky_query.iter_mut() {
         for (pacman_position, pacman_direction) in pacman_query.iter() {
-            if ghost != &Pinky || state != &Chase { continue; }
+            if ghost != &Pinky { continue; }
 
             let next_target_neighbour = get_neighbour_nearest_to_target(
                 pinky_position,
