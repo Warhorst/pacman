@@ -7,7 +7,7 @@ use crate::common::MoveDirection;
 use crate::common::MoveDirection::*;
 use crate::ghosts::Ghost;
 use crate::ghosts::Ghost::*;
-use crate::ghosts::state::{Frightened, State};
+use crate::ghosts::state::{Eaten, Frightened, State};
 use crate::ghosts::state::State::*;
 use crate::map::board::Board;
 use crate::map::FieldType::*;
@@ -36,7 +36,7 @@ impl Plugin for TargetPlugin {
 fn set_spawned_target(
     mut commands: Commands,
     board: Res<Board>,
-    mut query: Query<(Entity, &mut MoveDirection, &Position, &State), (Without<Frightened>, Without<Target>)>,
+    mut query: Query<(Entity, &mut MoveDirection, &Position, &State), (Without<Frightened>, Without<Eaten>, Without<Target>)>,
 ) {
     for (entity, mut direction, position, state) in query.iter_mut() {
         if state != &Spawned { continue; }
@@ -61,7 +61,7 @@ fn set_spawned_target(
 fn set_scatter_target(
     mut commands: Commands,
     board: Res<Board>,
-    mut query: Query<(Entity, &Ghost, &mut MoveDirection, &Position, &State), (Without<Frightened>, Without<Target>)>,
+    mut query: Query<(Entity, &Ghost, &mut MoveDirection, &Position, &State), (Without<Frightened>, Without<Eaten>, Without<Target>)>,
 ) {
     for (entity, ghost, mut direction, position, state) in query.iter_mut() {
         if state != &Scatter { continue; }
@@ -82,7 +82,7 @@ fn set_scatter_target(
 fn set_blinky_chase_target(
     mut commands: Commands,
     board: Res<Board>,
-    mut blinky_query: Query<(Entity, &Ghost, &mut MoveDirection, &Position, &State), (Without<Frightened>, Without<Target>)>,
+    mut blinky_query: Query<(Entity, &Ghost, &mut MoveDirection, &Position, &State), (Without<Frightened>, Without<Eaten>, Without<Target>)>,
     pacman_query: Query<&Position, With<Pacman>>,
 ) {
     for (entity, ghost, mut direction, blinky_position, state) in blinky_query.iter_mut() {
@@ -105,7 +105,7 @@ fn set_blinky_chase_target(
 fn set_pinky_chase_target(
     mut commands: Commands,
     board: Res<Board>,
-    mut pinky_query: Query<(Entity, &Ghost, &mut MoveDirection, &Position, &State), (Without<Frightened>, Without<Pacman>, Without<Target>)>,
+    mut pinky_query: Query<(Entity, &Ghost, &mut MoveDirection, &Position, &State), (Without<Frightened>, Without<Eaten>, Without<Pacman>, Without<Target>)>,
     pacman_query: Query<(&Position, &MoveDirection), With<Pacman>>,
 ) {
     for (entity, ghost, mut pinky_direction, pinky_position, state) in pinky_query.iter_mut() {
@@ -145,7 +145,7 @@ fn set_frightened_target(
     mut commands: Commands,
     board: Res<Board>,
     random: Res<Random>,
-    mut query: Query<(Entity, &mut MoveDirection, &Position), (With<Frightened>, Without<Target>)>,
+    mut query: Query<(Entity, &mut MoveDirection, &Position), (With<Frightened>, Without<Eaten>, Without<Target>)>,
 ) {
     for (entity, mut direction, position) in query.iter_mut() {
         let possible_neighbours = get_possible_neighbours(
@@ -168,11 +168,9 @@ fn set_frightened_target(
 fn set_eaten_target(
     mut commands: Commands,
     board: Res<Board>,
-    mut query: Query<(Entity, &mut MoveDirection, &Position, &State), (Without<Frightened>, Without<Target>)>,
+    mut query: Query<(Entity, &mut MoveDirection, &Position), (With<Eaten>, Without<Frightened>, Without<Target>)>,
 ) {
-    for (entity, mut direction, position, state) in query.iter_mut() {
-        if state != &Eaten { continue; }
-
+    for (entity, mut direction, position) in query.iter_mut() {
         let ghost_spawn_positions = board.positions_of_type(GhostSpawn);
         let nearest_spawn_position = &ghost_spawn_positions.iter()
             .min_by(|pos_a, pos_b| minimal_distance_to_positions(&position, pos_a, pos_b))

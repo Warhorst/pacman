@@ -43,12 +43,15 @@ pub enum State {
     Spawned,
     Chase,
     Scatter,
-    Eaten,
 }
 
 /// Indicates that a ghost is currently frightened.
 #[derive(Component)]
 pub struct Frightened;
+
+/// Indicates that a ghost was eaten by pacman
+#[derive(Component)]
+pub struct Eaten;
 
 pub struct FrightenedTimer {
     timer: Timer,
@@ -81,7 +84,7 @@ impl FrightenedTimer {
 fn set_spawned_next_state(
     schedule: Res<Schedule>,
     board: Res<Board>,
-    mut query: Query<(&mut State, &Position), (With<Ghost>, Without<Frightened>)>,
+    mut query: Query<(&mut State, &Position), (With<Ghost>, Without<Frightened>, Without<Eaten>)>,
 ) {
     for (mut state, position) in query.iter_mut() {
         if *state != Spawned { continue; }
@@ -94,7 +97,7 @@ fn set_spawned_next_state(
 
 fn set_chase_and_scatter_next_state(
     schedule: Res<Schedule>,
-    mut query: Query<&mut State, (With<Ghost>, Without<Frightened>)>,
+    mut query: Query<&mut State, (With<Ghost>, Without<Frightened>, Without<Eaten>)>,
 ) {
     for mut state in query.iter_mut() {
         if *state != Chase && *state != Scatter { continue; }
@@ -105,11 +108,10 @@ fn set_chase_and_scatter_next_state(
     }
 }
 
-// TODO: Other state updates need Frightened filter
 fn update_frightened_state(
     mut commands: Commands,
     frightened_timer: Option<Res<FrightenedTimer>>,
-    mut query: Query<Entity, (With<Ghost>, With<Frightened>)>,
+    mut query: Query<Entity, (With<Ghost>, With<Frightened>, Without<Eaten>)>,
 ) {
     for entity in query.iter_mut() {
         let frightened_time_over = match frightened_timer {
@@ -124,11 +126,13 @@ fn update_frightened_state(
 }
 
 fn set_eaten_next_state(
+    mut commands: Commands,
     board: Res<Board>,
-    mut query: Query<(&mut State, &Position)>,
+    mut query: Query<(Entity, &mut State, &Position), With<Eaten>>,
 ) {
-    for (mut state, position) in query.iter_mut() {
+    for (entity, mut state, position) in query.iter_mut() {
         if board.type_of_position(position) == &GhostSpawn {
+            commands.entity(entity).remove::<Eaten>();
             *state = Spawned
         }
     }
@@ -152,7 +156,7 @@ fn set_frightened_when_pacman_ate_energizer(
     mut commands: Commands,
     level: Res<Level>,
     event_reader: EventReader<EnergizerEaten>,
-    mut query: Query<(Entity, &State, &mut MoveDirection, &mut Target), (With<Ghost>, Without<Frightened>)>,
+    mut query: Query<(Entity, &State, &mut MoveDirection, &mut Target), (With<Ghost>, Without<Frightened>, Without<Eaten>)>,
 ) {
     if event_reader.is_empty() { return; }
 
@@ -179,7 +183,7 @@ fn set_frightened_when_pacman_ate_energizer_and_ghost_has_no_target(
     mut commands: Commands,
     level: Res<Level>,
     event_reader: EventReader<EnergizerEaten>,
-    mut query: Query<(Entity, &State, &mut MoveDirection), (With<Ghost>, Without<Target>, Without<Frightened>)>,
+    mut query: Query<(Entity, &State, &mut MoveDirection), (With<Ghost>, Without<Target>, Without<Frightened>, Without<Eaten>)>,
 ) {
     if event_reader.is_empty() { return; }
 
@@ -195,14 +199,14 @@ fn set_frightened_when_pacman_ate_energizer_and_ghost_has_no_target(
 
 fn set_eaten_when_hit_by_pacman(
     mut commands: Commands,
-    mut ghost_query: Query<(Entity, &Position, &mut State), (With<Ghost>, With<Frightened>)>,
+    ghost_query: Query<(Entity, &Position), (With<Ghost>, With<Frightened>, Without<Eaten>)>,
     pacman_query: Query<&Position, With<Pacman>>,
 ) {
-    for (entity, ghost_position, mut state) in ghost_query.iter_mut() {
+    for (entity, ghost_position) in ghost_query.iter() {
         for pacman_position in pacman_query.iter() {
             if ghost_position == pacman_position {
                 commands.entity(entity).remove::<Frightened>();
-                *state = Eaten;
+                commands.entity(entity).insert(Eaten);
             }
         }
     }
