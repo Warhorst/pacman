@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::ghosts::movement::MovePlugin;
 use crate::ghosts::schedule::SchedulePlugin;
 use crate::ghosts::spawn::spawn_ghosts;
-use crate::ghosts::state::StateSetPlugin;
+use crate::ghosts::state::StatePlugin;
 use crate::ghosts::target::{Target, TargetPlugin};
 use crate::tunnels::GhostPassedTunnel;
 
@@ -28,7 +28,7 @@ impl Plugin for GhostPlugin {
         app
             .add_plugin(MovePlugin)
             .add_plugin(TargetPlugin)
-            .add_plugin(StateSetPlugin)
+            .add_plugin(StatePlugin)
             .add_plugin(SchedulePlugin)
             .add_startup_system(spawn_ghosts)
             .add_system(ghost_passed_tunnel);

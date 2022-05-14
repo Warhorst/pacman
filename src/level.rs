@@ -28,7 +28,7 @@ pub struct LevelUi;
 fn spawn_level_ui(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    level: Res<Level>
+    level: Res<Level>,
 ) {
     commands.spawn_bundle(Text2dBundle {
         text: Text::with_section(format!("Level: {}", **level),
@@ -50,7 +50,7 @@ fn spawn_level_ui(
 fn increase_level_when_all_dots_eaten(
     event_reader: EventReader<AllDotsEaten>,
     mut level: ResMut<Level>,
-    mut query: Query<&mut Text, With<LevelUi>>
+    mut query: Query<&mut Text, With<LevelUi>>,
 ) {
     if event_reader.is_empty() { return; }
 
