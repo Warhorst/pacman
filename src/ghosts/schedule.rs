@@ -101,11 +101,14 @@ fn update_schedule(
 
 fn create_default_schedule() -> Schedule {
     let mut phases = Vec::new();
-    phases.push(Phase::new(ScatterState, 10.0));
-    phases.push(Phase::new(ChaseState, 10.0));
-    phases.push(Phase::new(ScatterState, 10.0));
-    phases.push(Phase::new(ChaseState, 10.0));
-    phases.push(Phase::new(ScatterState, 10.0));
+    phases.push(Phase::new(ScatterState, 7.0));
+    phases.push(Phase::new(ChaseState, 20.0));
+    phases.push(Phase::new(ScatterState, 7.0));
+    phases.push(Phase::new(ChaseState, 20.0));
+    phases.push(Phase::new(ScatterState, 5.0));
+    phases.push(Phase::new(ChaseState, 20.0));
+    phases.push(Phase::new(ScatterState, 5.0));
+    phases.push(Phase::new(ChaseState, 1.0)); // Maybe add an infinite variant
     Schedule::new(phases)
 }
 
