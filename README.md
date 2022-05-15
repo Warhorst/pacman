@@ -15,6 +15,7 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 - implement chase for Clyde (the orange ghost)
 - leave ghost house based on eaten dots and time
 - change appearance based on state
+- ghosts can turn around in the ghost house
 - animations
 
 ### Lifecycle

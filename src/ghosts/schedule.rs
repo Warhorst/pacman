@@ -1,6 +1,8 @@
+use std::ops::RangeInclusive;
 use bevy::prelude::*;
 use bevy::utils::Duration;
 use crate::ghosts::state::FrightenedTimer;
+use crate::level::Level;
 
 use self::State::*;
 
@@ -10,21 +12,37 @@ impl Plugin for SchedulePlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<ScheduleChanged>()
-            .insert_resource(create_default_schedule())
+            .insert_resource(create_schedules())
+            .add_startup_system(register_start_schedule)
+            .add_system(update_schedule_when_level_changed)
             .add_system(update_schedule);
     }
 }
 
-/// Indicates that a new state is active
-#[derive(Deref, DerefMut)]
-pub struct ScheduleChanged(State);
+fn create_schedules() -> ScheduleByLevel {
+    ScheduleByLevel::new(vec![
+        LevelScheduleRange::new(Level(1)..=Level(1), level_one_schedule),
+        LevelScheduleRange::new(Level(2)..=Level(4), level_two_to_four_schedule),
+        LevelScheduleRange::new(Level(5)..=Level(usize::MAX), level_five_plus_schedule),
+    ])
+}
 
-/// Spawned - just spawned, try to leave the spawn area
-/// Chase - use your hunting strategy to kill pacman
-#[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]
-pub enum State {
-    ChaseState,
-    ScatterState,
+fn register_start_schedule(
+    mut commands: Commands,
+    level: Res<Level>,
+    schedule_by_level: Res<ScheduleByLevel>,
+) {
+    commands.insert_resource(schedule_by_level.get_schedule_for_level(&level));
+}
+
+fn update_schedule_when_level_changed(
+    mut schedule: ResMut<Schedule>,
+    level: Res<Level>,
+    schedule_by_level: Res<ScheduleByLevel>,
+) {
+    if !level.is_changed() { return; }
+
+    *schedule = schedule_by_level.get_schedule_for_level(&level);
 }
 
 /// Update the currently active schedule and send an event when the active state changed.
@@ -46,7 +64,33 @@ fn update_schedule(
     }
 }
 
-fn create_default_schedule() -> Schedule {
+fn level_one_schedule() -> Schedule {
+    let mut phases = Vec::new();
+    phases.push(Phase::for_duration(ScatterState, 7.0));
+    phases.push(Phase::for_duration(ChaseState, 20.0));
+    phases.push(Phase::for_duration(ScatterState, 7.0));
+    phases.push(Phase::for_duration(ChaseState, 20.0));
+    phases.push(Phase::for_duration(ScatterState, 5.0));
+    phases.push(Phase::for_duration(ChaseState, 1033.0));
+    phases.push(Phase::for_duration(ScatterState, 1.0 / 60.0));
+    phases.push(Phase::infinite(ChaseState));
+    Schedule::new(phases)
+}
+
+fn level_two_to_four_schedule() -> Schedule {
+    let mut phases = Vec::new();
+    phases.push(Phase::for_duration(ScatterState, 5.0));
+    phases.push(Phase::for_duration(ChaseState, 20.0));
+    phases.push(Phase::for_duration(ScatterState, 5.0));
+    phases.push(Phase::for_duration(ChaseState, 20.0));
+    phases.push(Phase::for_duration(ScatterState, 5.0));
+    phases.push(Phase::for_duration(ChaseState, 1037.0));
+    phases.push(Phase::for_duration(ScatterState, 1.0 / 60.0));
+    phases.push(Phase::infinite(ChaseState));
+    Schedule::new(phases)
+}
+
+fn level_five_plus_schedule() -> Schedule {
     let mut phases = Vec::new();
     phases.push(Phase::for_duration(ScatterState, 7.0));
     phases.push(Phase::for_duration(ChaseState, 20.0));
@@ -57,6 +101,55 @@ fn create_default_schedule() -> Schedule {
     phases.push(Phase::for_duration(ScatterState, 5.0));
     phases.push(Phase::infinite(ChaseState));
     Schedule::new(phases)
+}
+
+/// Indicates that a new state is active
+#[derive(Deref, DerefMut)]
+pub struct ScheduleChanged(State);
+
+/// Spawned - just spawned, try to leave the spawn area
+/// Chase - use your hunting strategy to kill pacman
+#[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]
+pub enum State {
+    ChaseState,
+    ScatterState,
+}
+
+pub struct ScheduleByLevel {
+    ranges: Vec<LevelScheduleRange>,
+}
+
+impl ScheduleByLevel {
+    pub fn new(ranges: Vec<LevelScheduleRange>) -> Self {
+        ScheduleByLevel { ranges }
+    }
+
+    pub fn get_schedule_for_level(&self, level: &Level) -> Schedule {
+        self.ranges.iter()
+            .find_map(|r| match r.contains_level(level) {
+                true => Some((r.schedule_producer)()),
+                false => None
+            })
+            .expect("No schedule was registered for the current level")
+    }
+}
+
+pub struct LevelScheduleRange {
+    range: RangeInclusive<Level>,
+    schedule_producer: Box<dyn Fn() -> Schedule + Send + Sync>,
+}
+
+impl LevelScheduleRange {
+    pub fn new(range: RangeInclusive<Level>, schedule_producer: impl Fn() -> Schedule + 'static + Send + Sync) -> Self {
+        LevelScheduleRange {
+            range,
+            schedule_producer: Box::new(schedule_producer),
+        }
+    }
+
+    pub fn contains_level(&self, level: &Level) -> bool {
+        self.range.contains(level)
+    }
 }
 
 /// The schedule of a ghost determines the state the ghost has after a certain time passed
