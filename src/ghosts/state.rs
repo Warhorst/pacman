@@ -4,13 +4,13 @@ use bevy::prelude::*;
 
 use crate::common::{MoveDirection, Position};
 use crate::energizer::EnergizerEaten;
-use crate::ghosts::Ghost;
 use crate::ghosts::schedule::Schedule;
 use crate::ghosts::target::Target;
 use crate::map::board::Board;
 use crate::map::FieldType::{GhostSpawn, GhostWall};
 use crate::pacman::Pacman;
 use crate::common::MoveDirection::*;
+use crate::ghosts::Ghost;
 use crate::level::Level;
 use crate::ghosts::schedule::State::*;
 

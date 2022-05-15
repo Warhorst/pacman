@@ -13,13 +13,21 @@ pub mod state;
 pub mod target;
 mod schedule;
 
-#[derive(Copy, Clone, Component, Debug, PartialOrd, PartialEq)]
-pub enum Ghost {
-    Blinky,
-    Pinky,
-    Inky,
-    Clyde,
-}
+/// Used to mark every ghost.
+#[derive(Component)]
+pub struct Ghost;
+
+#[derive(Component)]
+pub struct Blinky;
+
+#[derive(Component)]
+pub struct Pinky;
+
+#[derive(Component)]
+pub struct Inky;
+
+#[derive(Component)]
+pub struct Clyde;
 
 pub struct GhostPlugin;
 

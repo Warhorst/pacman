@@ -24,7 +24,6 @@ mod score;
 mod ghosts;
 mod tunnels;
 mod energizer;
-mod debug;
 mod random;
 mod lives;
 mod level;

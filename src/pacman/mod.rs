@@ -6,7 +6,7 @@ use crate::common::{MoveDirection, Position};
 use crate::common::MoveDirection::*;
 use crate::dots::DotEaten;
 use crate::ghosts::Ghost;
-use crate::ghosts::state::{Eaten, Frightened};
+use crate::ghosts::state::{Eaten, Frightened, Spawned};
 use crate::lives::Life;
 use crate::map::board::Board;
 use crate::map::FieldType::PacManSpawn;
@@ -126,7 +126,7 @@ fn set_direction_based_on_keyboard_input_when_pacman_is_still(
 fn pacman_hits_ghost_and_get_killed(
     mut event_writer: EventWriter<PacmanKilled>,
     pacman_query: Query<&Position, With<Pacman>>,
-    ghost_query: Query<&Position, (With<Ghost>, Without<Frightened>, Without<Eaten>)>,
+    ghost_query: Query<&Position, (With<Ghost>, Without<Frightened>, Without<Eaten>, Without<Spawned>)>,
 ) {
     for pacman_position in pacman_query.iter() {
         for ghost_position in ghost_query.iter() {

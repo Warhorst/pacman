@@ -3,8 +3,7 @@ use bevy::prelude::*;
 use crate::common::Position;
 use crate::common::MoveDirection::Up;
 use crate::constants::GHOST_DIMENSION;
-use crate::ghosts::Ghost;
-use crate::ghosts::Ghost::*;
+use crate::ghosts::{Blinky, Clyde, Ghost, Inky, Pinky};
 use crate::ghosts::state::Spawned;
 use crate::level::Level;
 use crate::map::board::Board;
@@ -18,10 +17,10 @@ pub fn spawn_ghosts(
     speed_by_level: Res<SpeedByLevel>
 ) {
     let spawn_positions = board.positions_of_type(FieldType::GhostSpawn);
-    spawn_ghost(&mut commands, &board, spawn_positions[0], &level, &speed_by_level, Blinky);
-    spawn_ghost(&mut commands, &board, spawn_positions[1], &level, &speed_by_level, Pinky);
-    spawn_ghost(&mut commands, &board, spawn_positions[2], &level, &speed_by_level, Inky);
-    spawn_ghost(&mut commands, &board, spawn_positions[3], &level, &speed_by_level, Clyde)
+    spawn_ghost(&mut commands, &board, spawn_positions[0], &level, &speed_by_level, Color::hex("FF0000").unwrap(), Blinky);
+    spawn_ghost(&mut commands, &board, spawn_positions[1], &level, &speed_by_level, Color::hex("FFB8FF").unwrap(), Pinky);
+    spawn_ghost(&mut commands, &board, spawn_positions[2], &level, &speed_by_level, Color::hex("00FFFF").unwrap(), Inky);
+    spawn_ghost(&mut commands, &board, spawn_positions[3], &level, &speed_by_level, Color::hex("FFB852").unwrap(), Clyde)
 }
 
 fn spawn_ghost(
@@ -30,14 +29,9 @@ fn spawn_ghost(
     position: &Position,
     level: &Level,
     speed_by_level: &SpeedByLevel,
-    ghost: Ghost
+    color: Color,
+    ghost_type: impl Component
 ) {
-    let color = match ghost {
-        Blinky => Color::hex("FF0000").unwrap(),
-        Pinky => Color::hex("FFB8FF").unwrap(),
-        Inky => Color::hex("00FFFF").unwrap(),
-        Clyde => Color::hex("FFB852").unwrap(),
-    };
     commands
         .spawn()
         .insert_bundle(SpriteBundle {
@@ -49,7 +43,8 @@ fn spawn_ghost(
             transform: Transform::from_translation(board.coordinates_of_position(position)),
             ..Default::default()
         })
-        .insert(ghost)
+        .insert(Ghost)
+        .insert(ghost_type)
         .insert(*position)
         .insert(Up)
         .insert(speed_by_level.for_ghosts(level).normal)
