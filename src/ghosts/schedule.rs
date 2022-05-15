@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy::utils::Duration;
+use crate::ghosts::state::FrightenedTimer;
 
 use self::State::*;
 
@@ -12,6 +13,50 @@ impl Plugin for SchedulePlugin {
             .insert_resource(create_default_schedule())
             .add_system(update_schedule);
     }
+}
+
+/// Indicates that a new state is active
+#[derive(Deref, DerefMut)]
+pub struct ScheduleChanged(State);
+
+/// Spawned - just spawned, try to leave the spawn area
+/// Chase - use your hunting strategy to kill pacman
+#[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]
+pub enum State {
+    ChaseState,
+    ScatterState,
+}
+
+/// Update the currently active schedule and send an event when the active state changed.
+///
+/// The schedule does not proceed while an energizer is active.
+fn update_schedule(
+    time: Res<Time>,
+    frightened_timer: Option<Res<FrightenedTimer>>,
+    mut schedule: ResMut<Schedule>,
+    mut event_writer: EventWriter<ScheduleChanged>,
+) {
+    if frightened_timer.is_some() { return; }
+
+    let old_state = schedule.current_state();
+    let new_state = schedule.state_after_tick(time.delta());
+
+    if old_state != new_state {
+        event_writer.send(ScheduleChanged(new_state))
+    }
+}
+
+fn create_default_schedule() -> Schedule {
+    let mut phases = Vec::new();
+    phases.push(Phase::for_duration(ScatterState, 7.0));
+    phases.push(Phase::for_duration(ChaseState, 20.0));
+    phases.push(Phase::for_duration(ScatterState, 7.0));
+    phases.push(Phase::for_duration(ChaseState, 20.0));
+    phases.push(Phase::for_duration(ScatterState, 5.0));
+    phases.push(Phase::for_duration(ChaseState, 20.0));
+    phases.push(Phase::for_duration(ScatterState, 5.0));
+    phases.push(Phase::infinite(ChaseState));
+    Schedule::new(phases)
 }
 
 /// The schedule of a ghost determines the state the ghost has after a certain time passed
@@ -56,7 +101,7 @@ impl Schedule {
 /// A Phase is a time range where a specific state for a specific ghost is active.
 pub enum Phase {
     Finite(State, Timer),
-    Infinite(State)
+    Infinite(State),
 }
 
 impl Phase {
@@ -88,41 +133,3 @@ impl Phase {
         }
     }
 }
-
-#[derive(Deref, DerefMut)]
-pub(super) struct ScheduleChanged(State);
-
-/// Spawned - just spawned, try to leave the spawn area
-/// Chase - use your hunting strategy to kill pacman
-#[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]
-pub enum State {
-    ChaseState,
-    ScatterState,
-}
-
-fn update_schedule(
-    time: Res<Time>,
-    mut schedule: ResMut<Schedule>,
-    mut event_writer: EventWriter<ScheduleChanged>,
-) {
-    let old_state = schedule.current_state();
-    let new_state = schedule.state_after_tick(time.delta());
-
-    if old_state != new_state {
-        event_writer.send(ScheduleChanged(new_state))
-    }
-}
-
-fn create_default_schedule() -> Schedule {
-    let mut phases = Vec::new();
-    phases.push(Phase::for_duration(ScatterState, 7.0));
-    phases.push(Phase::for_duration(ChaseState, 20.0));
-    phases.push(Phase::for_duration(ScatterState, 7.0));
-    phases.push(Phase::for_duration(ChaseState, 20.0));
-    phases.push(Phase::for_duration(ScatterState, 5.0));
-    phases.push(Phase::for_duration(ChaseState, 20.0));
-    phases.push(Phase::for_duration(ScatterState, 5.0));
-    phases.push(Phase::infinite(ChaseState));
-    Schedule::new(phases)
-}
-
