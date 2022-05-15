@@ -8,7 +8,7 @@ pub(super) struct SchedulePlugin;
 impl Plugin for SchedulePlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_event::<PhaseChanged>()
+            .add_event::<ScheduleChanged>()
             .insert_resource(create_default_schedule())
             .add_system(update_schedule);
     }
@@ -31,11 +31,11 @@ impl Schedule {
         if self.current_phase().is_finished() {
             self.start_next_phase()
         }
-        self.current_phase().active_state
+        self.current_phase().active_state()
     }
 
     pub fn current_state(&self) -> State {
-        self.current_phase().active_state
+        self.current_phase().active_state()
     }
 
     fn current_phase(&self) -> &Phase {
@@ -54,29 +54,43 @@ impl Schedule {
 }
 
 /// A Phase is a time range where a specific state for a specific ghost is active.
-pub struct Phase {
-    active_state: State,
-    remaining_time: Timer,
+pub enum Phase {
+    Finite(State, Timer),
+    Infinite(State)
 }
 
 impl Phase {
-    pub fn new(active_state: State, duration: f32) -> Self {
-        Phase {
-            active_state,
-            remaining_time: Timer::from_seconds(duration, false),
+    pub fn for_duration(active_state: State, duration: f32) -> Self {
+        Phase::Finite(active_state, Timer::from_seconds(duration, false))
+    }
+
+    pub fn infinite(active_state: State) -> Self {
+        Phase::Infinite(active_state)
+    }
+
+    pub fn active_state(&self) -> State {
+        match self {
+            Phase::Finite(s, _) => *s,
+            Phase::Infinite(s) => *s
         }
     }
 
     pub fn progress(&mut self, elapsed_time: Duration) {
-        self.remaining_time.tick(elapsed_time);
+        if let Phase::Finite(_, ref mut timer) = self {
+            timer.tick(elapsed_time);
+        }
     }
 
     pub fn is_finished(&self) -> bool {
-        self.remaining_time.finished()
+        match self {
+            Phase::Finite(_, timer) => timer.finished(),
+            Phase::Infinite(_) => false
+        }
     }
 }
 
-pub(super) struct PhaseChanged;
+#[derive(Deref, DerefMut)]
+pub(super) struct ScheduleChanged(State);
 
 /// Spawned - just spawned, try to leave the spawn area
 /// Chase - use your hunting strategy to kill pacman
@@ -89,26 +103,26 @@ pub enum State {
 fn update_schedule(
     time: Res<Time>,
     mut schedule: ResMut<Schedule>,
-    mut event_writer: EventWriter<PhaseChanged>,
+    mut event_writer: EventWriter<ScheduleChanged>,
 ) {
     let old_state = schedule.current_state();
     let new_state = schedule.state_after_tick(time.delta());
 
     if old_state != new_state {
-        event_writer.send(PhaseChanged)
+        event_writer.send(ScheduleChanged(new_state))
     }
 }
 
 fn create_default_schedule() -> Schedule {
     let mut phases = Vec::new();
-    phases.push(Phase::new(ScatterState, 7.0));
-    phases.push(Phase::new(ChaseState, 20.0));
-    phases.push(Phase::new(ScatterState, 7.0));
-    phases.push(Phase::new(ChaseState, 20.0));
-    phases.push(Phase::new(ScatterState, 5.0));
-    phases.push(Phase::new(ChaseState, 20.0));
-    phases.push(Phase::new(ScatterState, 5.0));
-    phases.push(Phase::new(ChaseState, 1.0)); // Maybe add an infinite variant
+    phases.push(Phase::for_duration(ScatterState, 7.0));
+    phases.push(Phase::for_duration(ChaseState, 20.0));
+    phases.push(Phase::for_duration(ScatterState, 7.0));
+    phases.push(Phase::for_duration(ChaseState, 20.0));
+    phases.push(Phase::for_duration(ScatterState, 5.0));
+    phases.push(Phase::for_duration(ChaseState, 20.0));
+    phases.push(Phase::for_duration(ScatterState, 5.0));
+    phases.push(Phase::infinite(ChaseState));
     Schedule::new(phases)
 }
 

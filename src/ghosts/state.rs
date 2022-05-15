@@ -4,7 +4,7 @@ use bevy::prelude::*;
 
 use crate::common::{MoveDirection, Position};
 use crate::energizer::EnergizerEaten;
-use crate::ghosts::schedule::Schedule;
+use crate::ghosts::schedule::ScheduleChanged;
 use crate::ghosts::target::Target;
 use crate::map::board::Board;
 use crate::map::FieldType::{GhostSpawn, GhostWall};
@@ -12,6 +12,7 @@ use crate::pacman::Pacman;
 use crate::common::MoveDirection::*;
 use crate::ghosts::Ghost;
 use crate::level::Level;
+use crate::ghosts::schedule::Schedule;
 use crate::ghosts::schedule::State::*;
 
 pub struct StatePlugin;
@@ -21,12 +22,16 @@ impl Plugin for StatePlugin {
         app
             .add_system(update_frightened_state)
             .add_system(update_spawned_state)
+            .add_system(set_chase_or_scatter_state_when_not_set)
             .add_system(update_chase_and_scatter_state)
             .add_system(update_eaten_state)
             .add_system(update_frightened_timer)
             .add_system(set_frightened_when_pacman_ate_energizer)
             .add_system(set_frightened_when_pacman_ate_energizer_and_ghost_has_no_target)
-            .add_system(set_eaten_when_hit_by_pacman);
+            .add_system(set_eaten_when_hit_by_pacman)
+            .add_system(reverse_when_schedule_changed)
+            .add_system(reverse_when_schedule_changed_and_ghost_has_no_target)
+        ;
     }
 }
 
@@ -78,6 +83,7 @@ impl FrightenedTimer {
     }
 }
 
+// TODO: This might fail if a ghost is on the ghost wall and a schedule change happens -> he turns around and is trapped.
 fn update_spawned_state(
     mut commands: Commands,
     board: Res<Board>,
@@ -90,16 +96,33 @@ fn update_spawned_state(
     }
 }
 
-fn update_chase_and_scatter_state(
+fn set_chase_or_scatter_state_when_not_set(
     mut commands: Commands,
     schedule: Res<Schedule>,
-    query: Query<Entity, With<Ghost>>,
+    query: Query<Entity, (With<Ghost>, Without<Scatter>, Without<Chase>)>,
 ) {
     for entity in query.iter() {
         match schedule.current_state() {
-            ChaseState => commands.entity(entity).remove::<Scatter>().insert(Chase),
-            ScatterState => commands.entity(entity).remove::<Chase>().insert(Scatter)
+            ScatterState => commands.entity(entity).insert(Scatter),
+            ChaseState => commands.entity(entity).insert(Chase)
         };
+    }
+}
+
+fn update_chase_and_scatter_state(
+    mut commands: Commands,
+    mut event_reader: EventReader<ScheduleChanged>,
+    query: Query<Entity, With<Ghost>>,
+) {
+    if event_reader.is_empty() { return; }
+
+    for event in event_reader.iter() {
+        for entity in query.iter() {
+            match **event {
+                ChaseState => commands.entity(entity).remove::<Scatter>().insert(Chase),
+                ScatterState => commands.entity(entity).remove::<Chase>().insert(Scatter)
+            };
+        }
     }
 }
 
@@ -110,7 +133,7 @@ fn update_frightened_state(
 ) {
     for entity in query.iter_mut() {
         let frightened_time_over = match frightened_timer {
-            Some(ref timer)  => timer.is_finished(),
+            Some(ref timer) => timer.is_finished(),
             _ => true
         };
 
@@ -142,7 +165,7 @@ fn update_frightened_timer(
     match timer {
         Some(ref t) if t.is_finished() => {
             commands.remove_resource::<FrightenedTimer>()
-        },
+        }
         Some(ref mut t) => t.tick(time.delta()),
         _ => return
     }
@@ -173,6 +196,7 @@ fn set_frightened_when_pacman_ate_energizer(
     }
 }
 
+// TODO: Does this always work? (runs concurrent with target setters)
 fn set_frightened_when_pacman_ate_energizer_and_ghost_has_no_target(
     mut commands: Commands,
     level: Res<Level>,
@@ -202,5 +226,36 @@ fn set_eaten_when_hit_by_pacman(
                     .insert(Eaten);
             }
         }
+    }
+}
+
+fn reverse_when_schedule_changed(
+    event_reader: EventReader<ScheduleChanged>,
+    mut query: Query<(&mut MoveDirection, &mut Target), (With<Ghost>, Without<Frightened>, Without<Eaten>, Without<Spawned>)>,
+) {
+    if event_reader.is_empty() { return; }
+
+    for (mut direction, mut target) in query.iter_mut() {
+        let position_ghost_came_from = match *direction {
+            Up => Position::new(target.x(), target.y() - 1),
+            Down => Position::new(target.x(), target.y() + 1),
+            Left => Position::new(target.x() + 1, target.y()),
+            Right => Position::new(target.x() - 1, target.y())
+        };
+
+        direction.reverse();
+        *target = Target(position_ghost_came_from);
+    }
+}
+
+// TODO: Does this always work? (runs concurrent with target setters)
+fn reverse_when_schedule_changed_and_ghost_has_no_target(
+    event_reader: EventReader<ScheduleChanged>,
+    mut query: Query<&mut MoveDirection, (With<Ghost>, Without<Target>, Without<Frightened>, Without<Eaten>, Without<Spawned>)>,
+) {
+    if event_reader.is_empty() { return; }
+
+    for mut direction in query.iter_mut() {
+        direction.reverse();
     }
 }
