@@ -40,7 +40,7 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 - sprites for pacman
 - sprites for ghosts
 - sprites for dots and energizer
-- sprites for the maze
+- sprites for the maze (there are 3 different kinds of walls: outer -> thick, inner -> thin, ghost house -> square)
 - return the correct z coordinate from the board (or only x and y)
 
 ### Appearance
