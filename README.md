@@ -51,3 +51,7 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 ### UI
 - main menu to start the game (and later access the high score)
 - pause menu to quit the game
+
+### Refactoring
+- add every map element (walls, tunnels, ghost house) as an entity
+- bind movement to the target, so the ghost has no extra movement component
