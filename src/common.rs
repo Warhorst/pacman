@@ -1,8 +1,9 @@
+use serde::{Serialize, Deserialize};
 use bevy::prelude::*;
 
 use crate::common::MoveDirection::*;
 
-#[derive(Copy, Clone, Component, Hash, Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Component, Deserialize, Hash, Debug, Eq, PartialEq, Serialize)]
 pub struct Position(usize, usize);
 
 impl Position {
@@ -32,7 +33,7 @@ impl Position {
     }
 }
 
-#[derive(Copy, Clone, Component, Debug, PartialOrd, PartialEq)]
+#[derive(Copy, Clone, Component, Deserialize, Debug, PartialOrd, PartialEq, Serialize)]
 pub enum MoveDirection {
     Up,
     Down,
