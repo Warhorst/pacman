@@ -1,7 +1,9 @@
 use bevy::prelude::*;
 use crate::constants::WALL_DIMENSION;
-use crate::map::board::Board;
-use crate::map::FieldType::{GhostWall, Wall};
+use crate::is;
+use crate::new_map::board::Board;
+use crate::new_map::Element;
+use crate::new_map::Element::Wall;
 
 pub struct WallsPlugin;
 
@@ -15,7 +17,7 @@ fn spawn_walls(
     mut commands: Commands,
     board: Res<Board>
 ) {
-    for position in board.positions_of_type(Wall) {
+    for position in board.get_positions_matching(is!(Wall {..})) {
         commands.spawn()
             .insert_bundle(SpriteBundle {
                 sprite: Sprite {
@@ -28,7 +30,7 @@ fn spawn_walls(
             });
     }
 
-    for position in board.positions_of_type(GhostWall) {
+    for position in board.get_positions_matching(is!(Element::GhostHouseEntrance {..})) {
         commands.spawn()
             .insert_bundle(SpriteBundle {
                 sprite: Sprite {

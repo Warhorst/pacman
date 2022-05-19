@@ -5,7 +5,7 @@ use crate::constants::{GHOST_SPEED, PACMAN_SPEED};
 use crate::ghosts::Ghost;
 use crate::ghosts::state::{Frightened, FrightenedTimer};
 use crate::level::Level;
-use crate::map::board::Board;
+use crate::new_map::board::Board;
 use crate::pacman::Pacman;
 
 pub struct SpeedPlugin;

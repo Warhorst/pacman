@@ -1,10 +1,11 @@
 use bevy::prelude::*;
 
 use crate::constants::ENERGIZER_DIMENSION;
-use crate::map::board::Board;
-use crate::map::FieldType;
 use crate::pacman::Pacman;
 use crate::common::Position;
+use crate::is;
+use crate::new_map::board::Board;
+use crate::new_map::Element::EnergizerSpawn;
 
 pub struct EnergizerPlugin;
 
@@ -24,9 +25,12 @@ pub struct Energizer;
 /// Fired when pacman eats an energizer.
 pub struct EnergizerEaten;
 
-fn spawn_energizer(mut commands: Commands, board: Res<Board>) {
+fn spawn_energizer(
+    mut commands: Commands,
+    board: Res<Board>
+) {
     let energizer_dimension = Vec2::new(ENERGIZER_DIMENSION, ENERGIZER_DIMENSION);
-    for position in board.positions_of_type(FieldType::Energizer) {
+    for position in board.get_positions_matching(is!(EnergizerSpawn)) {
         commands.spawn()
             .insert_bundle(SpriteBundle {
                 sprite: Sprite {

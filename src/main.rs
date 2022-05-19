@@ -2,7 +2,6 @@ extern crate core;
 
 use bevy::prelude::*;
 
-use map::MapPlugin;
 use pacman::PacmanPlugin;
 
 use crate::dots::DotPlugin;
@@ -10,6 +9,7 @@ use crate::energizer::EnergizerPlugin;
 use crate::ghosts::GhostPlugin;
 use crate::level::LevelPlugin;
 use crate::lives::LivesPlugin;
+use crate::new_map::MapPlugin;
 use crate::random::RandomPlugin;
 use crate::score::ScorePlugin;
 use crate::speed::SpeedPlugin;
@@ -19,7 +19,7 @@ use crate::walls::WallsPlugin;
 mod constants;
 mod common;
 mod pacman;
-mod map;
+// mod map;
 mod dots;
 mod score;
 mod ghosts;

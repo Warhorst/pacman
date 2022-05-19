@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::common::{MoveDirection, Position};
 use crate::ghosts::Ghost;
-use crate::map::board::Board;
+use crate::new_map::board::Board;
 use crate::pacman::Pacman;
 use crate::tunnels::{GhostPassedTunnel, Tunnel, TunnelEntrance};
 

@@ -1,9 +1,10 @@
 use bevy::prelude::*;
 
 use crate::constants::PACMAN_DIMENSION;
+use crate::is;
 use crate::level::Level;
-use crate::map::board::Board;
-use crate::map::FieldType::PacManSpawn;
+use crate::new_map::board::Board;
+use crate::new_map::Element::PacManSpawn;
 use crate::pacman::Pacman;
 use crate::speed::SpeedByLevel;
 
@@ -13,7 +14,7 @@ pub (in crate::pacman) fn spawn_pacman(
     level: Res<Level>,
     speed_by_level: Res<SpeedByLevel>
 ) {
-    let start_position = board.position_of_type(PacManSpawn).clone();
+    let start_position = board.get_position_matching(is!(PacManSpawn)).clone();
     let pacman_dimension = Vec2::new(PACMAN_DIMENSION, PACMAN_DIMENSION);
     commands.spawn()
         .insert_bundle(SpriteBundle {

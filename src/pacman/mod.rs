@@ -7,9 +7,10 @@ use crate::common::MoveDirection::*;
 use crate::dots::DotEaten;
 use crate::ghosts::Ghost;
 use crate::ghosts::state::{Eaten, Frightened, Spawned};
+use crate::is;
 use crate::lives::Life;
-use crate::map::board::Board;
-use crate::map::FieldType::PacManSpawn;
+use crate::new_map::board::Board;
+use crate::new_map::Element::PacManSpawn;
 use crate::pacman::movement::move_pacman_if_not_stopped;
 use crate::pacman::spawn::spawn_pacman;
 
@@ -185,7 +186,7 @@ fn reset_pacman_when_he_died_and_has_lives(
     if live_query.iter().count() == 0 { return; }
 
     for mut transform in pacman_query.iter_mut() {
-        let pacman_start = board.coordinates_of_position(&board.position_of_type(PacManSpawn));
+        let pacman_start = board.coordinates_of_position(&board.get_position_matching(is!(PacManSpawn)));
         *transform = Transform::from_xyz(pacman_start.x, pacman_start.y, pacman_start.z);
     }
 }

@@ -12,7 +12,7 @@ use crate::new_map::Element::*;
 static EMPTY: Vec<Element> = vec![];
 
 #[derive(Debug)]
-struct Board {
+pub struct Board {
     elements_map: HashMap<Position, Vec<Element>>,
     width: usize,
     height: usize,
@@ -119,26 +119,46 @@ impl Board {
 
     /// Return the position of one specific field type. Of the FieldType
     /// should be exactly one on the map. If not, the program panics.
-    pub fn position_of_element(&self, element: Element) -> &Position {
-        let type_positions = self.elements_map.iter()
-            .filter(|(_, elems)| elems.contains(&element))
+    pub fn get_position_matching(&self, filter: impl Fn(&Element) -> bool) -> &Position {
+        let positions = self.elements_map.iter()
+            .filter(|(_, elems)| Self::elements_match_filter(elems, &filter))
             .map(|(pos, _)| pos)
             .collect::<Vec<_>>();
-        match type_positions.len() {
-            1 => type_positions[0],
-            _ => panic!("Expected exactly one field with element {:?}", element)
+        match positions.len() {
+            1 => positions[0],
+            _ => panic!("Expected exactly one field")
         }
     }
 
-    pub fn positions_with_element(&self, element: &Element) -> Vec<&Position> {
-        self.positions_with_elements_filter(|elems| elems.contains(element))
-    }
-
-    pub fn positions_with_elements_filter(&self, filter: impl Fn(&Vec<Element>) -> bool) -> Vec<&Position> {
+    pub fn get_positions_matching(&self, filter: impl Fn(&Element) -> bool) -> Vec<&Position> {
         self.elements_map.iter()
-            .filter(|(_, elems)| filter(elems))
+            .filter(|(_, elems)| Self::elements_match_filter(elems, &filter))
             .map(|(pos, _)| pos)
             .collect()
+    }
+
+    /// Check if the given position matches the given element filter
+    pub fn position_matches_filter(&self, position: &Position, filter: impl Fn(&Element) -> bool) -> bool {
+        Self::elements_match_filter(self.elements_on_position(position), &filter)
+    }
+
+    fn elements_match_filter(elems: &Vec<Element>, filter: &impl Fn(&Element) -> bool) -> bool {
+        elems.into_iter()
+            .map(filter)
+            .max()
+            .unwrap_or(false)
+    }
+
+    /// Returns the first element on the given position matching the given filter.
+    ///
+    /// Returns None if
+    /// - the position is not on the board
+    /// - no element matches the filter
+    pub fn element_on_position_matching(&self, position: &Position, filter: impl Fn(&Element) -> bool) -> Option<&Element> {
+        self.elements_map.get(position)?
+            .into_iter()
+            .filter(|e| (filter)(e))
+            .next()
     }
 
     /// Return the elements on the given position.
@@ -185,6 +205,30 @@ impl Board {
             .min()
             .unwrap_or(false)
     }
+}
+
+#[macro_export]
+macro_rules! is {
+    ($pattern:pat) => {
+        {
+            |e: &crate::new_map::Element| match e {
+                $pattern => true,
+                _ => false
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! is_not {
+    ($pattern:pat) => {
+        {
+            |e: &crate::new_map::Element| match e {
+                $pattern => false,
+                _ => true
+            }
+        }
+    };
 }
 
 #[cfg(test)]

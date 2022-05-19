@@ -1,9 +1,21 @@
-mod board;
-
+use bevy::prelude::*;
 use std::fs::File;
 use std::path::Path;
-use serde::{Serialize, Deserialize};
+
+use serde::{Deserialize, Serialize};
+
 use crate::common::{MoveDirection, Position};
+use crate::new_map::board::Board;
+
+pub mod board;
+
+pub struct MapPlugin;
+
+impl Plugin for MapPlugin {
+    fn build(&self, app: &mut App) {
+        app.insert_resource(Board::new());
+    }
+}
 
 #[derive(Serialize, Deserialize)]
 pub struct Map {
@@ -18,6 +30,7 @@ struct Field {
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum Element {
+    // TODO: remove, an empty field just has no elements
     Empty,
     Wall {
         wall_type: WallType,
@@ -29,6 +42,7 @@ pub enum Element {
     },
     GhostHouse,
     PacManSpawn,
+    // TODO: Remove, every ghost has its own spawn now
     GhostSpawn,
     DotSpawn,
     EnergizerSpawn,
@@ -61,7 +75,7 @@ pub enum Rotation {
     D0,
     D90,
     D180,
-    D270
+    D270,
 }
 
 /// Represents the neighbour of a specific field, with ist type and the direction
@@ -76,6 +90,13 @@ pub struct Neighbour<'a> {
 impl<'a> Neighbour<'a> {
     pub fn new(position: Position, elements: &'a Vec<Element>, direction: MoveDirection) -> Self {
         Neighbour { position, elements, direction }
+    }
+
+    pub fn elements_match_filter(&self, filter: impl Fn(&Element) -> bool) -> bool {
+        self.elements.into_iter()
+            .map(filter)
+            .max()
+            .unwrap_or(false)
     }
 }
 
@@ -105,9 +126,10 @@ impl Map {
 mod tests {
     use std::fs::{File, OpenOptions};
     use std::io::Write;
+
     use crate::common::{MoveDirection, Position};
-    use crate::new_map::Element::*;
     use crate::new_map::{Element, Field, Map, Rotation, WallType};
+    use crate::new_map::Element::*;
 
     #[test]
     fn from_json() {
@@ -118,7 +140,7 @@ mod tests {
     fn to_json() {
         let fields = vec![
             create_field_line(2, 0, vec![
-                wall_corner(PinkySpawn),
+                wall_corner(PinkyCorner),
                 wall(26),
                 wall_corner(BlinkyCorner),
             ]),

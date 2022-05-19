@@ -5,9 +5,11 @@ use crate::common::MoveDirection::Up;
 use crate::constants::GHOST_DIMENSION;
 use crate::ghosts::{Blinky, Clyde, Ghost, Inky, Pinky};
 use crate::ghosts::state::Spawned;
+use crate::is;
 use crate::level::Level;
-use crate::map::board::Board;
-use crate::map::FieldType;
+use crate::new_map::board::Board;
+use crate::new_map::Element;
+use crate::new_map::Element::*;
 use crate::speed::SpeedByLevel;
 
 pub fn spawn_ghosts(
@@ -16,11 +18,10 @@ pub fn spawn_ghosts(
     level: Res<Level>,
     speed_by_level: Res<SpeedByLevel>
 ) {
-    let spawn_positions = board.positions_of_type(FieldType::GhostSpawn);
-    spawn_ghost(&mut commands, &board, spawn_positions[0], &level, &speed_by_level, Color::hex("FF0000").unwrap(), Blinky);
-    spawn_ghost(&mut commands, &board, spawn_positions[1], &level, &speed_by_level, Color::hex("FFB8FF").unwrap(), Pinky);
-    spawn_ghost(&mut commands, &board, spawn_positions[2], &level, &speed_by_level, Color::hex("00FFFF").unwrap(), Inky);
-    spawn_ghost(&mut commands, &board, spawn_positions[3], &level, &speed_by_level, Color::hex("FFB852").unwrap(), Clyde)
+    spawn_ghost(&mut commands, &board, board.get_position_matching(is!(BlinkySpawn)), &level, &speed_by_level, Color::hex("FF0000").unwrap(), Blinky);
+    spawn_ghost(&mut commands, &board, board.get_position_matching(is!(PinkySpawn)), &level, &speed_by_level, Color::hex("FFB8FF").unwrap(), Pinky);
+    spawn_ghost(&mut commands, &board, board.get_position_matching(is!(InkySpawn)), &level, &speed_by_level, Color::hex("00FFFF").unwrap(), Inky);
+    spawn_ghost(&mut commands, &board, board.get_position_matching(is!(ClydeSpawn)), &level, &speed_by_level, Color::hex("FFB852").unwrap(), Clyde)
 }
 
 fn spawn_ghost(

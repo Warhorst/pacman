@@ -6,14 +6,16 @@ use crate::common::{MoveDirection, Position};
 use crate::energizer::EnergizerEaten;
 use crate::ghosts::schedule::ScheduleChanged;
 use crate::ghosts::target::Target;
-use crate::map::board::Board;
-use crate::map::FieldType::{GhostSpawn, GhostWall};
 use crate::pacman::Pacman;
 use crate::common::MoveDirection::*;
 use crate::ghosts::Ghost;
 use crate::level::Level;
 use crate::ghosts::schedule::Schedule;
 use crate::ghosts::schedule::State::*;
+use crate::is;
+use crate::new_map::board::Board;
+use crate::new_map::Element;
+use crate::new_map::Element::GhostSpawn;
 
 pub struct StatePlugin;
 
@@ -90,7 +92,12 @@ fn update_spawned_state(
     mut query: Query<(Entity, &Position), (With<Ghost>, With<Spawned>, Without<Frightened>, Without<Eaten>)>,
 ) {
     for (entity, position) in query.iter_mut() {
-        if board.type_of_position(position) == &GhostWall {
+        let position_is_ghost_house_entrance = board.position_matches_filter(position, |e| match e {
+            Element::GhostHouseEntrance {..} => true,
+            _ => false
+        });
+
+        if position_is_ghost_house_entrance {
             commands.entity(entity).remove::<Spawned>();
         }
     }
@@ -149,7 +156,7 @@ fn update_eaten_state(
     query: Query<(Entity, &Position), (With<Eaten>, Without<Frightened>, Without<Spawned>)>,
 ) {
     for (entity, position) in query.iter() {
-        if board.type_of_position(position) == &GhostSpawn {
+        if board.position_matches_filter(position, is!(GhostSpawn)) {
             commands.entity(entity)
                 .remove::<Eaten>()
                 .insert(Spawned);

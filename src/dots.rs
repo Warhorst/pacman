@@ -1,9 +1,10 @@
 use bevy::prelude::*;
 
 use crate::constants::POINT_DIMENSION;
-use crate::map::board::Board;
-use crate::map::FieldType;
 use crate::common::Position;
+use crate::is;
+use crate::new_map::board::Board;
+use crate::new_map::Element;
 use crate::pacman::Pacman;
 
 pub struct DotPlugin;
@@ -29,9 +30,12 @@ pub struct DotEaten;
 /// Event. Fired when all dots are eaten.
 pub struct AllDotsEaten;
 
-fn spawn_dots(mut commands: Commands, board: Res<Board>) {
+fn spawn_dots(
+    mut commands: Commands,
+    board: Res<Board>
+) {
     let point_dimension = Vec2::new(POINT_DIMENSION, POINT_DIMENSION);
-    for position in board.positions_of_type(FieldType::Point) {
+    for position in board.get_positions_matching(is!(Element::DotSpawn)) {
         commands.spawn()
             .insert_bundle(SpriteBundle {
                 sprite: Sprite {

@@ -5,11 +5,12 @@ use bevy::prelude::*;
 use crate::common::Position;
 use crate::common::MoveDirection;
 use crate::common::MoveDirection::*;
+use crate::{is, is_not};
 use crate::ghosts::{Blinky, Clyde, Inky, Pinky};
 use crate::ghosts::state::{Chase, Eaten, Frightened, Scatter, Spawned};
-use crate::map::board::Board;
-use crate::map::FieldType::*;
-use crate::map::Neighbour;
+use crate::new_map::board::Board;
+use crate::new_map::Element::*;
+use crate::new_map::{Element, Neighbour};
 use crate::pacman::Pacman;
 use crate::random::Random;
 
@@ -40,7 +41,8 @@ fn set_spawned_target(
     mut query: Query<(Entity, &mut MoveDirection, &Position), (With<Spawned>, Without<Frightened>, Without<Eaten>, Without<Target>)>,
 ) {
     for (entity, mut direction, position) in query.iter_mut() {
-        let ghost_wall_positions = board.positions_of_type(GhostWall);
+        let ghost_wall_positions = board.get_positions_matching(is!(GhostHouseEntrance {..}));
+
         let nearest_wall_position = ghost_wall_positions.into_iter()
             .min_by(|pos_a, pos_b| minimal_distance_to_positions(&position, pos_a, pos_b))
             .expect("There should at least be one ghost wall on the map");
@@ -69,7 +71,7 @@ fn set_blinky_scatter_target(
             entity,
             &mut direction,
             position,
-            board.position_of_type(BlinkyCorner)
+            board.get_position_matching(is!(BlinkyCorner))
         )
     }
 }
@@ -86,7 +88,7 @@ fn set_pinky_scatter_target(
             entity,
             &mut direction,
             position,
-            board.position_of_type(PinkyCorner)
+            board.get_position_matching(is!(PinkyCorner))
         )
     }
 }
@@ -103,7 +105,7 @@ fn set_inky_scatter_target(
             entity,
             &mut direction,
             position,
-            board.position_of_type(InkyCorner)
+            board.get_position_matching(is!(InkyCorner))
         )
     }
 }
@@ -120,7 +122,7 @@ fn set_clyde_scatter_target(
             entity,
             &mut direction,
             position,
-            board.position_of_type(ClydeCorner)
+            board.get_position_matching(is!(ClydeCorner))
         )
     }
 }
@@ -219,8 +221,8 @@ fn set_frightened_target(
 
         let next_target_neighbour = match possible_neighbours.len() {
             0 => board.neighbour_behind(&position, &direction),
-            1 => possible_neighbours[0],
-            len => possible_neighbours[random.zero_to(len)]
+            1 => possible_neighbours.get(0).unwrap().clone(),
+            len => possible_neighbours.get(random.zero_to(len)).unwrap().clone()
         };
         *direction = next_target_neighbour.direction;
         commands.entity(entity).insert(Target(next_target_neighbour.position));
@@ -233,7 +235,7 @@ fn set_eaten_target(
     mut query: Query<(Entity, &mut MoveDirection, &Position), (With<Eaten>, Without<Frightened>, Without<Spawned>, Without<Target>)>,
 ) {
     for (entity, mut direction, position) in query.iter_mut() {
-        let ghost_spawn_positions = board.positions_of_type(GhostSpawn);
+        let ghost_spawn_positions = board.get_positions_matching(is!(GhostSpawn));
         let nearest_spawn_position = &ghost_spawn_positions.iter()
             .min_by(|pos_a, pos_b| minimal_distance_to_positions(&position, pos_a, pos_b))
             .expect("There should at least be one ghost spawn on the map");
@@ -250,25 +252,25 @@ fn set_eaten_target(
     }
 }
 
-fn get_neighbour_nearest_to_target<F: Fn(&Neighbour) -> bool>(
+fn get_neighbour_nearest_to_target<'a, F: Fn(&Neighbour<'a>) -> bool>(
     ghost_position: &Position,
     target_position: &Position,
-    board: &Board,
+    board: &'a Board,
     direction: &MoveDirection,
     field_filter: F,
-) -> Neighbour {
+) -> Neighbour<'a> {
     get_possible_neighbours(ghost_position, board, direction, field_filter)
         .into_iter()
         .min_by(|n_a, n_b| minimal_distance_to_neighbours(target_position, n_a, n_b))
         .unwrap_or_else(|| board.neighbour_behind(ghost_position, direction))
 }
 
-fn get_possible_neighbours<F: Fn(&Neighbour) -> bool>(
+fn get_possible_neighbours<'a, F: Fn(&Neighbour<'a>) -> bool>(
     ghost_position: &Position,
-    board: &Board,
+    board: &'a Board,
     direction: &MoveDirection,
     field_filter: F,
-) -> Vec<Neighbour> {
+) -> Vec<Neighbour<'a>> {
     board.neighbours_of(ghost_position)
         .into_iter()
         .filter(|neighbour| neighbour_not_in_opposite_direction(direction, neighbour))
@@ -277,24 +279,24 @@ fn get_possible_neighbours<F: Fn(&Neighbour) -> bool>(
 }
 
 fn neighbour_is_no_wall_in_spawn(board: &Board, ghost_position: &Position, neighbour: &Neighbour) -> bool {
-    match *board.type_of_position(ghost_position) == GhostWall {
-        true => neighbour.field_type != Wall && neighbour.field_type != GhostSpawn,
-        false => neighbour.field_type != Wall
+    match board.position_matches_filter(ghost_position, is!(GhostHouseEntrance {..})) {
+        true => neighbour.elements_match_filter(is_not!(Wall {..} | GhostSpawn)),
+        false => neighbour.elements_match_filter(is_not!(Wall {..}))
     }
 }
 
-fn neighbour_is_no_wall(board: &Board, neighbour_position: &Position) -> bool {
-    match board.type_of_position(neighbour_position) {
-        Wall | GhostWall | InvisibleWall => false,
+fn neighbour_is_no_wall(board: &Board, position: &Position) -> bool {
+    board.position_matches_filter(position, |e| match e {
+        Wall {..} | InvisibleWall => false,
         _ => true
-    }
+    })
 }
 
-fn neighbour_is_no_normal_wall(board: &Board, neighbour_position: &Position) -> bool {
-    match board.type_of_position(neighbour_position) {
-        Wall => false,
+fn neighbour_is_no_normal_wall(board: &Board, position: &Position) -> bool {
+    board.position_matches_filter(position, |e| match e {
+        Wall {..} => false,
         _ => true
-    }
+    })
 }
 
 fn neighbour_not_in_opposite_direction(direction: &MoveDirection, neighbour: &Neighbour) -> bool {

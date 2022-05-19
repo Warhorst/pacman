@@ -5,8 +5,8 @@ use crate::common::MoveDirection;
 use crate::common::MoveDirection::*;
 use crate::common::Position;
 use crate::constants::PACMAN_DIMENSION;
-use crate::map::board::Board;
-use crate::map::FieldType::*;
+use crate::new_map::board::Board;
+use crate::new_map::Element;
 use crate::pacman::{Pacman, Stop};
 use crate::speed::Speed;
 
@@ -70,10 +70,10 @@ fn is_going_to_collide_with_obstacle(board: &Board, direction: &MoveDirection, n
 
 /// Tells if the given position is an obstacle for pacman.
 fn position_is_obstacle(board: &Board, position: &Position) -> bool {
-    match board.type_of_position(position) {
-        Wall | GhostWall | InvisibleWall => true,
+    board.position_matches_filter(position, |e| match e {
+        Element::Wall {..} | Element::InvisibleWall => true,
         _ => false
-    }
+    })
 }
 
 /// Limit pacmans movement if he reached an obstacle and stop him.
