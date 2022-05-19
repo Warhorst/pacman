@@ -14,6 +14,7 @@ use crate::random::RandomPlugin;
 use crate::score::ScorePlugin;
 use crate::speed::SpeedPlugin;
 use crate::tunnels::TunnelPlugin;
+use crate::walls::WallsPlugin;
 
 mod constants;
 mod common;
@@ -29,6 +30,7 @@ mod lives;
 mod level;
 mod speed;
 mod new_map;
+mod walls;
 
 fn main() {
     App::new()
@@ -42,6 +44,7 @@ fn main() {
         .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
         .add_plugins(DefaultPlugins)
         .add_plugin(MapPlugin)
+        .add_plugin(WallsPlugin)
         .add_plugin(PacmanPlugin)
         .add_plugin(DotPlugin)
         .add_plugin(ScorePlugin)

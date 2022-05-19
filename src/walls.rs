@@ -1,0 +1,43 @@
+use bevy::prelude::*;
+use crate::constants::WALL_DIMENSION;
+use crate::map::board::Board;
+use crate::map::FieldType::{GhostWall, Wall};
+
+pub struct WallsPlugin;
+
+impl Plugin for WallsPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_startup_system(spawn_walls);
+    }
+}
+
+fn spawn_walls(
+    mut commands: Commands,
+    board: Res<Board>
+) {
+    for position in board.positions_of_type(Wall) {
+        commands.spawn()
+            .insert_bundle(SpriteBundle {
+                sprite: Sprite {
+                    color: Color::rgb(0.0, 0.0, 1.0),
+                    custom_size: Some(Vec2::new(WALL_DIMENSION, WALL_DIMENSION)),
+                    ..default()
+                },
+                transform: Transform::from_translation(board.coordinates_of_position(position)),
+                ..Default::default()
+            });
+    }
+
+    for position in board.positions_of_type(GhostWall) {
+        commands.spawn()
+            .insert_bundle(SpriteBundle {
+                sprite: Sprite {
+                    color: Color::rgb(1.0, 1.0, 1.0),
+                    custom_size: Some(Vec2::new(WALL_DIMENSION, WALL_DIMENSION)),
+                    ..default()
+                },
+                transform: Transform::from_translation(board.coordinates_of_position(position)),
+                ..Default::default()
+            });
+    }
+}
