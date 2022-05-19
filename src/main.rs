@@ -28,6 +28,7 @@ mod random;
 mod lives;
 mod level;
 mod speed;
+mod new_map;
 
 fn main() {
     App::new()

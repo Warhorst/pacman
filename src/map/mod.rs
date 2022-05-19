@@ -14,7 +14,6 @@ use crate::map::board::Board;
 
 pub mod board;
 mod pacmap;
-mod new_map;
 
 type FieldTypeMatrix = Vec<Vec<FieldType>>;
 type PositionTypeMap = HashMap<Position, FieldType>;

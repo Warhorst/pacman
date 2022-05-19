@@ -1,8 +1,12 @@
+mod board;
+
+use std::fs::File;
+use std::path::Path;
 use serde::{Serialize, Deserialize};
 use crate::common::{MoveDirection, Position};
 
 #[derive(Serialize, Deserialize)]
-pub struct RawMap {
+pub struct Map {
     fields: Vec<Field>,
 }
 
@@ -12,16 +16,16 @@ struct Field {
     elements: Vec<Element>,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
-enum Element {
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub enum Element {
     Empty,
     Wall {
         wall_type: WallType,
-        rotation: f32,
+        rotation: Rotation,
         is_corner: bool,
     },
     GhostHouseEntrance {
-        rotation: f32
+        rotation: Rotation
     },
     GhostHouse,
     PacManSpawn,
@@ -45,11 +49,55 @@ enum Element {
     InvisibleWall,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
-enum WallType {
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub enum WallType {
     Outer,
     Inner,
     Ghost,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub enum Rotation {
+    D0,
+    D90,
+    D180,
+    D270
+}
+
+/// Represents the neighbour of a specific field, with ist type and the direction
+/// relative to the original position.
+#[derive(Clone)]
+pub struct Neighbour<'a> {
+    pub position: Position,
+    pub elements: &'a Vec<Element>,
+    pub direction: MoveDirection,
+}
+
+impl<'a> Neighbour<'a> {
+    pub fn new(position: Position, elements: &'a Vec<Element>, direction: MoveDirection) -> Self {
+        Neighbour { position, elements, direction }
+    }
+}
+
+impl Map {
+    pub fn load<P: AsRef<Path>>(path: P) -> Self {
+        let file = File::open(path).expect("could not open map from given path");
+        serde_json::from_reader(file).expect("could not parse map from json")
+    }
+
+    pub fn get_width(&self) -> usize {
+        self.fields.iter()
+            .map(|f| f.position.x() + 1)
+            .max()
+            .unwrap_or(0)
+    }
+
+    pub fn get_height(&self) -> usize {
+        self.fields.iter()
+            .map(|f| f.position.y() + 1)
+            .max()
+            .unwrap_or(0)
+    }
 }
 
 /// This bullshit is only used to generate the json map until I have a better way to do this
@@ -58,12 +106,12 @@ mod tests {
     use std::fs::{File, OpenOptions};
     use std::io::Write;
     use crate::common::{MoveDirection, Position};
-    use crate::map::new_map::{Element, Field, RawMap, WallType};
-    use crate::map::new_map::Element::*;
+    use crate::new_map::Element::*;
+    use crate::new_map::{Element, Field, Map, Rotation, WallType};
 
     #[test]
     fn from_json() {
-        serde_json::from_reader::<_, RawMap>(File::open("./maps/new_map.json").unwrap()).expect("Failed to deserialize map");
+        serde_json::from_reader::<_, Map>(File::open("./maps/new_map.json").unwrap()).expect("Failed to deserialize map");
     }
 
     #[test]
@@ -216,7 +264,7 @@ mod tests {
                 wall(2),
                 empty(1),
                 wall(3),
-                elem(2, GhostHouseEntrance { rotation: 0.0 }),
+                elem(2, GhostHouseEntrance { rotation: Rotation::D0 }),
                 wall(3),
                 empty(1),
                 wall(2),
@@ -446,7 +494,7 @@ mod tests {
             ]),
         ];
 
-        let map = RawMap {
+        let map = Map {
             fields: fields.into_iter()
                 .inspect(|vec| assert!(vec.len() == 28 || vec.len() == 32))
                 .flat_map(|f| f)
@@ -473,7 +521,7 @@ mod tests {
         (0..amount).into_iter()
             .map(|_| vec![Wall {
                 wall_type: WallType::Outer,
-                rotation: 0.0,
+                rotation: Rotation::D0,
                 is_corner: false,
             }])
             .collect()

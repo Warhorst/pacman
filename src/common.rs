@@ -33,7 +33,7 @@ impl Position {
     }
 }
 
-#[derive(Copy, Clone, Component, Deserialize, Debug, PartialOrd, PartialEq, Serialize)]
+#[derive(Copy, Clone, Component, Deserialize, Debug, Eq, PartialEq, PartialOrd, Serialize)]
 pub enum MoveDirection {
     Up,
     Down,

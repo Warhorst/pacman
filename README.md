@@ -56,3 +56,4 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 - add every map element (walls, tunnels, ghost house) as an entity
 - bind movement to the target, so the ghost has no extra movement component
 - redo the map creation. The txt file is too limited
+- (Maybe) change the point to a field struct to remove these stupid getters
