@@ -353,7 +353,7 @@ mod tests {
                 wall(2),
                 dot(1),
                 wall(1),
-                wall(5),
+                empty(5),
             ]),
             create_field_line(2, 17, vec![
                 empty(5),
@@ -364,7 +364,7 @@ mod tests {
                 wall(2),
                 dot(1),
                 wall(1),
-                wall(5),
+                empty(5),
             ]),
             create_field_line(2, 18, vec![
                 empty(5),
@@ -377,7 +377,7 @@ mod tests {
                 wall(2),
                 dot(1),
                 wall(1),
-                wall(5),
+                empty(5),
             ]),
             create_field_line(2, 19, vec![
                 wall(6),

@@ -8,7 +8,6 @@ use crate::ghosts::state::Spawned;
 use crate::is;
 use crate::level::Level;
 use crate::new_map::board::Board;
-use crate::new_map::Element;
 use crate::new_map::Element::*;
 use crate::speed::SpeedByLevel;
 

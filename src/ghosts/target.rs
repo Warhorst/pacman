@@ -10,7 +10,7 @@ use crate::ghosts::{Blinky, Clyde, Inky, Pinky};
 use crate::ghosts::state::{Chase, Eaten, Frightened, Scatter, Spawned};
 use crate::new_map::board::Board;
 use crate::new_map::Element::*;
-use crate::new_map::{Element, Neighbour};
+use crate::new_map::Neighbour;
 use crate::pacman::Pacman;
 use crate::random::Random;
 

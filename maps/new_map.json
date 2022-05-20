@@ -5936,13 +5936,7 @@
         "y": 14
       },
       "elements": [
-        {
-          "Wall": {
-            "wall_type": "Outer",
-            "rotation": "D0",
-            "is_corner": false
-          }
-        }
+        "Empty"
       ]
     },
     {
@@ -5951,13 +5945,7 @@
         "y": 14
       },
       "elements": [
-        {
-          "Wall": {
-            "wall_type": "Outer",
-            "rotation": "D0",
-            "is_corner": false
-          }
-        }
+        "Empty"
       ]
     },
     {
@@ -5966,13 +5954,7 @@
         "y": 14
       },
       "elements": [
-        {
-          "Wall": {
-            "wall_type": "Outer",
-            "rotation": "D0",
-            "is_corner": false
-          }
-        }
+        "Empty"
       ]
     },
     {
@@ -5981,13 +5963,7 @@
         "y": 14
       },
       "elements": [
-        {
-          "Wall": {
-            "wall_type": "Outer",
-            "rotation": "D0",
-            "is_corner": false
-          }
-        }
+        "Empty"
       ]
     },
     {
@@ -5996,13 +5972,7 @@
         "y": 14
       },
       "elements": [
-        {
-          "Wall": {
-            "wall_type": "Outer",
-            "rotation": "D0",
-            "is_corner": false
-          }
-        }
+        "Empty"
       ]
     },
     {
@@ -6254,13 +6224,7 @@
         "y": 13
       },
       "elements": [
-        {
-          "Wall": {
-            "wall_type": "Outer",
-            "rotation": "D0",
-            "is_corner": false
-          }
-        }
+        "Empty"
       ]
     },
     {
@@ -6269,13 +6233,7 @@
         "y": 13
       },
       "elements": [
-        {
-          "Wall": {
-            "wall_type": "Outer",
-            "rotation": "D0",
-            "is_corner": false
-          }
-        }
+        "Empty"
       ]
     },
     {
@@ -6284,13 +6242,7 @@
         "y": 13
       },
       "elements": [
-        {
-          "Wall": {
-            "wall_type": "Outer",
-            "rotation": "D0",
-            "is_corner": false
-          }
-        }
+        "Empty"
       ]
     },
     {
@@ -6299,13 +6251,7 @@
         "y": 13
       },
       "elements": [
-        {
-          "Wall": {
-            "wall_type": "Outer",
-            "rotation": "D0",
-            "is_corner": false
-          }
-        }
+        "Empty"
       ]
     },
     {
@@ -6314,13 +6260,7 @@
         "y": 13
       },
       "elements": [
-        {
-          "Wall": {
-            "wall_type": "Outer",
-            "rotation": "D0",
-            "is_corner": false
-          }
-        }
+        "Empty"
       ]
     },
     {
@@ -6620,13 +6560,7 @@
         "y": 12
       },
       "elements": [
-        {
-          "Wall": {
-            "wall_type": "Outer",
-            "rotation": "D0",
-            "is_corner": false
-          }
-        }
+        "Empty"
       ]
     },
     {
@@ -6635,13 +6569,7 @@
         "y": 12
       },
       "elements": [
-        {
-          "Wall": {
-            "wall_type": "Outer",
-            "rotation": "D0",
-            "is_corner": false
-          }
-        }
+        "Empty"
       ]
     },
     {
@@ -6650,13 +6578,7 @@
         "y": 12
       },
       "elements": [
-        {
-          "Wall": {
-            "wall_type": "Outer",
-            "rotation": "D0",
-            "is_corner": false
-          }
-        }
+        "Empty"
       ]
     },
     {
@@ -6665,13 +6587,7 @@
         "y": 12
       },
       "elements": [
-        {
-          "Wall": {
-            "wall_type": "Outer",
-            "rotation": "D0",
-            "is_corner": false
-          }
-        }
+        "Empty"
       ]
     },
     {
@@ -6680,13 +6596,7 @@
         "y": 12
       },
       "elements": [
-        {
-          "Wall": {
-            "wall_type": "Outer",
-            "rotation": "D0",
-            "is_corner": false
-          }
-        }
+        "Empty"
       ]
     },
     {
