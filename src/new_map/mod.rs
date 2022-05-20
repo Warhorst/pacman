@@ -516,15 +516,22 @@ mod tests {
             ]),
         ];
 
-        let map = Map {
+        let mut map = Map {
             fields: fields.into_iter()
                 .inspect(|vec| assert!(vec.len() == 28 || vec.len() == 32))
                 .flat_map(|f| f)
                 .collect()
         };
 
+        let height = map.get_height();
+
+        map.fields.iter_mut()
+            .for_each(|f| {
+                f.position.y = height - 1 - f.position.y
+            });
+
         let json = serde_json::to_string(&map).unwrap();
-        let mut file = OpenOptions::new().write(true).open("./maps/new_map.json").unwrap();
+        let mut file = OpenOptions::new().truncate(true).write(true).open("./maps/new_map.json").unwrap();
         file.write(json.as_bytes()).unwrap();
     }
 
