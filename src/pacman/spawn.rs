@@ -3,8 +3,8 @@ use bevy::prelude::*;
 use crate::constants::PACMAN_DIMENSION;
 use crate::is;
 use crate::level::Level;
-use crate::new_map::board::Board;
-use crate::new_map::Element::PacManSpawn;
+use crate::map::board::Board;
+use crate::map::Element::PacManSpawn;
 use crate::pacman::Pacman;
 use crate::speed::SpeedByLevel;
 

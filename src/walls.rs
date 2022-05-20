@@ -1,9 +1,9 @@
 use bevy::prelude::*;
 use crate::constants::WALL_DIMENSION;
 use crate::is;
-use crate::new_map::board::Board;
-use crate::new_map::Element;
-use crate::new_map::Element::Wall;
+use crate::map::board::Board;
+use crate::map::Element;
+use crate::map::Element::Wall;
 
 pub struct WallsPlugin;
 

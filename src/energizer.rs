@@ -4,8 +4,8 @@ use crate::constants::ENERGIZER_DIMENSION;
 use crate::pacman::Pacman;
 use crate::common::Position;
 use crate::is;
-use crate::new_map::board::Board;
-use crate::new_map::Element::EnergizerSpawn;
+use crate::map::board::Board;
+use crate::map::Element::EnergizerSpawn;
 
 pub struct EnergizerPlugin;
 

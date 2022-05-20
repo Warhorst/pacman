@@ -9,7 +9,7 @@ use crate::energizer::EnergizerPlugin;
 use crate::ghosts::GhostPlugin;
 use crate::level::LevelPlugin;
 use crate::lives::LivesPlugin;
-use crate::new_map::MapPlugin;
+use crate::map::MapPlugin;
 use crate::random::RandomPlugin;
 use crate::score::ScorePlugin;
 use crate::speed::SpeedPlugin;
@@ -29,7 +29,7 @@ mod random;
 mod lives;
 mod level;
 mod speed;
-mod new_map;
+mod map;
 mod walls;
 
 fn main() {

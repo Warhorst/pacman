@@ -7,8 +7,8 @@ use crate::ghosts::{Blinky, Clyde, Ghost, Inky, Pinky};
 use crate::ghosts::state::Spawned;
 use crate::is;
 use crate::level::Level;
-use crate::new_map::board::Board;
-use crate::new_map::Element::*;
+use crate::map::board::Board;
+use crate::map::Element::*;
 use crate::speed::SpeedByLevel;
 
 pub fn spawn_ghosts(

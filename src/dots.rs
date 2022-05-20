@@ -3,8 +3,8 @@ use bevy::prelude::*;
 use crate::constants::POINT_DIMENSION;
 use crate::common::Position;
 use crate::is;
-use crate::new_map::board::Board;
-use crate::new_map::Element;
+use crate::map::board::Board;
+use crate::map::Element;
 use crate::pacman::Pacman;
 
 pub struct DotPlugin;

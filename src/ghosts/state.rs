@@ -13,9 +13,9 @@ use crate::level::Level;
 use crate::ghosts::schedule::Schedule;
 use crate::ghosts::schedule::State::*;
 use crate::is;
-use crate::new_map::board::Board;
-use crate::new_map::Element;
-use crate::new_map::Element::GhostSpawn;
+use crate::map::board::Board;
+use crate::map::Element;
+use crate::map::Element::GhostSpawn;
 
 pub struct StatePlugin;
 

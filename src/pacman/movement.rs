@@ -5,8 +5,8 @@ use crate::common::MoveDirection;
 use crate::common::MoveDirection::*;
 use crate::common::Position;
 use crate::constants::PACMAN_DIMENSION;
-use crate::new_map::board::Board;
-use crate::new_map::Element;
+use crate::map::board::Board;
+use crate::map::Element;
 use crate::pacman::{Pacman, Stop};
 use crate::speed::Speed;
 

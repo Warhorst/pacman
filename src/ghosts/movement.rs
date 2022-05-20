@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::common::{MoveDirection, Position};
 use crate::common::MoveDirection::*;
 use crate::ghosts::target::Target;
-use crate::new_map::board::Board;
+use crate::map::board::Board;
 use crate::speed::Speed;
 
 pub struct MovePlugin;

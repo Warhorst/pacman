@@ -4,10 +4,10 @@ use bevy::prelude::*;
 use crate::common::Position;
 use crate::constants::FIELD_DIMENSION;
 use crate::is;
-use crate::new_map::Element;
+use crate::map::Element;
 
-use crate::new_map::board::Board;
-use crate::new_map::Neighbour;
+use crate::map::board::Board;
+use crate::map::Neighbour;
 use crate::tunnels::Tunnel;
 use crate::tunnels::TunnelEntrance;
 
