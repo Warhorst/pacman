@@ -17,6 +17,7 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 - change appearance based on state
 - ghosts can turn around in the ghost house
 - animations
+- add a GhostHouseEntrance entity or resource: A pair of two entrance fields where the center is used to navigate the ghost in and out the house
 
 ### Lifecycle
 - ghosts enter the game depending on the current level/time
