@@ -17,13 +17,12 @@ impl Plugin for MovePlugin {
 fn move_ghost(
     mut commands: Commands,
     time: Res<Time>,
-    board: Res<Board>,
     mut query: Query<(Entity, &MoveDirection, &mut Position, &Target, &mut Transform, &Speed)>,
 ) {
     for (entity, direction, mut position, target, mut transform, speed) in query.iter_mut() {
         let mut coordinates = &mut transform.translation;
         let delta_seconds = time.delta_seconds();
-        let target_coordinates = board.coordinates_of_position(target);
+        let target_coordinates = Board::coordinates_of_position(target);
         move_in_direction(&mut coordinates, delta_seconds, &direction, speed);
         limit_movement(&mut coordinates, &direction, &target_coordinates);
 
@@ -32,7 +31,7 @@ fn move_ghost(
             commands.entity(entity).remove::<Target>();
         }
 
-        *position = board.position_of_coordinates(coordinates)
+        *position = Board::position_of_coordinates(coordinates)
     }
 }
 

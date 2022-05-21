@@ -7,7 +7,6 @@ use crate::pacman::Pacman;
 use crate::tunnels::{GhostPassedTunnel, Tunnel, TunnelEntrance};
 
 pub(in crate::tunnels) fn move_pacman_through_tunnel(
-    board: Res<Board>,
     tunnel_query: Query<&Tunnel>,
     mut pacman_query: Query<(&mut Transform, &mut Position, &mut MoveDirection), With<Pacman>>,
 ) {
@@ -19,14 +18,13 @@ pub(in crate::tunnels) fn move_pacman_through_tunnel(
             };
 
             *position = end.position;
-            transform.translation = board.coordinates_of_position(&end.position);
+            transform.translation = Board::coordinates_of_position(&end.position);
             *direction = end.entrance_direction.opposite();
         }
     }
 }
 
 pub(in crate::tunnels) fn move_ghost_trough_tunnel(
-    board: Res<Board>,
     mut event_writer: EventWriter<GhostPassedTunnel>,
     tunnel_query: Query<&Tunnel>,
     mut ghost_query: Query<(Entity, &mut Transform, &mut Position, &mut MoveDirection), With<Ghost>>,
@@ -39,7 +37,7 @@ pub(in crate::tunnels) fn move_ghost_trough_tunnel(
             };
 
             *position = end.position;
-            transform.translation = board.coordinates_of_position(&end.position);
+            transform.translation = Board::coordinates_of_position(&end.position);
             *direction = end.entrance_direction.opposite();
             event_writer.send(GhostPassedTunnel(entity));
         }

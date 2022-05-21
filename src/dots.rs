@@ -43,7 +43,7 @@ fn spawn_dots(
                     custom_size: Some(point_dimension),
                     ..default()
                 },
-                transform: Transform::from_translation(board.coordinates_of_position(position)),
+                transform: Transform::from_translation(Board::coordinates_of_position(position)),
                 ..Default::default()
             })
             .insert(Dot)

@@ -4,7 +4,7 @@ use bevy::prelude::*;
 
 use crate::common::{MoveDirection, Position};
 use crate::common::MoveDirection::*;
-use crate::constants::{FIELD_DIMENSION, MAP_PATH, WALL_DIMENSION};
+use crate::constants::{FIELD_DIMENSION, MAP_PATH};
 use crate::map::Neighbour;
 use crate::map::{Element, Map};
 use crate::map::Element::*;
@@ -35,20 +35,21 @@ impl Board {
         }
     }
 
-    // TODO: Can be static
-    pub fn coordinates_of_position(&self, position: &Position) -> Vec3 {
+    // TODO: Maybe move to Position
+    pub fn coordinates_of_position(position: &Position) -> Vec3 {
         let x = (position.x() as f32) * FIELD_DIMENSION;
         let y = (position.y() as f32) * FIELD_DIMENSION;
         Vec3::new(x, y, 0.0)
     }
 
-    // TODO: can be static
-    pub fn position_of_coordinates(&self, coordinates: &Vec3) -> Position {
+    // TODO: Maybe move to Position
+    pub fn position_of_coordinates(coordinates: &Vec3) -> Position {
         let x = (coordinates.x + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
         let y = (coordinates.y + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
         Position::new(x as usize, y as usize)
     }
 
+    // TODO: Maybe move to Position
     pub fn position_in_direction(&self, position: &Position, direction: &MoveDirection) -> Option<Position> {
         match direction {
             Up => self.position_up_of(position),
@@ -83,29 +84,6 @@ impl Board {
         match position.x() {
             x if x < self.width - 1 => Some(Position::new(x + 1, position.y())),
             _ => None
-        }
-    }
-
-    /// Determines if pacmans current coordinates are in the center of his current position. The center of the position is
-    /// its middle point with the width/height of the accumulated distance between pacman and the walls.
-    /// Assumes pacman is larger than a wall.
-    pub fn are_coordinates_in_field_center(&self, direction: &MoveDirection, position: &Position, coordinates: &Vec3, entity_dimension: f32) -> bool {
-        let position_coordinates = self.coordinates_of_position(position);
-        let entity_wall_distance = match entity_dimension > WALL_DIMENSION {
-            true => entity_dimension - WALL_DIMENSION,
-            false => 0.0
-        };
-        match direction {
-            Left | Right => {
-                let y_start = position_coordinates.y - entity_wall_distance;
-                let y_end = position_coordinates.y + entity_wall_distance;
-                coordinates.y >= y_start && coordinates.y <= y_end
-            }
-            Up | Down => {
-                let x_start = position_coordinates.x - entity_wall_distance;
-                let x_end = position_coordinates.x + entity_wall_distance;
-                coordinates.x >= x_start && coordinates.x <= x_end
-            }
         }
     }
 
