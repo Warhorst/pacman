@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use crate::common::Position;
 use crate::common::MoveDirection;
 use crate::common::MoveDirection::*;
-use crate::{is, is_not};
+use crate::is;
 use crate::ghosts::{Blinky, Clyde, Inky, Pinky};
 use crate::ghosts::state::{Chase, Eaten, Frightened, Scatter, Spawned};
 use crate::map::board::Board;
@@ -41,9 +41,9 @@ fn set_spawned_target(
     mut query: Query<(Entity, &mut MoveDirection, &Position), (With<Spawned>, Without<Frightened>, Without<Eaten>, Without<Target>)>,
 ) {
     for (entity, mut direction, position) in query.iter_mut() {
-        let ghost_wall_positions = board.get_positions_matching(is!(GhostHouseEntrance {..}));
+        let entrance_positions = board.get_positions_matching(is!(GhostHouseEntrance {..}));
 
-        let nearest_wall_position = ghost_wall_positions.into_iter()
+        let nearest_wall_position = entrance_positions.into_iter()
             .min_by(|pos_a, pos_b| minimal_distance_to_positions(&position, pos_a, pos_b))
             .expect("There should at least be one ghost wall on the map");
         let next_target_neighbour = get_neighbour_nearest_to_target(
@@ -235,7 +235,7 @@ fn set_eaten_target(
     mut query: Query<(Entity, &mut MoveDirection, &Position), (With<Eaten>, Without<Frightened>, Without<Spawned>, Without<Target>)>,
 ) {
     for (entity, mut direction, position) in query.iter_mut() {
-        let ghost_spawn_positions = board.get_positions_matching(is!(GhostSpawn));
+        let ghost_spawn_positions = board.get_positions_matching(is!(GhostHouse));
         let nearest_spawn_position = &ghost_spawn_positions.iter()
             .min_by(|pos_a, pos_b| minimal_distance_to_positions(&position, pos_a, pos_b))
             .expect("There should at least be one ghost spawn on the map");
@@ -280,23 +280,17 @@ fn get_possible_neighbours<'a, F: Fn(&Neighbour<'a>) -> bool>(
 
 fn neighbour_is_no_wall_in_spawn(board: &Board, ghost_position: &Position, neighbour: &Neighbour) -> bool {
     match board.position_matches_filter(ghost_position, is!(GhostHouseEntrance {..})) {
-        true => neighbour.elements_match_filter(is_not!(Wall {..} | GhostSpawn)),
-        false => neighbour.elements_match_filter(is_not!(Wall {..}))
+        true => !neighbour.elements_match_filter(is!(Wall {..} | GhostHouse)),
+        false => !neighbour.elements_match_filter(is!(Wall {..}))
     }
 }
 
 fn neighbour_is_no_wall(board: &Board, position: &Position) -> bool {
-    board.position_matches_filter(position, |e| match e {
-        Wall {..} | InvisibleWall => false,
-        _ => true
-    })
+    !board.position_matches_filter(position, is!(Wall {..} | GhostHouseEntrance {..} | InvisibleWall))
 }
 
 fn neighbour_is_no_normal_wall(board: &Board, position: &Position) -> bool {
-    board.position_matches_filter(position, |e| match e {
-        Wall {..} => false,
-        _ => true
-    })
+    !board.position_matches_filter(position, is!(Wall {..}))
 }
 
 fn neighbour_not_in_opposite_direction(direction: &MoveDirection, neighbour: &Neighbour) -> bool {

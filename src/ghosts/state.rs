@@ -15,7 +15,7 @@ use crate::ghosts::schedule::State::*;
 use crate::is;
 use crate::map::board::Board;
 use crate::map::Element;
-use crate::map::Element::GhostSpawn;
+use crate::map::Element::GhostHouse;
 
 pub struct StatePlugin;
 
@@ -92,12 +92,7 @@ fn update_spawned_state(
     mut query: Query<(Entity, &Position), (With<Ghost>, With<Spawned>, Without<Frightened>, Without<Eaten>)>,
 ) {
     for (entity, position) in query.iter_mut() {
-        let position_is_ghost_house_entrance = board.position_matches_filter(position, |e| match e {
-            Element::GhostHouseEntrance {..} => true,
-            _ => false
-        });
-
-        if position_is_ghost_house_entrance {
+        if !board.position_matches_filter(position, is!(Element::GhostHouse | Element::GhostHouseEntrance {..})) {
             commands.entity(entity).remove::<Spawned>();
         }
     }
@@ -156,7 +151,7 @@ fn update_eaten_state(
     query: Query<(Entity, &Position), (With<Eaten>, Without<Frightened>, Without<Spawned>)>,
 ) {
     for (entity, position) in query.iter() {
-        if board.position_matches_filter(position, is!(GhostSpawn)) {
+        if board.position_matches_filter(position, is!(GhostHouse)) {
             commands.entity(entity)
                 .remove::<Eaten>()
                 .insert(Spawned);

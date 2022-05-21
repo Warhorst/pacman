@@ -219,18 +219,6 @@ macro_rules! is {
     };
 }
 
-#[macro_export]
-macro_rules! is_not {
-    ($pattern:pat) => {
-        {
-            |e: &crate::map::Element| match e {
-                $pattern => false,
-                _ => true
-            }
-        }
-    };
-}
-
 #[cfg(test)]
 mod tests {
     use crate::map::board::Board;
