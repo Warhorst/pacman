@@ -3,6 +3,7 @@ extern crate core;
 use bevy::prelude::*;
 
 use pacman::PacmanPlugin;
+use crate::camera::CameraPlugin;
 
 use crate::dots::DotPlugin;
 use crate::energizer::EnergizerPlugin;
@@ -16,10 +17,10 @@ use crate::speed::SpeedPlugin;
 use crate::tunnels::TunnelPlugin;
 use crate::walls::WallsPlugin;
 
+mod camera;
 mod constants;
 mod common;
 mod pacman;
-// mod map;
 mod dots;
 mod score;
 mod ghosts;
@@ -42,6 +43,7 @@ fn main() {
             ..Default::default()
         })
         .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
+        .add_plugin(CameraPlugin)
         .add_plugins(DefaultPlugins)
         .add_plugin(MapPlugin)
         .add_plugin(WallsPlugin)
@@ -55,11 +57,5 @@ fn main() {
         .add_plugin(LivesPlugin)
         .add_plugin(LevelPlugin)
         .add_plugin(SpeedPlugin)
-        .add_startup_system(init)
         .run()
-}
-
-fn init(mut commands: Commands) {
-    commands.spawn()
-        .insert_bundle(OrthographicCameraBundle::new_2d());
 }

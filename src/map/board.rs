@@ -14,9 +14,8 @@ static EMPTY: Vec<Element> = vec![];
 #[derive(Debug)]
 pub struct Board {
     elements_map: HashMap<Position, Vec<Element>>,
-    width: usize,
-    height: usize,
-    board_root: Vec2,
+    pub width: usize,
+    pub height: usize,
 }
 
 impl Board {
@@ -33,27 +32,20 @@ impl Board {
             elements_map,
             width,
             height,
-            board_root: Self::calculate_board_root(width, height)
         }
     }
 
-    /// Calculate a board root where the board is always centered.
-    /// TODO: Why move the board and not the camera? It would make things easier if the board is at (0,0)
-    fn calculate_board_root(width: usize, height: usize) -> Vec2 {
-        let x = -(width as f32 * FIELD_DIMENSION / 2.0);
-        let y = -(height as f32 * FIELD_DIMENSION / 2.0);
-        Vec2::new(x, y)
-    }
-
+    // TODO: Can be static
     pub fn coordinates_of_position(&self, position: &Position) -> Vec3 {
-        let x = self.board_root.x + (position.x() as f32) * FIELD_DIMENSION;
-        let y = self.board_root.y + (position.y() as f32) * FIELD_DIMENSION;
+        let x = (position.x() as f32) * FIELD_DIMENSION;
+        let y = (position.y() as f32) * FIELD_DIMENSION;
         Vec3::new(x, y, 0.0)
     }
 
+    // TODO: can be static
     pub fn position_of_coordinates(&self, coordinates: &Vec3) -> Position {
-        let x = (coordinates.x - self.board_root.x + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
-        let y = (coordinates.y - self.board_root.y + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
+        let x = (coordinates.x + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
+        let y = (coordinates.y + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
         Position::new(x as usize, y as usize)
     }
 

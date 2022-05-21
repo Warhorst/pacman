@@ -43,7 +43,7 @@ fn create_scoreboard(
                                      vertical: VerticalAlign::Center,
                                      horizontal: HorizontalAlign::Center,
                                  }),
-        transform: Transform::from_xyz(-430.0, 300.0, 0.0),
+        transform: Transform::from_xyz(0.0, 500.0, 0.0),
         ..Default::default()
     })
         .insert(Scoreboard);

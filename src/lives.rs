@@ -46,7 +46,7 @@ fn spawn_lives(
 }
 
 fn spawn_life(commands: &mut Commands, life_index: usize) {
-    let life_x = 300.0 + (life_index as f32) * (PACMAN_DIMENSION) * 2.0;
+    let life_x = 480.0 + (life_index as f32) * (PACMAN_DIMENSION) * 2.0;
 
     commands.spawn()
         .insert_bundle(SpriteBundle {
@@ -55,7 +55,7 @@ fn spawn_life(commands: &mut Commands, life_index: usize) {
                 custom_size: Some(Vec2::new(PACMAN_DIMENSION, PACMAN_DIMENSION)),
                 ..default()
             },
-            transform: Transform::from_translation(Vec3::new(life_x, 300.0, 0.0)),
+            transform: Transform::from_translation(Vec3::new(life_x, 500.0, 0.0)),
             ..default()
         })
         .insert(Life(life_index));

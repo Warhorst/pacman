@@ -41,7 +41,7 @@ fn spawn_level_ui(
                                      vertical: VerticalAlign::Center,
                                      horizontal: HorizontalAlign::Center,
                                  }),
-        transform: Transform::from_xyz(0.0, 300.0, 0.0),
+        transform: Transform::from_xyz(240.0, 500.0, 0.0),
         ..Default::default()
     })
         .insert(LevelUi);
