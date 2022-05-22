@@ -6,25 +6,25 @@ use crate::constants::FIELD_DIMENSION;
 
 #[derive(Copy, Clone, Component, Deserialize, Hash, Debug, Eq, PartialEq, Serialize)]
 pub struct Position {
-    pub x: usize,
-    pub y: usize
+    pub x: isize,
+    pub y: isize
 }
 
 impl Position {
-    pub fn new(x: usize, y: usize) -> Self {
+    pub fn new(x: isize, y: isize) -> Self {
         Position {x, y}
     }
 
-    pub fn x(&self) -> usize {
+    pub fn x(&self) -> isize {
         self.x
     }
 
-    pub fn y(&self) -> usize {
+    pub fn y(&self) -> isize {
         self.y
     }
 
     /// Returns the distance between two positions.
-    pub fn distance_to(&self, other: &Position) -> usize {
+    pub fn distance_to(&self, other: &Position) -> isize {
         let x_diff = match self.x() < other.x() {
             true => other.x() - self.x(),
             false => self.x() - other.x()
@@ -41,7 +41,7 @@ impl From<&Vec3> for Position {
     fn from(vec: &Vec3) -> Self {
         let x = (vec.x + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
         let y = (vec.y + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
-        Position::new(x as usize, y as usize)
+        Position::new(x as isize, y as isize)
     }
 }
 
@@ -49,7 +49,7 @@ impl From<&mut Vec3> for Position {
     fn from(vec: &mut Vec3) -> Self {
         let x = (vec.x + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
         let y = (vec.y + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
-        Position::new(x as usize, y as usize)
+        Position::new(x as isize, y as isize)
     }
 }
 

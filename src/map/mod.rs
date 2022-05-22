@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use std::fs::File;
 use std::path::Path;
+use bevy::utils::HashSet;
 
 use serde::{Deserialize, Serialize};
 
@@ -108,16 +109,16 @@ impl Map {
 
     pub fn get_width(&self) -> usize {
         self.fields.iter()
-            .map(|f| f.position.x() + 1)
-            .max()
-            .unwrap_or(0)
+            .map(|f| f.position.x)
+            .collect::<HashSet<_>>()
+            .len()
     }
 
     pub fn get_height(&self) -> usize {
         self.fields.iter()
-            .map(|f| f.position.y() + 1)
-            .max()
-            .unwrap_or(0)
+            .map(|f| f.position.y)
+            .collect::<HashSet<_>>()
+            .len()
     }
 }
 
@@ -527,7 +528,7 @@ mod tests {
 
         map.fields.iter_mut()
             .for_each(|f| {
-                f.position.y = height - 1 - f.position.y
+                f.position.y = (height as isize) - 1 - f.position.y
             });
 
         let json = serde_json::to_string(&map).unwrap();
@@ -535,12 +536,12 @@ mod tests {
         file.write(json.as_bytes()).unwrap();
     }
 
-    fn create_field_line(start_x: usize, y: usize, elements: Vec<Vec<Vec<Element>>>) -> Vec<Field> {
+    fn create_field_line(start_x: isize, y: isize, elements: Vec<Vec<Vec<Element>>>) -> Vec<Field> {
         elements.into_iter()
             .flat_map(|i| i)
             .enumerate()
             .map(|(i, elems)| Field {
-                position: Position::new(start_x + i, y),
+                position: Position::new(start_x + (i as isize), y),
                 elements: elems,
             })
             .collect()

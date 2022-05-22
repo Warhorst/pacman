@@ -43,32 +43,20 @@ impl Board {
         }
     }
 
-    fn position_up_of(&self, position: &Position) -> Option<Position> {
-        match position.y() {
-            y if y < self.height - 1 => Some(Position::new(position.x(), y + 1)),
-            _ => None
-        }
+    fn position_up_of(&self, p: &Position) -> Option<Position> {
+        Some(Position::new(p.x, p.y + 1))
     }
 
-    fn position_down_of(&self, position: &Position) -> Option<Position> {
-        match position.y() {
-            y if y > 0 => Some(Position::new(position.x(), y - 1)),
-            _ => None
-        }
+    fn position_down_of(&self, p: &Position) -> Option<Position> {
+        Some(Position::new(p.x, p.y - 1))
     }
 
-    fn position_left_of(&self, position: &Position) -> Option<Position> {
-        match position.x() {
-            x if x > 0 => Some(Position::new(x - 1, position.y())),
-            _ => None
-        }
+    fn position_left_of(&self, p: &Position) -> Option<Position> {
+        Some(Position::new(p.x - 1, p.y))
     }
 
-    fn position_right_of(&self, position: &Position) -> Option<Position> {
-        match position.x() {
-            x if x < self.width - 1 => Some(Position::new(x + 1, position.y())),
-            _ => None
-        }
+    fn position_right_of(&self, p: &Position) -> Option<Position> {
+        Some(Position::new(p.x + 1, p.y))
     }
 
     /// Return the position of one specific field type. Of the FieldType
