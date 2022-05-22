@@ -55,9 +55,9 @@ pub fn spawn_pacman(
     speed_by_level: Res<SpeedByLevel>
 ) {
     let pacman_spawn = PacmanSpawn::new(board.get_positions_matching(is!(PacManSpawn)));
-
     let start_position = Position::from(&*pacman_spawn);
     let pacman_dimension = Vec2::new(PACMAN_DIMENSION, PACMAN_DIMENSION);
+
     commands.spawn()
         .insert_bundle(SpriteBundle {
             sprite: Sprite {
