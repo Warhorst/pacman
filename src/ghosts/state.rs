@@ -8,14 +8,11 @@ use crate::ghosts::schedule::ScheduleChanged;
 use crate::ghosts::target::Target;
 use crate::pacman::Pacman;
 use crate::common::MoveDirection::*;
+use crate::ghost_house::GhostHousePositions;
 use crate::ghosts::Ghost;
 use crate::level::Level;
 use crate::ghosts::schedule::Schedule;
 use crate::ghosts::schedule::State::*;
-use crate::is;
-use crate::map::board::Board;
-use crate::map::Element;
-use crate::map::Element::GhostHouse;
 
 pub struct StatePlugin;
 
@@ -88,11 +85,11 @@ impl FrightenedTimer {
 // TODO: This might fail if a ghost is on the ghost wall and a schedule change happens -> he turns around and is trapped.
 fn update_spawned_state(
     mut commands: Commands,
-    board: Res<Board>,
+    ghost_house_positions: Res<GhostHousePositions>,
     mut query: Query<(Entity, &Position), (With<Ghost>, With<Spawned>, Without<Frightened>, Without<Eaten>)>,
 ) {
     for (entity, position) in query.iter_mut() {
-        if !board.position_matches_filter(position, is!(Element::GhostHouse | Element::GhostHouseEntrance {..})) {
+        if !ghost_house_positions.position_is_in_house(position) {
             commands.entity(entity).remove::<Spawned>();
         }
     }
@@ -147,11 +144,11 @@ fn update_frightened_state(
 
 fn update_eaten_state(
     mut commands: Commands,
-    board: Res<Board>,
+    ghost_house_positions: Res<GhostHousePositions>,
     query: Query<(Entity, &Position), (With<Eaten>, Without<Frightened>, Without<Spawned>)>,
 ) {
     for (entity, position) in query.iter() {
-        if board.position_matches_filter(position, is!(GhostHouse)) {
+        if ghost_house_positions.position_is_interior(position) {
             commands.entity(entity)
                 .remove::<Eaten>()
                 .insert(Spawned);

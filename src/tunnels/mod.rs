@@ -5,7 +5,7 @@ use crate::tunnels::movement::{move_ghost_trough_tunnel, move_pacman_through_tun
 use crate::tunnels::spawn::spawn_tunnels;
 
 mod movement;
-mod spawn;
+pub mod spawn;
 
 pub struct TunnelPlugin;
 

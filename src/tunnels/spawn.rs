@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use bevy::prelude::*;
+use bevy::utils::HashSet;
 use crate::common::Position;
 use crate::constants::FIELD_DIMENSION;
 use crate::is;
@@ -10,10 +11,26 @@ use crate::map::board::Board;
 use crate::tunnels::Tunnel;
 use crate::tunnels::TunnelEntrance;
 
+/// Resource that knows the position of everything that is considered a tunnel.
+pub struct TunnelPositions(HashSet<Position>);
+
+impl TunnelPositions {
+    fn new<'a, I: IntoIterator<Item=&'a Position>>(iter: I) -> Self {
+        TunnelPositions(iter.into_iter().map(|p| *p).collect())
+    }
+
+    pub fn contains(&self, pos: &Position) -> bool {
+        self.0.contains(pos)
+    }
+}
+
 pub(in crate::tunnels) fn spawn_tunnels(
     mut commands: Commands,
     board: Res<Board>,
 ) {
+    let tunnel_positions = TunnelPositions::new(board.get_positions_matching(is!(Element::Tunnel {..} | Element::TunnelEntrance | Element::TunnelHallway)));
+    commands.insert_resource(tunnel_positions);
+
     // TODO: This is only a bad workaround, as the board always returns z = 0.0
     let get_transform = |pos: Position| -> Transform {
         let mut translation = Vec3::from(&pos);

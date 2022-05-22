@@ -4,11 +4,9 @@ use crate::common::Position;
 use crate::constants::{GHOST_SPEED, PACMAN_SPEED};
 use crate::ghosts::Ghost;
 use crate::ghosts::state::{Frightened, FrightenedTimer};
-use crate::is;
 use crate::level::Level;
-use crate::map::board::Board;
 use crate::pacman::Pacman;
-use crate::map::Element::*;
+use crate::tunnels::spawn::TunnelPositions;
 
 pub struct SpeedPlugin;
 
@@ -137,7 +135,7 @@ pub struct GhostSpeed {
 }
 
 fn update_normal_ghost_speed(
-    board: Res<Board>,
+    tunnel_positions: Res<TunnelPositions>,
     level: Res<Level>,
     speed_by_level: Res<SpeedByLevel>,
     mut query: Query<(&Position, &mut Speed), (With<Ghost>, Without<Frightened>)>
@@ -145,7 +143,7 @@ fn update_normal_ghost_speed(
     for (position, mut speed) in query.iter_mut() {
         let ghost_speed = speed_by_level.for_ghosts(&level);
 
-        if board.position_matches_filter(&position, is!(Tunnel {..} | TunnelEntrance | TunnelHallway)) {
+        if tunnel_positions.contains(position) {
             *speed = ghost_speed.tunnel;
         } else {
             *speed = ghost_speed.normal
@@ -154,7 +152,7 @@ fn update_normal_ghost_speed(
 }
 
 fn update_frightened_ghost_speed(
-    board: Res<Board>,
+    tunnel_positions: Res<TunnelPositions>,
     level: Res<Level>,
     speed_by_level: Res<SpeedByLevel>,
     mut query: Query<(&Position, &mut Speed), (With<Ghost>, With<Frightened>)>
@@ -162,7 +160,7 @@ fn update_frightened_ghost_speed(
     for (position, mut speed) in query.iter_mut() {
         let ghost_speed = speed_by_level.for_ghosts(&level);
 
-        if board.position_matches_filter(&position, is!(Tunnel {..} | TunnelEntrance | TunnelHallway)) {
+        if tunnel_positions.contains(position) {
             *speed = ghost_speed.tunnel;
         } else  {
             *speed = ghost_speed.frightened

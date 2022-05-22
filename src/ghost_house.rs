@@ -37,6 +37,10 @@ impl GhostHousePositions {
     pub fn position_is_interior(&self, pos: &Position) -> bool {
         self.interior.contains(pos)
     }
+
+    pub fn position_is_in_house(&self, pos: &Position) -> bool {
+        self.interior.contains(pos) || self.entrances.contains(pos)
+    }
 }
 
 fn spawn_ghost_house(
