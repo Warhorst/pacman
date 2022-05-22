@@ -14,19 +14,19 @@ pub mod target;
 mod schedule;
 
 /// Used to mark every ghost.
-#[derive(Component)]
+#[derive(Component, Eq, PartialEq)]
 pub struct Ghost;
 
-#[derive(Component)]
+#[derive(Copy, Clone, Component)]
 pub struct Blinky;
 
-#[derive(Component)]
+#[derive(Copy, Clone, Component)]
 pub struct Pinky;
 
-#[derive(Component)]
+#[derive(Copy, Clone, Component)]
 pub struct Inky;
 
-#[derive(Component)]
+#[derive(Copy, Clone, Component)]
 pub struct Clyde;
 
 pub struct GhostPlugin;

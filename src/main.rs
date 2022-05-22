@@ -7,6 +7,7 @@ use crate::camera::CameraPlugin;
 
 use crate::dots::DotPlugin;
 use crate::energizer::EnergizerPlugin;
+use crate::ghost_corners::GhostCornersPlugin;
 use crate::ghost_house::GhostHousePlugin;
 use crate::ghosts::GhostPlugin;
 use crate::level::LevelPlugin;
@@ -34,6 +35,7 @@ mod speed;
 mod map;
 mod walls;
 mod ghost_house;
+mod ghost_corners;
 
 fn main() {
     App::new()
@@ -50,6 +52,7 @@ fn main() {
         .add_plugin(MapPlugin)
         .add_plugin(WallsPlugin)
         .add_plugin(GhostHousePlugin)
+        .add_plugin(GhostCornersPlugin)
         .add_plugin(PacmanPlugin)
         .add_plugin(DotPlugin)
         .add_plugin(ScorePlugin)

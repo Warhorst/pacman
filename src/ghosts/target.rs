@@ -5,12 +5,10 @@ use bevy::prelude::*;
 use crate::common::{Neighbour, Position};
 use crate::common::MoveDirection;
 use crate::common::MoveDirection::*;
+use crate::ghost_corners::GhostCorner;
 use crate::ghost_house::GhostHousePositions;
-use crate::is;
 use crate::ghosts::{Blinky, Clyde, Inky, Pinky};
 use crate::ghosts::state::{Chase, Eaten, Frightened, Scatter, Spawned};
-use crate::map::board::Board;
-use crate::map::Element::*;
 use crate::pacman::Pacman;
 use crate::random::Random;
 use crate::walls::WallPositions;
@@ -24,10 +22,10 @@ impl Plugin for TargetPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_system(set_spawned_target)
-            .add_system(set_blinky_scatter_target)
-            .add_system(set_pinky_scatter_target)
-            .add_system(set_inky_scatter_target)
-            .add_system(set_clyde_scatter_target)
+            .add_system(set_scatter_target::<Blinky>)
+            .add_system(set_scatter_target::<Pinky>)
+            .add_system(set_scatter_target::<Inky>)
+            .add_system(set_scatter_target::<Clyde>)
             .add_system(set_blinky_chase_target)
             .add_system(set_pinky_chase_target)
             .add_system(set_frightened_target)
@@ -59,104 +57,26 @@ fn set_spawned_target(
     }
 }
 
-fn set_blinky_scatter_target(
+fn set_scatter_target<G: Component>(
     mut commands: Commands,
-    board: Res<Board>,
     wall_positions: Res<WallPositions>,
     ghost_house_positions: Res<GhostHousePositions>,
-    mut query: Query<(Entity, &mut MoveDirection, &Position), (With<Blinky>, With<Scatter>, Without<Frightened>, Without<Eaten>, Without<Spawned>, Without<Target>)>,
+    mut ghost_query: Query<(Entity, &mut MoveDirection, &Position), (With<G>, With<Scatter>, Without<Frightened>, Without<Eaten>, Without<Spawned>, Without<Target>)>,
+    corner_query: Query<&Position, (With<G>, With<GhostCorner>)>
 ) {
-    for (entity, mut direction, position) in query.iter_mut() {
-        set_scatter_target(
-            &mut commands,
-            &wall_positions,
-            &ghost_house_positions,
-            entity,
-            &mut direction,
-            position,
-            board.get_position_matching(is!(BlinkyCorner))
-        )
+    for (entity, mut direction, position) in ghost_query.iter_mut() {
+        let nearest_corner = position.get_nearest_from(corner_query.iter());
+
+        let next_target_neighbour = position.get_neighbours()
+            .into_iter()
+            .filter(|n| n.direction != direction.opposite())
+            .filter(|n| !wall_positions.position_is_wall(&n.position) && !ghost_house_positions.position_is_entrance(&n.position))
+            .min_by(|n_a, n_b| minimal_distance_to_neighbours(nearest_corner, n_a, n_b))
+            .unwrap_or_else(|| position.neighbour_behind(&direction));
+
+        *direction = next_target_neighbour.direction;
+        commands.entity(entity).insert(Target(next_target_neighbour.position));
     }
-}
-
-fn set_pinky_scatter_target(
-    mut commands: Commands,
-    board: Res<Board>,
-    wall_positions: Res<WallPositions>,
-    ghost_house_positions: Res<GhostHousePositions>,
-    mut query: Query<(Entity, &mut MoveDirection, &Position), (With<Pinky>, With<Scatter>, Without<Frightened>, Without<Eaten>, Without<Spawned>, Without<Target>)>,
-) {
-    for (entity, mut direction, position) in query.iter_mut() {
-        set_scatter_target(
-            &mut commands,
-            &wall_positions,
-            &ghost_house_positions,
-            entity,
-            &mut direction,
-            position,
-            board.get_position_matching(is!(PinkyCorner))
-        )
-    }
-}
-
-fn set_inky_scatter_target(
-    mut commands: Commands,
-    board: Res<Board>,
-    wall_positions: Res<WallPositions>,
-    ghost_house_positions: Res<GhostHousePositions>,
-    mut query: Query<(Entity, &mut MoveDirection, &Position), (With<Inky>, With<Scatter>, Without<Frightened>, Without<Eaten>, Without<Spawned>, Without<Target>)>,
-) {
-    for (entity, mut direction, position) in query.iter_mut() {
-        set_scatter_target(
-            &mut commands,
-            &wall_positions,
-            &ghost_house_positions,
-            entity,
-            &mut direction,
-            position,
-            board.get_position_matching(is!(InkyCorner))
-        )
-    }
-}
-
-fn set_clyde_scatter_target(
-    mut commands: Commands,
-    board: Res<Board>,
-    wall_positions: Res<WallPositions>,
-    ghost_house_positions: Res<GhostHousePositions>,
-    mut query: Query<(Entity, &mut MoveDirection, &Position), (With<Clyde>, With<Scatter>, Without<Frightened>, Without<Eaten>, Without<Spawned>, Without<Target>)>,
-) {
-    for (entity, mut direction, position) in query.iter_mut() {
-        set_scatter_target(
-            &mut commands,
-            &wall_positions,
-            &ghost_house_positions,
-            entity,
-            &mut direction,
-            position,
-            board.get_position_matching(is!(ClydeCorner))
-        )
-    }
-}
-
-fn set_scatter_target(
-    commands: &mut Commands,
-    wall_positions: &WallPositions,
-    ghost_house_positions: &GhostHousePositions,
-    entity: Entity,
-    direction: &mut MoveDirection,
-    ghost_position: &Position,
-    corner_position: &Position
-) {
-    let next_target_neighbour = ghost_position.get_neighbours()
-        .into_iter()
-        .filter(|n| n.direction != direction.opposite())
-        .filter(|n| !wall_positions.position_is_wall(&n.position) && !ghost_house_positions.position_is_entrance(&n.position))
-        .min_by(|n_a, n_b| minimal_distance_to_neighbours(corner_position, n_a, n_b))
-        .unwrap_or_else(|| ghost_position.neighbour_behind(&direction));
-
-    *direction = next_target_neighbour.direction;
-    commands.entity(entity).insert(Target(next_target_neighbour.position));
 }
 
 fn set_blinky_chase_target(
