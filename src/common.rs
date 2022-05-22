@@ -58,6 +58,16 @@ impl Position {
         self.get_neighbour_in_direction(&direction.opposite())
     }
 
+    /// Return the direction where to find the other position when neighbored.
+    /// If not neighbored, return None.
+    pub fn get_neighbour_direction(&self, other: &Position) -> Option<MoveDirection> {
+        self.get_neighbours()
+            .into_iter()
+            .filter(|n| &n.position == other)
+            .map(|n| n.direction)
+            .next()
+    }
+
     pub fn get_neighbours(&self) -> [Neighbour; 4] {
         [
             self.get_neighbour_in_direction(&Up),

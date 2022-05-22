@@ -12,7 +12,7 @@ use crate::lives::Life;
 use crate::map::board::Board;
 use crate::map::Element::PacManSpawn;
 use crate::pacman::movement::move_pacman_if_not_stopped;
-use crate::pacman::spawn::spawn_pacman;
+use crate::pacman::spawn::{PacmanSpawn, spawn_pacman};
 
 mod movement;
 mod spawn;
@@ -176,7 +176,7 @@ fn update_pacman_stop_timer(
 }
 
 fn reset_pacman_when_he_died_and_has_lives(
-    board: Res<Board>,
+    pacman_spawn: Res<PacmanSpawn>,
     event_reader: EventReader<PacmanKilled>,
     live_query: Query<&Life>,
     mut pacman_query: Query<&mut Transform, With<Pacman>>,
@@ -186,7 +186,6 @@ fn reset_pacman_when_he_died_and_has_lives(
     if live_query.iter().count() == 0 { return; }
 
     for mut transform in pacman_query.iter_mut() {
-        let pacman_start = Vec3::from(board.get_position_matching(is!(PacManSpawn)));
-        *transform = Transform::from_xyz(pacman_start.x, pacman_start.y, pacman_start.z);
+        *transform = Transform::from_translation(**pacman_spawn)
     }
 }
