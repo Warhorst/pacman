@@ -2,6 +2,7 @@ use serde::{Serialize, Deserialize};
 use bevy::prelude::*;
 
 use crate::common::MoveDirection::*;
+use crate::constants::FIELD_DIMENSION;
 
 #[derive(Copy, Clone, Component, Deserialize, Hash, Debug, Eq, PartialEq, Serialize)]
 pub struct Position {
@@ -33,6 +34,38 @@ impl Position {
             false => self.y() - other.y()
         };
         x_diff.pow(2) + y_diff.pow(2)
+    }
+}
+
+impl From<&Vec3> for Position {
+    fn from(vec: &Vec3) -> Self {
+        let x = (vec.x + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
+        let y = (vec.y + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
+        Position::new(x as usize, y as usize)
+    }
+}
+
+impl From<&mut Vec3> for Position {
+    fn from(vec: &mut Vec3) -> Self {
+        let x = (vec.x + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
+        let y = (vec.y + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
+        Position::new(x as usize, y as usize)
+    }
+}
+
+impl From<&Position> for Vec3 {
+    fn from(pos: &Position) -> Self {
+        let x = (pos.x as f32) * FIELD_DIMENSION;
+        let y = (pos.y as f32) * FIELD_DIMENSION;
+        Vec3::new(x, y, 0.0)
+    }
+}
+
+impl From<&mut Position> for Vec3 {
+    fn from(pos: &mut Position) -> Self {
+        let x = (pos.x as f32) * FIELD_DIMENSION;
+        let y = (pos.y as f32) * FIELD_DIMENSION;
+        Vec3::new(x, y, 0.0)
     }
 }
 

@@ -29,7 +29,7 @@ pub(in crate::pacman) fn move_pacman_if_not_stopped(
 
     for mut move_components in query.iter_mut() {
         let mut new_coordinates = calculate_new_coordinates(&mut move_components, delta_seconds);
-        let new_position = Board::position_of_coordinates(&new_coordinates);
+        let new_position = Position::from(&new_coordinates);
 
         if is_going_to_collide_with_obstacle(&board, &move_components.direction, &new_position, &new_coordinates) {
             process_collision(&move_components.direction, &new_position, &mut new_coordinates)
@@ -73,7 +73,7 @@ fn is_going_to_collide_with_obstacle(board: &Board, direction: &MoveDirection, n
 /// its middle point with the width/height of the accumulated distance between pacman and the walls.
 /// Assumes pacman is larger than a wall.
 pub fn are_coordinates_in_field_center(direction: &MoveDirection, position: &Position, coordinates: &Vec3, entity_dimension: f32) -> bool {
-    let position_coordinates = Board::coordinates_of_position(position);
+    let position_coordinates = Vec3::from(position);
     let entity_wall_distance = match entity_dimension > WALL_DIMENSION {
         true => entity_dimension - WALL_DIMENSION,
         false => 0.0
@@ -99,7 +99,7 @@ fn position_is_obstacle(board: &Board, position: &Position) -> bool {
 
 /// Limit pacmans movement if he reached an obstacle and stop him.
 fn process_collision(direction: &MoveDirection, new_position: &Position, new_coordinates: &mut Vec3) {
-    let field_coordinates = Board::coordinates_of_position(new_position);
+    let field_coordinates = Vec3::from(new_position);
     limit_movement(direction, &field_coordinates, new_coordinates);
 }
 
@@ -116,7 +116,7 @@ fn limit_movement(direction: &MoveDirection, field_coordinates: &Vec3, new_coord
 /// Center pacmans current position in the middle of his current field.
 /// The purpose of this method is to keep equally sized gaps to the hallway pacman is currently passing.
 fn center_position(direction: &MoveDirection, new_position: &Position, new_coordinates: &mut Vec3) {
-    let position_coordinates = Board::coordinates_of_position(new_position);
+    let position_coordinates = Vec3::from(new_position);
     match direction {
         Up | Down => new_coordinates.x = position_coordinates.x,
         Left | Right => new_coordinates.y = position_coordinates.y

@@ -2,7 +2,6 @@ use bevy::prelude::*;
 
 use crate::common::{MoveDirection, Position};
 use crate::ghosts::Ghost;
-use crate::map::board::Board;
 use crate::pacman::Pacman;
 use crate::tunnels::{GhostPassedTunnel, Tunnel, TunnelEntrance};
 
@@ -18,7 +17,7 @@ pub(in crate::tunnels) fn move_pacman_through_tunnel(
             };
 
             *position = end.position;
-            transform.translation = Board::coordinates_of_position(&end.position);
+            transform.translation = Vec3::from(&end.position);
             *direction = end.entrance_direction.opposite();
         }
     }
@@ -37,7 +36,7 @@ pub(in crate::tunnels) fn move_ghost_trough_tunnel(
             };
 
             *position = end.position;
-            transform.translation = Board::coordinates_of_position(&end.position);
+            transform.translation = Vec3::from(&end.position);
             *direction = end.entrance_direction.opposite();
             event_writer.send(GhostPassedTunnel(entity));
         }

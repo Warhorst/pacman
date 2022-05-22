@@ -25,7 +25,7 @@ fn spawn_walls(
                     custom_size: Some(Vec2::new(WALL_DIMENSION, WALL_DIMENSION)),
                     ..default()
                 },
-                transform: Transform::from_translation(Board::coordinates_of_position(position)),
+                transform: Transform::from_translation(Vec3::from(position)),
                 ..Default::default()
             });
     }
@@ -38,7 +38,7 @@ fn spawn_walls(
                     custom_size: Some(Vec2::new(WALL_DIMENSION, WALL_DIMENSION)),
                     ..default()
                 },
-                transform: Transform::from_translation(Board::coordinates_of_position(position)),
+                transform: Transform::from_translation(Vec3::from(position)),
                 ..Default::default()
             });
     }

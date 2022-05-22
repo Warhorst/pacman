@@ -1,10 +1,8 @@
 use std::collections::HashMap;
 
-use bevy::prelude::*;
-
 use crate::common::{MoveDirection, Position};
 use crate::common::MoveDirection::*;
-use crate::constants::{FIELD_DIMENSION, MAP_PATH};
+use crate::constants::MAP_PATH;
 use crate::map::Neighbour;
 use crate::map::{Element, Map};
 use crate::map::Element::*;
@@ -33,20 +31,6 @@ impl Board {
             width,
             height,
         }
-    }
-
-    // TODO: Maybe move to Position
-    pub fn coordinates_of_position(position: &Position) -> Vec3 {
-        let x = (position.x() as f32) * FIELD_DIMENSION;
-        let y = (position.y() as f32) * FIELD_DIMENSION;
-        Vec3::new(x, y, 0.0)
-    }
-
-    // TODO: Maybe move to Position
-    pub fn position_of_coordinates(coordinates: &Vec3) -> Position {
-        let x = (coordinates.x + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
-        let y = (coordinates.y + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
-        Position::new(x as usize, y as usize)
     }
 
     // TODO: Maybe move to Position

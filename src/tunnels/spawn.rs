@@ -17,7 +17,7 @@ pub(in crate::tunnels) fn spawn_tunnels(
 ) {
     // TODO: This is only a bad workaround, as the board always returns z = 0.0
     let get_transform = |pos: Position| -> Transform {
-        let mut translation = Board::coordinates_of_position(&pos);
+        let mut translation = Vec3::from(&pos);
         translation.z = 1.0;
         Transform::from_translation(translation)
     };

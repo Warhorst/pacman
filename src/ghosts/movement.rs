@@ -3,7 +3,6 @@ use bevy::prelude::*;
 use crate::common::{MoveDirection, Position};
 use crate::common::MoveDirection::*;
 use crate::ghosts::target::Target;
-use crate::map::board::Board;
 use crate::speed::Speed;
 
 pub struct MovePlugin;
@@ -22,7 +21,7 @@ fn move_ghost(
     for (entity, direction, mut position, target, mut transform, speed) in query.iter_mut() {
         let mut coordinates = &mut transform.translation;
         let delta_seconds = time.delta_seconds();
-        let target_coordinates = Board::coordinates_of_position(target);
+        let target_coordinates = Vec3::from(&**target);
         move_in_direction(&mut coordinates, delta_seconds, &direction, speed);
         limit_movement(&mut coordinates, &direction, &target_coordinates);
 
@@ -31,7 +30,7 @@ fn move_ghost(
             commands.entity(entity).remove::<Target>();
         }
 
-        *position = Board::position_of_coordinates(coordinates)
+        *position = Position::from(coordinates)
     }
 }
 

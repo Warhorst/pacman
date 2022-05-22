@@ -23,7 +23,7 @@ pub (in crate::pacman) fn spawn_pacman(
                 custom_size: Some(pacman_dimension),
                 ..default()
             },
-            transform: Transform::from_translation(Board::coordinates_of_position(&start_position)),
+            transform: Transform::from_translation(Vec3::from(&start_position)),
             ..Default::default()
         })
         .insert(Pacman)
