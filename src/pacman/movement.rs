@@ -62,10 +62,12 @@ fn get_modifiers_for_direction(direction: &MoveDirection) -> (f32, f32) {
 
 /// Determine if pacman will collide with an obstacle if he is going further in his current direction.
 fn is_going_to_collide_with_obstacle(board: &Board, direction: &MoveDirection, new_position: &Position, new_coordinates: &Vec3) -> bool {
-    match board.position_in_direction(new_position, direction) {
-        Some(pos) if position_is_obstacle(board, &pos) => true,
-        Some(pos) => !are_coordinates_in_field_center(direction, &pos, new_coordinates, PACMAN_DIMENSION),
-        None => true
+    let pos_in_direction = new_position.neighbour_position(direction);
+
+    if position_is_obstacle(board, &pos_in_direction) {
+        true
+    } else {
+        !are_coordinates_in_field_center(direction, &pos_in_direction, new_coordinates, PACMAN_DIMENSION)
     }
 }
 

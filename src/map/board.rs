@@ -5,7 +5,6 @@ use crate::common::MoveDirection::*;
 use crate::constants::MAP_PATH;
 use crate::map::Neighbour;
 use crate::map::{Element, Map};
-use crate::map::Element::*;
 
 static EMPTY: Vec<Element> = vec![];
 
@@ -31,32 +30,6 @@ impl Board {
             width,
             height,
         }
-    }
-
-    // TODO: Maybe move to Position
-    pub fn position_in_direction(&self, position: &Position, direction: &MoveDirection) -> Option<Position> {
-        match direction {
-            Up => self.position_up_of(position),
-            Down => self.position_down_of(position),
-            Left => self.position_left_of(position),
-            Right => self.position_right_of(position),
-        }
-    }
-
-    fn position_up_of(&self, p: &Position) -> Option<Position> {
-        Some(Position::new(p.x, p.y + 1))
-    }
-
-    fn position_down_of(&self, p: &Position) -> Option<Position> {
-        Some(Position::new(p.x, p.y - 1))
-    }
-
-    fn position_left_of(&self, p: &Position) -> Option<Position> {
-        Some(Position::new(p.x - 1, p.y))
-    }
-
-    fn position_right_of(&self, p: &Position) -> Option<Position> {
-        Some(Position::new(p.x + 1, p.y))
     }
 
     /// Return the position of one specific field type. Of the FieldType
@@ -113,39 +86,19 @@ impl Board {
 
     pub fn neighbours_of(&self, position: &Position) -> Vec<Neighbour> {
         let neighbour_position_options = vec![
-            (Up, self.position_up_of(position)),
-            (Down, self.position_down_of(position)),
-            (Left, self.position_left_of(position)),
-            (Right, self.position_right_of(position)),
+            (Up, position.neighbour_position(&Up)),
+            (Down, position.neighbour_position(&Down)),
+            (Left, position.neighbour_position(&Left)),
+            (Right, position.neighbour_position(&Right)),
         ];
         neighbour_position_options.into_iter()
-            .filter(|(_, option)| option.is_some())
-            .map(|(dir, option)| match option {
-                Some(pos) => Neighbour::new(pos, self.elements_on_position(&pos), dir),
-                None => panic!()
-            })
+            .map(|(dir, pos)| Neighbour::new(pos, self.elements_on_position(&pos), dir))
             .collect()
     }
 
     pub fn neighbour_behind(&self, position: &Position, direction: &MoveDirection) -> Neighbour {
-        let position = (match direction.opposite() {
-            Up => self.position_up_of(position),
-            Down => self.position_down_of(position),
-            Left => self.position_left_of(position),
-            Right => self.position_right_of(position)
-        }).unwrap();
-
-        Neighbour::new(position, self.elements_on_position(&position), direction.opposite())
-    }
-
-    pub fn position_is_tunnel(&self, position: &Position) -> bool {
-        self.elements_on_position(position).into_iter()
-            .map(|e| match e {
-                Tunnel {..} | TunnelEntrance | TunnelHallway => true,
-                _ => false
-            })
-            .min()
-            .unwrap_or(false)
+        let pos = position.neighbour_position(&direction.opposite());
+        Neighbour::new(pos, self.elements_on_position(&pos), direction.opposite())
     }
 }
 

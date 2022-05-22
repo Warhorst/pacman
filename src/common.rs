@@ -35,6 +35,15 @@ impl Position {
         };
         x_diff.pow(2) + y_diff.pow(2)
     }
+    
+    pub fn neighbour_position(&self, direction: &MoveDirection) -> Position {
+        match direction {
+            Up => Position::new(self.x, self.y + 1),
+            Down => Position::new(self.x, self.y - 1),
+            Left => Position::new(self.x - 1, self.y),
+            Right => Position::new(self.x + 1, self.y),
+        }
+    }
 }
 
 impl From<&Vec3> for Position {
