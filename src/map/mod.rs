@@ -31,8 +31,6 @@ struct Field {
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum Element {
-    // TODO: remove, an empty field just has no elements
-    Empty,
     Wall {
         wall_type: WallType,
         rotation: Rotation,
@@ -43,8 +41,6 @@ pub enum Element {
     },
     GhostHouse,
     PacManSpawn,
-    // TODO: Remove, every ghost has its own spawn now
-    GhostSpawn,
     DotSpawn,
     EnergizerSpawn,
     BlinkySpawn,
@@ -571,7 +567,7 @@ mod tests {
 
     fn empty(amount: usize) -> Vec<Vec<Element>> {
         (0..amount).into_iter()
-            .map(|_| vec![Empty])
+            .map(|_| vec![])
             .collect()
     }
 

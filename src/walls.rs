@@ -1,9 +1,11 @@
 use bevy::prelude::*;
+use bevy::utils::HashSet;
+use crate::common::Position;
 use crate::constants::WALL_DIMENSION;
 use crate::is;
 use crate::map::board::Board;
 use crate::map::Element;
-use crate::map::Element::Wall;
+use crate::map::Element::*;
 
 pub struct WallsPlugin;
 
@@ -13,10 +15,25 @@ impl Plugin for WallsPlugin {
     }
 }
 
+/// Resource that knows the positions of fields that are considered walls.
+#[derive(Deref, DerefMut)]
+pub struct WallPositions(HashSet<Position>);
+
+impl WallPositions {
+    fn new<'a, W: IntoIterator<Item=&'a Position>>(wall_iter: W) -> Self {
+        WallPositions(wall_iter.into_iter().map(|p| *p).collect())
+    }
+}
+
 fn spawn_walls(
     mut commands: Commands,
     board: Res<Board>
 ) {
+    let wall_positions = WallPositions::new(
+        board.get_positions_matching(is!(Wall {..} | InvisibleWall)),
+    );
+    commands.insert_resource(wall_positions);
+
     for position in board.get_positions_matching(is!(Wall {..})) {
         commands.spawn()
             .insert_bundle(SpriteBundle {

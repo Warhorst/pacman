@@ -43,12 +43,12 @@ fn set_spawned_target(
     for (entity, mut direction, position) in query.iter_mut() {
         let entrance_positions = board.get_positions_matching(is!(GhostHouseEntrance {..}));
 
-        let nearest_wall_position = entrance_positions.into_iter()
+        let nearest_entrance_position = entrance_positions.into_iter()
             .min_by(|pos_a, pos_b| minimal_distance_to_positions(&position, pos_a, pos_b))
             .expect("There should at least be one ghost wall on the map");
         let next_target_neighbour = get_neighbour_nearest_to_target(
             position,
-            nearest_wall_position,
+            nearest_entrance_position,
             &board,
             &direction,
             |neighbour| neighbour_is_no_wall_in_spawn(&board, position, neighbour),
