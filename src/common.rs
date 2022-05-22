@@ -44,6 +44,34 @@ impl Position {
             Right => Position::new(self.x + 1, self.y),
         }
     }
+
+    pub fn get_neighbour_in_direction(&self, direction: &MoveDirection) -> Neighbour {
+        match direction {
+            Up => Neighbour::new(Position::new(self.x, self.y + 1), *direction),
+            Down => Neighbour::new(Position::new(self.x, self.y - 1), *direction),
+            Left => Neighbour::new(Position::new(self.x - 1, self.y), *direction),
+            Right => Neighbour::new(Position::new(self.x + 1, self.y), *direction),
+        }
+    }
+
+    pub fn neighbour_behind(&self, direction: &MoveDirection) -> Neighbour {
+        self.get_neighbour_in_direction(&direction.opposite())
+    }
+
+    pub fn get_neighbours(&self) -> [Neighbour; 4] {
+        [
+            self.get_neighbour_in_direction(&Up),
+            self.get_neighbour_in_direction(&Down),
+            self.get_neighbour_in_direction(&Left),
+            self.get_neighbour_in_direction(&Right),
+        ]
+    }
+
+    pub fn get_nearest_from<'a, I: IntoIterator<Item=&'a Position>>(&self, iter: I) -> &'a Position {
+        iter.into_iter()
+            .min_by(|pos_0, pos_1| self.distance_to(pos_0).cmp(&self.distance_to(pos_1)))
+            .expect("The given iterator of positions should not be empty!")
+    }
 }
 
 impl From<&Vec3> for Position {
@@ -75,6 +103,18 @@ impl From<&mut Position> for Vec3 {
         let x = (pos.x as f32) * FIELD_DIMENSION;
         let y = (pos.y as f32) * FIELD_DIMENSION;
         Vec3::new(x, y, 0.0)
+    }
+}
+
+#[derive(Copy, Clone)]
+pub struct Neighbour {
+    pub position: Position,
+    pub direction: MoveDirection
+}
+
+impl Neighbour {
+    pub fn new(position: Position, direction: MoveDirection) -> Self {
+        Self { position, direction }
     }
 }
 

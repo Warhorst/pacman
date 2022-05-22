@@ -1,9 +1,7 @@
 use std::collections::HashMap;
 
-use crate::common::{MoveDirection, Position};
-use crate::common::MoveDirection::*;
+use crate::common::Position;
 use crate::constants::MAP_PATH;
-use crate::map::Neighbour;
 use crate::map::{Element, Map};
 
 static EMPTY: Vec<Element> = vec![];
@@ -82,23 +80,6 @@ impl Board {
     /// vector.
     pub fn elements_on_position(&self, position: &Position) -> &Vec<Element> {
         self.elements_map.get(position).unwrap_or(&EMPTY)
-    }
-
-    pub fn neighbours_of(&self, position: &Position) -> Vec<Neighbour> {
-        let neighbour_position_options = vec![
-            (Up, position.neighbour_position(&Up)),
-            (Down, position.neighbour_position(&Down)),
-            (Left, position.neighbour_position(&Left)),
-            (Right, position.neighbour_position(&Right)),
-        ];
-        neighbour_position_options.into_iter()
-            .map(|(dir, pos)| Neighbour::new(pos, self.elements_on_position(&pos), dir))
-            .collect()
-    }
-
-    pub fn neighbour_behind(&self, position: &Position, direction: &MoveDirection) -> Neighbour {
-        let pos = position.neighbour_position(&direction.opposite());
-        Neighbour::new(pos, self.elements_on_position(&pos), direction.opposite())
     }
 }
 

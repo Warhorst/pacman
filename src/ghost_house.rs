@@ -16,8 +16,8 @@ impl Plugin for GhostHousePlugin {
 /// Resource that knows where the ghost house and its entrances are.
 /// The walls around a ghost house are not considered part of the ghost house.
 pub struct GhostHousePositions {
-    entrances: HashSet<Position>,
-    interior: HashSet<Position>
+    pub entrances: HashSet<Position>,
+    pub interior: HashSet<Position>
 }
 
 impl GhostHousePositions {

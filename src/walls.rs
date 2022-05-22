@@ -23,6 +23,10 @@ impl WallPositions {
     fn new<'a, W: IntoIterator<Item=&'a Position>>(wall_iter: W) -> Self {
         WallPositions(wall_iter.into_iter().map(|p| *p).collect())
     }
+
+    pub fn position_is_wall(&self, pos: &Position) -> bool {
+        self.0.contains(pos)
+    }
 }
 
 fn spawn_walls(

@@ -75,28 +75,6 @@ pub enum Rotation {
     D270,
 }
 
-/// Represents the neighbour of a specific field, with ist type and the direction
-/// relative to the original position.
-#[derive(Clone)]
-pub struct Neighbour<'a> {
-    pub position: Position,
-    pub elements: &'a Vec<Element>,
-    pub direction: MoveDirection,
-}
-
-impl<'a> Neighbour<'a> {
-    pub fn new(position: Position, elements: &'a Vec<Element>, direction: MoveDirection) -> Self {
-        Neighbour { position, elements, direction }
-    }
-
-    pub fn elements_match_filter(&self, filter: impl Fn(&Element) -> bool) -> bool {
-        self.elements.into_iter()
-            .map(filter)
-            .max()
-            .unwrap_or(false)
-    }
-}
-
 impl Map {
     pub fn load<P: AsRef<Path>>(path: P) -> Self {
         let file = File::open(path).expect("could not open map from given path");

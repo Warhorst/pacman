@@ -7,7 +7,6 @@ use crate::is;
 use crate::map::Element;
 
 use crate::map::board::Board;
-use crate::map::Neighbour;
 use crate::tunnels::Tunnel;
 use crate::tunnels::TunnelEntrance;
 
@@ -67,9 +66,9 @@ pub(in crate::tunnels) fn spawn_tunnels(
 fn create_tunnel_entrances(board: &Board) -> HashMap<usize, Vec<TunnelEntrance>> {
     let mut index_with_entrance = HashMap::new();
     for tunnel_entrance_position in board.get_positions_matching(is!(Element::Tunnel {..})) {
-        let tunnel_entrance_neighbours = board.neighbours_of(tunnel_entrance_position)
+        let tunnel_entrance_neighbours = tunnel_entrance_position.get_neighbours()
             .into_iter()
-            .filter(neighbour_type_is_tunnel_entrance)
+            .filter(|n| board.position_matches_filter(&n.position, is!(Element::TunnelEntrance)))
             .collect::<Vec<_>>();
 
         let tunnel_entrance_neighbour = match tunnel_entrance_neighbours.len() {
@@ -95,8 +94,4 @@ fn create_tunnel_entrances(board: &Board) -> HashMap<usize, Vec<TunnelEntrance>>
         }
     }
     index_with_entrance
-}
-
-fn neighbour_type_is_tunnel_entrance(neighbour: &Neighbour) -> bool {
-    neighbour.elements_match_filter(is!(Element::TunnelEntrance))
 }

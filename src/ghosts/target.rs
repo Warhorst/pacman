@@ -2,17 +2,18 @@ use std::cmp::Ordering;
 
 use bevy::prelude::*;
 
-use crate::common::Position;
+use crate::common::{Neighbour, Position};
 use crate::common::MoveDirection;
 use crate::common::MoveDirection::*;
+use crate::ghost_house::GhostHousePositions;
 use crate::is;
 use crate::ghosts::{Blinky, Clyde, Inky, Pinky};
 use crate::ghosts::state::{Chase, Eaten, Frightened, Scatter, Spawned};
 use crate::map::board::Board;
 use crate::map::Element::*;
-use crate::map::Neighbour;
 use crate::pacman::Pacman;
 use crate::random::Random;
+use crate::walls::WallPositions;
 
 #[derive(Component, Deref, DerefMut)]
 pub struct Target(pub Position);
@@ -37,22 +38,21 @@ impl Plugin for TargetPlugin {
 
 fn set_spawned_target(
     mut commands: Commands,
-    board: Res<Board>,
+    wall_positions: Res<WallPositions>,
+    ghost_house_positions: Res<GhostHousePositions>,
     mut query: Query<(Entity, &mut MoveDirection, &Position), (With<Spawned>, Without<Frightened>, Without<Eaten>, Without<Target>)>,
 ) {
     for (entity, mut direction, position) in query.iter_mut() {
-        let entrance_positions = board.get_positions_matching(is!(GhostHouseEntrance {..}));
-
-        let nearest_entrance_position = entrance_positions.into_iter()
-            .min_by(|pos_a, pos_b| minimal_distance_to_positions(&position, pos_a, pos_b))
-            .expect("There should at least be one ghost wall on the map");
-        let next_target_neighbour = get_neighbour_nearest_to_target(
-            position,
-            nearest_entrance_position,
-            &board,
-            &direction,
-            |neighbour| neighbour_is_no_wall_in_spawn(&board, position, neighbour),
-        );
+        let nearest_entrance_position = position.get_nearest_from(ghost_house_positions.entrances.iter());
+        let next_target_neighbour = position.get_neighbours()
+            .into_iter()
+            .filter(|n| n.direction != direction.opposite())
+            .filter(|n| match ghost_house_positions.position_is_entrance(&n.position) {
+                true => !wall_positions.position_is_wall(&n.position) && !ghost_house_positions.position_is_interior(&n.position),
+                false => !wall_positions.position_is_wall(&n.position),
+            })
+            .min_by(|n_a, n_b| minimal_distance_to_neighbours(nearest_entrance_position, n_a, n_b))
+            .unwrap_or_else(|| position.neighbour_behind(&direction));
 
         *direction = next_target_neighbour.direction;
         commands.entity(entity).insert(Target(next_target_neighbour.position));
@@ -62,12 +62,15 @@ fn set_spawned_target(
 fn set_blinky_scatter_target(
     mut commands: Commands,
     board: Res<Board>,
+    wall_positions: Res<WallPositions>,
+    ghost_house_positions: Res<GhostHousePositions>,
     mut query: Query<(Entity, &mut MoveDirection, &Position), (With<Blinky>, With<Scatter>, Without<Frightened>, Without<Eaten>, Without<Spawned>, Without<Target>)>,
 ) {
     for (entity, mut direction, position) in query.iter_mut() {
         set_scatter_target(
             &mut commands,
-            &board,
+            &wall_positions,
+            &ghost_house_positions,
             entity,
             &mut direction,
             position,
@@ -79,12 +82,15 @@ fn set_blinky_scatter_target(
 fn set_pinky_scatter_target(
     mut commands: Commands,
     board: Res<Board>,
+    wall_positions: Res<WallPositions>,
+    ghost_house_positions: Res<GhostHousePositions>,
     mut query: Query<(Entity, &mut MoveDirection, &Position), (With<Pinky>, With<Scatter>, Without<Frightened>, Without<Eaten>, Without<Spawned>, Without<Target>)>,
 ) {
     for (entity, mut direction, position) in query.iter_mut() {
         set_scatter_target(
             &mut commands,
-            &board,
+            &wall_positions,
+            &ghost_house_positions,
             entity,
             &mut direction,
             position,
@@ -96,12 +102,15 @@ fn set_pinky_scatter_target(
 fn set_inky_scatter_target(
     mut commands: Commands,
     board: Res<Board>,
+    wall_positions: Res<WallPositions>,
+    ghost_house_positions: Res<GhostHousePositions>,
     mut query: Query<(Entity, &mut MoveDirection, &Position), (With<Inky>, With<Scatter>, Without<Frightened>, Without<Eaten>, Without<Spawned>, Without<Target>)>,
 ) {
     for (entity, mut direction, position) in query.iter_mut() {
         set_scatter_target(
             &mut commands,
-            &board,
+            &wall_positions,
+            &ghost_house_positions,
             entity,
             &mut direction,
             position,
@@ -113,12 +122,15 @@ fn set_inky_scatter_target(
 fn set_clyde_scatter_target(
     mut commands: Commands,
     board: Res<Board>,
+    wall_positions: Res<WallPositions>,
+    ghost_house_positions: Res<GhostHousePositions>,
     mut query: Query<(Entity, &mut MoveDirection, &Position), (With<Clyde>, With<Scatter>, Without<Frightened>, Without<Eaten>, Without<Spawned>, Without<Target>)>,
 ) {
     for (entity, mut direction, position) in query.iter_mut() {
         set_scatter_target(
             &mut commands,
-            &board,
+            &wall_positions,
+            &ghost_house_positions,
             entity,
             &mut direction,
             position,
@@ -129,38 +141,40 @@ fn set_clyde_scatter_target(
 
 fn set_scatter_target(
     commands: &mut Commands,
-    board: &Board,
+    wall_positions: &WallPositions,
+    ghost_house_positions: &GhostHousePositions,
     entity: Entity,
     direction: &mut MoveDirection,
     ghost_position: &Position,
     corner_position: &Position
 ) {
-    let next_target_neighbour = get_neighbour_nearest_to_target(
-        ghost_position,
-        corner_position,
-        &board,
-        &direction,
-        |neighbour| neighbour_is_no_wall(&board, &neighbour.position),
-    );
+    let next_target_neighbour = ghost_position.get_neighbours()
+        .into_iter()
+        .filter(|n| n.direction != direction.opposite())
+        .filter(|n| !wall_positions.position_is_wall(&n.position) && !ghost_house_positions.position_is_entrance(&n.position))
+        .min_by(|n_a, n_b| minimal_distance_to_neighbours(corner_position, n_a, n_b))
+        .unwrap_or_else(|| ghost_position.neighbour_behind(&direction));
+
     *direction = next_target_neighbour.direction;
     commands.entity(entity).insert(Target(next_target_neighbour.position));
 }
 
 fn set_blinky_chase_target(
     mut commands: Commands,
-    board: Res<Board>,
+    wall_positions: Res<WallPositions>,
+    ghost_house_positions: Res<GhostHousePositions>,
     mut blinky_query: Query<(Entity, &mut MoveDirection, &Position), (With<Blinky>, With<Chase>, Without<Frightened>, Without<Eaten>, Without<Spawned>, Without<Target>)>,
     pacman_query: Query<&Position, With<Pacman>>,
 ) {
     for (entity, mut direction, blinky_position) in blinky_query.iter_mut() {
         for pacman_position in pacman_query.iter() {
-            let next_target_neighbour = get_neighbour_nearest_to_target(
-                blinky_position,
-                pacman_position,
-                &board,
-                &direction,
-                |neighbour| neighbour_is_no_wall(&board, &neighbour.position),
-            );
+            let next_target_neighbour = blinky_position.get_neighbours()
+                .into_iter()
+                .filter(|n| n.direction != direction.opposite())
+                .filter(|n| !wall_positions.position_is_wall(&n.position) && !ghost_house_positions.position_is_entrance(&n.position))
+                .min_by(|n_a, n_b| minimal_distance_to_neighbours(pacman_position, n_a, n_b))
+                .unwrap_or_else(|| blinky_position.neighbour_behind(&direction));
+
             *direction = next_target_neighbour.direction;
             commands.entity(entity).insert(Target(next_target_neighbour.position));
         }
@@ -170,19 +184,22 @@ fn set_blinky_chase_target(
 // TODO: Bug. Pacman might not have a movement direction, which causes pinky to stand still when in chase.
 fn set_pinky_chase_target(
     mut commands: Commands,
-    board: Res<Board>,
+    wall_positions: Res<WallPositions>,
+    ghost_house_positions: Res<GhostHousePositions>,
     mut pinky_query: Query<(Entity, &mut MoveDirection, &Position), (With<Pinky>, With<Chase>, Without<Frightened>, Without<Eaten>, Without<Spawned>, Without<Pacman>, Without<Target>)>,
     pacman_query: Query<(&Position, &MoveDirection), With<Pacman>>,
 ) {
     for (entity, mut pinky_direction, pinky_position) in pinky_query.iter_mut() {
         for (pacman_position, pacman_direction) in pacman_query.iter() {
-            let next_target_neighbour = get_neighbour_nearest_to_target(
-                pinky_position,
-                &calculate_pinky_target_position(pacman_position, pacman_direction),
-                &board,
-                &pinky_direction,
-                |neighbour| neighbour_is_no_wall(&board, &neighbour.position),
-            );
+            let pinky_target_pos = calculate_pinky_target_position(pacman_position, pacman_direction);
+
+            let next_target_neighbour = pinky_position.get_neighbours()
+                .into_iter()
+                .filter(|n| n.direction != pinky_direction.opposite())
+                .filter(|n| !wall_positions.position_is_wall(&n.position) && !ghost_house_positions.position_is_entrance(&n.position))
+                .min_by(|n_a, n_b| minimal_distance_to_neighbours(&pinky_target_pos, n_a, n_b))
+                .unwrap_or_else(|| pinky_position.neighbour_behind(&pinky_direction));
+
             *pinky_direction = next_target_neighbour.direction;
             commands.entity(entity).insert(Target(next_target_neighbour.position));
         }
@@ -207,20 +224,20 @@ fn calculate_pinky_target_position(
 
 fn set_frightened_target(
     mut commands: Commands,
-    board: Res<Board>,
+    wall_positions: Res<WallPositions>,
+    ghost_house_positions: Res<GhostHousePositions>,
     random: Res<Random>,
     mut query: Query<(Entity, &mut MoveDirection, &Position), (With<Frightened>, Without<Eaten>, Without<Spawned>, Without<Target>)>,
 ) {
     for (entity, mut direction, position) in query.iter_mut() {
-        let possible_neighbours = get_possible_neighbours(
-            position,
-            &board,
-            &direction,
-            |neighbour| neighbour_is_no_wall(&board, &neighbour.position),
-        );
+        let possible_neighbours = position.get_neighbours()
+            .into_iter()
+            .filter(|n| n.direction != direction.opposite())
+            .filter(|n| !wall_positions.position_is_wall(&n.position) && !ghost_house_positions.position_is_entrance(&n.position))
+            .collect::<Vec<_>>();
 
         let next_target_neighbour = match possible_neighbours.len() {
-            0 => board.neighbour_behind(&position, &direction),
+            0 => position.neighbour_behind(&direction),
             1 => possible_neighbours.get(0).unwrap().clone(),
             len => possible_neighbours.get(random.zero_to(len)).unwrap().clone()
         };
@@ -231,70 +248,22 @@ fn set_frightened_target(
 
 fn set_eaten_target(
     mut commands: Commands,
-    board: Res<Board>,
+    wall_positions: Res<WallPositions>,
+    ghost_house_positions: Res<GhostHousePositions>,
     mut query: Query<(Entity, &mut MoveDirection, &Position), (With<Eaten>, Without<Frightened>, Without<Spawned>, Without<Target>)>,
 ) {
     for (entity, mut direction, position) in query.iter_mut() {
-        let ghost_spawn_positions = board.get_positions_matching(is!(GhostHouse));
-        let nearest_spawn_position = &ghost_spawn_positions.iter()
-            .min_by(|pos_a, pos_b| minimal_distance_to_positions(&position, pos_a, pos_b))
-            .expect("There should at least be one ghost spawn on the map");
+        let nearest_spawn_position = position.get_nearest_from(ghost_house_positions.interior.iter());
+        let next_target_neighbour = position.get_neighbours()
+            .into_iter()
+            .filter(|n| n.direction != direction.opposite())
+            .filter(|n| !wall_positions.position_is_wall(&n.position))
+            .min_by(|n_a, n_b| minimal_distance_to_neighbours(nearest_spawn_position, n_a, n_b))
+            .unwrap_or_else(|| position.neighbour_behind(&direction));
 
-        let next_target_neighbour = get_neighbour_nearest_to_target(
-            position,
-            nearest_spawn_position,
-            &board,
-            &direction,
-            |neighbour| neighbour_is_no_normal_wall(&board, &neighbour.position),
-        );
         *direction = next_target_neighbour.direction;
         commands.entity(entity).insert(Target(next_target_neighbour.position));
     }
-}
-
-fn get_neighbour_nearest_to_target<'a, F: Fn(&Neighbour<'a>) -> bool>(
-    ghost_position: &Position,
-    target_position: &Position,
-    board: &'a Board,
-    direction: &MoveDirection,
-    field_filter: F,
-) -> Neighbour<'a> {
-    get_possible_neighbours(ghost_position, board, direction, field_filter)
-        .into_iter()
-        .min_by(|n_a, n_b| minimal_distance_to_neighbours(target_position, n_a, n_b))
-        .unwrap_or_else(|| board.neighbour_behind(ghost_position, direction))
-}
-
-fn get_possible_neighbours<'a, F: Fn(&Neighbour<'a>) -> bool>(
-    ghost_position: &Position,
-    board: &'a Board,
-    direction: &MoveDirection,
-    field_filter: F,
-) -> Vec<Neighbour<'a>> {
-    board.neighbours_of(ghost_position)
-        .into_iter()
-        .filter(|neighbour| neighbour_not_in_opposite_direction(direction, neighbour))
-        .filter(|neighbour| (field_filter)(neighbour))
-        .collect()
-}
-
-fn neighbour_is_no_wall_in_spawn(board: &Board, ghost_position: &Position, neighbour: &Neighbour) -> bool {
-    match board.position_matches_filter(ghost_position, is!(GhostHouseEntrance {..})) {
-        true => !neighbour.elements_match_filter(is!(Wall {..} | GhostHouse)),
-        false => !neighbour.elements_match_filter(is!(Wall {..}))
-    }
-}
-
-fn neighbour_is_no_wall(board: &Board, position: &Position) -> bool {
-    !board.position_matches_filter(position, is!(Wall {..} | GhostHouseEntrance {..} | InvisibleWall))
-}
-
-fn neighbour_is_no_normal_wall(board: &Board, position: &Position) -> bool {
-    !board.position_matches_filter(position, is!(Wall {..}))
-}
-
-fn neighbour_not_in_opposite_direction(direction: &MoveDirection, neighbour: &Neighbour) -> bool {
-    neighbour.direction != direction.opposite()
 }
 
 fn minimal_distance_to_neighbours(big_target: &Position, neighbour_a: &Neighbour, neighbour_b: &Neighbour) -> Ordering {
