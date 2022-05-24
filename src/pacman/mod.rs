@@ -7,10 +7,7 @@ use crate::common::MoveDirection::*;
 use crate::dots::DotEaten;
 use crate::ghosts::Ghost;
 use crate::ghosts::state::{Eaten, Frightened, Spawned};
-use crate::is;
 use crate::lives::Life;
-use crate::map::board::Board;
-use crate::map::Element::PacManSpawn;
 use crate::pacman::movement::move_pacman_if_not_stopped;
 use crate::pacman::spawn::{PacmanSpawn, spawn_pacman};
 

@@ -39,18 +39,21 @@ impl GhostSpawns {
         let neighbour_direction = pos_0.get_neighbour_direction(&pos_1).expect("The spawns of the same ghost should be neighbored");
         let (vec_0, vec_1) = (Vec3::from(&pos_0), Vec3::from(&pos_1));
 
-        match neighbour_direction {
-            Up | Down => {
-                let x = vec_0.x;
-                let y = (vec_0.y + vec_1.y) / 2.0;
-                Vec3::new(x, y, 0.0)
-            },
-            Left | Right => {
-                let x = (vec_0.x + vec_1.x) / 2.0;
-                let y = vec_0.y;
-                Vec3::new(x, y, 0.0)
-            }
-        }
+        // Not using this for now
+        // match neighbour_direction {
+        //     Up | Down => {
+        //         let x = vec_0.x;
+        //         let y = (vec_0.y + vec_1.y) / 2.0;
+        //         Vec3::new(x, y, 0.0)
+        //     },
+        //     Left | Right => {
+        //         let x = (vec_0.x + vec_1.x) / 2.0;
+        //         let y = vec_0.y;
+        //         Vec3::new(x, y, 0.0)
+        //     }
+        // }
+
+        vec_0
     }
 }
 

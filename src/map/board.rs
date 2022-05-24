@@ -30,19 +30,6 @@ impl Board {
         }
     }
 
-    /// Return the position of one specific field type. Of the FieldType
-    /// should be exactly one on the map. If not, the program panics.
-    pub fn get_position_matching(&self, filter: impl Fn(&Element) -> bool) -> &Position {
-        let positions = self.elements_map.iter()
-            .filter(|(_, elems)| Self::elements_match_filter(elems, &filter))
-            .map(|(pos, _)| pos)
-            .collect::<Vec<_>>();
-        match positions.len() {
-            1 => positions[0],
-            _ => panic!("Expected exactly one field")
-        }
-    }
-
     pub fn get_positions_matching(&self, filter: impl Fn(&Element) -> bool) -> Vec<&Position> {
         self.elements_map.iter()
             .filter(|(_, elems)| Self::elements_match_filter(elems, &filter))
