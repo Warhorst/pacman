@@ -14,7 +14,7 @@ use crate::random::Random;
 use crate::walls::WallPositions;
 
 #[derive(Component, Deref, DerefMut)]
-pub struct Target(pub Position);
+pub struct Target(pub Vec3);
 
 pub struct TargetPlugin;
 
@@ -53,7 +53,7 @@ fn set_spawned_target(
             .unwrap_or_else(|| position.neighbour_behind(&direction));
 
         *direction = next_target_neighbour.direction;
-        commands.entity(entity).insert(Target(next_target_neighbour.position));
+        commands.entity(entity).insert(Target(Vec3::from(&next_target_neighbour.position)));
     }
 }
 
@@ -75,7 +75,7 @@ fn set_scatter_target<G: Component>(
             .unwrap_or_else(|| position.neighbour_behind(&direction));
 
         *direction = next_target_neighbour.direction;
-        commands.entity(entity).insert(Target(next_target_neighbour.position));
+        commands.entity(entity).insert(Target(Vec3::from(&next_target_neighbour.position)));
     }
 }
 
@@ -96,7 +96,7 @@ fn set_blinky_chase_target(
                 .unwrap_or_else(|| blinky_position.neighbour_behind(&direction));
 
             *direction = next_target_neighbour.direction;
-            commands.entity(entity).insert(Target(next_target_neighbour.position));
+            commands.entity(entity).insert(Target(Vec3::from(&next_target_neighbour.position)));
         }
     }
 }
@@ -121,7 +121,7 @@ fn set_pinky_chase_target(
                 .unwrap_or_else(|| pinky_position.neighbour_behind(&pinky_direction));
 
             *pinky_direction = next_target_neighbour.direction;
-            commands.entity(entity).insert(Target(next_target_neighbour.position));
+            commands.entity(entity).insert(Target(Vec3::from(&next_target_neighbour.position)));
         }
     }
 }
@@ -162,7 +162,7 @@ fn set_frightened_target(
             len => possible_neighbours.get(random.zero_to(len)).unwrap().clone()
         };
         *direction = next_target_neighbour.direction;
-        commands.entity(entity).insert(Target(next_target_neighbour.position));
+        commands.entity(entity).insert(Target(Vec3::from(&next_target_neighbour.position)));
     }
 }
 
@@ -182,7 +182,7 @@ fn set_eaten_target(
             .unwrap_or_else(|| position.neighbour_behind(&direction));
 
         *direction = next_target_neighbour.direction;
-        commands.entity(entity).insert(Target(next_target_neighbour.position));
+        commands.entity(entity).insert(Target(Vec3::from(&next_target_neighbour.position)));
     }
 }
 

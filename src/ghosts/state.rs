@@ -183,15 +183,15 @@ fn set_frightened_when_pacman_ate_energizer(
     for (entity, mut direction, mut target) in query.iter_mut() {
         commands.entity(entity).insert(Frightened);
 
-        let position_ghost_came_from = match *direction {
-            Up => Position::new(target.x(), target.y() - 1),
-            Down => Position::new(target.x(), target.y() + 1),
-            Left => Position::new(target.x() + 1, target.y()),
-            Right => Position::new(target.x() - 1, target.y())
+        let coordinates_ghost_came_from = match *direction {
+            Up => Vec3::new(target.x, target.y - 1.0, 0.0),
+            Down => Vec3::new(target.x, target.y + 1.0, 0.0),
+            Left => Vec3::new(target.x + 1.0, target.y, 0.0),
+            Right => Vec3::new(target.x - 1.0, target.y, 0.0)
         };
 
         direction.reverse();
-        *target = Target(position_ghost_came_from);
+        *target = Target(coordinates_ghost_came_from);
     }
 }
 
@@ -235,15 +235,15 @@ fn reverse_when_schedule_changed(
     if event_reader.is_empty() { return; }
 
     for (mut direction, mut target) in query.iter_mut() {
-        let position_ghost_came_from = match *direction {
-            Up => Position::new(target.x(), target.y() - 1),
-            Down => Position::new(target.x(), target.y() + 1),
-            Left => Position::new(target.x() + 1, target.y()),
-            Right => Position::new(target.x() - 1, target.y())
+        let coordinates_ghost_came_from = match *direction {
+            Up => Vec3::new(target.x, target.y - 1.0, 0.0),
+            Down => Vec3::new(target.x, target.y + 1.0, 0.0),
+            Left => Vec3::new(target.x + 1.0, target.y, 0.0),
+            Right => Vec3::new(target.x - 1.0, target.y, 0.0)
         };
 
         direction.reverse();
-        *target = Target(position_ghost_came_from);
+        *target = Target(coordinates_ghost_came_from);
     }
 }
 
