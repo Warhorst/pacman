@@ -1,3 +1,4 @@
+use std::fmt::Formatter;
 use serde::{Serialize, Deserialize};
 use bevy::prelude::*;
 
@@ -113,6 +114,11 @@ impl From<&mut Position> for Vec3 {
         let x = (pos.x as f32) * FIELD_DIMENSION;
         let y = (pos.y as f32) * FIELD_DIMENSION;
         Vec3::new(x, y, 0.0)
+    }
+}
+impl std::fmt::Display for Position {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({}, {})", self.x, self.y)
     }
 }
 
