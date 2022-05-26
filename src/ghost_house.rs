@@ -1,10 +1,12 @@
-use std::collections::HashSet;
+use std::any::TypeId;
+use std::collections::{HashMap, HashSet};
 use bevy::prelude::*;
 use crate::common::Position;
 use crate::{is, map};
 use crate::map::board::Board;
 use map::Element;
 use map::Element::*;
+use crate::ghosts::{Blinky, Clyde, GhostType, Inky, Pinky};
 
 pub struct GhostHousePlugin;
 
@@ -39,10 +41,7 @@ impl Plugin for GhostHousePlugin {
 /// W = Wall
 pub struct GhostHouse {
     pub entrance_positions: HashSet<Position>,
-    pub blinky_spawn: Vec3,
-    pub pinky_spawn: Vec3,
-    pub inky_spawn: Vec3,
-    pub clyde_spawn: Vec3,
+    spawns: HashMap<TypeId, Spawn>,
 }
 
 impl GhostHouse {
@@ -54,12 +53,15 @@ impl GhostHouse {
             .fold(Position::new(0, 0), |acc, pos| Position::new(isize::max(acc.x, pos.x), isize::max(acc.y, pos.y)));
         Self::assert_positions_valid(&top_right, &entrance_positions, &ghost_house_positions);
 
+        let mut spawns = HashMap::with_capacity(4);
+        spawns.insert(TypeId::of::<Blinky>(), Self::create_blinky_spawn(&top_right));
+        spawns.insert(TypeId::of::<Pinky>(), Self::create_pinky_spawn(&top_right));
+        spawns.insert(TypeId::of::<Inky>(), Self::create_inky_spawn(&top_right));
+        spawns.insert(TypeId::of::<Clyde>(), Self::create_clyde_spawn(&top_right));
+
         GhostHouse {
             entrance_positions: HashSet::from_iter(entrance_positions.into_iter().map(|p| *p)),
-            blinky_spawn: Self::create_blinky_spawn(&top_right),
-            pinky_spawn: Self::create_pinky_spawn(&top_right),
-            inky_spawn: Self::create_inky_spawn(&top_right),
-            clyde_spawn: Self::create_clyde_spawn(&top_right),
+            spawns
         }
     }
 
@@ -110,29 +112,61 @@ impl GhostHouse {
         positions.into_iter().map(Position::to_string).collect::<Vec<String>>().join(", ")
     }
 
-    /// Centered (on x axis) coordinates of Blinky
-    fn create_blinky_spawn(top_right: &Position) -> Vec3 {
-        Self::centered_position_for(top_right.x - 3, top_right.x - 2, top_right.y + 2)
+    fn create_blinky_spawn(top_right: &Position) -> Spawn {
+        let positions = [
+            Position::new(top_right.x - 3, top_right.y + 2),
+            Position::new(top_right.x - 2, top_right.y + 2)
+        ];
+        let coordinates = Self::centered_position_for(&positions);
+
+        Spawn {
+            positions,
+            coordinates
+        }
     }
 
-    /// Centered (on x axis) coordinates of Pinky
-    fn create_pinky_spawn(top_right: &Position) -> Vec3 {
-        Self::centered_position_for(top_right.x - 3, top_right.x - 2, top_right.y - 1)
+    fn create_pinky_spawn(top_right: &Position) -> Spawn {
+        let positions = [
+            Position::new(top_right.x - 3, top_right.y - 1),
+            Position::new(top_right.x - 2, top_right.y - 1)
+        ];
+        let coordinates = Self::centered_position_for(&positions);
+
+        Spawn {
+            positions,
+            coordinates
+        }
     }
 
-    /// Centered (on x axis) coordinates of Inky
-    fn create_inky_spawn(top_right: &Position) -> Vec3 {
-        Self::centered_position_for(top_right.x - 5, top_right.x - 4, top_right.y - 1)
+    fn create_inky_spawn(top_right: &Position) -> Spawn {
+        let positions = [
+            Position::new(top_right.x - 5, top_right.y - 1),
+            Position::new(top_right.x - 4, top_right.y - 1)
+        ];
+        let coordinates = Self::centered_position_for(&positions);
+
+        Spawn {
+            positions,
+            coordinates
+        }
     }
 
-    /// Centered (on x axis) coordinates of Clyde
-    fn create_clyde_spawn(top_right: &Position) -> Vec3 {
-        Self::centered_position_for(top_right.x - 1, top_right.x, top_right.y - 1)
+    fn create_clyde_spawn(top_right: &Position) -> Spawn {
+        let positions = [
+            Position::new(top_right.x - 1, top_right.y - 1),
+            Position::new(top_right.x, top_right.y - 1)
+        ];
+        let coordinates = Self::centered_position_for(&positions);
+
+        Spawn {
+            positions,
+            coordinates
+        }
     }
 
-    fn centered_position_for(x_0: isize, x_1: isize, y: isize) -> Vec3 {
-        let vec_0 = Vec3::from(&Position::new(x_0, y));
-        let vec_1 = Vec3::from(&Position::new(x_1, y));
+    fn centered_position_for(positions: &[Position; 2]) -> Vec3 {
+        let vec_0 = Vec3::from(&positions[0]);
+        let vec_1 = Vec3::from(&positions[1]);
 
         Vec3::new(
             (vec_0.x + vec_1.x) / 2.0,
@@ -140,6 +174,29 @@ impl GhostHouse {
             0.0
         )
     }
+
+    pub fn spawn_coordinates_of<G: GhostType + 'static>(&self) -> Vec3 {
+        self.spawn_of::<G>().coordinates
+    }
+
+    /// Blinky always spawns in front of the ghost house.
+    pub fn positions_in_front_of_entrance(&self) -> impl IntoIterator<Item=&Position> {
+        self.spawn_of::<Blinky>().positions.iter()
+    }
+
+    /// Return the coordinates of the ghost house center. Every ghost moves to the center when leaving the house or entering for respawn.
+    pub fn center_coordinates(&self) -> Vec3 {
+        self.spawn_of::<Pinky>().coordinates
+    }
+
+    fn spawn_of<G: GhostType + 'static>(&self) -> &Spawn {
+        self.spawns.get(&TypeId::of::<G>()).expect("every ghost should have a registered spawn")
+    }
+}
+
+struct Spawn {
+    pub coordinates: Vec3,
+    pub positions: [Position; 2]
 }
 
 /// Resource that knows where the ghost house and its entrances are.

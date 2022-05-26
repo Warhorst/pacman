@@ -17,6 +17,9 @@ mod schedule;
 #[derive(Component, Eq, PartialEq)]
 pub struct Ghost;
 
+/// Marks every ghost.
+pub trait GhostType {}
+
 #[derive(Copy, Clone, Component)]
 pub struct Blinky;
 
@@ -28,6 +31,14 @@ pub struct Inky;
 
 #[derive(Copy, Clone, Component)]
 pub struct Clyde;
+
+impl GhostType for Blinky {}
+
+impl GhostType for Pinky {}
+
+impl GhostType for Inky {}
+
+impl GhostType for Clyde {}
 
 pub struct GhostPlugin;
 
