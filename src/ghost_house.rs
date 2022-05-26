@@ -179,9 +179,22 @@ impl GhostHouse {
         self.spawn_of::<G>().coordinates
     }
 
+    pub fn respawn_coordinates_of<G: GhostType + 'static>(&self) -> Vec3 {
+        if TypeId::of::<G>() == TypeId::of::<Blinky>() {
+            self.spawn_coordinates_of::<Pinky>()
+        } else {
+            self.spawn_coordinates_of::<G>()
+        }
+    }
+
     /// Blinky always spawns in front of the ghost house.
     pub fn positions_in_front_of_entrance(&self) -> impl IntoIterator<Item=&Position> {
         self.spawn_of::<Blinky>().positions.iter()
+    }
+
+    /// Blinky always spawns in front of the ghost house.
+    pub fn coordinates_in_front_of_entrance(&self) -> Vec3 {
+        self.spawn_of::<Blinky>().coordinates
     }
 
     /// Return the coordinates of the ghost house center. Every ghost moves to the center when leaving the house or entering for respawn.
@@ -219,22 +232,12 @@ impl GhostHousePositions {
     pub fn position_is_entrance(&self, pos: &Position) -> bool {
         self.entrances.contains(pos)
     }
-
-    pub fn position_is_interior(&self, pos: &Position) -> bool {
-        self.interior.contains(pos)
-    }
-
-    pub fn position_is_in_house(&self, pos: &Position) -> bool {
-        self.interior.contains(pos) || self.entrances.contains(pos)
-    }
 }
 
 fn spawn_ghost_house(
     mut commands: Commands,
     board: Res<Board>
 ) {
-    commands.insert_resource(GhostHouse::new(&board));
-
     let ghost_house_positions = GhostHousePositions::new(
         board.get_positions_matching(is!(GhostHouseEntrance {..})),
         board.get_positions_matching(is!(GhostHouse))

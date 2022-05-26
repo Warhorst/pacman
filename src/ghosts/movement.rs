@@ -26,7 +26,9 @@ fn move_ghost(
         limit_movement(&mut coordinates, &direction, &target_coordinates);
 
         // TODO maybe move this to the target plugin to keep things simple
-        if *coordinates == target_coordinates {
+        if on_target(*coordinates, target_coordinates, direction) {
+            // Fix slight errors which might cause ghost to get stuck
+            *coordinates = target_coordinates;
             commands.entity(entity).remove::<Target>();
         }
 
@@ -56,5 +58,12 @@ fn limit_movement(coordinates: &mut Vec3, direction: &MoveDirection, target_coor
         Down => coordinates.y = coordinates.y.max(target_coordinates.y),
         Left => coordinates.x = coordinates.x.max(target_coordinates.x),
         Right => coordinates.x = coordinates.x.min(target_coordinates.x),
+    }
+}
+
+fn on_target(coordinates: Vec3, target: Vec3, direction: &MoveDirection) -> bool {
+    match direction {
+        Up | Down => coordinates.y == target.y,
+        Left | Right => coordinates.x == target.x
     }
 }

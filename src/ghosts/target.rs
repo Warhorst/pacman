@@ -2,11 +2,12 @@ use std::cmp::Ordering;
 
 use bevy::prelude::*;
 
+use crate::ghosts::GhostType;
 use crate::common::{Neighbour, Position};
 use crate::common::MoveDirection;
 use crate::common::MoveDirection::*;
 use crate::ghost_corners::GhostCorner;
-use crate::ghost_house::GhostHousePositions;
+use crate::ghost_house::{GhostHouse, GhostHousePositions};
 use crate::ghosts::{Blinky, Clyde, Inky, Pinky};
 use crate::ghosts::state::{Chase, Eaten, Frightened, Scatter, Spawned};
 use crate::pacman::Pacman;
@@ -21,7 +22,10 @@ pub struct TargetPlugin;
 impl Plugin for TargetPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_system(set_spawned_target)
+            .add_system(set_spawned_target::<Blinky>)
+            .add_system(set_spawned_target::<Pinky>)
+            .add_system(set_spawned_target::<Inky>)
+            .add_system(set_spawned_target::<Clyde>)
             .add_system(set_scatter_target::<Blinky>)
             .add_system(set_scatter_target::<Pinky>)
             .add_system(set_scatter_target::<Inky>)
@@ -29,31 +33,34 @@ impl Plugin for TargetPlugin {
             .add_system(set_blinky_chase_target)
             .add_system(set_pinky_chase_target)
             .add_system(set_frightened_target)
-            .add_system(set_eaten_target)
+            .add_system(set_eaten_target::<Blinky>)
+            .add_system(set_eaten_target::<Pinky>)
+            .add_system(set_eaten_target::<Inky>)
+            .add_system(set_eaten_target::<Clyde>)
         ;
     }
 }
 
-fn set_spawned_target(
+fn set_spawned_target<G: GhostType + Component + 'static>(
     mut commands: Commands,
-    wall_positions: Res<WallPositions>,
-    ghost_house_positions: Res<GhostHousePositions>,
-    mut query: Query<(Entity, &mut MoveDirection, &Position), (With<Spawned>, Without<Frightened>, Without<Eaten>, Without<Target>)>,
+    ghost_house: Res<GhostHouse>,
+    mut query: Query<(Entity, &mut MoveDirection, &Transform), (With<G>, With<Spawned>, Without<Frightened>, Without<Eaten>, Without<Target>)>,
 ) {
-    for (entity, mut direction, position) in query.iter_mut() {
-        let nearest_entrance_position = position.get_nearest_from(ghost_house_positions.entrances.iter());
-        let next_target_neighbour = position.get_neighbours()
-            .into_iter()
-            .filter(|n| n.direction != direction.opposite())
-            .filter(|n| match ghost_house_positions.position_is_entrance(&n.position) {
-                true => !wall_positions.position_is_wall(&n.position) && !ghost_house_positions.position_is_interior(&n.position),
-                false => !wall_positions.position_is_wall(&n.position),
-            })
-            .min_by(|n_a, n_b| minimal_distance_to_neighbours(nearest_entrance_position, n_a, n_b))
-            .unwrap_or_else(|| position.neighbour_behind(&direction));
+    for (entity, mut direction, transform) in query.iter_mut() {
+        let coordinates = transform.translation;
+        let center = ghost_house.center_coordinates();
+        let respawn = ghost_house.respawn_coordinates_of::<G>();
 
-        *direction = next_target_neighbour.direction;
-        commands.entity(entity).insert(Target(Vec3::from(&next_target_neighbour.position)));
+        if coordinates == center {
+            *direction = Up;
+            commands.entity(entity).insert(Target(ghost_house.coordinates_in_front_of_entrance()));
+        } else if coordinates == respawn {
+            *direction = match respawn.x < center.x {
+                true => Right,
+                false => Left
+            };
+            commands.entity(entity).insert(Target(ghost_house.center_coordinates()));
+        }
     }
 }
 
@@ -62,7 +69,7 @@ fn set_scatter_target<G: Component>(
     wall_positions: Res<WallPositions>,
     ghost_house_positions: Res<GhostHousePositions>,
     mut ghost_query: Query<(Entity, &mut MoveDirection, &Position), (With<G>, With<Scatter>, Without<Frightened>, Without<Eaten>, Without<Spawned>, Without<Target>)>,
-    corner_query: Query<&Position, (With<G>, With<GhostCorner>)>
+    corner_query: Query<&Position, (With<G>, With<GhostCorner>)>,
 ) {
     for (entity, mut direction, position) in ghost_query.iter_mut() {
         let nearest_corner = position.get_nearest_from(corner_query.iter());
@@ -166,23 +173,51 @@ fn set_frightened_target(
     }
 }
 
-fn set_eaten_target(
+fn set_eaten_target<G: Component + GhostType + 'static>(
     mut commands: Commands,
+    ghost_house: Res<GhostHouse>,
     wall_positions: Res<WallPositions>,
-    ghost_house_positions: Res<GhostHousePositions>,
-    mut query: Query<(Entity, &mut MoveDirection, &Position), (With<Eaten>, Without<Frightened>, Without<Spawned>, Without<Target>)>,
+    mut query: Query<(Entity, &mut MoveDirection, &Position, &Transform), (With<G>, With<Eaten>, Without<Frightened>, Without<Spawned>, Without<Target>)>,
 ) {
-    for (entity, mut direction, position) in query.iter_mut() {
-        let nearest_spawn_position = position.get_nearest_from(ghost_house_positions.interior.iter());
-        let next_target_neighbour = position.get_neighbours()
-            .into_iter()
-            .filter(|n| n.direction != direction.opposite())
-            .filter(|n| !wall_positions.position_is_wall(&n.position))
-            .min_by(|n_a, n_b| minimal_distance_to_neighbours(nearest_spawn_position, n_a, n_b))
-            .unwrap_or_else(|| position.neighbour_behind(&direction));
+    for (entity, mut direction, position, transform) in query.iter_mut() {
+        let coordinates = transform.translation;
+        let center = ghost_house.center_coordinates();
+        let respawn = ghost_house.respawn_coordinates_of::<G>();
+        let in_front_of_house = ghost_house.coordinates_in_front_of_entrance();
 
-        *direction = next_target_neighbour.direction;
-        commands.entity(entity).insert(Target(Vec3::from(&next_target_neighbour.position)));
+        if coordinates == respawn {
+            // TODO: Bad. I need to this because the state changes at the next frame
+            return;
+        }
+
+        if coordinates == in_front_of_house {
+            *direction = Down;
+            commands.entity(entity).insert(Target(center));
+        } else if ghost_house.positions_in_front_of_entrance().into_iter().any(|pos| pos == position) {
+            let position_coordinates = Vec3::from(position);
+            *direction = match position_coordinates.x < in_front_of_house.x {
+                true => Left,
+                false => Right
+            };
+            commands.entity(entity).insert(Target(in_front_of_house));
+        } else if coordinates == center {
+            *direction = match respawn.x < center.x {
+                true => Left,
+                false => Right
+            };
+            commands.entity(entity).insert(Target(respawn));
+        } else {
+            let nearest_spawn_position = position.get_nearest_from(ghost_house.positions_in_front_of_entrance());
+            let next_target_neighbour = position.get_neighbours()
+                .into_iter()
+                .filter(|n| n.direction != direction.opposite())
+                .filter(|n| !wall_positions.position_is_wall(&n.position))
+                .min_by(|n_a, n_b| minimal_distance_to_neighbours(nearest_spawn_position, n_a, n_b))
+                .unwrap_or_else(|| position.neighbour_behind(&direction));
+
+            *direction = next_target_neighbour.direction;
+            commands.entity(entity).insert(Target(Vec3::from(&next_target_neighbour.position)));
+        }
     }
 }
 

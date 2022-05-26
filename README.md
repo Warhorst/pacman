@@ -54,6 +54,7 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 - pause menu to quit the game
 
 ### Refactoring
+- the app needs a fixed order of execution for target setting, state update and movement. A core problem here is the Target component, which gets removed and added frequently with 1-frame-delays
 - add every map element (walls, tunnels, ghost house) as an entity
 - bind movement to the target, so the ghost has no extra movement component
 - redo the map creation. The txt file is too limited

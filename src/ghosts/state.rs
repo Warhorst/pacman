@@ -8,8 +8,8 @@ use crate::ghosts::schedule::ScheduleChanged;
 use crate::ghosts::target::Target;
 use crate::pacman::Pacman;
 use crate::common::MoveDirection::*;
-use crate::ghost_house::GhostHousePositions;
-use crate::ghosts::Ghost;
+use crate::ghost_house::GhostHouse;
+use crate::ghosts::{Blinky, Clyde, Ghost, GhostType, Inky, Pinky};
 use crate::level::Level;
 use crate::ghosts::schedule::Schedule;
 use crate::ghosts::schedule::State::*;
@@ -23,7 +23,10 @@ impl Plugin for StatePlugin {
             .add_system(update_spawned_state)
             .add_system(set_chase_or_scatter_state_when_not_set)
             .add_system(update_chase_and_scatter_state)
-            .add_system(update_eaten_state)
+            .add_system(update_eaten_state::<Blinky>)
+            .add_system(update_eaten_state::<Pinky>)
+            .add_system(update_eaten_state::<Inky>)
+            .add_system(update_eaten_state::<Clyde>)
             .add_system(update_frightened_timer)
             .add_system(set_frightened_when_pacman_ate_energizer)
             .add_system(set_frightened_when_pacman_ate_energizer_and_ghost_has_no_target)
@@ -83,14 +86,19 @@ impl FrightenedTimer {
 }
 
 // TODO: This might fail if a ghost is on the ghost wall and a schedule change happens -> he turns around and is trapped.
+/// Update the spawned state. A ghost is no longer spawned if he stands in front of
+/// the ghost house. When he left the ghost house, he always turns to the right.
 fn update_spawned_state(
     mut commands: Commands,
-    ghost_house_positions: Res<GhostHousePositions>,
-    mut query: Query<(Entity, &Position), (With<Ghost>, With<Spawned>, Without<Frightened>, Without<Eaten>)>,
+    ghost_house: Res<GhostHouse>,
+    mut query: Query<(Entity, &mut MoveDirection, &Transform), (With<Ghost>, With<Spawned>, Without<Frightened>, Without<Eaten>)>,
 ) {
-    for (entity, position) in query.iter_mut() {
-        if !ghost_house_positions.position_is_in_house(position) {
+    for (entity, mut direction, transform) in query.iter_mut() {
+        let coordinates = transform.translation;
+
+        if coordinates == ghost_house.coordinates_in_front_of_entrance() {
             commands.entity(entity).remove::<Spawned>();
+            *direction = Left;
         }
     }
 }
@@ -142,13 +150,15 @@ fn update_frightened_state(
     }
 }
 
-fn update_eaten_state(
+fn update_eaten_state<G: Component + GhostType + 'static>(
     mut commands: Commands,
-    ghost_house_positions: Res<GhostHousePositions>,
-    query: Query<(Entity, &Position), (With<Eaten>, Without<Frightened>, Without<Spawned>)>,
+    ghost_house: Res<GhostHouse>,
+    query: Query<(Entity, &Transform), (With<G>, With<Eaten>, Without<Frightened>, Without<Spawned>)>,
 ) {
-    for (entity, position) in query.iter() {
-        if ghost_house_positions.position_is_interior(position) {
+    for (entity, transform) in query.iter() {
+        let coordinates = transform.translation;
+
+        if coordinates == ghost_house.respawn_coordinates_of::<G>() {
             commands.entity(entity)
                 .remove::<Eaten>()
                 .insert(Spawned);
