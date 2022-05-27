@@ -10,7 +10,7 @@ use crate::ghosts::state::State;
 use crate::lives::Life;
 use crate::pacman::movement::move_pacman_if_not_stopped;
 use crate::pacman::spawn::{PacmanSpawn, spawn_pacman};
-use crate::skip_if;
+use crate::state_skip_if;
 
 mod movement;
 mod spawn;
@@ -129,7 +129,7 @@ fn pacman_hits_ghost_and_get_killed(
 ) {
     for pacman_position in pacman_query.iter() {
         for (ghost_position, state) in ghost_query.iter() {
-            skip_if!(state != State::Scatter | State::Chase);
+            state_skip_if!(state != State::Scatter | State::Chase);
             if pacman_position == ghost_position {
                 event_writer.send(PacmanKilled)
             }

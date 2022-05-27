@@ -5,34 +5,41 @@ use bevy::prelude::*;
 use crate::common::{MoveDirection, Position};
 use crate::energizer::EnergizerEaten;
 use crate::ghosts::schedule::ScheduleChanged;
-use crate::ghosts::target::Target_;
+use crate::ghosts::target::Target;
 use crate::pacman::Pacman;
 use crate::common::MoveDirection::*;
 use crate::ghost_house::GhostHouse;
 use crate::ghosts::{Blinky, Clyde, Ghost, GhostType, Inky, Pinky};
 use crate::level::Level;
 use crate::ghosts::schedule::Schedule;
-use crate::skip_if;
+use crate::state_skip_if;
 
 pub struct StatePlugin;
 
 impl Plugin for StatePlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_system(update_frightened_state)
-            .add_system(update_spawned_state)
-            .add_system(update_chase_and_scatter_state)
-            .add_system(update_eaten_state::<Blinky>)
-            .add_system(update_eaten_state::<Pinky>)
-            .add_system(update_eaten_state::<Inky>)
-            .add_system(update_eaten_state::<Clyde>)
-            .add_system(update_frightened_timer)
-            .add_system(set_frightened_when_pacman_ate_energizer)
-            .add_system(set_eaten_when_hit_by_pacman)
-            .add_system(reverse_when_schedule_changed)
+            .add_system_set(
+                SystemSet::new()
+                    .with_system(update_frightened_state)
+                    .with_system(update_spawned_state)
+                    .with_system(update_chase_and_scatter_state)
+                    .with_system(update_eaten_state::<Blinky>)
+                    .with_system(update_eaten_state::<Pinky>)
+                    .with_system(update_eaten_state::<Inky>)
+                    .with_system(update_eaten_state::<Clyde>)
+                    .with_system(update_frightened_timer)
+                    .with_system(set_frightened_when_pacman_ate_energizer)
+                    .with_system(set_eaten_when_hit_by_pacman)
+                    .label(StateSetter)
+            )
         ;
     }
 }
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(SystemLabel)]
+pub struct StateSetter;
 
 #[derive(Component, Copy, Clone, Eq, PartialEq)]
 pub enum State {
@@ -79,7 +86,7 @@ fn update_spawned_state(
     mut query: Query<(&mut MoveDirection, &mut State, &Transform)>,
 ) {
     for (mut direction, mut state, transform) in query.iter_mut() {
-        skip_if!(state != State::Spawned);
+        state_skip_if!(state != State::Spawned);
         let coordinates = transform.translation;
 
         if coordinates == ghost_house.coordinates_in_front_of_entrance() {
@@ -91,14 +98,27 @@ fn update_spawned_state(
 
 fn update_chase_and_scatter_state(
     mut event_reader: EventReader<ScheduleChanged>,
-    mut query: Query<&mut State, With<Ghost>>,
+    mut query: Query<(&mut MoveDirection, &mut Target, &mut State, &Transform), With<Ghost>>,
 ) {
     if event_reader.is_empty() { return; }
 
     for event in event_reader.iter() {
-        for mut state in query.iter_mut() {
-            skip_if!(state != State::Scatter | State::Chase);
+        for (mut direction, mut target, mut state, transform) in query.iter_mut() {
+            state_skip_if!(state != State::Scatter | State::Chase);
+
             *state = **event;
+
+            let target_coordinates = if target.is_set() {
+                target.get()
+            } else {
+                transform.translation
+            };
+
+            let target_position = Position::from(target_coordinates);
+            let coordinates_ghost_came_from = Vec3::from(target_position.get_neighbour_in_direction(&direction.opposite()).position);
+
+            direction.reverse();
+            target.set(coordinates_ghost_came_from);
         }
     }
 }
@@ -114,7 +134,7 @@ fn update_frightened_state(
     };
 
     for mut state in query.iter_mut() {
-        skip_if!(state != State::Frightened);
+        state_skip_if!(state != State::Frightened);
         if frightened_time_over {
             *state = schedule.current_state();
         }
@@ -126,7 +146,7 @@ fn update_eaten_state<G: Component + GhostType + 'static>(
     mut query: Query<(&Transform, &mut State), With<G>>,
 ) {
     for (transform, mut state) in query.iter_mut() {
-        skip_if!(state != State::Eaten);
+        state_skip_if!(state != State::Eaten);
 
         let coordinates = transform.translation;
 
@@ -154,28 +174,22 @@ fn set_frightened_when_pacman_ate_energizer(
     mut commands: Commands,
     level: Res<Level>,
     event_reader: EventReader<EnergizerEaten>,
-    mut query: Query<(&mut MoveDirection, &mut Target_, &mut State, &Transform), With<Ghost>>,
+    mut query: Query<(&mut MoveDirection, &mut Target, &mut State, &Transform), With<Ghost>>,
 ) {
     if event_reader.is_empty() { return; }
 
     commands.insert_resource(FrightenedTimer::start(&level));
 
     for (mut direction, mut target, mut state, transform) in query.iter_mut() {
-        skip_if!(state != State::Scatter | State::Chase);
+        state_skip_if!(state != State::Scatter | State::Chase);
 
         let target_coordinates = if target.is_set() {
             target.get()
         } else {
             transform.translation
         };
-
-        // TODO: refactor
-        let coordinates_ghost_came_from = match *direction {
-            Up => Vec3::new(target_coordinates.x, target_coordinates.y - 1.0, 0.0),
-            Down => Vec3::new(target_coordinates.x, target_coordinates.y + 1.0, 0.0),
-            Left => Vec3::new(target_coordinates.x + 1.0, target_coordinates.y, 0.0),
-            Right => Vec3::new(target_coordinates.x - 1.0, target_coordinates.y, 0.0)
-        };
+        let target_position = Position::from(target_coordinates);
+        let coordinates_ghost_came_from = Vec3::from(target_position.get_neighbour_in_direction(&direction.opposite()).position);
 
         *state = State::Frightened;
         direction.reverse();
@@ -190,44 +204,15 @@ fn set_eaten_when_hit_by_pacman(
     for (ghost_position, mut state) in ghost_query.iter_mut() {
         for pacman_position in pacman_query.iter() {
             if ghost_position == pacman_position {
-                skip_if!(state != State::Frightened);
+                state_skip_if!(state != State::Frightened);
                 *state = State::Eaten;
             }
         }
     }
 }
 
-// TODO: why two systems?
-fn reverse_when_schedule_changed(
-    event_reader: EventReader<ScheduleChanged>,
-    mut query: Query<(&mut MoveDirection, &mut Target_, &State, &Transform), With<Ghost>>,
-) {
-    if event_reader.is_empty() { return; }
-
-    for (mut direction, mut target, state, transform) in query.iter_mut() {
-        skip_if!(state != State::Scatter | State::Chase);
-
-        let target_coordinates = if target.is_set() {
-            target.get()
-        } else {
-            transform.translation
-        };
-
-        // TODO: refactor
-        let coordinates_ghost_came_from = match *direction {
-            Up => Vec3::new(target_coordinates.x, target_coordinates.y - 1.0, 0.0),
-            Down => Vec3::new(target_coordinates.x, target_coordinates.y + 1.0, 0.0),
-            Left => Vec3::new(target_coordinates.x + 1.0, target_coordinates.y, 0.0),
-            Right => Vec3::new(target_coordinates.x - 1.0, target_coordinates.y, 0.0)
-        };
-
-        direction.reverse();
-        target.set(coordinates_ghost_came_from);
-    }
-}
-
 #[macro_export]
-macro_rules! skip_if {
+macro_rules! state_skip_if {
     ($state:ident = $pattern:pat) => {
         if let $pattern = *$state { continue; }
     };

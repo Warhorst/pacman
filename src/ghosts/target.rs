@@ -9,21 +9,55 @@ use crate::ghost_corners::GhostCorner;
 use crate::ghost_house::{GhostHouse, GhostHousePositions};
 use crate::ghosts::{Blinky, Clyde, Inky, Pinky};
 use crate::ghosts::GhostType;
-use crate::ghosts::state::State;
+use crate::ghosts::state::{State, StateSetter};
 use crate::pacman::Pacman;
 use crate::random::Random;
-use crate::skip_if;
+use crate::state_skip_if;
 use crate::target_skip_if;
 use crate::walls::WallPositions;
 
+pub struct TargetPlugin;
+
+impl Plugin for TargetPlugin {
+    fn build(&self, app: &mut App) {
+        app
+            .add_system_set(
+                SystemSet::new()
+                    .with_system(set_spawned_target::<Blinky>)
+                    .with_system(set_spawned_target::<Pinky>)
+                    .with_system(set_spawned_target::<Inky>)
+                    .with_system(set_spawned_target::<Clyde>)
+                    .with_system(set_scatter_target::<Blinky>)
+                    .with_system(set_scatter_target::<Pinky>)
+                    .with_system(set_scatter_target::<Inky>)
+                    .with_system(set_scatter_target::<Clyde>)
+                    .with_system(set_blinky_chase_target)
+                    .with_system(set_pinky_chase_target)
+                    .with_system(set_frightened_target)
+                    .with_system(set_eaten_target::<Blinky>)
+                    .with_system(set_eaten_target::<Pinky>)
+                    .with_system(set_eaten_target::<Inky>)
+                    .with_system(set_eaten_target::<Clyde>)
+                    .label(TargetSetter)
+                    .after(StateSetter)
+            )
+        ;
+    }
+}
+
+/// Marks every system that sets a ghosts target.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(SystemLabel)]
+pub struct TargetSetter;
+
 #[derive(Component)]
-pub struct Target_ {
+pub struct Target {
     coordinates: Option<Vec3>,
 }
 
-impl Target_ {
+impl Target {
     pub fn new() -> Self {
-        Target_ { coordinates: None }
+        Target { coordinates: None }
     }
 
     pub fn is_set(&self) -> bool {
@@ -49,37 +83,13 @@ impl Target_ {
     }
 }
 
-pub struct TargetPlugin;
-
-impl Plugin for TargetPlugin {
-    fn build(&self, app: &mut App) {
-        app
-            .add_system(set_spawned_target::<Blinky>)
-            .add_system(set_spawned_target::<Pinky>)
-            .add_system(set_spawned_target::<Inky>)
-            .add_system(set_spawned_target::<Clyde>)
-            .add_system(set_scatter_target::<Blinky>)
-            .add_system(set_scatter_target::<Pinky>)
-            .add_system(set_scatter_target::<Inky>)
-            .add_system(set_scatter_target::<Clyde>)
-            .add_system(set_blinky_chase_target)
-            .add_system(set_pinky_chase_target)
-            .add_system(set_frightened_target)
-            .add_system(set_eaten_target::<Blinky>)
-            .add_system(set_eaten_target::<Pinky>)
-            .add_system(set_eaten_target::<Inky>)
-            .add_system(set_eaten_target::<Clyde>)
-        ;
-    }
-}
-
 fn set_spawned_target<G: GhostType + Component + 'static>(
     ghost_house: Res<GhostHouse>,
-    mut query: Query<(&mut Target_, &mut MoveDirection, &Transform, &State), With<G>>,
+    mut query: Query<(&mut Target, &mut MoveDirection, &Transform, &State), With<G>>,
 ) {
     for (mut target, mut direction, transform, state) in query.iter_mut() {
         target_skip_if!(target set);
-        skip_if!(state != State::Spawned);
+        state_skip_if!(state != State::Spawned);
         let coordinates = transform.translation;
         let center = ghost_house.center_coordinates();
         let respawn = ghost_house.respawn_coordinates_of::<G>();
@@ -100,12 +110,12 @@ fn set_spawned_target<G: GhostType + Component + 'static>(
 fn set_scatter_target<G: Component>(
     wall_positions: Res<WallPositions>,
     ghost_house_positions: Res<GhostHousePositions>,
-    mut ghost_query: Query<(&mut Target_, &mut MoveDirection, &Position, &State), With<G>>,
+    mut ghost_query: Query<(&mut Target, &mut MoveDirection, &Position, &State), With<G>>,
     corner_query: Query<&Position, (With<G>, With<GhostCorner>)>,
 ) {
     for (mut target, mut direction, position, state) in ghost_query.iter_mut() {
         target_skip_if!(target set);
-        skip_if!(state != State::Scatter);
+        state_skip_if!(state != State::Scatter);
         let nearest_corner = position.get_nearest_from(corner_query.iter());
 
         let next_target_neighbour = position.get_neighbours()
@@ -123,12 +133,12 @@ fn set_scatter_target<G: Component>(
 fn set_blinky_chase_target(
     wall_positions: Res<WallPositions>,
     ghost_house_positions: Res<GhostHousePositions>,
-    mut blinky_query: Query<(&mut Target_, &mut MoveDirection, &Position, &State), With<Blinky>>,
+    mut blinky_query: Query<(&mut Target, &mut MoveDirection, &Position, &State), With<Blinky>>,
     pacman_query: Query<&Position, With<Pacman>>,
 ) {
     for (mut target, mut direction, blinky_position, state) in blinky_query.iter_mut() {
         target_skip_if!(target set);
-        skip_if!(state != State::Chase);
+        state_skip_if!(state != State::Chase);
         for pacman_position in pacman_query.iter() {
             let next_target_neighbour = blinky_position.get_neighbours()
                 .into_iter()
@@ -147,12 +157,12 @@ fn set_blinky_chase_target(
 fn set_pinky_chase_target(
     wall_positions: Res<WallPositions>,
     ghost_house_positions: Res<GhostHousePositions>,
-    mut pinky_query: Query<(&mut Target_, &mut MoveDirection, &Position, &State), (With<Pinky>, Without<Pacman>)>,
+    mut pinky_query: Query<(&mut Target, &mut MoveDirection, &Position, &State), (With<Pinky>, Without<Pacman>)>,
     pacman_query: Query<(&Position, &MoveDirection), With<Pacman>>,
 ) {
     for (mut target, mut pinky_direction, pinky_position, state) in pinky_query.iter_mut() {
         target_skip_if!(target set);
-        skip_if!(state != State::Chase);
+        state_skip_if!(state != State::Chase);
         for (pacman_position, pacman_direction) in pacman_query.iter() {
             let pinky_target_pos = calculate_pinky_target_position(pacman_position, pacman_direction);
 
@@ -189,11 +199,11 @@ fn set_frightened_target(
     wall_positions: Res<WallPositions>,
     ghost_house_positions: Res<GhostHousePositions>,
     random: Res<Random>,
-    mut query: Query<(&mut Target_, &mut MoveDirection, &Position, &State)>,
+    mut query: Query<(&mut Target, &mut MoveDirection, &Position, &State)>,
 ) {
     for (mut target, mut direction, position, state) in query.iter_mut() {
         target_skip_if!(target set);
-        skip_if!(state != State::Frightened);
+        state_skip_if!(state != State::Frightened);
         let possible_neighbours = position.get_neighbours()
             .into_iter()
             .filter(|n| n.direction != direction.opposite())
@@ -213,11 +223,11 @@ fn set_frightened_target(
 fn set_eaten_target<G: Component + GhostType + 'static>(
     ghost_house: Res<GhostHouse>,
     wall_positions: Res<WallPositions>,
-    mut query: Query<(&mut Target_, &mut MoveDirection, &Position, &Transform, &State), With<G>>,
+    mut query: Query<(&mut Target, &mut MoveDirection, &Position, &Transform, &State), With<G>>,
 ) {
     for (mut target, mut direction, position, transform, state) in query.iter_mut() {
         target_skip_if!(target set);
-        skip_if!(state != State::Eaten);
+        state_skip_if!(state != State::Eaten);
         let coordinates = transform.translation;
         let center = ghost_house.center_coordinates();
         let respawn = ghost_house.respawn_coordinates_of::<G>();

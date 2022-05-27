@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::common::{MoveDirection, Position};
 use crate::common::MoveDirection::*;
-use crate::ghosts::target::Target_;
+use crate::ghosts::target::{Target, TargetSetter};
 use crate::speed::Speed;
 use crate::target_skip_if;
 
@@ -10,13 +10,13 @@ pub struct MovePlugin;
 
 impl Plugin for MovePlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(move_ghost);
+        app.add_system(move_ghost.after(TargetSetter));
     }
 }
 
 fn move_ghost(
     time: Res<Time>,
-    mut query: Query<(&MoveDirection, &mut Position, &mut Target_, &mut Transform, &Speed)>,
+    mut query: Query<(&MoveDirection, &mut Position, &mut Target, &mut Transform, &Speed)>,
 ) {
     for (direction, mut position, mut target, mut transform, speed) in query.iter_mut() {
         target_skip_if!(target not set);

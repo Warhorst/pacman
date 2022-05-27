@@ -85,6 +85,14 @@ impl Position {
     }
 }
 
+impl From<Vec3> for Position {
+    fn from(vec: Vec3) -> Self {
+        let x = (vec.x + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
+        let y = (vec.y + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
+        Position::new(x as isize, y as isize)
+    }
+}
+
 impl From<&Vec3> for Position {
     fn from(vec: &Vec3) -> Self {
         let x = (vec.x + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
@@ -98,6 +106,14 @@ impl From<&mut Vec3> for Position {
         let x = (vec.x + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
         let y = (vec.y + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
         Position::new(x as isize, y as isize)
+    }
+}
+
+impl From<Position> for Vec3 {
+    fn from(pos: Position) -> Self {
+        let x = (pos.x as f32) * FIELD_DIMENSION;
+        let y = (pos.y as f32) * FIELD_DIMENSION;
+        Vec3::new(x, y, 0.0)
     }
 }
 
