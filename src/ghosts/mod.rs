@@ -4,7 +4,7 @@ use crate::ghosts::movement::MovePlugin;
 use crate::ghosts::schedule::SchedulePlugin;
 use crate::ghosts::spawn::spawn_ghosts;
 use crate::ghosts::state::StatePlugin;
-use crate::ghosts::target::{Target, TargetPlugin};
+use crate::ghosts::target::{Target_, TargetPlugin};
 use crate::tunnels::GhostPassedTunnel;
 
 pub mod movement;
@@ -55,14 +55,13 @@ impl Plugin for GhostPlugin {
 }
 
 fn ghost_passed_tunnel(
-    mut commands: Commands,
     mut event_reader: EventReader<GhostPassedTunnel>,
-    mut query: Query<Entity, With<Ghost>>,
+    mut query: Query<(Entity, &mut Target_), With<Ghost>>,
 ) {
     for event in event_reader.iter() {
-        for entity in query.iter_mut() {
+        for (entity, mut target) in query.iter_mut() {
             if entity == **event {
-                commands.entity(entity).remove::<Target>();
+                target.clear();
             }
         }
     }

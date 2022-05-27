@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use crate::common::{MoveDirection, Position};
 use crate::energizer::EnergizerEaten;
 use crate::ghosts::schedule::ScheduleChanged;
-use crate::ghosts::target::Target;
+use crate::ghosts::target::Target_;
 use crate::pacman::Pacman;
 use crate::common::MoveDirection::*;
 use crate::ghost_house::GhostHouse;
@@ -28,10 +28,8 @@ impl Plugin for StatePlugin {
             .add_system(update_eaten_state::<Clyde>)
             .add_system(update_frightened_timer)
             .add_system(set_frightened_when_pacman_ate_energizer)
-            .add_system(set_frightened_when_pacman_ate_energizer_and_ghost_has_no_target)
             .add_system(set_eaten_when_hit_by_pacman)
             .add_system(reverse_when_schedule_changed)
-            .add_system(reverse_when_schedule_changed_and_ghost_has_no_target)
         ;
     }
 }
@@ -156,44 +154,32 @@ fn set_frightened_when_pacman_ate_energizer(
     mut commands: Commands,
     level: Res<Level>,
     event_reader: EventReader<EnergizerEaten>,
-    mut query: Query<(&mut MoveDirection, &mut Target, &mut State), With<Ghost>>,
+    mut query: Query<(&mut MoveDirection, &mut Target_, &mut State, &Transform), With<Ghost>>,
 ) {
     if event_reader.is_empty() { return; }
 
     commands.insert_resource(FrightenedTimer::start(&level));
 
-    for (mut direction, mut target, mut state) in query.iter_mut() {
+    for (mut direction, mut target, mut state, transform) in query.iter_mut() {
         skip_if!(state != State::Scatter | State::Chase);
+
+        let target_coordinates = if target.is_set() {
+            target.get()
+        } else {
+            transform.translation
+        };
 
         // TODO: refactor
         let coordinates_ghost_came_from = match *direction {
-            Up => Vec3::new(target.x, target.y - 1.0, 0.0),
-            Down => Vec3::new(target.x, target.y + 1.0, 0.0),
-            Left => Vec3::new(target.x + 1.0, target.y, 0.0),
-            Right => Vec3::new(target.x - 1.0, target.y, 0.0)
+            Up => Vec3::new(target_coordinates.x, target_coordinates.y - 1.0, 0.0),
+            Down => Vec3::new(target_coordinates.x, target_coordinates.y + 1.0, 0.0),
+            Left => Vec3::new(target_coordinates.x + 1.0, target_coordinates.y, 0.0),
+            Right => Vec3::new(target_coordinates.x - 1.0, target_coordinates.y, 0.0)
         };
 
         *state = State::Frightened;
         direction.reverse();
-        *target = Target(coordinates_ghost_came_from);
-    }
-}
-
-// TODO: Does this always work? (runs concurrent with target setters)
-fn set_frightened_when_pacman_ate_energizer_and_ghost_has_no_target(
-    mut commands: Commands,
-    level: Res<Level>,
-    event_reader: EventReader<EnergizerEaten>,
-    mut query: Query<(&mut MoveDirection, &mut State), (With<Ghost>, Without<Target>)>,
-) {
-    if event_reader.is_empty() { return; }
-
-    commands.insert_resource(FrightenedTimer::start(&level));
-
-    for (mut direction, mut state) in query.iter_mut() {
-        skip_if!(state != State::Scatter | State::Chase);
-        *state = State::Frightened;
-        direction.reverse();
+        target.set(coordinates_ghost_came_from);
     }
 }
 
@@ -214,37 +200,29 @@ fn set_eaten_when_hit_by_pacman(
 // TODO: why two systems?
 fn reverse_when_schedule_changed(
     event_reader: EventReader<ScheduleChanged>,
-    mut query: Query<(&mut MoveDirection, &mut Target, &State), With<Ghost>>,
+    mut query: Query<(&mut MoveDirection, &mut Target_, &State, &Transform), With<Ghost>>,
 ) {
     if event_reader.is_empty() { return; }
 
-    for (mut direction, mut target, state) in query.iter_mut() {
+    for (mut direction, mut target, state, transform) in query.iter_mut() {
         skip_if!(state != State::Scatter | State::Chase);
+
+        let target_coordinates = if target.is_set() {
+            target.get()
+        } else {
+            transform.translation
+        };
 
         // TODO: refactor
         let coordinates_ghost_came_from = match *direction {
-            Up => Vec3::new(target.x, target.y - 1.0, 0.0),
-            Down => Vec3::new(target.x, target.y + 1.0, 0.0),
-            Left => Vec3::new(target.x + 1.0, target.y, 0.0),
-            Right => Vec3::new(target.x - 1.0, target.y, 0.0)
+            Up => Vec3::new(target_coordinates.x, target_coordinates.y - 1.0, 0.0),
+            Down => Vec3::new(target_coordinates.x, target_coordinates.y + 1.0, 0.0),
+            Left => Vec3::new(target_coordinates.x + 1.0, target_coordinates.y, 0.0),
+            Right => Vec3::new(target_coordinates.x - 1.0, target_coordinates.y, 0.0)
         };
 
         direction.reverse();
-        *target = Target(coordinates_ghost_came_from);
-    }
-}
-
-// TODO: why two systems?
-// TODO: Does this always work? (runs concurrent with target setters)
-fn reverse_when_schedule_changed_and_ghost_has_no_target(
-    event_reader: EventReader<ScheduleChanged>,
-    mut query: Query<(&mut MoveDirection, &State), (With<Ghost>, Without<Target>)>,
-) {
-    if event_reader.is_empty() { return; }
-
-    for (mut direction, state) in query.iter_mut() {
-        skip_if!(state != State::Scatter | State::Chase);
-        direction.reverse();
+        target.set(coordinates_ghost_came_from);
     }
 }
 

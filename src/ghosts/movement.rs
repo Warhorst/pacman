@@ -2,8 +2,9 @@ use bevy::prelude::*;
 
 use crate::common::{MoveDirection, Position};
 use crate::common::MoveDirection::*;
-use crate::ghosts::target::Target;
+use crate::ghosts::target::Target_;
 use crate::speed::Speed;
+use crate::target_skip_if;
 
 pub struct MovePlugin;
 
@@ -14,22 +15,21 @@ impl Plugin for MovePlugin {
 }
 
 fn move_ghost(
-    mut commands: Commands,
     time: Res<Time>,
-    mut query: Query<(Entity, &MoveDirection, &mut Position, &Target, &mut Transform, &Speed)>,
+    mut query: Query<(&MoveDirection, &mut Position, &mut Target_, &mut Transform, &Speed)>,
 ) {
-    for (entity, direction, mut position, target, mut transform, speed) in query.iter_mut() {
+    for (direction, mut position, mut target, mut transform, speed) in query.iter_mut() {
+        target_skip_if!(target not set);
         let mut coordinates = &mut transform.translation;
         let delta_seconds = time.delta_seconds();
-        let target_coordinates = **target;
+        let target_coordinates = target.get();
         move_in_direction(&mut coordinates, delta_seconds, &direction, speed);
         limit_movement(&mut coordinates, &direction, &target_coordinates);
 
-        // TODO maybe move this to the target plugin to keep things simple
         if on_target(*coordinates, target_coordinates, direction) {
             // Fix slight errors which might cause ghost to get stuck
             *coordinates = target_coordinates;
-            commands.entity(entity).remove::<Target>();
+            target.clear();
         }
 
         *position = Position::from(coordinates)
