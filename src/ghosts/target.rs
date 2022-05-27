@@ -5,9 +5,10 @@ use bevy::prelude::*;
 use crate::common::{Neighbour, Position};
 use crate::common::MoveDirection;
 use crate::common::MoveDirection::*;
+use crate::constants::FIELD_DIMENSION;
 use crate::ghost_corners::GhostCorner;
 use crate::ghost_house::{GhostHouse, GhostHousePositions};
-use crate::ghosts::{Blinky, Clyde, Inky, Pinky};
+use crate::ghosts::{Blinky, Clyde, DotCounter, Inky, Pinky};
 use crate::ghosts::GhostType;
 use crate::ghosts::state::{State, StateSetter};
 use crate::pacman::Pacman;
@@ -83,26 +84,48 @@ impl Target {
     }
 }
 
+// TODO: refactor
 fn set_spawned_target<G: GhostType + Component + 'static>(
     ghost_house: Res<GhostHouse>,
-    mut query: Query<(&mut Target, &mut MoveDirection, &Transform, &State), With<G>>,
+    mut query: Query<(&mut Target, &mut MoveDirection, &Transform, &State, &DotCounter), With<G>>,
 ) {
-    for (mut target, mut direction, transform, state) in query.iter_mut() {
+    for (mut target, mut direction, transform, state, dot_counter) in query.iter_mut() {
         target_skip_if!(target set);
         state_skip_if!(state != State::Spawned);
-        let coordinates = transform.translation;
-        let center = ghost_house.center_coordinates();
-        let respawn = ghost_house.respawn_coordinates_of::<G>();
 
-        if coordinates == center {
-            *direction = Up;
-            target.set(ghost_house.coordinates_in_front_of_entrance());
-        } else if coordinates == respawn {
-            *direction = match respawn.x < center.x {
-                true => Right,
-                false => Left
-            };
-            target.set(ghost_house.center_coordinates());
+        if dot_counter.is_active() {
+            let coordinates = transform.translation;
+            let respawn = ghost_house.respawn_coordinates_of::<G>();
+            let above_respawn = Vec3::new(respawn.x, respawn.y + FIELD_DIMENSION / 2.0, 0.0);
+            let below_respawn = Vec3::new(respawn.x, respawn.y - FIELD_DIMENSION / 2.0, 0.0);
+
+            if coordinates == respawn {
+                match *direction {
+                    Up => target.set(above_respawn),
+                    _ => target.set(below_respawn)
+                };
+            } else if coordinates == above_respawn {
+                target.set(below_respawn);
+                *direction = Down
+            } else if coordinates == below_respawn {
+                target.set(above_respawn);
+                *direction = Up
+            }
+        } else {
+            let coordinates = transform.translation;
+            let center = ghost_house.center_coordinates();
+            let respawn = ghost_house.respawn_coordinates_of::<G>();
+
+            if coordinates.x == center.x {
+                *direction = Up;
+                target.set(ghost_house.coordinates_in_front_of_entrance());
+            } else if coordinates.x == respawn.x {
+                *direction = match respawn.x < center.x {
+                    true => Right,
+                    false => Left
+                };
+                target.set(Vec3::new(center.x, coordinates.y, 0.0));
+            }
         }
     }
 }

@@ -9,7 +9,7 @@ use crate::ghosts::target::Target;
 use crate::pacman::Pacman;
 use crate::common::MoveDirection::*;
 use crate::ghost_house::GhostHouse;
-use crate::ghosts::{Blinky, Clyde, Ghost, GhostType, Inky, Pinky};
+use crate::ghosts::{Blinky, Clyde, DotCounter, Ghost, GhostType, Inky, Pinky};
 use crate::level::Level;
 use crate::ghosts::schedule::Schedule;
 use crate::state_skip_if;
@@ -83,10 +83,13 @@ impl FrightenedTimer {
 fn update_spawned_state(
     schedule: Res<Schedule>,
     ghost_house: Res<GhostHouse>,
-    mut query: Query<(&mut MoveDirection, &mut State, &Transform)>,
+    mut query: Query<(&mut MoveDirection, &mut State, &Transform, &DotCounter)>,
 ) {
-    for (mut direction, mut state, transform) in query.iter_mut() {
+    for (mut direction, mut state, transform, dot_counter) in query.iter_mut() {
         state_skip_if!(state != State::Spawned);
+
+        if dot_counter.is_active() { continue; }
+
         let coordinates = transform.translation;
 
         if coordinates == ghost_house.coordinates_in_front_of_entrance() {
