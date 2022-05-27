@@ -12,6 +12,7 @@ impl Plugin for GhostCornersPlugin {
     }
 }
 
+// TODO: As the amount of corners does not change during the game, a resource might fit better
 #[derive(Component)]
 pub struct GhostCorner;
 

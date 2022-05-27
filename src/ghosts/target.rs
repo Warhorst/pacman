@@ -2,16 +2,17 @@ use std::cmp::Ordering;
 
 use bevy::prelude::*;
 
-use crate::ghosts::GhostType;
 use crate::common::{Neighbour, Position};
 use crate::common::MoveDirection;
 use crate::common::MoveDirection::*;
 use crate::ghost_corners::GhostCorner;
 use crate::ghost_house::{GhostHouse, GhostHousePositions};
 use crate::ghosts::{Blinky, Clyde, Inky, Pinky};
-use crate::ghosts::state::{Chase, Eaten, Frightened, Scatter, Spawned};
+use crate::ghosts::GhostType;
+use crate::ghosts::state::State;
 use crate::pacman::Pacman;
 use crate::random::Random;
+use crate::skip_if;
 use crate::walls::WallPositions;
 
 #[derive(Component, Deref, DerefMut)]
@@ -44,9 +45,10 @@ impl Plugin for TargetPlugin {
 fn set_spawned_target<G: GhostType + Component + 'static>(
     mut commands: Commands,
     ghost_house: Res<GhostHouse>,
-    mut query: Query<(Entity, &mut MoveDirection, &Transform), (With<G>, With<Spawned>, Without<Frightened>, Without<Eaten>, Without<Target>)>,
+    mut query: Query<(Entity, &mut MoveDirection, &Transform, &State), (With<G>, Without<Target>)>,
 ) {
-    for (entity, mut direction, transform) in query.iter_mut() {
+    for (entity, mut direction, transform, state) in query.iter_mut() {
+        skip_if!(state != State::Spawned);
         let coordinates = transform.translation;
         let center = ghost_house.center_coordinates();
         let respawn = ghost_house.respawn_coordinates_of::<G>();
@@ -68,10 +70,11 @@ fn set_scatter_target<G: Component>(
     mut commands: Commands,
     wall_positions: Res<WallPositions>,
     ghost_house_positions: Res<GhostHousePositions>,
-    mut ghost_query: Query<(Entity, &mut MoveDirection, &Position), (With<G>, With<Scatter>, Without<Frightened>, Without<Eaten>, Without<Spawned>, Without<Target>)>,
+    mut ghost_query: Query<(Entity, &mut MoveDirection, &Position, &State), (With<G>, Without<Target>)>,
     corner_query: Query<&Position, (With<G>, With<GhostCorner>)>,
 ) {
-    for (entity, mut direction, position) in ghost_query.iter_mut() {
+    for (entity, mut direction, position, state) in ghost_query.iter_mut() {
+        skip_if!(state != State::Scatter);
         let nearest_corner = position.get_nearest_from(corner_query.iter());
 
         let next_target_neighbour = position.get_neighbours()
@@ -90,10 +93,11 @@ fn set_blinky_chase_target(
     mut commands: Commands,
     wall_positions: Res<WallPositions>,
     ghost_house_positions: Res<GhostHousePositions>,
-    mut blinky_query: Query<(Entity, &mut MoveDirection, &Position), (With<Blinky>, With<Chase>, Without<Frightened>, Without<Eaten>, Without<Spawned>, Without<Target>)>,
+    mut blinky_query: Query<(Entity, &mut MoveDirection, &Position, &State), (With<Blinky>, Without<Target>)>,
     pacman_query: Query<&Position, With<Pacman>>,
 ) {
-    for (entity, mut direction, blinky_position) in blinky_query.iter_mut() {
+    for (entity, mut direction, blinky_position, state) in blinky_query.iter_mut() {
+        skip_if!(state != State::Chase);
         for pacman_position in pacman_query.iter() {
             let next_target_neighbour = blinky_position.get_neighbours()
                 .into_iter()
@@ -113,10 +117,11 @@ fn set_pinky_chase_target(
     mut commands: Commands,
     wall_positions: Res<WallPositions>,
     ghost_house_positions: Res<GhostHousePositions>,
-    mut pinky_query: Query<(Entity, &mut MoveDirection, &Position), (With<Pinky>, With<Chase>, Without<Frightened>, Without<Eaten>, Without<Spawned>, Without<Pacman>, Without<Target>)>,
+    mut pinky_query: Query<(Entity, &mut MoveDirection, &Position, &State), (With<Pinky>, Without<Pacman>, Without<Target>)>,
     pacman_query: Query<(&Position, &MoveDirection), With<Pacman>>,
 ) {
-    for (entity, mut pinky_direction, pinky_position) in pinky_query.iter_mut() {
+    for (entity, mut pinky_direction, pinky_position, state) in pinky_query.iter_mut() {
+        skip_if!(state != State::Chase);
         for (pacman_position, pacman_direction) in pacman_query.iter() {
             let pinky_target_pos = calculate_pinky_target_position(pacman_position, pacman_direction);
 
@@ -154,9 +159,10 @@ fn set_frightened_target(
     wall_positions: Res<WallPositions>,
     ghost_house_positions: Res<GhostHousePositions>,
     random: Res<Random>,
-    mut query: Query<(Entity, &mut MoveDirection, &Position), (With<Frightened>, Without<Eaten>, Without<Spawned>, Without<Target>)>,
+    mut query: Query<(Entity, &mut MoveDirection, &Position, &State), Without<Target>>,
 ) {
-    for (entity, mut direction, position) in query.iter_mut() {
+    for (entity, mut direction, position, state) in query.iter_mut() {
+        skip_if!(state != State::Frightened);
         let possible_neighbours = position.get_neighbours()
             .into_iter()
             .filter(|n| n.direction != direction.opposite())
@@ -177,18 +183,14 @@ fn set_eaten_target<G: Component + GhostType + 'static>(
     mut commands: Commands,
     ghost_house: Res<GhostHouse>,
     wall_positions: Res<WallPositions>,
-    mut query: Query<(Entity, &mut MoveDirection, &Position, &Transform), (With<G>, With<Eaten>, Without<Frightened>, Without<Spawned>, Without<Target>)>,
+    mut query: Query<(Entity, &mut MoveDirection, &Position, &Transform, &State), (With<G>, Without<Target>)>,
 ) {
-    for (entity, mut direction, position, transform) in query.iter_mut() {
+    for (entity, mut direction, position, transform, state) in query.iter_mut() {
+        skip_if!(state != State::Eaten);
         let coordinates = transform.translation;
         let center = ghost_house.center_coordinates();
         let respawn = ghost_house.respawn_coordinates_of::<G>();
         let in_front_of_house = ghost_house.coordinates_in_front_of_entrance();
-
-        if coordinates == respawn {
-            // TODO: Bad. I need to this because the state changes at the next frame
-            return;
-        }
 
         if coordinates == in_front_of_house {
             *direction = Down;

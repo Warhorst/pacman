@@ -3,8 +3,8 @@ use bevy::prelude::*;
 use bevy::utils::Duration;
 use crate::ghosts::state::FrightenedTimer;
 use crate::level::Level;
-
-use self::State::*;
+use crate::ghosts::state::State;
+use crate::ghosts::state::State::*;
 
 pub(super) struct SchedulePlugin;
 
@@ -66,54 +66,46 @@ fn update_schedule(
 
 fn level_one_schedule() -> Schedule {
     let mut phases = Vec::new();
-    phases.push(Phase::for_duration(ScatterState, 7.0));
-    phases.push(Phase::for_duration(ChaseState, 20.0));
-    phases.push(Phase::for_duration(ScatterState, 7.0));
-    phases.push(Phase::for_duration(ChaseState, 20.0));
-    phases.push(Phase::for_duration(ScatterState, 5.0));
-    phases.push(Phase::for_duration(ChaseState, 1033.0));
-    phases.push(Phase::for_duration(ScatterState, 1.0 / 60.0));
-    phases.push(Phase::infinite(ChaseState));
+    phases.push(Phase::for_duration(Scatter, 7.0));
+    phases.push(Phase::for_duration(Chase, 20.0));
+    phases.push(Phase::for_duration(Scatter, 7.0));
+    phases.push(Phase::for_duration(Chase, 20.0));
+    phases.push(Phase::for_duration(Scatter, 5.0));
+    phases.push(Phase::for_duration(Chase, 1033.0));
+    phases.push(Phase::for_duration(Scatter, 1.0 / 60.0));
+    phases.push(Phase::infinite(Chase));
     Schedule::new(phases)
 }
 
 fn level_two_to_four_schedule() -> Schedule {
     let mut phases = Vec::new();
-    phases.push(Phase::for_duration(ScatterState, 5.0));
-    phases.push(Phase::for_duration(ChaseState, 20.0));
-    phases.push(Phase::for_duration(ScatterState, 5.0));
-    phases.push(Phase::for_duration(ChaseState, 20.0));
-    phases.push(Phase::for_duration(ScatterState, 5.0));
-    phases.push(Phase::for_duration(ChaseState, 1037.0));
-    phases.push(Phase::for_duration(ScatterState, 1.0 / 60.0));
-    phases.push(Phase::infinite(ChaseState));
+    phases.push(Phase::for_duration(Scatter, 5.0));
+    phases.push(Phase::for_duration(Chase, 20.0));
+    phases.push(Phase::for_duration(Scatter, 5.0));
+    phases.push(Phase::for_duration(Chase, 20.0));
+    phases.push(Phase::for_duration(Scatter, 5.0));
+    phases.push(Phase::for_duration(Chase, 1037.0));
+    phases.push(Phase::for_duration(Scatter, 1.0 / 60.0));
+    phases.push(Phase::infinite(Chase));
     Schedule::new(phases)
 }
 
 fn level_five_plus_schedule() -> Schedule {
     let mut phases = Vec::new();
-    phases.push(Phase::for_duration(ScatterState, 7.0));
-    phases.push(Phase::for_duration(ChaseState, 20.0));
-    phases.push(Phase::for_duration(ScatterState, 7.0));
-    phases.push(Phase::for_duration(ChaseState, 20.0));
-    phases.push(Phase::for_duration(ScatterState, 5.0));
-    phases.push(Phase::for_duration(ChaseState, 20.0));
-    phases.push(Phase::for_duration(ScatterState, 5.0));
-    phases.push(Phase::infinite(ChaseState));
+    phases.push(Phase::for_duration(Scatter, 7.0));
+    phases.push(Phase::for_duration(Chase, 20.0));
+    phases.push(Phase::for_duration(Scatter, 7.0));
+    phases.push(Phase::for_duration(Chase, 20.0));
+    phases.push(Phase::for_duration(Scatter, 5.0));
+    phases.push(Phase::for_duration(Chase, 20.0));
+    phases.push(Phase::for_duration(Scatter, 5.0));
+    phases.push(Phase::infinite(Chase));
     Schedule::new(phases)
 }
 
 /// Indicates that a new state is active
 #[derive(Deref, DerefMut)]
 pub struct ScheduleChanged(State);
-
-/// Spawned - just spawned, try to leave the spawn area
-/// Chase - use your hunting strategy to kill pacman
-#[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]
-pub enum State {
-    ChaseState,
-    ScatterState,
-}
 
 pub struct ScheduleByLevel {
     ranges: Vec<LevelScheduleRange>,

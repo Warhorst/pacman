@@ -5,7 +5,7 @@ use crate::common::MoveDirection::*;
 use crate::constants::GHOST_DIMENSION;
 use crate::ghost_house::GhostHouse;
 use crate::ghosts::{Blinky, Clyde, Ghost, Inky, Pinky};
-use crate::ghosts::state::Spawned;
+use crate::ghosts::state::State;
 use crate::level::Level;
 use crate::map::board::Board;
 use crate::speed::SpeedByLevel;
@@ -48,5 +48,5 @@ fn spawn_ghost(
         .insert(Position::from(&spawn_coordinates))
         .insert(Left)
         .insert(speed_by_level.for_ghosts(level).normal)
-        .insert(Spawned);
+        .insert(State::Spawned);
 }

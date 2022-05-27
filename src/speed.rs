@@ -3,10 +3,11 @@ use bevy::prelude::*;
 use crate::common::Position;
 use crate::constants::{GHOST_SPEED, PACMAN_SPEED};
 use crate::ghosts::Ghost;
-use crate::ghosts::state::{Frightened, FrightenedTimer};
+use crate::ghosts::state::FrightenedTimer;
 use crate::level::Level;
 use crate::pacman::Pacman;
 use crate::tunnels::spawn::TunnelPositions;
+use crate::ghosts::state::State;
 
 pub struct SpeedPlugin;
 
@@ -14,8 +15,7 @@ impl Plugin for SpeedPlugin {
     fn build(&self, app: &mut App) {
         app
             .insert_resource(SpeedByLevel::new())
-            .add_system(update_normal_ghost_speed)
-            .add_system(update_frightened_ghost_speed)
+            .add_system(update_ghost_speed)
             .add_system(update_pacman_speed)
         ;
     }
@@ -134,36 +134,21 @@ pub struct GhostSpeed {
     pub tunnel: Speed
 }
 
-fn update_normal_ghost_speed(
+fn update_ghost_speed(
     tunnel_positions: Res<TunnelPositions>,
     level: Res<Level>,
     speed_by_level: Res<SpeedByLevel>,
-    mut query: Query<(&Position, &mut Speed), (With<Ghost>, Without<Frightened>)>
+    mut query: Query<(&Position, &mut Speed, &State), With<Ghost>>
 ) {
-    for (position, mut speed) in query.iter_mut() {
+    for (position, mut speed, state) in query.iter_mut() {
         let ghost_speed = speed_by_level.for_ghosts(&level);
 
         if tunnel_positions.contains(position) {
             *speed = ghost_speed.tunnel;
+        } else if *state == State::Frightened {
+            *speed = ghost_speed.frightened
         } else {
             *speed = ghost_speed.normal
-        }
-    }
-}
-
-fn update_frightened_ghost_speed(
-    tunnel_positions: Res<TunnelPositions>,
-    level: Res<Level>,
-    speed_by_level: Res<SpeedByLevel>,
-    mut query: Query<(&Position, &mut Speed), (With<Ghost>, With<Frightened>)>
-) {
-    for (position, mut speed) in query.iter_mut() {
-        let ghost_speed = speed_by_level.for_ghosts(&level);
-
-        if tunnel_positions.contains(position) {
-            *speed = ghost_speed.tunnel;
-        } else  {
-            *speed = ghost_speed.frightened
         }
     }
 }
