@@ -2,8 +2,8 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 
-use crate::common::{MoveDirection, Position};
-use crate::common::MoveDirection::*;
+use crate::common::{Direction, Position};
+use crate::common::Direction::*;
 use crate::dots::DotEaten;
 use crate::ghosts::Ghost;
 use crate::ghosts::state::State;
@@ -77,7 +77,7 @@ impl Plugin for PacmanPlugin {
 
 fn set_direction_based_on_keyboard_input(
     keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<&mut MoveDirection, With<Pacman>>,
+    mut query: Query<&mut Direction, With<Pacman>>,
 ) {
     for mut direction in query.iter_mut() {
         if keyboard_input.pressed(KeyCode::Left) {
@@ -101,7 +101,7 @@ fn set_direction_based_on_keyboard_input(
 fn set_direction_based_on_keyboard_input_when_pacman_is_still(
     mut commands: Commands,
     keyboard_input: Res<Input<KeyCode>>,
-    query: Query<Entity, (With<Pacman>, Without<MoveDirection>)>
+    query: Query<Entity, (With<Pacman>, Without<Direction>)>
 ) {
     for entity in query.iter() {
         if keyboard_input.pressed(KeyCode::Left) {

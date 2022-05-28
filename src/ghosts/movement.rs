@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
-use crate::common::{MoveDirection, Position};
-use crate::common::MoveDirection::*;
+use crate::common::{Direction, Position};
+use crate::common::Direction::*;
 use crate::ghosts::target::{Target, TargetSetter};
 use crate::speed::Speed;
 use crate::target_skip_if;
@@ -16,7 +16,7 @@ impl Plugin for MovePlugin {
 
 fn move_ghost(
     time: Res<Time>,
-    mut query: Query<(&MoveDirection, &mut Position, &mut Target, &mut Transform, &Speed)>,
+    mut query: Query<(&Direction, &mut Position, &mut Target, &mut Transform, &Speed)>,
 ) {
     for (direction, mut position, mut target, mut transform, speed) in query.iter_mut() {
         target_skip_if!(target not set);
@@ -36,13 +36,13 @@ fn move_ghost(
     }
 }
 
-fn move_in_direction(coordinates: &mut Vec3, delta_seconds: f32, direction: &MoveDirection, speed: &Speed) {
+fn move_in_direction(coordinates: &mut Vec3, delta_seconds: f32, direction: &Direction, speed: &Speed) {
     let (x, y) = get_direction_modifiers(direction);
     coordinates.x += delta_seconds * x * **speed;
     coordinates.y += delta_seconds * y * **speed;
 }
 
-fn get_direction_modifiers(direction: &MoveDirection) -> (f32, f32) {
+fn get_direction_modifiers(direction: &Direction) -> (f32, f32) {
     match direction {
         Up => (0.0, 1.0),
         Down => (0.0, -1.0),
@@ -52,7 +52,7 @@ fn get_direction_modifiers(direction: &MoveDirection) -> (f32, f32) {
 }
 
 /// The ghost should not move over its target.
-fn limit_movement(coordinates: &mut Vec3, direction: &MoveDirection, target_coordinates: &Vec3) {
+fn limit_movement(coordinates: &mut Vec3, direction: &Direction, target_coordinates: &Vec3) {
     match direction {
         Up => coordinates.y = coordinates.y.min(target_coordinates.y),
         Down => coordinates.y = coordinates.y.max(target_coordinates.y),
@@ -61,7 +61,7 @@ fn limit_movement(coordinates: &mut Vec3, direction: &MoveDirection, target_coor
     }
 }
 
-fn on_target(coordinates: Vec3, target: Vec3, direction: &MoveDirection) -> bool {
+fn on_target(coordinates: Vec3, target: Vec3, direction: &Direction) -> bool {
     match direction {
         Up | Down => coordinates.y == target.y,
         Left | Right => coordinates.x == target.x

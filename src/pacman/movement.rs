@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 use bevy::ecs::query::WorldQuery;
 
-use crate::common::MoveDirection;
-use crate::common::MoveDirection::*;
+use crate::common::Direction;
+use crate::common::Direction::*;
 use crate::common::Position;
 use crate::constants::{PACMAN_DIMENSION, WALL_DIMENSION};
 use crate::is;
@@ -14,7 +14,7 @@ use crate::speed::Speed;
 #[derive(WorldQuery)]
 #[world_query(mutable)]
 pub struct MoveComponents<'a> {
-    direction: &'a MoveDirection,
+    direction: &'a Direction,
     position: &'a mut Position,
     transform: &'a mut Transform,
     speed: &'a Speed
@@ -51,7 +51,7 @@ fn calculate_new_coordinates(move_components: &mut MoveComponentsItem, delta_sec
     new_coordinates
 }
 
-fn get_modifiers_for_direction(direction: &MoveDirection) -> (f32, f32) {
+fn get_modifiers_for_direction(direction: &Direction) -> (f32, f32) {
     match direction {
         Up => (0.0, 1.0),
         Down => (0.0, -1.0),
@@ -61,7 +61,7 @@ fn get_modifiers_for_direction(direction: &MoveDirection) -> (f32, f32) {
 }
 
 /// Determine if pacman will collide with an obstacle if he is going further in his current direction.
-fn is_going_to_collide_with_obstacle(board: &Board, direction: &MoveDirection, new_position: &Position, new_coordinates: &Vec3) -> bool {
+fn is_going_to_collide_with_obstacle(board: &Board, direction: &Direction, new_position: &Position, new_coordinates: &Vec3) -> bool {
     let pos_in_direction = new_position.neighbour_position(direction);
 
     if position_is_obstacle(board, &pos_in_direction) {
@@ -74,7 +74,7 @@ fn is_going_to_collide_with_obstacle(board: &Board, direction: &MoveDirection, n
 /// Determines if pacmans current coordinates are in the center of his current position. The center of the position is
 /// its middle point with the width/height of the accumulated distance between pacman and the walls.
 /// Assumes pacman is larger than a wall.
-pub fn are_coordinates_in_field_center(direction: &MoveDirection, position: &Position, coordinates: &Vec3, entity_dimension: f32) -> bool {
+pub fn are_coordinates_in_field_center(direction: &Direction, position: &Position, coordinates: &Vec3, entity_dimension: f32) -> bool {
     let position_coordinates = Vec3::from(position);
     let entity_wall_distance = match entity_dimension > WALL_DIMENSION {
         true => entity_dimension - WALL_DIMENSION,
@@ -100,13 +100,13 @@ fn position_is_obstacle(board: &Board, position: &Position) -> bool {
 }
 
 /// Limit pacmans movement if he reached an obstacle and stop him.
-fn process_collision(direction: &MoveDirection, new_position: &Position, new_coordinates: &mut Vec3) {
+fn process_collision(direction: &Direction, new_position: &Position, new_coordinates: &mut Vec3) {
     let field_coordinates = Vec3::from(new_position);
     limit_movement(direction, &field_coordinates, new_coordinates);
 }
 
 /// Because the next field is an obstacle, pacman can not go beyond his current field.
-fn limit_movement(direction: &MoveDirection, field_coordinates: &Vec3, new_coordinates: &mut Vec3) {
+fn limit_movement(direction: &Direction, field_coordinates: &Vec3, new_coordinates: &mut Vec3) {
     match direction {
         Up => new_coordinates.y = new_coordinates.y.min(field_coordinates.y),
         Down => new_coordinates.y = new_coordinates.y.max(field_coordinates.y),
@@ -117,7 +117,7 @@ fn limit_movement(direction: &MoveDirection, field_coordinates: &Vec3, new_coord
 
 /// Center pacmans current position in the middle of his current field.
 /// The purpose of this method is to keep equally sized gaps to the hallway pacman is currently passing.
-fn center_position(direction: &MoveDirection, new_position: &Position, new_coordinates: &mut Vec3) {
+fn center_position(direction: &Direction, new_position: &Position, new_coordinates: &mut Vec3) {
     let position_coordinates = Vec3::from(new_position);
     match direction {
         Up | Down => new_coordinates.x = position_coordinates.x,

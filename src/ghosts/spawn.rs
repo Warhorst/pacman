@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::common::Position;
-use crate::common::MoveDirection::*;
+use crate::common::Direction::*;
 use crate::constants::GHOST_DIMENSION;
 use crate::ghost_house::GhostHouse;
 use crate::ghosts::{Blinky, Clyde, DotCounter, Ghost, Inky, Pinky};

@@ -2,12 +2,12 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 
-use crate::common::{MoveDirection, Position};
+use crate::common::{Direction, Position};
 use crate::energizer::EnergizerEaten;
 use crate::ghosts::schedule::ScheduleChanged;
 use crate::ghosts::target::Target;
 use crate::pacman::Pacman;
-use crate::common::MoveDirection::*;
+use crate::common::Direction::*;
 use crate::ghost_house::GhostHouse;
 use crate::ghosts::{Blinky, Clyde, DotCounter, Ghost, GhostType, Inky, Pinky};
 use crate::level::Level;
@@ -83,7 +83,7 @@ impl FrightenedTimer {
 fn update_spawned_state(
     schedule: Res<Schedule>,
     ghost_house: Res<GhostHouse>,
-    mut query: Query<(&mut MoveDirection, &mut State, &Transform, &DotCounter)>,
+    mut query: Query<(&mut Direction, &mut State, &Transform, &DotCounter)>,
 ) {
     for (mut direction, mut state, transform, dot_counter) in query.iter_mut() {
         state_skip_if!(state != State::Spawned);
@@ -94,14 +94,14 @@ fn update_spawned_state(
 
         if coordinates == ghost_house.coordinates_in_front_of_entrance() {
             *state = schedule.current_state();
-            *direction = Left;
+            *direction = ghost_house.entrance_direction.rotate_left();
         }
     }
 }
 
 fn update_chase_and_scatter_state(
     mut event_reader: EventReader<ScheduleChanged>,
-    mut query: Query<(&mut MoveDirection, &mut Target, &mut State, &Transform), With<Ghost>>,
+    mut query: Query<(&mut Direction, &mut Target, &mut State, &Transform), With<Ghost>>,
 ) {
     if event_reader.is_empty() { return; }
 
@@ -177,7 +177,7 @@ fn set_frightened_when_pacman_ate_energizer(
     mut commands: Commands,
     level: Res<Level>,
     event_reader: EventReader<EnergizerEaten>,
-    mut query: Query<(&mut MoveDirection, &mut Target, &mut State, &Transform), With<Ghost>>,
+    mut query: Query<(&mut Direction, &mut Target, &mut State, &Transform), With<Ghost>>,
 ) {
     if event_reader.is_empty() { return; }
 
@@ -216,8 +216,19 @@ fn set_eaten_when_hit_by_pacman(
 
 #[macro_export]
 macro_rules! state_skip_if {
+    ($components:ident.$state:ident = $pattern:pat) => {
+        if let $pattern = *$components.$state { continue; }
+    };
+
     ($state:ident = $pattern:pat) => {
         if let $pattern = *$state { continue; }
+    };
+
+    ($components:ident.$state:ident != $pattern:pat) => {
+        match *$components.$state {
+            $pattern => (),
+            _ => continue
+        }
     };
 
     ($state:ident != $pattern:pat) => {

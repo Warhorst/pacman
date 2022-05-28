@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::common::{MoveDirection, Position};
+use crate::common::{Direction, Position};
 use crate::tunnels::movement::{move_ghost_trough_tunnel, move_pacman_through_tunnel};
 use crate::tunnels::spawn::spawn_tunnels;
 
@@ -38,5 +38,5 @@ pub struct GhostPassedTunnel(pub Entity);
 #[derive(Copy, Clone, Debug)]
 struct TunnelEntrance {
     position: Position,
-    entrance_direction: MoveDirection,
+    entrance_direction: Direction,
 }

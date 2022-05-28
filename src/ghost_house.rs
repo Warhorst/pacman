@@ -7,6 +7,7 @@ use crate::map::board::Board;
 use map::Element;
 use map::Element::*;
 use crate::ghosts::{Blinky, Clyde, GhostType, Inky, Pinky};
+use crate::common::Direction;
 
 pub struct GhostHousePlugin;
 
@@ -39,8 +40,13 @@ impl Plugin for GhostHousePlugin {
 /// E = Entrance
 /// H = House
 /// W = Wall
+///
+// TODO: it might not be possible to destructure the ghost house anymore. But it might be possible in the
+//  future to rotate it. Therefore, everyone accessing the house acts relative to the house (like respecting the entrance direction).
 pub struct GhostHouse {
+    pub entrance_direction: Direction,
     pub entrance_positions: HashSet<Position>,
+    pub house_positions: HashSet<Position>,
     spawns: HashMap<TypeId, Spawn>,
 }
 
@@ -50,7 +56,7 @@ impl GhostHouse {
         let ghost_house_positions = board.get_positions_matching(is!(Element::GhostHouse));
         let top_right = ghost_house_positions
             .iter()
-            .fold(Position::new(0, 0), |acc, pos| Position::new(isize::max(acc.x, pos.x), isize::max(acc.y, pos.y)));
+            .fold(Position::new(isize::MIN, isize::MIN), |acc, pos| Position::new(isize::max(acc.x, pos.x), isize::max(acc.y, pos.y)));
         Self::assert_positions_valid(&top_right, &entrance_positions, &ghost_house_positions);
 
         let mut spawns = HashMap::with_capacity(4);
@@ -60,7 +66,9 @@ impl GhostHouse {
         spawns.insert(TypeId::of::<Clyde>(), Self::create_clyde_spawn(&top_right));
 
         GhostHouse {
+            entrance_direction: Direction::Up,
             entrance_positions: HashSet::from_iter(entrance_positions.into_iter().map(|p| *p)),
+            house_positions: HashSet::from_iter(ghost_house_positions.into_iter().map(|p| *p)),
             spawns
         }
     }

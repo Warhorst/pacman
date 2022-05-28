@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use crate::common::Position;
-use crate::common::MoveDirection::*;
+use crate::common::Direction::*;
 
 use crate::constants::PACMAN_DIMENSION;
 use crate::is;

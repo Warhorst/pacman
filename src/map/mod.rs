@@ -5,7 +5,7 @@ use bevy::utils::HashSet;
 
 use serde::{Deserialize, Serialize};
 
-use crate::common::{MoveDirection, Position};
+use crate::common::{Direction, Position};
 use crate::map::board::Board;
 
 pub mod board;
@@ -53,7 +53,7 @@ pub enum Element {
     ClydeCorner,
     Tunnel {
         index: usize,
-        opening_direction: MoveDirection,
+        opening_direction: Direction,
     },
     TunnelEntrance,
     TunnelHallway,
@@ -102,7 +102,7 @@ mod tests {
     use std::fs::{File, OpenOptions};
     use std::io::Write;
 
-    use crate::common::{MoveDirection, Position};
+    use crate::common::{Direction, Position};
     use crate::map::{Element, Field, Map, Rotation, WallType};
     use crate::map::Element::*;
 
@@ -565,14 +565,14 @@ mod tests {
     fn tunnel_right() -> Vec<Vec<Element>> {
         vec![vec![Tunnel {
             index: 0,
-            opening_direction: MoveDirection::Right,
+            opening_direction: Direction::Right,
         }]]
     }
 
     fn tunnel_left() -> Vec<Vec<Element>> {
         vec![vec![Tunnel {
             index: 0,
-            opening_direction: MoveDirection::Left,
+            opening_direction: Direction::Left,
         }]]
     }
 }

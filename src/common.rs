@@ -2,7 +2,7 @@ use std::fmt::Formatter;
 use serde::{Serialize, Deserialize};
 use bevy::prelude::*;
 
-use crate::common::MoveDirection::*;
+use crate::common::Direction::*;
 use crate::constants::FIELD_DIMENSION;
 
 #[derive(Copy, Clone, Component, Deserialize, Hash, Debug, Eq, PartialEq, Serialize)]
@@ -37,7 +37,7 @@ impl Position {
         x_diff.pow(2) + y_diff.pow(2)
     }
     
-    pub fn neighbour_position(&self, direction: &MoveDirection) -> Position {
+    pub fn neighbour_position(&self, direction: &Direction) -> Position {
         match direction {
             Up => Position::new(self.x, self.y + 1),
             Down => Position::new(self.x, self.y - 1),
@@ -46,7 +46,7 @@ impl Position {
         }
     }
 
-    pub fn get_neighbour_in_direction(&self, direction: &MoveDirection) -> Neighbour {
+    pub fn get_neighbour_in_direction(&self, direction: &Direction) -> Neighbour {
         match direction {
             Up => Neighbour::new(Position::new(self.x, self.y + 1), *direction),
             Down => Neighbour::new(Position::new(self.x, self.y - 1), *direction),
@@ -55,13 +55,13 @@ impl Position {
         }
     }
 
-    pub fn neighbour_behind(&self, direction: &MoveDirection) -> Neighbour {
+    pub fn neighbour_behind(&self, direction: &Direction) -> Neighbour {
         self.get_neighbour_in_direction(&direction.opposite())
     }
 
     /// Return the direction where to find the other position when neighbored.
     /// If not neighbored, return None.
-    pub fn get_neighbour_direction(&self, other: &Position) -> Option<MoveDirection> {
+    pub fn get_neighbour_direction(&self, other: &Position) -> Option<Direction> {
         self.get_neighbours()
             .into_iter()
             .filter(|n| &n.position == other)
@@ -141,30 +141,48 @@ impl std::fmt::Display for Position {
 #[derive(Copy, Clone)]
 pub struct Neighbour {
     pub position: Position,
-    pub direction: MoveDirection
+    pub direction: Direction
 }
 
 impl Neighbour {
-    pub fn new(position: Position, direction: MoveDirection) -> Self {
+    pub fn new(position: Position, direction: Direction) -> Self {
         Self { position, direction }
     }
 }
 
 #[derive(Copy, Clone, Component, Deserialize, Debug, Eq, PartialEq, PartialOrd, Serialize)]
-pub enum MoveDirection {
+pub enum Direction {
     Up,
     Down,
     Left,
     Right,
 }
 
-impl MoveDirection {
-    pub fn opposite(&self) -> MoveDirection {
+impl Direction {
+    pub fn opposite(&self) -> Direction {
         match self {
             Up => Down,
             Down => Up,
             Right => Left,
             Left => Right
+        }
+    }
+
+    pub fn rotate_right(&self) -> Direction {
+        match self {
+            Up => Right,
+            Right => Down,
+            Down => Left,
+            Left => Up
+        }
+    }
+
+    pub fn rotate_left(&self) -> Direction {
+        match self {
+            Up => Left,
+            Left => Down,
+            Down => Right,
+            Right => Up
         }
     }
 

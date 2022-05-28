@@ -3,19 +3,22 @@ use std::cmp::Ordering;
 use bevy::prelude::*;
 
 use crate::common::{Neighbour, Position};
-use crate::common::MoveDirection;
-use crate::common::MoveDirection::*;
-use crate::constants::FIELD_DIMENSION;
+use crate::common::Direction;
+use crate::common::Direction::*;
 use crate::ghost_corners::GhostCorner;
-use crate::ghost_house::{GhostHouse, GhostHousePositions};
-use crate::ghosts::{Blinky, Clyde, DotCounter, Inky, Pinky};
-use crate::ghosts::GhostType;
+use crate::ghost_house::GhostHousePositions;
+use crate::ghosts::{Blinky, Clyde, Inky, Pinky};
 use crate::ghosts::state::{State, StateSetter};
+use crate::ghosts::target::eaten::set_eaten_target;
+use crate::ghosts::target::spawned::set_spawned_target;
 use crate::pacman::Pacman;
 use crate::random::Random;
 use crate::state_skip_if;
 use crate::target_skip_if;
 use crate::walls::WallPositions;
+
+mod spawned;
+mod eaten;
 
 pub struct TargetPlugin;
 
@@ -84,56 +87,10 @@ impl Target {
     }
 }
 
-// TODO: refactor
-fn set_spawned_target<G: GhostType + Component + 'static>(
-    ghost_house: Res<GhostHouse>,
-    mut query: Query<(&mut Target, &mut MoveDirection, &Transform, &State, &DotCounter), With<G>>,
-) {
-    for (mut target, mut direction, transform, state, dot_counter) in query.iter_mut() {
-        target_skip_if!(target set);
-        state_skip_if!(state != State::Spawned);
-
-        if dot_counter.is_active() {
-            let coordinates = transform.translation;
-            let respawn = ghost_house.respawn_coordinates_of::<G>();
-            let above_respawn = Vec3::new(respawn.x, respawn.y + FIELD_DIMENSION / 2.0, 0.0);
-            let below_respawn = Vec3::new(respawn.x, respawn.y - FIELD_DIMENSION / 2.0, 0.0);
-
-            if coordinates == respawn {
-                match *direction {
-                    Up => target.set(above_respawn),
-                    _ => target.set(below_respawn)
-                };
-            } else if coordinates == above_respawn {
-                target.set(below_respawn);
-                *direction = Down
-            } else if coordinates == below_respawn {
-                target.set(above_respawn);
-                *direction = Up
-            }
-        } else {
-            let coordinates = transform.translation;
-            let center = ghost_house.center_coordinates();
-            let respawn = ghost_house.respawn_coordinates_of::<G>();
-
-            if coordinates.x == center.x {
-                *direction = Up;
-                target.set(ghost_house.coordinates_in_front_of_entrance());
-            } else if coordinates.x == respawn.x {
-                *direction = match respawn.x < center.x {
-                    true => Right,
-                    false => Left
-                };
-                target.set(Vec3::new(center.x, coordinates.y, 0.0));
-            }
-        }
-    }
-}
-
 fn set_scatter_target<G: Component>(
     wall_positions: Res<WallPositions>,
     ghost_house_positions: Res<GhostHousePositions>,
-    mut ghost_query: Query<(&mut Target, &mut MoveDirection, &Position, &State), With<G>>,
+    mut ghost_query: Query<(&mut Target, &mut Direction, &Position, &State), With<G>>,
     corner_query: Query<&Position, (With<G>, With<GhostCorner>)>,
 ) {
     for (mut target, mut direction, position, state) in ghost_query.iter_mut() {
@@ -156,7 +113,7 @@ fn set_scatter_target<G: Component>(
 fn set_blinky_chase_target(
     wall_positions: Res<WallPositions>,
     ghost_house_positions: Res<GhostHousePositions>,
-    mut blinky_query: Query<(&mut Target, &mut MoveDirection, &Position, &State), With<Blinky>>,
+    mut blinky_query: Query<(&mut Target, &mut Direction, &Position, &State), With<Blinky>>,
     pacman_query: Query<&Position, With<Pacman>>,
 ) {
     for (mut target, mut direction, blinky_position, state) in blinky_query.iter_mut() {
@@ -180,8 +137,8 @@ fn set_blinky_chase_target(
 fn set_pinky_chase_target(
     wall_positions: Res<WallPositions>,
     ghost_house_positions: Res<GhostHousePositions>,
-    mut pinky_query: Query<(&mut Target, &mut MoveDirection, &Position, &State), (With<Pinky>, Without<Pacman>)>,
-    pacman_query: Query<(&Position, &MoveDirection), With<Pacman>>,
+    mut pinky_query: Query<(&mut Target, &mut Direction, &Position, &State), (With<Pinky>, Without<Pacman>)>,
+    pacman_query: Query<(&Position, &Direction), With<Pacman>>,
 ) {
     for (mut target, mut pinky_direction, pinky_position, state) in pinky_query.iter_mut() {
         target_skip_if!(target set);
@@ -206,7 +163,7 @@ fn set_pinky_chase_target(
 /// If pacman is idle, the field to its right is choosen.
 fn calculate_pinky_target_position(
     pacman_position: &Position,
-    pacman_direction: &MoveDirection,
+    pacman_direction: &Direction,
 ) -> Position {
     let x = pacman_position.x();
     let y = pacman_position.y();
@@ -222,7 +179,7 @@ fn set_frightened_target(
     wall_positions: Res<WallPositions>,
     ghost_house_positions: Res<GhostHousePositions>,
     random: Res<Random>,
-    mut query: Query<(&mut Target, &mut MoveDirection, &Position, &State)>,
+    mut query: Query<(&mut Target, &mut Direction, &Position, &State)>,
 ) {
     for (mut target, mut direction, position, state) in query.iter_mut() {
         target_skip_if!(target set);
@@ -243,50 +200,6 @@ fn set_frightened_target(
     }
 }
 
-fn set_eaten_target<G: Component + GhostType + 'static>(
-    ghost_house: Res<GhostHouse>,
-    wall_positions: Res<WallPositions>,
-    mut query: Query<(&mut Target, &mut MoveDirection, &Position, &Transform, &State), With<G>>,
-) {
-    for (mut target, mut direction, position, transform, state) in query.iter_mut() {
-        target_skip_if!(target set);
-        state_skip_if!(state != State::Eaten);
-        let coordinates = transform.translation;
-        let center = ghost_house.center_coordinates();
-        let respawn = ghost_house.respawn_coordinates_of::<G>();
-        let in_front_of_house = ghost_house.coordinates_in_front_of_entrance();
-
-        if coordinates == in_front_of_house {
-            *direction = Down;
-            target.set(center);
-        } else if ghost_house.positions_in_front_of_entrance().into_iter().any(|pos| pos == position) {
-            let position_coordinates = Vec3::from(position);
-            *direction = match position_coordinates.x < in_front_of_house.x {
-                true => Left,
-                false => Right
-            };
-            target.set(in_front_of_house);
-        } else if coordinates == center {
-            *direction = match respawn.x < center.x {
-                true => Left,
-                false => Right
-            };
-            target.set(respawn);
-        } else {
-            let nearest_spawn_position = position.get_nearest_from(ghost_house.positions_in_front_of_entrance());
-            let next_target_neighbour = position.get_neighbours()
-                .into_iter()
-                .filter(|n| n.direction != direction.opposite())
-                .filter(|n| !wall_positions.position_is_wall(&n.position))
-                .min_by(|n_a, n_b| minimal_distance_to_neighbours(nearest_spawn_position, n_a, n_b))
-                .unwrap_or_else(|| position.neighbour_behind(&direction));
-
-            *direction = next_target_neighbour.direction;
-            target.set(Vec3::from(&next_target_neighbour.position));
-        }
-    }
-}
-
 fn minimal_distance_to_neighbours(big_target: &Position, neighbour_a: &Neighbour, neighbour_b: &Neighbour) -> Ordering {
     minimal_distance_to_positions(big_target, &neighbour_a.position, &neighbour_b.position)
 }
@@ -297,6 +210,12 @@ fn minimal_distance_to_positions(big_target: &Position, position_a: &Position, p
 
 #[macro_export]
 macro_rules! target_skip_if {
+    ($components:ident.$target:ident set) => {
+        if $components.$target.is_set() {
+            continue
+        }
+    };
+
     ($target:ident set) => {
         if $target.is_set() {
             continue
