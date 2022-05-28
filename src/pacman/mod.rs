@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 
-use crate::common::{Direction, Position};
+use crate::common::{Direction, has_no_events, Position};
 use crate::common::Direction::*;
 use crate::dots::DotEaten;
 use crate::ghosts::Ghost;
@@ -126,7 +126,7 @@ fn stop_pacman_when_a_dot_was_eaten(
     mut pacman_stop_timer: ResMut<PacmanStopTimer>,
     query: Query<Entity, With<Pacman>>,
 ) {
-    if event_reader.is_empty() { return; }
+    if has_no_events(event_reader) { return; }
 
     for entity in query.iter() {
         pacman_stop_timer.start_for_dot();
@@ -155,7 +155,7 @@ fn reset_pacman_when_he_died_and_has_lives(
     live_query: Query<&Life>,
     mut pacman_query: Query<&mut Transform, With<Pacman>>,
 ) {
-    if event_reader.is_empty() { return; }
+    if has_no_events(event_reader) { return; }
 
     if live_query.iter().count() == 0 { return; }
 

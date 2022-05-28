@@ -83,6 +83,15 @@ impl Position {
             .min_by(|pos_0, pos_1| self.distance_to(pos_0).cmp(&self.distance_to(pos_1)))
             .expect("The given iterator of positions should not be empty!")
     }
+
+    pub fn get_position_in_direction_with_offset(&self, direction: &Direction, offset: usize) -> Self {
+        match direction {
+            Up => Position::new(self.x, self.y + (offset as isize)),
+            Down => Position::new(self.x, self.y - (offset as isize)),
+            Left => Position::new(self.x - (offset as isize), self.y),
+            Right => Position::new(self.x + (offset as isize), self.y)
+        }
+    }
 }
 
 impl From<Vec3> for Position {
@@ -189,4 +198,25 @@ impl Direction {
     pub fn reverse(&mut self) {
         *self = self.opposite()
     }
+}
+
+/// Checks if an event reader has no events and also clears the events in the process.
+///
+/// Background: Some events don't carry data and only signaling something happened. These events also
+/// should only trigger their effects once. EventReader::is_empty sounds sufficient for
+/// this task, but this call is read only and does not effect the events themself.
+/// This way, it is possible to get true for two frames if is_empty gets called
+/// on the reader due to bevy's event buffering. Example:
+///
+/// Frame 1:
+/// 1. system a sends event
+/// 2. system b uses is_empty on reader, returns false
+///
+/// Frame 2
+/// 1. system a does not send a new event
+/// 2. system b uses is_empty on reader. Because no event was used yet, they are still present. Returns false.
+///
+// TODO: I should create an issue for this because it's confusing.
+pub fn has_no_events<T: Send + Sync + 'static>(mut reader: EventReader<T>) -> bool {
+    reader.iter().count() == 0
 }

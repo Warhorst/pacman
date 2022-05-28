@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use crate::common::has_no_events;
 use crate::constants::PACMAN_DIMENSION;
 use crate::pacman::PacmanKilled;
 use crate::score::Score;
@@ -66,7 +67,7 @@ fn remove_life_when_pacman_dies(
     event_reader: EventReader<PacmanKilled>,
     query: Query<(Entity, &Life)>,
 ) {
-    if event_reader.is_empty() { return; }
+    if has_no_events(event_reader) { return; }
 
     let life_to_remove = query.iter()
         .max_by(|(_, i0), (_, i1)| i0.cmp(i1));

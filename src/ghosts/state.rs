@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 
-use crate::common::{Direction, Position};
+use crate::common::{Direction, has_no_events, Position};
 use crate::energizer::EnergizerEaten;
 use crate::ghosts::schedule::ScheduleChanged;
 use crate::ghosts::target::Target;
@@ -102,8 +102,6 @@ fn update_chase_and_scatter_state(
     mut event_reader: EventReader<ScheduleChanged>,
     mut query: Query<(&mut Direction, &mut Target, &mut State, &Transform), With<Ghost>>,
 ) {
-    if event_reader.is_empty() { return; }
-
     for event in event_reader.iter() {
         for (mut direction, mut target, mut state, transform) in query.iter_mut() {
             state_skip_if!(state != State::Scatter | State::Chase);
@@ -178,7 +176,7 @@ fn set_frightened_when_pacman_ate_energizer(
     event_reader: EventReader<EnergizerEaten>,
     mut query: Query<(&mut Direction, &mut Target, &mut State, &Transform), With<Ghost>>,
 ) {
-    if event_reader.is_empty() { return; }
+    if has_no_events(event_reader) { return; }
 
     commands.insert_resource(FrightenedTimer::start(&level));
 

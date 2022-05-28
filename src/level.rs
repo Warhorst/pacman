@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use crate::common::has_no_events;
 use crate::dots::AllDotsEaten;
 
 pub struct LevelPlugin;
@@ -52,7 +53,7 @@ fn increase_level_when_all_dots_eaten(
     mut level: ResMut<Level>,
     mut query: Query<&mut Text, With<LevelUi>>,
 ) {
-    if event_reader.is_empty() { return; }
+    if has_no_events(event_reader) { return; }
 
     level.increase();
 

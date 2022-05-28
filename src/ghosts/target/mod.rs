@@ -39,6 +39,7 @@ impl Plugin for TargetPlugin {
                     .with_system(set_scatter_target::<Clyde>)
                     .with_system(set_blinky_chase_target)
                     .with_system(set_pinky_chase_target)
+                    .with_system(set_inky_chase_target)
                     .with_system(set_clyde_chase_target)
                     .with_system(set_frightened_target)
                     .with_system(set_eaten_target::<Blinky>)
@@ -182,6 +183,43 @@ fn calculate_pinky_target_position(
         Left => Position::new(x - 4, y),
         Right => Position::new(x + 4, y)
     }
+}
+
+fn set_inky_chase_target(
+    wall_positions: Res<WallPositions>,
+    ghost_house_positions: Res<GhostHousePositions>,
+    blinky_query: Query<&Position, With<Blinky>>,
+    pacman_query: Query<(&Position, &Direction), With<Pacman>>,
+    mut inky_query: Query<TargetComponents, (With<Inky>, Without<Pacman>)>
+) {
+    for (pacman_position, pacman_direction) in pacman_query.iter() {
+        for blinky_position in blinky_query.iter() {
+            for mut components in inky_query.iter_mut() {
+                target_skip_if!(components.target set);
+                state_skip_if!(components.state != State::Chase);
+                let target = calculate_inky_target(pacman_position, pacman_direction, blinky_position);
+                let next_target_neighbour = get_nearest_neighbour(
+                    &components,
+                    &target,
+                    |n| !wall_positions.position_is_wall(&n.position) && !ghost_house_positions.position_is_entrance(&n.position)
+                );
+
+                *components.direction = next_target_neighbour.direction;
+                components.target.set(Vec3::from(&next_target_neighbour.position));
+            }
+        }
+    }
+}
+
+fn calculate_inky_target(
+    pacman_position: &Position,
+    pacman_direction: &Direction,
+    blinky_position: &Position,
+) -> Position {
+    let position_pacman_is_facing = pacman_position.get_position_in_direction_with_offset(pacman_direction, 2);
+    let x_diff = position_pacman_is_facing.x - blinky_position.x;
+    let y_diff = position_pacman_is_facing.y - blinky_position.y;
+    Position::new(blinky_position.x + 2 * x_diff, blinky_position.y + 2 * y_diff)
 }
 
 /// Clydes target is determined by his distance to pacman. If pacman is in an eight field distance
