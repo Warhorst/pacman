@@ -7,7 +7,6 @@ use crate::energizer::EnergizerEaten;
 use crate::ghosts::schedule::ScheduleChanged;
 use crate::ghosts::target::Target;
 use crate::pacman::Pacman;
-use crate::common::Direction::*;
 use crate::ghost_house::GhostHouse;
 use crate::ghosts::{Blinky, Clyde, DotCounter, Ghost, GhostType, Inky, Pinky};
 use crate::level::Level;

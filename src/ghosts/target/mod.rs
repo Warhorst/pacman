@@ -1,10 +1,12 @@
 use std::cmp::Ordering;
 
 use bevy::prelude::*;
+use bevy::ecs::query::WorldQuery;
 
 use crate::common::{Neighbour, Position};
 use crate::common::Direction;
 use crate::common::Direction::*;
+use crate::constants::FIELD_DIMENSION;
 use crate::ghost_corners::GhostCorner;
 use crate::ghost_house::GhostHousePositions;
 use crate::ghosts::{Blinky, Clyde, Inky, Pinky};
@@ -37,6 +39,7 @@ impl Plugin for TargetPlugin {
                     .with_system(set_scatter_target::<Clyde>)
                     .with_system(set_blinky_chase_target)
                     .with_system(set_pinky_chase_target)
+                    .with_system(set_clyde_chase_target)
                     .with_system(set_frightened_target)
                     .with_system(set_eaten_target::<Blinky>)
                     .with_system(set_eaten_target::<Pinky>)
@@ -53,6 +56,16 @@ impl Plugin for TargetPlugin {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[derive(SystemLabel)]
 pub struct TargetSetter;
+
+#[derive(WorldQuery)]
+#[world_query(mutable)]
+pub struct TargetComponents<'a> {
+    target: &'a mut Target,
+    direction: &'a mut Direction,
+    position: &'a Position,
+    transform: &'a Transform,
+    state: &'a State
+}
 
 #[derive(Component)]
 pub struct Target {
@@ -90,71 +103,67 @@ impl Target {
 fn set_scatter_target<G: Component>(
     wall_positions: Res<WallPositions>,
     ghost_house_positions: Res<GhostHousePositions>,
-    mut ghost_query: Query<(&mut Target, &mut Direction, &Position, &State), With<G>>,
+    mut ghost_query: Query<TargetComponents, With<G>>,
     corner_query: Query<&Position, (With<G>, With<GhostCorner>)>,
 ) {
-    for (mut target, mut direction, position, state) in ghost_query.iter_mut() {
-        target_skip_if!(target set);
-        state_skip_if!(state != State::Scatter);
-        let nearest_corner = position.get_nearest_from(corner_query.iter());
+    for mut components in ghost_query.iter_mut() {
+        target_skip_if!(components.target set);
+        state_skip_if!(components.state != State::Scatter);
+        let nearest_corner = components.position.get_nearest_from(corner_query.iter());
 
-        let next_target_neighbour = position.get_neighbours()
-            .into_iter()
-            .filter(|n| n.direction != direction.opposite())
-            .filter(|n| !wall_positions.position_is_wall(&n.position) && !ghost_house_positions.position_is_entrance(&n.position))
-            .min_by(|n_a, n_b| minimal_distance_to_neighbours(nearest_corner, n_a, n_b))
-            .unwrap_or_else(|| position.neighbour_behind(&direction));
+        let next_target_neighbour = get_nearest_neighbour(
+            &components,
+            nearest_corner,
+            |n| !wall_positions.position_is_wall(&n.position) && !ghost_house_positions.position_is_entrance(&n.position)
+        );
 
-        *direction = next_target_neighbour.direction;
-        target.set(Vec3::from(&next_target_neighbour.position));
+        *components.direction = next_target_neighbour.direction;
+        components.target.set(Vec3::from(&next_target_neighbour.position));
     }
 }
 
 fn set_blinky_chase_target(
     wall_positions: Res<WallPositions>,
     ghost_house_positions: Res<GhostHousePositions>,
-    mut blinky_query: Query<(&mut Target, &mut Direction, &Position, &State), With<Blinky>>,
+    mut blinky_query: Query<TargetComponents, With<Blinky>>,
     pacman_query: Query<&Position, With<Pacman>>,
 ) {
-    for (mut target, mut direction, blinky_position, state) in blinky_query.iter_mut() {
-        target_skip_if!(target set);
-        state_skip_if!(state != State::Chase);
+    for mut components in blinky_query.iter_mut() {
+        target_skip_if!(components.target set);
+        state_skip_if!(components.state != State::Chase);
         for pacman_position in pacman_query.iter() {
-            let next_target_neighbour = blinky_position.get_neighbours()
-                .into_iter()
-                .filter(|n| n.direction != direction.opposite())
-                .filter(|n| !wall_positions.position_is_wall(&n.position) && !ghost_house_positions.position_is_entrance(&n.position))
-                .min_by(|n_a, n_b| minimal_distance_to_neighbours(pacman_position, n_a, n_b))
-                .unwrap_or_else(|| blinky_position.neighbour_behind(&direction));
+            let next_target_neighbour = get_nearest_neighbour(
+                &components,
+                &pacman_position,
+                |n| !wall_positions.position_is_wall(&n.position) && !ghost_house_positions.position_is_entrance(&n.position)
+            );
 
-            *direction = next_target_neighbour.direction;
-            target.set(Vec3::from(&next_target_neighbour.position));
+            *components.direction = next_target_neighbour.direction;
+            components.target.set(Vec3::from(&next_target_neighbour.position));
         }
     }
 }
 
-// TODO: Bug. Pacman might not have a movement direction, which causes pinky to stand still when in chase.
 fn set_pinky_chase_target(
     wall_positions: Res<WallPositions>,
     ghost_house_positions: Res<GhostHousePositions>,
-    mut pinky_query: Query<(&mut Target, &mut Direction, &Position, &State), (With<Pinky>, Without<Pacman>)>,
+    mut pinky_query: Query<TargetComponents, (With<Pinky>, Without<Pacman>)>,
     pacman_query: Query<(&Position, &Direction), With<Pacman>>,
 ) {
-    for (mut target, mut pinky_direction, pinky_position, state) in pinky_query.iter_mut() {
-        target_skip_if!(target set);
-        state_skip_if!(state != State::Chase);
+    for mut components in pinky_query.iter_mut() {
+        target_skip_if!(components.target set);
+        state_skip_if!(components.state != State::Chase);
         for (pacman_position, pacman_direction) in pacman_query.iter() {
             let pinky_target_pos = calculate_pinky_target_position(pacman_position, pacman_direction);
 
-            let next_target_neighbour = pinky_position.get_neighbours()
-                .into_iter()
-                .filter(|n| n.direction != pinky_direction.opposite())
-                .filter(|n| !wall_positions.position_is_wall(&n.position) && !ghost_house_positions.position_is_entrance(&n.position))
-                .min_by(|n_a, n_b| minimal_distance_to_neighbours(&pinky_target_pos, n_a, n_b))
-                .unwrap_or_else(|| pinky_position.neighbour_behind(&pinky_direction));
+            let next_target_neighbour = get_nearest_neighbour(
+                &components,
+                &pinky_target_pos,
+                |n| !wall_positions.position_is_wall(&n.position) && !ghost_house_positions.position_is_entrance(&n.position)
+            );
 
-            *pinky_direction = next_target_neighbour.direction;
-            target.set(Vec3::from(&next_target_neighbour.position));
+            *components.direction = next_target_neighbour.direction;
+            components.target.set(Vec3::from(&next_target_neighbour.position));
         }
     }
 }
@@ -175,29 +184,83 @@ fn calculate_pinky_target_position(
     }
 }
 
+/// Clydes target is determined by his distance to pacman. If pacman is in an eight field distance
+/// to clyde, clyde returns to his corner. If clyde is farther away, he targets pacmans direct
+/// position instead.
+fn set_clyde_chase_target(
+    wall_positions: Res<WallPositions>,
+    ghost_house_positions: Res<GhostHousePositions>,
+    mut clyde_query: Query<TargetComponents, (With<Clyde>, Without<Pacman>)>,
+    pacman_query: Query<&Position, With<Pacman>>,
+    corner_query: Query<&Position, (With<Clyde>, With<GhostCorner>)>
+) {
+    for mut components in clyde_query.iter_mut() {
+        target_skip_if!(components.target set);
+        state_skip_if!(components.state != State::Chase);
+        for pacman_position in pacman_query.iter() {
+            let target = if is_clyde_near_pacman(&components, pacman_position) {
+                components.position.get_nearest_from(corner_query.iter())
+            } else {
+                pacman_position
+            };
+
+            let next_target_neighbour = get_nearest_neighbour(
+                &components,
+                &target,
+                |n| !wall_positions.position_is_wall(&n.position) && !ghost_house_positions.position_is_entrance(&n.position)
+            );
+
+            *components.direction = next_target_neighbour.direction;
+            components.target.set(Vec3::from(&next_target_neighbour.position));
+        }
+    }
+}
+
+fn is_clyde_near_pacman(components: &TargetComponentsItem, pacman_position: &Position) -> bool {
+    let clyde_coordinates = Vec3::from(components.position);
+    let pacman_coordinates = Vec3::from(pacman_position);
+    let distance = clyde_coordinates.distance(pacman_coordinates);
+    distance < FIELD_DIMENSION * 8.0
+}
+
 fn set_frightened_target(
     wall_positions: Res<WallPositions>,
     ghost_house_positions: Res<GhostHousePositions>,
     random: Res<Random>,
-    mut query: Query<(&mut Target, &mut Direction, &Position, &State)>,
+    mut query: Query<TargetComponents>,
 ) {
-    for (mut target, mut direction, position, state) in query.iter_mut() {
-        target_skip_if!(target set);
-        state_skip_if!(state != State::Frightened);
-        let possible_neighbours = position.get_neighbours()
+    for mut components in query.iter_mut() {
+        target_skip_if!(components.target set);
+        state_skip_if!(components.state != State::Frightened);
+        let possible_neighbours = components.position.get_neighbours()
             .into_iter()
-            .filter(|n| n.direction != direction.opposite())
+            .filter(|n| n.direction != components.direction.opposite())
             .filter(|n| !wall_positions.position_is_wall(&n.position) && !ghost_house_positions.position_is_entrance(&n.position))
             .collect::<Vec<_>>();
 
         let next_target_neighbour = match possible_neighbours.len() {
-            0 => position.neighbour_behind(&direction),
+            0 => components.position.neighbour_behind(&components.direction),
             1 => possible_neighbours.get(0).unwrap().clone(),
             len => possible_neighbours.get(random.zero_to(len)).unwrap().clone()
         };
-        *direction = next_target_neighbour.direction;
-        target.set(Vec3::from(&next_target_neighbour.position));
+        *components.direction = next_target_neighbour.direction;
+        components.target.set(Vec3::from(&next_target_neighbour.position));
     }
+}
+
+/// Get the neighbour with the shortest distance (euclidean) to a given position. To filter not allowed
+/// positions, a specific filter is provided.
+///
+/// It is generally not allowed for ghosts to turn around, so the position behind the ghost is always filtered. However,
+/// if due to some circumstances (like bad map design) a ghost has no other way to go, we allow the pour soul to
+/// turn around.
+fn get_nearest_neighbour(components: &TargetComponentsItem, target_position: &Position, position_filter: impl Fn(&Neighbour) -> bool) -> Neighbour {
+    components.position.get_neighbours()
+        .into_iter()
+        .filter(|n| n.direction != components.direction.opposite())
+        .filter(position_filter)
+        .min_by(|n_a, n_b| minimal_distance_to_neighbours(&target_position, n_a, n_b))
+        .unwrap_or_else(|| components.position.neighbour_behind(&components.direction))
 }
 
 fn minimal_distance_to_neighbours(big_target: &Position, neighbour_a: &Neighbour, neighbour_b: &Neighbour) -> Ordering {

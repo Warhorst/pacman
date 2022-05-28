@@ -1,24 +1,11 @@
 use bevy::prelude::*;
-use bevy::ecs::query::WorldQuery;
-use crate::common::Position;
 use crate::ghost_house::GhostHouse;
 use crate::ghosts::GhostType;
-use crate::ghosts::target::{minimal_distance_to_neighbours, Target};
+use crate::ghosts::target::{get_nearest_neighbour, TargetComponents, TargetComponentsItem};
 use crate::walls::WallPositions;
-use crate::common::Direction;
 use crate::common::Direction::*;
 use crate::ghosts::state::State;
 use crate::{state_skip_if, target_skip_if};
-
-#[derive(WorldQuery)]
-#[world_query(mutable)]
-pub struct EatenTargetComponents<'a> {
-    target: &'a mut Target,
-    direction: &'a mut Direction,
-    position: &'a Position,
-    transform: &'a Transform,
-    state: &'a State
-}
 
 /// Determine the next target coordinates for a ghost when in "Eaten" state.
 ///
@@ -27,7 +14,7 @@ pub struct EatenTargetComponents<'a> {
 pub fn set_eaten_target<G: Component + GhostType + 'static>(
     ghost_house: Res<GhostHouse>,
     wall_positions: Res<WallPositions>,
-    mut query: Query<EatenTargetComponents, With<G>>,
+    mut query: Query<TargetComponents, With<G>>,
 ) {
     for mut components in query.iter_mut() {
         target_skip_if!(components.target set);
@@ -47,21 +34,21 @@ pub fn set_eaten_target<G: Component + GhostType + 'static>(
 }
 
 /// Return if the ghost is perfectly centered in front of the ghost house entrance.
-fn is_directly_before_entrance(components: &EatenTargetComponentsItem, ghost_house: &GhostHouse) -> bool {
+fn is_directly_before_entrance(components: &TargetComponentsItem, ghost_house: &GhostHouse) -> bool {
     components.transform.translation == ghost_house.coordinates_in_front_of_entrance()
 }
 
-fn move_in_house_center(components: &mut EatenTargetComponentsItem, ghost_house: &GhostHouse) {
+fn move_in_house_center(components: &mut TargetComponentsItem, ghost_house: &GhostHouse) {
     *components.direction = ghost_house.entrance_direction.opposite();
     components.target.set(ghost_house.center_coordinates());
 }
 
 /// Return if the ghost is just on a position in front of the house.
-fn is_before_entrance(components: &EatenTargetComponentsItem, ghost_house: &GhostHouse) -> bool {
+fn is_before_entrance(components: &TargetComponentsItem, ghost_house: &GhostHouse) -> bool {
     ghost_house.positions_in_front_of_entrance().into_iter().any(|pos| pos == components.position)
 }
 
-fn move_directly_before_entrance(components: &mut EatenTargetComponentsItem, ghost_house: &GhostHouse) {
+fn move_directly_before_entrance(components: &mut TargetComponentsItem, ghost_house: &GhostHouse) {
     let in_front_of_house = ghost_house.coordinates_in_front_of_entrance();
     let position_coordinates = Vec3::from(components.position);
 
@@ -78,11 +65,11 @@ fn move_directly_before_entrance(components: &mut EatenTargetComponentsItem, gho
     components.target.set(in_front_of_house);
 }
 
-fn is_in_center(components: &EatenTargetComponentsItem, ghost_house: &GhostHouse) -> bool {
+fn is_in_center(components: &TargetComponentsItem, ghost_house: &GhostHouse) -> bool {
     components.transform.translation == ghost_house.center_coordinates()
 }
 
-fn move_to_respawn<G: Component + GhostType + 'static>(components: &mut EatenTargetComponentsItem, ghost_house: &GhostHouse) {
+fn move_to_respawn<G: Component + GhostType + 'static>(components: &mut TargetComponentsItem, ghost_house: &GhostHouse) {
     let center = ghost_house.center_coordinates();
     let respawn = ghost_house.respawn_coordinates_of::<G>();
 
@@ -99,14 +86,13 @@ fn move_to_respawn<G: Component + GhostType + 'static>(components: &mut EatenTar
     components.target.set(respawn);
 }
 
-fn move_to_nearest_position_before_entrance(components: &mut EatenTargetComponentsItem, ghost_house: &GhostHouse, wall_positions: &WallPositions) {
+fn move_to_nearest_position_before_entrance(components: &mut TargetComponentsItem, ghost_house: &GhostHouse, wall_positions: &WallPositions) {
     let nearest_spawn_position = components.position.get_nearest_from(ghost_house.positions_in_front_of_entrance());
-    let next_target_neighbour = components.position.get_neighbours()
-        .into_iter()
-        .filter(|n| n.direction != components.direction.opposite())
-        .filter(|n| !wall_positions.position_is_wall(&n.position))
-        .min_by(|n_a, n_b| minimal_distance_to_neighbours(nearest_spawn_position, n_a, n_b))
-        .unwrap_or_else(|| components.position.neighbour_behind(&components.direction));
+    let next_target_neighbour = get_nearest_neighbour(
+        components,
+        nearest_spawn_position,
+        |n| !wall_positions.position_is_wall(&n.position)
+    );
 
     *components.direction = next_target_neighbour.direction;
     components.target.set(Vec3::from(&next_target_neighbour.position));

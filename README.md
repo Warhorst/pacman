@@ -12,12 +12,9 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 
 ### Ghosts
 - implement chase for Inky (the cyan ghost)
-- implement chase for Clyde (the orange ghost)
-- leave ghost house based on eaten dots and time
+- leave ghost house based on eaten dots and time (partially done)
 - change appearance based on state
-- ghosts can turn around in the ghost house
 - animations
-- add a GhostHouseEntrance entity or resource: A pair of two entrance fields where the center is used to navigate the ghost in and out the house
 
 ### Lifecycle
 - ghosts enter the game depending on the current level/time

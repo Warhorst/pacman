@@ -70,6 +70,8 @@ pub fn spawn_pacman(
         })
         .insert(Pacman)
         .insert(speed_by_level.for_pacman(&level).normal)
-        .insert(start_position);
+        .insert(start_position)
+        .insert(Left)
+    ;
     commands.insert_resource(pacman_spawn);
 }

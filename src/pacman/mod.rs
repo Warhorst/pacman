@@ -66,7 +66,6 @@ impl Plugin for PacmanPlugin {
             .add_startup_system(spawn_pacman)
             .add_system(move_pacman_if_not_stopped)
             .add_system(set_direction_based_on_keyboard_input)
-            .add_system(set_direction_based_on_keyboard_input_when_pacman_is_still)
             .add_system(pacman_hits_ghost_and_get_killed)
             .add_system(stop_pacman_when_a_dot_was_eaten)
             .add_system(update_pacman_stop_timer)
@@ -94,30 +93,6 @@ fn set_direction_based_on_keyboard_input(
 
         if keyboard_input.pressed(KeyCode::Down) {
             *direction = Down
-        }
-    }
-}
-
-fn set_direction_based_on_keyboard_input_when_pacman_is_still(
-    mut commands: Commands,
-    keyboard_input: Res<Input<KeyCode>>,
-    query: Query<Entity, (With<Pacman>, Without<Direction>)>
-) {
-    for entity in query.iter() {
-        if keyboard_input.pressed(KeyCode::Left) {
-            commands.entity(entity).insert(Left);
-        }
-
-        if keyboard_input.pressed(KeyCode::Right) {
-            commands.entity(entity).insert(Right);
-        }
-
-        if keyboard_input.pressed(KeyCode::Up) {
-            commands.entity(entity).insert(Up);
-        }
-
-        if keyboard_input.pressed(KeyCode::Down) {
-            commands.entity(entity).insert(Down);
         }
     }
 }
