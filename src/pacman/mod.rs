@@ -11,6 +11,7 @@ use crate::lives::Life;
 use crate::pacman::movement::move_pacman_if_not_stopped;
 use crate::pacman::spawn::{PacmanSpawn, spawn_pacman};
 use crate::state_skip_if;
+use std::f32::consts::PI;
 
 mod movement;
 mod spawn;
@@ -65,7 +66,8 @@ impl Plugin for PacmanPlugin {
             .insert_resource(PacmanStopTimer::new())
             .add_startup_system(spawn_pacman)
             .add_system(move_pacman_if_not_stopped)
-            .add_system(set_direction_based_on_keyboard_input)
+            .add_system(set_direction_based_on_keyboard_input.label("pacman_keyboard_input"))
+            .add_system(change_appearance_when_direction_changed.after("pacman_keyboard_input"))
             .add_system(pacman_hits_ghost_and_get_killed)
             .add_system(stop_pacman_when_a_dot_was_eaten)
             .add_system(update_pacman_stop_timer)
@@ -93,6 +95,19 @@ fn set_direction_based_on_keyboard_input(
 
         if keyboard_input.pressed(KeyCode::Down) {
             *direction = Down
+        }
+    }
+}
+
+fn change_appearance_when_direction_changed(
+    mut query: Query<(&Direction, &mut Transform), (With<Pacman>, Changed<Direction>)>
+) {
+    for (direction, mut transform) in query.iter_mut() {
+        match direction {
+            Up => transform.rotation = Quat::from_rotation_z(PI * 0.5),
+            Down => transform.rotation = Quat::from_rotation_z(PI * 1.5),
+            Left => transform.rotation = Quat::from_rotation_z(PI),
+            Right => transform.rotation = Quat::from_rotation_z(0.0),
         }
     }
 }

@@ -50,6 +50,7 @@ impl PacmanSpawn {
 
 pub fn spawn_pacman(
     mut commands: Commands,
+    asset_server: Res<AssetServer>,
     board: Res<Board>,
     level: Res<Level>,
     speed_by_level: Res<SpeedByLevel>
@@ -60,8 +61,8 @@ pub fn spawn_pacman(
 
     commands.spawn()
         .insert_bundle(SpriteBundle {
+            texture: asset_server.load("textures/pacman.png"),
             sprite: Sprite {
-                color: Color::hex("FFEE00").unwrap(),
                 custom_size: Some(pacman_dimension),
                 ..default()
             },
