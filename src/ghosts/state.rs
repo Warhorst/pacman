@@ -123,6 +123,7 @@ fn update_chase_and_scatter_state(
     }
 }
 
+// TODO: Something ain't right here. Sometimes, a just instantly switches back to normal.
 fn update_frightened_state(
     schedule: Res<Schedule>,
     frightened_timer: Option<Res<FrightenedTimer>>,
