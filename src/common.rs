@@ -159,7 +159,7 @@ impl Neighbour {
     }
 }
 
-#[derive(Copy, Clone, Component, Deserialize, Debug, Eq, PartialEq, PartialOrd, Serialize)]
+#[derive(Copy, Clone, Component, Deserialize, Debug, Eq, Hash, PartialEq, PartialOrd, Serialize)]
 pub enum Direction {
     Up,
     Down,
@@ -198,25 +198,4 @@ impl Direction {
     pub fn reverse(&mut self) {
         *self = self.opposite()
     }
-}
-
-/// Checks if an event reader has no events and also clears the events in the process.
-///
-/// Background: Some events don't carry data and only signaling something happened. These events also
-/// should only trigger their effects once. EventReader::is_empty sounds sufficient for
-/// this task, but this call is read only and does not effect the events themself.
-/// This way, it is possible to get true for two frames if is_empty gets called
-/// on the reader due to bevy's event buffering. Example:
-///
-/// Frame 1:
-/// 1. system a sends event
-/// 2. system b uses is_empty on reader, returns false
-///
-/// Frame 2
-/// 1. system a does not send a new event
-/// 2. system b uses is_empty on reader. Because no event was used yet, they are still present. Returns false.
-///
-// TODO: I should create an issue for this because it's confusing.
-pub fn has_no_events<T: Send + Sync + 'static>(mut reader: EventReader<T>) -> bool {
-    reader.iter().count() == 0
 }

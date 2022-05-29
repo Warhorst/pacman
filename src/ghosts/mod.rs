@@ -6,13 +6,16 @@ use crate::ghosts::schedule::SchedulePlugin;
 use crate::ghosts::spawn::spawn_ghosts;
 use crate::ghosts::state::StatePlugin;
 use crate::ghosts::target::{Target, TargetPlugin};
+use crate::ghosts::textures::GhostTextures;
 use crate::tunnels::GhostPassedTunnel;
+use crate::common::Direction;
 
 pub mod movement;
 pub mod spawn;
 pub mod state;
 pub mod target;
 mod schedule;
+mod textures;
 
 pub struct GhostPlugin;
 
@@ -26,6 +29,10 @@ impl Plugin for GhostPlugin {
             .add_startup_system(spawn_ghosts)
             .add_system(ghost_passed_tunnel)
             .add_system(update_dot_counter_when_dot_eaten)
+            .add_system(update_ghost_appearance::<Blinky>)
+            .add_system(update_ghost_appearance::<Pinky>)
+            .add_system(update_ghost_appearance::<Inky>)
+            .add_system(update_ghost_appearance::<Clyde>)
         ;
     }
 }
@@ -101,8 +108,6 @@ fn ghost_passed_tunnel(
     }
 }
 
-// TODO: It seems event_reader.is_empty() might return true two frames in a row due to event buffering.
-//  Maybe other systems relying on this are bugged.
 fn update_dot_counter_when_dot_eaten(
     mut event_reader: EventReader<DotEaten>,
     mut query: Query<&mut DotCounter>,
@@ -111,5 +116,14 @@ fn update_dot_counter_when_dot_eaten(
         for mut dot_counter in query.iter_mut() {
             dot_counter.decrease();
         }
+    }
+}
+
+fn update_ghost_appearance<G: 'static + Component + GhostType>(
+    ghost_textures: Res<GhostTextures>,
+    mut query: Query<(&Direction, &mut Handle<Image>), (With<G>, Changed<Direction>)>
+) {
+    for (direction, mut texture) in query.iter_mut() {
+        *texture = ghost_textures.get_normal_texture_for::<G>(&direction)
     }
 }

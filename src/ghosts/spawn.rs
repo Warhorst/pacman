@@ -7,22 +7,26 @@ use crate::ghost_house::GhostHouse;
 use crate::ghosts::{Blinky, Clyde, DotCounter, Ghost, Inky, Pinky};
 use crate::ghosts::state::State;
 use crate::ghosts::target::Target;
+use crate::ghosts::textures::GhostTextures;
 use crate::level::Level;
 use crate::map::board::Board;
 use crate::speed::SpeedByLevel;
 
 pub fn spawn_ghosts(
     mut commands: Commands,
+    asset_server: Res<AssetServer>,
     board: Res<Board>,
     level: Res<Level>,
     speed_by_level: Res<SpeedByLevel>
 ) {
     let ghost_house = GhostHouse::new(&board);
-    spawn_ghost(&mut commands, ghost_house.spawn_coordinates_of::<Blinky>(), &level, &speed_by_level, Color::hex("FF0000").unwrap(), Blinky, DotCounter::new(0));
-    spawn_ghost(&mut commands, ghost_house.spawn_coordinates_of::<Pinky>(), &level, &speed_by_level, Color::hex("FFB8FF").unwrap(), Pinky, DotCounter::new(0));
-    spawn_ghost(&mut commands, ghost_house.spawn_coordinates_of::<Inky>(), &level, &speed_by_level, Color::hex("00FFFF").unwrap(), Inky, DotCounter::new(30));
-    spawn_ghost(&mut commands, ghost_house.spawn_coordinates_of::<Clyde>(), &level, &speed_by_level, Color::hex("FFB852").unwrap(), Clyde, DotCounter::new(60));
-    commands.insert_resource(ghost_house)
+    let ghost_textures = GhostTextures::new(&asset_server);
+    spawn_ghost(&mut commands, ghost_house.spawn_coordinates_of::<Blinky>(), &level, &speed_by_level, Blinky, DotCounter::new(0), ghost_textures.get_normal_texture_for::<Blinky>(&Left));
+    spawn_ghost(&mut commands, ghost_house.spawn_coordinates_of::<Pinky>(), &level, &speed_by_level, Pinky, DotCounter::new(0), ghost_textures.get_normal_texture_for::<Pinky>(&Left));
+    spawn_ghost(&mut commands, ghost_house.spawn_coordinates_of::<Inky>(), &level, &speed_by_level, Inky, DotCounter::new(30), ghost_textures.get_normal_texture_for::<Inky>(&Left));
+    spawn_ghost(&mut commands, ghost_house.spawn_coordinates_of::<Clyde>(), &level, &speed_by_level, Clyde, DotCounter::new(60), ghost_textures.get_normal_texture_for::<Clyde>(&Left));
+    commands.insert_resource(ghost_house);
+    commands.insert_resource(ghost_textures);
 }
 
 fn spawn_ghost(
@@ -30,15 +34,16 @@ fn spawn_ghost(
     spawn_coordinates: Vec3,
     level: &Level,
     speed_by_level: &SpeedByLevel,
-    color: Color,
     ghost_type: impl Component,
-    dot_counter: DotCounter
+    dot_counter: DotCounter,
+    texture: Handle<Image>
+
 ) {
     commands
         .spawn()
         .insert_bundle(SpriteBundle {
+            texture,
             sprite: Sprite {
-                color,
                 custom_size: Some(Vec2::new(GHOST_DIMENSION, GHOST_DIMENSION)),
                 ..default()
             },

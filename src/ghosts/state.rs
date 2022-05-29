@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 
-use crate::common::{Direction, has_no_events, Position};
+use crate::common::{Direction, Position};
 use crate::energizer::EnergizerEaten;
 use crate::ghosts::schedule::ScheduleChanged;
 use crate::ghosts::target::Target;
@@ -27,8 +27,8 @@ impl Plugin for StatePlugin {
                     .with_system(update_eaten_state::<Pinky>)
                     .with_system(update_eaten_state::<Inky>)
                     .with_system(update_eaten_state::<Clyde>)
-                    .with_system(update_frightened_timer)
-                    .with_system(set_frightened_when_pacman_ate_energizer)
+                    .with_system(update_frightened_timer.label("frightened_update"))
+                    .with_system(set_frightened_when_pacman_ate_energizer.after("frightened_update"))
                     .with_system(set_eaten_when_hit_by_pacman)
                     .label(StateSetter)
             )
@@ -173,27 +173,27 @@ fn update_frightened_timer(
 fn set_frightened_when_pacman_ate_energizer(
     mut commands: Commands,
     level: Res<Level>,
-    event_reader: EventReader<EnergizerEaten>,
+    mut event_reader: EventReader<EnergizerEaten>,
     mut query: Query<(&mut Direction, &mut Target, &mut State, &Transform), With<Ghost>>,
 ) {
-    if has_no_events(event_reader) { return; }
+    for _ in event_reader.iter() {
+        commands.insert_resource(FrightenedTimer::start(&level));
 
-    commands.insert_resource(FrightenedTimer::start(&level));
+        for (mut direction, mut target, mut state, transform) in query.iter_mut() {
+            state_skip_if!(state != State::Scatter | State::Chase);
 
-    for (mut direction, mut target, mut state, transform) in query.iter_mut() {
-        state_skip_if!(state != State::Scatter | State::Chase);
+            let target_coordinates = if target.is_set() {
+                target.get()
+            } else {
+                transform.translation
+            };
+            let target_position = Position::from(target_coordinates);
+            let coordinates_ghost_came_from = Vec3::from(target_position.get_neighbour_in_direction(&direction.opposite()).position);
 
-        let target_coordinates = if target.is_set() {
-            target.get()
-        } else {
-            transform.translation
-        };
-        let target_position = Position::from(target_coordinates);
-        let coordinates_ghost_came_from = Vec3::from(target_position.get_neighbour_in_direction(&direction.opposite()).position);
-
-        *state = State::Frightened;
-        direction.reverse();
-        target.set(coordinates_ghost_came_from);
+            *state = State::Frightened;
+            direction.reverse();
+            target.set(coordinates_ghost_came_from);
+        }
     }
 }
 

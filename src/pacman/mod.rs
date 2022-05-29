@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 
-use crate::common::{Direction, has_no_events, Position};
+use crate::common::{Direction, Position};
 use crate::common::Direction::*;
 use crate::dots::DotEaten;
 use crate::ghosts::Ghost;
@@ -137,15 +137,15 @@ fn pacman_hits_ghost_and_get_killed(
 /// with a fixed duration is used instead.
 fn stop_pacman_when_a_dot_was_eaten(
     mut commands: Commands,
-    event_reader: EventReader<DotEaten>,
+    mut event_reader: EventReader<DotEaten>,
     mut pacman_stop_timer: ResMut<PacmanStopTimer>,
     query: Query<Entity, With<Pacman>>,
 ) {
-    if has_no_events(event_reader) { return; }
-
-    for entity in query.iter() {
-        pacman_stop_timer.start_for_dot();
-        commands.entity(entity).insert(Stop);
+    for _ in event_reader.iter() {
+        for entity in query.iter() {
+            pacman_stop_timer.start_for_dot();
+            commands.entity(entity).insert(Stop);
+        }
     }
 }
 
@@ -166,15 +166,15 @@ fn update_pacman_stop_timer(
 
 fn reset_pacman_when_he_died_and_has_lives(
     pacman_spawn: Res<PacmanSpawn>,
-    event_reader: EventReader<PacmanKilled>,
+    mut event_reader: EventReader<PacmanKilled>,
     live_query: Query<&Life>,
     mut pacman_query: Query<&mut Transform, With<Pacman>>,
 ) {
-    if has_no_events(event_reader) { return; }
+    for _ in event_reader.iter() {
+        if live_query.iter().count() == 0 { return; }
 
-    if live_query.iter().count() == 0 { return; }
-
-    for mut transform in pacman_query.iter_mut() {
-        *transform = Transform::from_translation(**pacman_spawn)
+        for mut transform in pacman_query.iter_mut() {
+            transform.translation = **pacman_spawn
+        }
     }
 }

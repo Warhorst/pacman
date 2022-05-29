@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use crate::common::has_no_events;
 use crate::constants::PACMAN_DIMENSION;
 use crate::pacman::PacmanKilled;
 use crate::score::Score;
@@ -64,16 +63,16 @@ fn spawn_life(commands: &mut Commands, life_index: usize) {
 
 fn remove_life_when_pacman_dies(
     mut commands: Commands,
-    event_reader: EventReader<PacmanKilled>,
+    mut event_reader: EventReader<PacmanKilled>,
     query: Query<(Entity, &Life)>,
 ) {
-    if has_no_events(event_reader) { return; }
+    for _ in event_reader.iter() {
+        let life_to_remove = query.iter()
+            .max_by(|(_, i0), (_, i1)| i0.cmp(i1));
 
-    let life_to_remove = query.iter()
-        .max_by(|(_, i0), (_, i1)| i0.cmp(i1));
-
-    if let Some((e, _)) = life_to_remove {
-        commands.entity(e).despawn()
+        if let Some((e, _)) = life_to_remove {
+            commands.entity(e).despawn()
+        }
     }
 }
 
