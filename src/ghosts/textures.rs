@@ -9,7 +9,9 @@ pub type MovementTextures = HashMap<Direction, Handle<Image>>;
 
 /// Resource that holds all handles to ghost textures.
 pub struct GhostTextures {
-    pub normal_ghost_textures: HashMap<TypeId, MovementTextures>,
+    normal_ghost_textures: HashMap<TypeId, MovementTextures>,
+    frightened_texture: Handle<Image>,
+    eaten_textures_by_direction: HashMap<Direction, Handle<Image>>
 }
 
 impl GhostTextures {
@@ -20,7 +22,14 @@ impl GhostTextures {
         normal_ghost_textures.insert(TypeId::of::<Inky>(), Self::load_movement_textures_for("inky", asset_server));
         normal_ghost_textures.insert(TypeId::of::<Clyde>(), Self::load_movement_textures_for("clyde", asset_server));
 
-        GhostTextures { normal_ghost_textures }
+        let frightened_texture = asset_server.load("textures/ghost/frightened.png");
+        let eaten_textures_by_direction = Self::load_eaten_textures(asset_server);
+
+        GhostTextures {
+            normal_ghost_textures,
+            frightened_texture,
+            eaten_textures_by_direction
+        }
     }
 
     fn load_movement_textures_for(ghost: &str, asset_server: &AssetServer) -> MovementTextures {
@@ -32,6 +41,15 @@ impl GhostTextures {
         textures
     }
 
+    fn load_eaten_textures(asset_server: &AssetServer) -> HashMap<Direction, Handle<Image>> {
+        let mut map = HashMap::new();
+        map.insert(Up, asset_server.load("textures/ghost/eyes_up.png"));
+        map.insert(Down, asset_server.load("textures/ghost/eyes_down.png"));
+        map.insert(Left, asset_server.load("textures/ghost/eyes_left.png"));
+        map.insert(Right, asset_server.load("textures/ghost/eyes_right.png"));
+        map
+    }
+
     // TODO is cloning the right way?
     pub fn get_normal_texture_for<G: 'static + GhostType>(&self, direction: &Direction) -> Handle<Image> {
         self.normal_ghost_textures
@@ -39,6 +57,17 @@ impl GhostTextures {
             .expect("Ghost should have textures")
             .get(direction)
             .expect("texture for direction should be present")
+            .clone()
+    }
+
+    pub fn get_frightened_texture(&self) -> Handle<Image> {
+        self.frightened_texture.clone()
+    }
+
+    pub fn get_eaten_texture(&self, direction: &Direction) -> Handle<Image> {
+        self.eaten_textures_by_direction
+            .get(direction)
+            .expect("every direction should have a texture for eaten ghosts")
             .clone()
     }
 }

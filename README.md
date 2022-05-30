@@ -11,13 +11,10 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 - "waka waka" animation + sound when eating dots (very important)
 
 ### Ghosts
-- implement chase for Inky (the cyan ghost)
 - leave ghost house based on eaten dots and time (partially done)
-- change appearance based on state
 - animations
 
 ### Lifecycle
-- ghosts enter the game depending on the current level/time
 - the game ends if pacman dies without remaining lives
 - different ghost behaviour based on level/time
 
@@ -51,8 +48,5 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 - pause menu to quit the game
 
 ### Refactoring
-- the app needs a fixed order of execution for target setting, state update and movement. A core problem here is the Target component, which gets removed and added frequently with 1-frame-delays
 - add every map element (walls, tunnels, ghost house) as an entity
-- bind movement to the target, so the ghost has no extra movement component
-- redo the map creation. The txt file is too limited
 - (Maybe) change the point to a field struct to remove these stupid getters

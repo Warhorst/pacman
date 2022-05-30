@@ -18,6 +18,7 @@ pub struct StatePlugin;
 impl Plugin for StatePlugin {
     fn build(&self, app: &mut App) {
         app
+            .insert_resource(FrightenedTimerNew::new())
             .add_system_set(
                 SystemSet::new()
                     .with_system(update_frightened_state)
@@ -27,8 +28,7 @@ impl Plugin for StatePlugin {
                     .with_system(update_eaten_state::<Pinky>)
                     .with_system(update_eaten_state::<Inky>)
                     .with_system(update_eaten_state::<Clyde>)
-                    .with_system(update_frightened_timer.label("frightened_update"))
-                    .with_system(set_frightened_when_pacman_ate_energizer.after("frightened_update"))
+                    .with_system(set_frightened_when_pacman_ate_energizer)
                     .with_system(set_eaten_when_hit_by_pacman)
                     .label(StateSetter)
             )
@@ -49,31 +49,43 @@ pub enum State {
     Spawned,
 }
 
-pub struct FrightenedTimer {
-    timer: Timer,
+pub struct FrightenedTimerNew {
+    timer: Option<Timer>
 }
 
-impl FrightenedTimer {
+impl FrightenedTimerNew {
+    pub fn new() -> Self {
+        FrightenedTimerNew {
+            timer: None
+        }
+    }
+
     /// Ghost are frightened for the full time at level 1.
     /// Their time gets reduced every level until level 19, were they aren't frightened at all.
     ///
     /// This is only speculation. It is unclear how the time a ghost is frightened
     /// gets calculated.
-    pub fn start(level: &Level) -> Self {
+    pub fn start(&mut self, level: &Level) {
         let level = **level as f32 - 1.0;
         let time = f32::max(8.0 - level * (8.0 / 18.0), 0.0);
-
-        FrightenedTimer {
-            timer: Timer::from_seconds(time, false)
-        }
+        self.timer = Some(Timer::from_seconds(time, false))
     }
 
     pub fn tick(&mut self, delta: Duration) {
-        self.timer.tick(delta);
+        if let Some(ref mut t) = self.timer {
+            t.tick(delta);
+        }
+
+        if self.is_finished() {
+            self.timer = None
+        }
     }
 
     pub fn is_finished(&self) -> bool {
-        self.timer.finished()
+        match self.timer {
+            Some(ref t) => t.finished(),
+            None => true
+        }
     }
 }
 
@@ -123,20 +135,17 @@ fn update_chase_and_scatter_state(
     }
 }
 
-// TODO: Something ain't right here. Sometimes, a just instantly switches back to normal.
 fn update_frightened_state(
+    time: Res<Time>,
     schedule: Res<Schedule>,
-    frightened_timer: Option<Res<FrightenedTimer>>,
+    mut frightened_timer: ResMut<FrightenedTimerNew>,
     mut query: Query<&mut State, With<Ghost>>,
 ) {
-    let frightened_time_over = match frightened_timer {
-        Some(ref timer) => timer.is_finished(),
-        _ => true
-    };
+    frightened_timer.tick(time.delta());
 
     for mut state in query.iter_mut() {
         state_skip_if!(state != State::Frightened);
-        if frightened_time_over {
+        if frightened_timer.is_finished() {
             *state = schedule.current_state();
         }
     }
@@ -157,28 +166,14 @@ fn update_eaten_state<G: Component + GhostType + 'static>(
     }
 }
 
-fn update_frightened_timer(
-    mut commands: Commands,
-    time: Res<Time>,
-    mut timer: Option<ResMut<FrightenedTimer>>,
-) {
-    match timer {
-        Some(ref t) if t.is_finished() => {
-            commands.remove_resource::<FrightenedTimer>()
-        }
-        Some(ref mut t) => t.tick(time.delta()),
-        _ => return
-    }
-}
-
 fn set_frightened_when_pacman_ate_energizer(
-    mut commands: Commands,
     level: Res<Level>,
+    mut frightened_timer: ResMut<FrightenedTimerNew>,
     mut event_reader: EventReader<EnergizerEaten>,
     mut query: Query<(&mut Direction, &mut Target, &mut State, &Transform), With<Ghost>>,
 ) {
     for _ in event_reader.iter() {
-        commands.insert_resource(FrightenedTimer::start(&level));
+        frightened_timer.start(&level);
 
         for (mut direction, mut target, mut state, transform) in query.iter_mut() {
             state_skip_if!(state != State::Scatter | State::Chase);

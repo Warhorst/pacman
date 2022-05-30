@@ -9,6 +9,7 @@ use crate::ghosts::target::{Target, TargetPlugin};
 use crate::ghosts::textures::GhostTextures;
 use crate::tunnels::GhostPassedTunnel;
 use crate::common::Direction;
+use crate::ghosts::state::State;
 
 pub mod movement;
 pub mod spawn;
@@ -121,9 +122,13 @@ fn update_dot_counter_when_dot_eaten(
 
 fn update_ghost_appearance<G: 'static + Component + GhostType>(
     ghost_textures: Res<GhostTextures>,
-    mut query: Query<(&Direction, &mut Handle<Image>), (With<G>, Changed<Direction>)>
+    mut query: Query<(&Direction, &State, &mut Handle<Image>), With<G>>
 ) {
-    for (direction, mut texture) in query.iter_mut() {
-        *texture = ghost_textures.get_normal_texture_for::<G>(&direction)
+    for (direction, state, mut texture) in query.iter_mut() {
+        match state {
+            State::Frightened => *texture = ghost_textures.get_frightened_texture(),
+            State::Eaten => *texture = ghost_textures.get_eaten_texture(&direction),
+            _ => *texture = ghost_textures.get_normal_texture_for::<G>(&direction)
+        }
     }
 }
