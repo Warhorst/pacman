@@ -1,3 +1,4 @@
+use std::time::Duration;
 use bevy::prelude::*;
 use bevy::ecs::query::WorldQuery;
 
@@ -5,26 +6,77 @@ use crate::common::Direction;
 use crate::common::Direction::*;
 use crate::common::Position;
 use crate::constants::{PACMAN_DIMENSION, WALL_DIMENSION};
+use crate::dots::DotEaten;
 use crate::is;
 use crate::map::board::Board;
 use crate::map::Element;
-use crate::pacman::{Pacman, Stop};
+use crate::pacman::Pacman;
 use crate::speed::Speed;
+
+pub struct PacmanMovementPlugin;
+
+impl Plugin for PacmanMovementPlugin {
+    fn build(&self, app: &mut App) {
+        app
+            .insert_resource(PacmanStopTimer::new())
+            .add_system(stop_pacman_when_a_dot_was_eaten)
+            .add_system(move_pacman.after(stop_pacman_when_a_dot_was_eaten))
+            .add_system(update_stop_timer.after(move_pacman))
+        ;
+    }
+}
+
+/// Timer that tells how long pacman will be unable to move.
+struct PacmanStopTimer {
+    timer: Option<Timer>,
+}
+
+impl PacmanStopTimer {
+    pub fn new() -> Self {
+        PacmanStopTimer {
+            timer: None
+        }
+    }
+
+    pub fn start_for_dot(&mut self) {
+        self.timer = Some(Timer::from_seconds(1.0 / 60.0, false))
+    }
+
+    pub fn tick(&mut self, delta: Duration) {
+        if let Some(ref mut timer) = self.timer {
+            timer.tick(delta);
+        }
+    }
+
+    pub fn is_finished(&self) -> bool {
+        match self.timer {
+            None => true,
+            Some(ref t) => t.finished()
+        }
+    }
+
+    pub fn is_active(&self) -> bool {
+        !self.is_finished()
+    }
+}
 
 #[derive(WorldQuery)]
 #[world_query(mutable)]
-pub struct MoveComponents<'a> {
+struct MoveComponents<'a> {
     direction: &'a Direction,
     position: &'a mut Position,
     transform: &'a mut Transform,
-    speed: &'a Speed
+    speed: &'a Speed,
 }
 
-pub(in crate::pacman) fn move_pacman_if_not_stopped(
+fn move_pacman(
     board: Res<Board>,
     time: Res<Time>,
-    mut query: Query<MoveComponents, (With<Pacman>, Without<Stop>)>
+    pacman_stop_timer: Res<PacmanStopTimer>,
+    mut query: Query<MoveComponents, With<Pacman>>,
 ) {
+    if pacman_stop_timer.is_active() { return; }
+
     let delta_seconds = time.delta_seconds();
 
     for mut move_components in query.iter_mut() {
@@ -123,4 +175,28 @@ fn center_position(direction: &Direction, new_position: &Position, new_coordinat
         Up | Down => new_coordinates.x = position_coordinates.x,
         Left | Right => new_coordinates.y = position_coordinates.y
     }
+}
+
+/// When pacman eats a dot, he will stop for a moment. This allows
+/// the ghost to catch up on him if he continues to eat dots.
+///
+/// In the original arcade game, his movement update just skipped
+/// for one frame, letting him stop for 1/60 second. This might work on
+/// a frame locked arcade machine but will not have the desired
+/// effect if the game runs on 144 FPS for example. Therefore, a timer
+/// with a fixed duration is used instead.
+fn stop_pacman_when_a_dot_was_eaten(
+    mut event_reader: EventReader<DotEaten>,
+    mut pacman_stop_timer: ResMut<PacmanStopTimer>,
+) {
+    for _ in event_reader.iter() {
+        pacman_stop_timer.start_for_dot();
+    }
+}
+
+fn update_stop_timer(
+    time: Res<Time>,
+    mut pacman_stop_timer: ResMut<PacmanStopTimer>,
+) {
+    pacman_stop_timer.tick(time.delta());
 }

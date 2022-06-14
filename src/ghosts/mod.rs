@@ -69,14 +69,12 @@ impl GhostType for Clyde {}
 /// When reaching zero, a ghost can leave the ghost house.
 #[derive(Component)]
 pub struct DotCounter {
-    max: u8,
     current: u8,
 }
 
 impl DotCounter {
     pub fn new(amount: u8) -> Self {
         DotCounter {
-            max: amount,
             current: amount,
         }
     }
