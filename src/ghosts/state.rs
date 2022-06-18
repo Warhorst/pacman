@@ -1,15 +1,12 @@
-use std::time::Duration;
-
 use bevy::prelude::*;
 
 use crate::common::{Direction, Position};
-use crate::energizer::EnergizerEaten;
+use crate::energizer::{EnergizerEaten, EnergizerTimer};
 use crate::ghosts::schedule::ScheduleChanged;
 use crate::ghosts::target::Target;
-use crate::pacman::Pacman;
+use crate::pacman::PacmanEatsGhost;
 use crate::ghost_house::GhostHouse;
 use crate::ghosts::{Blinky, Clyde, DotCounter, Ghost, GhostType, Inky, Pinky};
-use crate::level::Level;
 use crate::ghosts::schedule::Schedule;
 use crate::state_skip_if;
 
@@ -17,21 +14,19 @@ pub struct StatePlugin;
 
 impl Plugin for StatePlugin {
     fn build(&self, app: &mut App) {
-        app
-            .insert_resource(FrightenedTimerNew::new())
-            .add_system_set(
-                SystemSet::new()
-                    .with_system(update_frightened_state)
-                    .with_system(update_spawned_state)
-                    .with_system(update_chase_and_scatter_state)
-                    .with_system(update_eaten_state::<Blinky>)
-                    .with_system(update_eaten_state::<Pinky>)
-                    .with_system(update_eaten_state::<Inky>)
-                    .with_system(update_eaten_state::<Clyde>)
-                    .with_system(set_frightened_when_pacman_ate_energizer)
-                    .with_system(set_eaten_when_hit_by_pacman)
-                    .label(StateSetter)
-            )
+        app.add_system_set(
+            SystemSet::new()
+                .with_system(update_frightened_state)
+                .with_system(update_spawned_state)
+                .with_system(update_chase_and_scatter_state)
+                .with_system(update_eaten_state::<Blinky>)
+                .with_system(update_eaten_state::<Pinky>)
+                .with_system(update_eaten_state::<Inky>)
+                .with_system(update_eaten_state::<Clyde>)
+                .with_system(set_frightened_when_pacman_ate_energizer)
+                .with_system(set_eaten_when_hit_by_pacman)
+                .label(StateSetter)
+        )
         ;
     }
 }
@@ -47,46 +42,6 @@ pub enum State {
     Frightened,
     Eaten,
     Spawned,
-}
-
-pub struct FrightenedTimerNew {
-    timer: Option<Timer>
-}
-
-impl FrightenedTimerNew {
-    pub fn new() -> Self {
-        FrightenedTimerNew {
-            timer: None
-        }
-    }
-
-    /// Ghost are frightened for the full time at level 1.
-    /// Their time gets reduced every level until level 19, were they aren't frightened at all.
-    ///
-    /// This is only speculation. It is unclear how the time a ghost is frightened
-    /// gets calculated.
-    pub fn start(&mut self, level: &Level) {
-        let level = **level as f32 - 1.0;
-        let time = f32::max(8.0 - level * (8.0 / 18.0), 0.0);
-        self.timer = Some(Timer::from_seconds(time, false))
-    }
-
-    pub fn tick(&mut self, delta: Duration) {
-        if let Some(ref mut t) = self.timer {
-            t.tick(delta);
-        }
-
-        if self.is_finished() {
-            self.timer = None
-        }
-    }
-
-    pub fn is_finished(&self) -> bool {
-        match self.timer {
-            Some(ref t) => t.finished(),
-            None => true
-        }
-    }
 }
 
 /// Update the spawned state. A ghost is no longer spawned if he stands in front of
@@ -136,16 +91,13 @@ fn update_chase_and_scatter_state(
 }
 
 fn update_frightened_state(
-    time: Res<Time>,
     schedule: Res<Schedule>,
-    mut frightened_timer: ResMut<FrightenedTimerNew>,
+    energizer_timer: Res<EnergizerTimer>,
     mut query: Query<&mut State, With<Ghost>>,
 ) {
-    frightened_timer.tick(time.delta());
-
     for mut state in query.iter_mut() {
         state_skip_if!(state != State::Frightened);
-        if frightened_timer.is_finished() {
+        if energizer_timer.is_finished() {
             *state = schedule.current_state();
         }
     }
@@ -167,14 +119,10 @@ fn update_eaten_state<G: Component + GhostType + 'static>(
 }
 
 fn set_frightened_when_pacman_ate_energizer(
-    level: Res<Level>,
-    mut frightened_timer: ResMut<FrightenedTimerNew>,
     mut event_reader: EventReader<EnergizerEaten>,
     mut query: Query<(&mut Direction, &mut Target, &mut State, &Transform), With<Ghost>>,
 ) {
     for _ in event_reader.iter() {
-        frightened_timer.start(&level);
-
         for (mut direction, mut target, mut state, transform) in query.iter_mut() {
             state_skip_if!(state != State::Scatter | State::Chase);
 
@@ -194,15 +142,17 @@ fn set_frightened_when_pacman_ate_energizer(
 }
 
 fn set_eaten_when_hit_by_pacman(
-    mut ghost_query: Query<(&Position, &mut State), With<Ghost>>,
-    pacman_query: Query<&Position, With<Pacman>>,
+    mut event_reader: EventReader<PacmanEatsGhost>,
+    mut ghost_query: Query<(Entity, &mut State), With<Ghost>>,
 ) {
-    for (ghost_position, mut state) in ghost_query.iter_mut() {
-        for pacman_position in pacman_query.iter() {
-            if ghost_position == pacman_position {
-                state_skip_if!(state != State::Frightened);
-                *state = State::Eaten;
+    for event in event_reader.iter() {
+        for (entity, mut state) in ghost_query.iter_mut() {
+            if entity != **event {
+                continue;
             }
+
+            state_skip_if!(state != State::Frightened);
+            *state = State::Eaten;
         }
     }
 }

@@ -20,7 +20,8 @@ pub struct Pacman;
 pub struct PacmanKilled;
 
 /// Fired when Pacman ate a ghost in frightened state.
-pub struct PacmanEatsGhost;
+#[derive(Deref)]
+pub struct PacmanEatsGhost(Entity);
 
 pub struct PacmanPlugin;
 
@@ -79,10 +80,10 @@ fn pacman_hits_ghost(
     mut killed_event_writer: EventWriter<PacmanKilled>,
     mut eat_event_writer: EventWriter<PacmanEatsGhost>,
     pacman_query: Query<&Position, With<Pacman>>,
-    ghost_query: Query<(&Position, &State), With<Ghost>>,
+    ghost_query: Query<(Entity, &Position, &State), With<Ghost>>,
 ) {
     for pacman_position in pacman_query.iter() {
-        for (ghost_position, state) in ghost_query.iter() {
+        for (entity, ghost_position, state) in ghost_query.iter() {
             if pacman_position != ghost_position { continue; }
 
             if let State::Scatter | State::Chase = state {
@@ -90,7 +91,7 @@ fn pacman_hits_ghost(
             }
 
             if let State::Frightened = state {
-                eat_event_writer.send(PacmanEatsGhost)
+                eat_event_writer.send(PacmanEatsGhost(entity))
             }
         }
     }

@@ -9,3 +9,5 @@ pub const GHOST_DIMENSION: f32 = PACMAN_DIMENSION;
 pub const GHOST_SPEED: f32 = PACMAN_SPEED;
 
 pub const POINTS_PER_DOT: usize = 10;
+pub const POINTS_PER_ENERGIZER: usize = 50;
+pub const POINTS_PER_GHOST: usize = 200;

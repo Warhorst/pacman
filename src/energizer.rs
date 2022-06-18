@@ -1,9 +1,11 @@
+use std::time::Duration;
 use bevy::prelude::*;
 
 use crate::constants::ENERGIZER_DIMENSION;
 use crate::pacman::Pacman;
 use crate::common::Position;
 use crate::is;
+use crate::level::Level;
 use crate::map::board::Board;
 use crate::map::Element::EnergizerSpawn;
 
@@ -13,8 +15,13 @@ impl Plugin for EnergizerPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<EnergizerEaten>()
+            .add_event::<EnergizerOver>()
+            .insert_resource(EnergizerTimer::new())
             .add_startup_system(spawn_energizer)
-            .add_system(pacman_eat_energizer);
+            .add_system(pacman_eat_energizer)
+            .add_system(start_energizer_timer_when_energizer_eaten)
+            .add_system(update_energizer_timer)
+        ;
     }
 }
 
@@ -24,6 +31,49 @@ pub struct Energizer;
 
 /// Fired when pacman eats an energizer.
 pub struct EnergizerEaten;
+
+/// Fired when an energizer is no longer active
+pub struct EnergizerOver;
+
+pub struct EnergizerTimer {
+    timer: Option<Timer>,
+}
+
+impl EnergizerTimer {
+    pub fn new() -> Self {
+        EnergizerTimer {
+            timer: None
+        }
+    }
+
+    /// The energizer is active for the full time at level 1.
+    /// Its time gets reduced every level until level 19, were it stops instantly.
+    ///
+    /// I use a linear function to calculate the energizer time per level. This is only speculation.
+    /// It is unclear how the time an energizer is active gets calculated.
+    pub fn start(&mut self, level: &Level) {
+        let level = **level as f32 - 1.0;
+        let time = f32::max(8.0 - level * (8.0 / 18.0), 0.0);
+        self.timer = Some(Timer::from_seconds(time, false))
+    }
+
+    pub fn tick(&mut self, delta: Duration) {
+        if let Some(ref mut t) = self.timer {
+            t.tick(delta);
+        }
+
+        if self.is_finished() {
+            self.timer = None
+        }
+    }
+
+    pub fn is_finished(&self) -> bool {
+        match self.timer {
+            Some(ref t) => t.finished(),
+            None => true
+        }
+    }
+}
 
 fn spawn_energizer(
     mut commands: Commands,
@@ -59,5 +109,27 @@ fn pacman_eat_energizer(
                 event_writer.send(EnergizerEaten)
             }
         }
+    }
+}
+
+fn start_energizer_timer_when_energizer_eaten(
+    mut event_reader: EventReader<EnergizerEaten>,
+    level: Res<Level>,
+    mut energizer_timer: ResMut<EnergizerTimer>
+) {
+    for _ in event_reader.iter() {
+        energizer_timer.start(&level)
+    }
+}
+
+fn update_energizer_timer(
+    mut event_writer: EventWriter<EnergizerOver>,
+    mut energizer_timer: ResMut<EnergizerTimer>,
+    time: Res<Time>
+) {
+    energizer_timer.tick(time.delta());
+
+    if energizer_timer.is_finished() {
+        event_writer.send(EnergizerOver)
     }
 }

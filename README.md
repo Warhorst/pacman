@@ -26,11 +26,6 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 - fruit points and appearance change based on the current level
 - eating the fruits gives pacman points
 
-### Points
-- correct value based on what was eaten
-- get points for eating ghosts
-- points increase exponentially when eating ghosts while an energizer is active
-
 ### Graphics
 - sprites for pacman
 - sprites for ghosts

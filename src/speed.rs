@@ -2,12 +2,12 @@ use std::ops::RangeInclusive;
 use bevy::prelude::*;
 use crate::common::Position;
 use crate::constants::{GHOST_SPEED, PACMAN_SPEED};
+use crate::energizer::EnergizerTimer;
 use crate::ghosts::Ghost;
 use crate::level::Level;
 use crate::pacman::Pacman;
 use crate::tunnels::spawn::TunnelPositions;
-use crate::ghosts::state::{FrightenedTimerNew, State};
-
+use crate::ghosts::state::State;
 pub struct SpeedPlugin;
 
 impl Plugin for SpeedPlugin {
@@ -155,13 +155,13 @@ fn update_ghost_speed(
 fn update_pacman_speed(
     level: Res<Level>,
     speed_by_level: Res<SpeedByLevel>,
-    frightened_timer: Res<FrightenedTimerNew>,
+    energizer_timer: Res<EnergizerTimer>,
     mut query: Query<&mut Speed, With<Pacman>>,
 ) {
     for mut speed in query.iter_mut() {
         let pacman_speed = speed_by_level.for_pacman(&level);
 
-        if !frightened_timer.is_finished() {
+        if !energizer_timer.is_finished() {
             *speed = pacman_speed.frightened;
         } else {
             *speed = pacman_speed.normal;

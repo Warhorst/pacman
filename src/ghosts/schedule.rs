@@ -1,8 +1,9 @@
 use std::ops::RangeInclusive;
 use bevy::prelude::*;
 use bevy::utils::Duration;
+use crate::energizer::EnergizerTimer;
 use crate::level::Level;
-use crate::ghosts::state::{FrightenedTimerNew, State};
+use crate::ghosts::state::State;
 use crate::ghosts::state::State::*;
 
 pub(super) struct SchedulePlugin;
@@ -49,11 +50,11 @@ fn update_schedule_when_level_changed(
 /// The schedule does not proceed while an energizer is active.
 fn update_schedule(
     time: Res<Time>,
-    frightened_timer: Res<FrightenedTimerNew>,
+    energizer_timer: Res<EnergizerTimer>,
     mut schedule: ResMut<Schedule>,
     mut event_writer: EventWriter<ScheduleChanged>,
 ) {
-    if !frightened_timer.is_finished() { return; }
+    if !energizer_timer.is_finished() { return; }
 
     let old_state = schedule.current_state();
     let new_state = schedule.state_after_tick(time.delta());
