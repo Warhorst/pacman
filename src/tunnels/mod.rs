@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 
-use crate::common::{Direction, Position};
 use crate::tunnels::movement::{move_ghost_trough_tunnel, move_pacman_through_tunnel};
 use crate::tunnels::spawn::spawn_tunnels;
 
@@ -19,24 +18,9 @@ impl Plugin for TunnelPlugin {
     }
 }
 
-#[derive(Copy, Clone, Component, Debug)]
-struct Tunnel {
-    first_entrance: TunnelEntrance,
-    second_entrance: TunnelEntrance,
-}
-
-impl Tunnel {
-    pub fn new(first_entrance: TunnelEntrance, second_entrance: TunnelEntrance) -> Self {
-        Tunnel { first_entrance, second_entrance }
-    }
-}
+#[derive(Component, Deref)]
+struct Tunnel(usize);
 
 /// Event. Fired when a ghost moved through a tunnel.
 #[derive(Deref, DerefMut)]
 pub struct GhostPassedTunnel(pub Entity);
-
-#[derive(Copy, Clone, Debug)]
-struct TunnelEntrance {
-    position: Position,
-    entrance_direction: Direction,
-}
