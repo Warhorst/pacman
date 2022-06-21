@@ -15,12 +15,11 @@ fn spawn_camera(
     board: Res<Board>,
 ) {
     let mut bundle = OrthographicCameraBundle::new_2d();
-    bundle.transform.translation = calculate_camera_position(board.width, board.height);
+    modify_camera_x_y(&board, &mut bundle.transform.translation);
     commands.spawn().insert_bundle(bundle);
 }
 
-fn calculate_camera_position(width: usize, height: usize) -> Vec3 {
-    let x = width as f32 * FIELD_DIMENSION / 2.0;
-    let y = height as f32 * FIELD_DIMENSION / 2.0;
-    Vec3::new(x, y, 0.0)
+fn modify_camera_x_y(board: &Board, translation: &mut Vec3) {
+    translation.x = board.width as f32 * FIELD_DIMENSION / 2.0;
+    translation.y = board.height as f32 * FIELD_DIMENSION / 2.0;
 }

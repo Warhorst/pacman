@@ -49,24 +49,19 @@ impl Board {
             .unwrap_or(false)
     }
 
-    /// Returns the first element on the given position matching the given filter.
-    ///
-    /// Returns None if
-    /// - the position is not on the board
-    /// - no element matches the filter
-    pub fn element_on_position_matching(&self, position: &Position, filter: impl Fn(&Element) -> bool) -> Option<&Element> {
-        self.elements_map.get(position)?
-            .into_iter()
-            .filter(|e| (filter)(e))
-            .next()
-    }
-
     /// Return the elements on the given position.
     ///
     /// If the position does not exists in the map, return a reference to an empty
     /// vector.
     pub fn elements_on_position(&self, position: &Position) -> &Vec<Element> {
         self.elements_map.get(position).unwrap_or(&EMPTY)
+    }
+
+    /// Return an iterator over all positions and elements.
+    pub fn get_position_element_iter(&self) -> impl IntoIterator<Item=(&Position, &Element)> {
+        self.elements_map
+            .iter()
+            .flat_map(|(pos, elements)| elements.into_iter().map(move |elem| (pos, elem)))
     }
 }
 
