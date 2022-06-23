@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::common::{Direction, Position};
-use crate::energizer::{EnergizerEaten, EnergizerTimer};
+use crate::energizer::{EnergizerEaten, EnergizerOver};
 use crate::ghosts::schedule::ScheduleChanged;
 use crate::ghosts::target::Target;
 use crate::pacman::PacmanEatsGhost;
@@ -92,12 +92,12 @@ fn update_chase_and_scatter_state(
 
 fn update_frightened_state(
     schedule: Res<Schedule>,
-    energizer_timer: Res<EnergizerTimer>,
+    mut event_reader: EventReader<EnergizerOver>,
     mut query: Query<&mut State, With<Ghost>>,
 ) {
-    for mut state in query.iter_mut() {
-        state_skip_if!(state != State::Frightened);
-        if energizer_timer.is_finished() {
+    for _ in event_reader.iter() {
+        for mut state in query.iter_mut() {
+            state_skip_if!(state != State::Frightened);
             *state = schedule.current_state();
         }
     }

@@ -19,7 +19,7 @@ impl Plugin for EnergizerPlugin {
             .insert_resource(EnergizerTimer::new())
             .add_startup_system(spawn_energizer)
             .add_system(pacman_eat_energizer)
-            .add_system(start_energizer_timer_when_energizer_eaten)
+            .add_system(start_energizer_timer_when_energizer_eaten.after(pacman_eat_energizer))
             .add_system(update_energizer_timer)
         ;
     }
