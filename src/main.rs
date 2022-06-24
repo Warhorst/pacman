@@ -36,6 +36,7 @@ mod map;
 mod walls;
 mod ghost_house;
 mod ghost_corners;
+mod ghost_house_gate;
 
 fn main() {
     App::new()
