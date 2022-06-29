@@ -4,10 +4,11 @@ use crate::ghosts::state::State;
 use crate::{state_skip_if, target_skip_if};
 use crate::constants::FIELD_DIMENSION;
 use crate::ghost_house::GhostHouse;
-use crate::ghosts::{DotCounter, GhostType};
+use crate::ghosts::GhostType;
 use crate::ghosts::target::Target;
 use crate::common::Direction;
 use crate::common::Direction::*;
+use crate::ghost_house_gate::GhostHouseGate;
 
 #[derive(WorldQuery)]
 #[world_query(mutable)]
@@ -16,7 +17,6 @@ pub struct SpawnedTargetComponents<'a> {
     direction: &'a mut Direction,
     transform: &'a Transform,
     state: &'a State,
-    dot_counter: &'a DotCounter
 }
 
 /// Determine the next target coordinates for a ghost when in "Spawned" state.
@@ -28,16 +28,17 @@ pub struct SpawnedTargetComponents<'a> {
 /// If a ghost cannot leave the house yet, he just moves around, eager to leave and hunt pacman.
 pub fn set_spawned_target<G: GhostType + Component + 'static>(
     ghost_house: Res<GhostHouse>,
+    ghost_house_gate: Res<GhostHouseGate>,
     mut query: Query<SpawnedTargetComponents, With<G>>,
 ) {
     for mut components in query.iter_mut() {
         target_skip_if!(components.target set);
         state_skip_if!(components.state != State::Spawned);
 
-        if components.dot_counter.is_active() {
-            bounce_around::<G>(&mut components, &ghost_house)
-        } else {
+        if ghost_house_gate.ghost_can_leave_house::<G>() {
             leave_house::<G>(&mut components, &ghost_house)
+        } else {
+            bounce_around::<G>(&mut components, &ghost_house)
         }
     }
 }

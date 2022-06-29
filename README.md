@@ -11,7 +11,6 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 - "waka waka" animation + sound when eating dots (very important)
 
 ### Ghosts
-- leave ghost house based on eaten dots and time (partially done)
 - animations
 
 ### Lifecycle
@@ -45,3 +44,4 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 ### Refactoring
 - add every map element (walls, tunnels, ghost house) as an entity
 - (Maybe) change the point to a field struct to remove these stupid getters
+- (Maybe) remove the Position component (but keep using it in systems). It can be generated quickly from a transform. This way only the transform needs to be updated.

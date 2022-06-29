@@ -108,7 +108,7 @@ impl GhostHouseGate {
     }
 
     /// Ask the gate if the given ghost type can be released.
-    pub fn can_ghost_leave<G: GhostType + 'static>(&mut self) -> bool {
+    pub fn ghost_can_leave_house<G: GhostType + 'static>(&self) -> bool {
         self.released_ghosts.contains(&TypeId::of::<G>())
     }
 

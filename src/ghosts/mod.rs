@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use crate::dots::DotEaten;
 
 use crate::ghosts::movement::MovePlugin;
 use crate::ghosts::schedule::SchedulePlugin;
@@ -29,7 +28,6 @@ impl Plugin for GhostPlugin {
             .add_plugin(SchedulePlugin)
             .add_startup_system(spawn_ghosts)
             .add_system(ghost_passed_tunnel)
-            .add_system(update_dot_counter_when_dot_eaten)
             .add_system(update_ghost_appearance::<Blinky>)
             .add_system(update_ghost_appearance::<Pinky>)
             .add_system(update_ghost_appearance::<Inky>)
@@ -65,35 +63,6 @@ impl GhostType for Inky {}
 
 impl GhostType for Clyde {}
 
-/// The personal counter of every ghost to keep track of how many dots were eaten.
-/// When reaching zero, a ghost can leave the ghost house.
-#[derive(Component)]
-pub struct DotCounter {
-    current: u8,
-}
-
-impl DotCounter {
-    pub fn new(amount: u8) -> Self {
-        DotCounter {
-            current: amount,
-        }
-    }
-
-    pub fn decrease(&mut self) {
-        if !self.is_done() {
-            self.current -= 1
-        }
-    }
-
-    pub fn is_done(&self) -> bool {
-        self.current == 0
-    }
-
-    pub fn is_active(&self) -> bool {
-        !self.is_done()
-    }
-}
-
 fn ghost_passed_tunnel(
     mut event_reader: EventReader<GhostPassedTunnel>,
     mut query: Query<(Entity, &mut Target), With<Ghost>>,
@@ -103,17 +72,6 @@ fn ghost_passed_tunnel(
             if entity == **event {
                 target.clear();
             }
-        }
-    }
-}
-
-fn update_dot_counter_when_dot_eaten(
-    mut event_reader: EventReader<DotEaten>,
-    mut query: Query<&mut DotCounter>,
-) {
-    for _ in event_reader.iter() {
-        for mut dot_counter in query.iter_mut() {
-            dot_counter.decrease();
         }
     }
 }

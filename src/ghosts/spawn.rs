@@ -4,7 +4,7 @@ use crate::common::Position;
 use crate::common::Direction::*;
 use crate::constants::GHOST_DIMENSION;
 use crate::ghost_house::GhostHouse;
-use crate::ghosts::{Blinky, Clyde, DotCounter, Ghost, Inky, Pinky};
+use crate::ghosts::{Blinky, Clyde, Ghost, Inky, Pinky};
 use crate::ghosts::state::State;
 use crate::ghosts::target::Target;
 use crate::ghosts::textures::GhostTextures;
@@ -21,10 +21,10 @@ pub fn spawn_ghosts(
 ) {
     let ghost_house = GhostHouse::new(&board);
     let ghost_textures = GhostTextures::new(&asset_server);
-    spawn_ghost(&mut commands, ghost_house.spawn_coordinates_of::<Blinky>(), &level, &speed_by_level, Blinky, DotCounter::new(0), ghost_textures.get_normal_texture_for::<Blinky>(&Left));
-    spawn_ghost(&mut commands, ghost_house.spawn_coordinates_of::<Pinky>(), &level, &speed_by_level, Pinky, DotCounter::new(0), ghost_textures.get_normal_texture_for::<Pinky>(&Left));
-    spawn_ghost(&mut commands, ghost_house.spawn_coordinates_of::<Inky>(), &level, &speed_by_level, Inky, DotCounter::new(30), ghost_textures.get_normal_texture_for::<Inky>(&Left));
-    spawn_ghost(&mut commands, ghost_house.spawn_coordinates_of::<Clyde>(), &level, &speed_by_level, Clyde, DotCounter::new(60), ghost_textures.get_normal_texture_for::<Clyde>(&Left));
+    spawn_ghost(&mut commands, ghost_house.spawn_coordinates_of::<Blinky>(), &level, &speed_by_level, Blinky, ghost_textures.get_normal_texture_for::<Blinky>(&Left));
+    spawn_ghost(&mut commands, ghost_house.spawn_coordinates_of::<Pinky>(), &level, &speed_by_level, Pinky, ghost_textures.get_normal_texture_for::<Pinky>(&Left));
+    spawn_ghost(&mut commands, ghost_house.spawn_coordinates_of::<Inky>(), &level, &speed_by_level, Inky, ghost_textures.get_normal_texture_for::<Inky>(&Left));
+    spawn_ghost(&mut commands, ghost_house.spawn_coordinates_of::<Clyde>(), &level, &speed_by_level, Clyde, ghost_textures.get_normal_texture_for::<Clyde>(&Left));
     commands.insert_resource(ghost_house);
     commands.insert_resource(ghost_textures);
 }
@@ -35,7 +35,6 @@ fn spawn_ghost(
     level: &Level,
     speed_by_level: &SpeedByLevel,
     ghost_type: impl Component,
-    dot_counter: DotCounter,
     texture: Handle<Image>
 
 ) {
@@ -57,6 +56,5 @@ fn spawn_ghost(
         .insert(speed_by_level.for_ghosts(level).normal)
         .insert(Target::new())
         .insert(State::Spawned)
-        .insert(dot_counter)
     ;
 }

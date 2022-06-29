@@ -6,7 +6,7 @@ use crate::ghosts::schedule::ScheduleChanged;
 use crate::ghosts::target::Target;
 use crate::pacman::PacmanEatsGhost;
 use crate::ghost_house::GhostHouse;
-use crate::ghosts::{Blinky, Clyde, DotCounter, Ghost, GhostType, Inky, Pinky};
+use crate::ghosts::{Blinky, Clyde, Ghost, GhostType, Inky, Pinky};
 use crate::ghosts::schedule::Schedule;
 use crate::state_skip_if;
 
@@ -17,7 +17,10 @@ impl Plugin for StatePlugin {
         app.add_system_set(
             SystemSet::new()
                 .with_system(update_frightened_state)
-                .with_system(update_spawned_state)
+                .with_system(update_spawned_state::<Blinky>)
+                .with_system(update_spawned_state::<Pinky>)
+                .with_system(update_spawned_state::<Inky>)
+                .with_system(update_spawned_state::<Clyde>)
                 .with_system(update_chase_and_scatter_state)
                 .with_system(update_eaten_state::<Blinky>)
                 .with_system(update_eaten_state::<Pinky>)
@@ -46,15 +49,13 @@ pub enum State {
 
 /// Update the spawned state. A ghost is no longer spawned if he stands in front of
 /// the ghost house. When he left the ghost house, he always turns to the right.
-fn update_spawned_state(
+fn update_spawned_state<G: GhostType + Component + 'static>(
     schedule: Res<Schedule>,
     ghost_house: Res<GhostHouse>,
-    mut query: Query<(&mut Direction, &mut State, &Transform, &DotCounter)>,
+    mut query: Query<(&mut Direction, &mut State, &Transform)>,
 ) {
-    for (mut direction, mut state, transform, dot_counter) in query.iter_mut() {
+    for (mut direction, mut state, transform) in query.iter_mut() {
         state_skip_if!(state != State::Spawned);
-
-        if dot_counter.is_active() { continue; }
 
         let coordinates = transform.translation;
 

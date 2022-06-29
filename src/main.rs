@@ -9,6 +9,7 @@ use crate::dots::DotPlugin;
 use crate::energizer::EnergizerPlugin;
 use crate::ghost_corners::GhostCornersPlugin;
 use crate::ghost_house::GhostHousePlugin;
+use crate::ghost_house_gate::GhostHouseGatePlugin;
 use crate::ghosts::GhostPlugin;
 use crate::level::LevelPlugin;
 use crate::lives::LivesPlugin;
@@ -64,5 +65,6 @@ fn main() {
         .add_plugin(LivesPlugin)
         .add_plugin(LevelPlugin)
         .add_plugin(SpeedPlugin)
+        .add_plugin(GhostHouseGatePlugin)
         .run()
 }
