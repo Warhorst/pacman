@@ -42,8 +42,8 @@ mod ghost_house_gate;
 fn main() {
     App::new()
         .insert_resource(WindowDescriptor {
-            width: 1000.0,
-            height: 700.0,
+            width: 1200.0,
+            height: 900.0,
             title: "PacMan".to_string(),
             resizable: false,
             ..Default::default()

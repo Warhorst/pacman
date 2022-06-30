@@ -1,5 +1,7 @@
 use bevy::prelude::*;
+use crate::constants::FIELD_DIMENSION;
 use crate::dots::AllDotsEaten;
+use crate::map::board::Board;
 
 pub struct LevelPlugin;
 
@@ -29,6 +31,7 @@ fn spawn_level_ui(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     level: Res<Level>,
+    board: Res<Board>
 ) {
     commands.spawn_bundle(Text2dBundle {
         text: Text::with_section(format!("Level: {}", **level),
@@ -41,7 +44,7 @@ fn spawn_level_ui(
                                      vertical: VerticalAlign::Center,
                                      horizontal: HorizontalAlign::Center,
                                  }),
-        transform: Transform::from_xyz(240.0, 500.0, 0.0),
+        transform: Transform::from_xyz(FIELD_DIMENSION * (board.width as f32 / 2.0), FIELD_DIMENSION * board.height as f32, 0.0),
         ..Default::default()
     })
         .insert(LevelUi);

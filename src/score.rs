@@ -1,8 +1,9 @@
 use bevy::prelude::*;
 
-use crate::constants::{POINTS_PER_DOT, POINTS_PER_ENERGIZER, POINTS_PER_GHOST};
+use crate::constants::{FIELD_DIMENSION, POINTS_PER_DOT, POINTS_PER_ENERGIZER, POINTS_PER_GHOST};
 use crate::dots::DotEaten;
 use crate::energizer::{EnergizerEaten, EnergizerOver};
+use crate::map::board::Board;
 use crate::pacman::PacmanEatsGhost;
 
 pub struct ScorePlugin;
@@ -41,6 +42,7 @@ struct EatenGhostCounter(usize);
 fn create_scoreboard(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
+    board: Res<Board>
 ) {
     commands.spawn_bundle(Text2dBundle {
         text: Text::with_section("Score".to_string(),
@@ -53,7 +55,7 @@ fn create_scoreboard(
                                      vertical: VerticalAlign::Center,
                                      horizontal: HorizontalAlign::Center,
                                  }),
-        transform: Transform::from_xyz(0.0, 500.0, 0.0),
+        transform: Transform::from_xyz(0.0, FIELD_DIMENSION * board.height as f32, 0.0),
         ..Default::default()
     })
         .insert(Scoreboard);

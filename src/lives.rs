@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::constants::PACMAN_DIMENSION;
+use crate::constants::{FIELD_DIMENSION, PACMAN_DIMENSION};
+use crate::map::board::Board;
 use crate::pacman::PacmanKilled;
 use crate::score::Score;
 
@@ -39,14 +40,15 @@ impl PointsRequiredForExtraLife {
 
 fn spawn_lives(
     mut commands: Commands,
+    board: Res<Board>
 ) {
     for i in 0..LIVES {
-        spawn_life(&mut commands, i)
+        spawn_life(&mut commands, &board, i)
     }
 }
 
-fn spawn_life(commands: &mut Commands, life_index: usize) {
-    let life_x = 480.0 + (life_index as f32) * (PACMAN_DIMENSION) * 2.0;
+fn spawn_life(commands: &mut Commands, board: &Board, life_index: usize) {
+    let life_x = FIELD_DIMENSION * board.width as f32 + (life_index as f32) * (PACMAN_DIMENSION) * 2.0;
 
     commands.spawn()
         .insert_bundle(SpriteBundle {
@@ -55,7 +57,7 @@ fn spawn_life(commands: &mut Commands, life_index: usize) {
                 custom_size: Some(Vec2::new(PACMAN_DIMENSION, PACMAN_DIMENSION)),
                 ..default()
             },
-            transform: Transform::from_translation(Vec3::new(life_x, 500.0, 0.0)),
+            transform: Transform::from_translation(Vec3::new(life_x, FIELD_DIMENSION * board.height as f32, 0.0)),
             ..default()
         })
         .insert(Life(life_index));
@@ -80,11 +82,12 @@ fn add_life_if_player_reaches_specific_score(
     mut commands: Commands,
     score: Res<Score>,
     mut points_required_for_extra_life: ResMut<PointsRequiredForExtraLife>,
+    board: Res<Board>,
     query: Query<&Life>
 ) {
     if **score >= **points_required_for_extra_life {
         let index = query.iter().count();
-        spawn_life(&mut commands, index);
+        spawn_life(&mut commands, &board, index);
         points_required_for_extra_life.increase_limit();
     }
 }
