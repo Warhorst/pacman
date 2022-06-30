@@ -29,7 +29,7 @@ pub(in crate::tunnels) fn spawn_tunnels(
     let tunnel_positions = TunnelPositions::new(board.get_positions_matching(is!(Element::Tunnel {..} | Element::TunnelEntrance | Element::TunnelHallway)));
     commands.insert_resource(tunnel_positions);
 
-    board.get_position_element_iter()
+    board.position_element_iter()
         .into_iter()
         .flat_map(|(pos, elem)| match elem {
             Element::Tunnel {index, opening_direction} => Some((*index, *pos, *opening_direction)),

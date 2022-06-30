@@ -58,7 +58,7 @@ impl Board {
     }
 
     /// Return an iterator over all positions and elements.
-    pub fn get_position_element_iter(&self) -> impl IntoIterator<Item=(&Position, &Element)> {
+    pub fn position_element_iter(&self) -> impl IntoIterator<Item=(&Position, &Element)> {
         self.elements_map
             .iter()
             .flat_map(|(pos, elements)| elements.into_iter().map(move |elem| (pos, elem)))
