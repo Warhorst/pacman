@@ -6,7 +6,7 @@ use crate::ghosts::Ghost;
 use crate::ghosts::state::State;
 use crate::lives::Life;
 use crate::pacman::spawn::{PacmanSpawn, spawn_pacman};
-use std::f32::consts::PI;
+use crate::map::Rotation;
 use crate::pacman::movement::PacmanMovementPlugin;
 
 mod movement;
@@ -68,10 +68,10 @@ fn change_appearance_when_direction_changed(
 ) {
     for (direction, mut transform) in query.iter_mut() {
         match direction {
-            Up => transform.rotation = Quat::from_rotation_z(PI * 0.5),
-            Down => transform.rotation = Quat::from_rotation_z(PI * 1.5),
-            Left => transform.rotation = Quat::from_rotation_z(PI),
-            Right => transform.rotation = Quat::from_rotation_z(0.0),
+            Up => transform.rotation = Rotation::D270.quat_z(),
+            Down => transform.rotation = Rotation::D90.quat_z(),
+            Left => transform.rotation = Rotation::D180.quat_z(),
+            Right => transform.rotation = Rotation::D0.quat_z(),
         }
     }
 }

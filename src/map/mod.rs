@@ -1,9 +1,12 @@
-use bevy::prelude::*;
+use std::f32::consts::PI;
 use std::fs::File;
 use std::path::Path;
-use bevy::utils::HashSet;
 
+use bevy::prelude::*;
+use bevy::utils::HashSet;
 use serde::{Deserialize, Serialize};
+
+use Rotation::*;
 
 use crate::common::{Direction, Position};
 use crate::map::board::Board;
@@ -73,6 +76,18 @@ pub enum Rotation {
     D90,
     D180,
     D270,
+}
+
+impl Rotation {
+    /// Return the Quat created from rotating around the z axes for the given degree.
+    pub fn quat_z(&self) -> Quat {
+        match self {
+            D0 => Quat::from_rotation_z(PI * 0.0),
+            D90 => Quat::from_rotation_z(PI * 1.5),
+            D180 => Quat::from_rotation_z(PI),
+            D270 => Quat::from_rotation_z(PI * 0.5),
+        }
+    }
 }
 
 impl Map {

@@ -1,4 +1,3 @@
-use std::f32::consts::PI;
 use bevy::prelude::*;
 use bevy::utils::HashSet;
 use crate::common::Position;
@@ -67,12 +66,7 @@ fn spawn_labyrinth_walls(commands: &mut Commands, board: &Board, asset_server: &
 
 fn create_transform(position: &Position, rotation: &Rotation) -> Transform {
     let mut transform = Transform::from_translation(Vec3::from(position));
-    transform.rotation = match rotation {
-        Rotation::D0 => Quat::from_rotation_z(PI * 0.0),
-        Rotation::D90 => Quat::from_rotation_z(PI * 1.5),
-        Rotation::D180 => Quat::from_rotation_z(PI),
-        Rotation::D270 => Quat::from_rotation_z(PI * 0.5),
-    };
+    transform.rotation = rotation.quat_z();
     transform
 }
 
