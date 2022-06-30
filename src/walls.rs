@@ -5,7 +5,7 @@ use crate::common::Position;
 use crate::constants::WALL_DIMENSION;
 use crate::is;
 use crate::map::board::Board;
-use crate::map::{Element, Rotation, WallType};
+use crate::map::{Element, Rotation};
 use crate::map::Element::*;
 
 pub struct WallsPlugin;
@@ -40,64 +40,51 @@ fn spawn_walls(
     );
     commands.insert_resource(wall_positions);
 
+    spawn_labyrinth_walls(&mut commands, &board, &asset_server);
+    spawn_ghost_house_entrance(&mut commands, &board);
+}
+
+fn spawn_labyrinth_walls(commands: &mut Commands, board: &Board, asset_server: &AssetServer) {
     for (position, element) in board.position_element_iter() {
-        // TODO refactor
-        match element {
-            Wall { wall_type, is_corner, rotation} => match wall_type {
-                WallType::Outer => {
-                    let mut transform = Transform::from_translation(Vec3::from(position));
+        if let Wall { is_corner, rotation, .. } = element {
+            let transform = create_transform(position, rotation);
+            let texture = select_texture(asset_server, *is_corner);
+            let custom_size = Some(Vec2::new(WALL_DIMENSION, WALL_DIMENSION));
 
-                    transform.rotation = match rotation {
-                        Rotation::D0 => Quat::from_rotation_z(PI * 0.0),
-                        Rotation::D90 => Quat::from_rotation_z(PI * 1.5),
-                        Rotation::D180 => Quat::from_rotation_z(PI),
-                        Rotation::D270 => Quat::from_rotation_z(PI * 0.5),
-                    };
-
-                    if *is_corner {
-                        commands.spawn()
-                            .insert_bundle(SpriteBundle {
-                                texture: asset_server.load("textures/walls/outer_wall_corner.png"),
-                                sprite: Sprite {
-                                    custom_size: Some(Vec2::new(WALL_DIMENSION, WALL_DIMENSION)),
-                                    ..default()
-                                },
-                                transform,
-                                ..Default::default()
-                            });
-                    } else {
-                        commands.spawn()
-                            .insert_bundle(SpriteBundle {
-                                texture: asset_server.load("textures/walls/outer_wall.png"),
-                                sprite: Sprite {
-                                    custom_size: Some(Vec2::new(WALL_DIMENSION, WALL_DIMENSION)),
-                                    ..default()
-                                },
-                                transform,
-                                ..Default::default()
-                            });
-                    }
-
-                },
-                _ => {
-                    commands.spawn()
-                        .insert_bundle(SpriteBundle {
-                            sprite: Sprite {
-                                color: Color::rgb(0.0, 0.0, 1.0),
-                                custom_size: Some(Vec2::new(WALL_DIMENSION, WALL_DIMENSION)),
-                                ..default()
-                            },
-                            transform: Transform::from_translation(Vec3::from(position)),
-                            ..Default::default()
-                        });
-                }
-            },
-            _ => {
-                // spawn nothing
-            }
+            commands.spawn()
+                .insert_bundle(SpriteBundle {
+                    texture,
+                    sprite: Sprite {
+                        custom_size,
+                        ..default()
+                    },
+                    transform,
+                    ..Default::default()
+                });
         }
     }
+}
 
+fn create_transform(position: &Position, rotation: &Rotation) -> Transform {
+    let mut transform = Transform::from_translation(Vec3::from(position));
+    transform.rotation = match rotation {
+        Rotation::D0 => Quat::from_rotation_z(PI * 0.0),
+        Rotation::D90 => Quat::from_rotation_z(PI * 1.5),
+        Rotation::D180 => Quat::from_rotation_z(PI),
+        Rotation::D270 => Quat::from_rotation_z(PI * 0.5),
+    };
+    transform
+}
+
+fn select_texture(asset_server: &AssetServer, is_corner: bool) -> Handle<Image> {
+    if is_corner {
+        asset_server.load("textures/walls/outer_wall_corner.png")
+    } else {
+        asset_server.load("textures/walls/outer_wall.png")
+    }
+}
+
+fn spawn_ghost_house_entrance(commands: &mut Commands, board: &Board) {
     for position in board.get_positions_matching(is!(Element::GhostHouseEntrance {..})) {
         commands.spawn()
             .insert_bundle(SpriteBundle {
