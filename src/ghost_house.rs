@@ -45,8 +45,6 @@ impl Plugin for GhostHousePlugin {
 //  future to rotate it. Therefore, everyone accessing the house acts relative to the house (like respecting the entrance direction).
 pub struct GhostHouse {
     pub entrance_direction: Direction,
-    pub entrance_positions: HashSet<Position>,
-    pub house_positions: HashSet<Position>,
     spawns: HashMap<TypeId, Spawn>,
 }
 
@@ -67,8 +65,6 @@ impl GhostHouse {
 
         GhostHouse {
             entrance_direction: Direction::Up,
-            entrance_positions: HashSet::from_iter(entrance_positions.into_iter().map(|p| *p)),
-            house_positions: HashSet::from_iter(ghost_house_positions.into_iter().map(|p| *p)),
             spawns
         }
     }
@@ -192,6 +188,14 @@ impl GhostHouse {
             self.spawn_coordinates_of::<Pinky>()
         } else {
             self.spawn_coordinates_of::<G>()
+        }
+    }
+
+    pub fn spawn_direction_of<G: GhostType + 'static>(&self) -> Direction {
+        match TypeId::of::<G>() {
+            t_id if t_id == TypeId::of::<Blinky>() => self.entrance_direction.rotate_left(),
+            t_id if t_id == TypeId::of::<Pinky>() => self.entrance_direction,
+            _ => self.entrance_direction.opposite()
         }
     }
 

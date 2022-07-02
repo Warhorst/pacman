@@ -1,10 +1,9 @@
 use bevy::prelude::*;
 
 use crate::common::Position;
-use crate::common::Direction::*;
 use crate::constants::GHOST_DIMENSION;
 use crate::ghost_house::GhostHouse;
-use crate::ghosts::{Blinky, Clyde, Ghost, Inky, Pinky};
+use crate::ghosts::{Blinky, Clyde, Ghost, GhostType, Inky, Pinky};
 use crate::ghosts::state::State;
 use crate::ghosts::target::Target;
 use crate::ghosts::textures::GhostTextures;
@@ -21,23 +20,27 @@ pub fn spawn_ghosts(
 ) {
     let ghost_house = GhostHouse::new(&board);
     let ghost_textures = GhostTextures::new(&asset_server);
-    spawn_ghost(&mut commands, ghost_house.spawn_coordinates_of::<Blinky>(), &level, &speed_by_level, Blinky, ghost_textures.get_normal_texture_for::<Blinky>(&Left));
-    spawn_ghost(&mut commands, ghost_house.spawn_coordinates_of::<Pinky>(), &level, &speed_by_level, Pinky, ghost_textures.get_normal_texture_for::<Pinky>(&Left));
-    spawn_ghost(&mut commands, ghost_house.spawn_coordinates_of::<Inky>(), &level, &speed_by_level, Inky, ghost_textures.get_normal_texture_for::<Inky>(&Left));
-    spawn_ghost(&mut commands, ghost_house.spawn_coordinates_of::<Clyde>(), &level, &speed_by_level, Clyde, ghost_textures.get_normal_texture_for::<Clyde>(&Left));
+    spawn_ghost(&mut commands, &ghost_house, &ghost_textures, &level, &speed_by_level, Blinky);
+    spawn_ghost(&mut commands, &ghost_house, &ghost_textures, &level, &speed_by_level, Pinky);
+    spawn_ghost(&mut commands, &ghost_house, &ghost_textures, &level, &speed_by_level, Inky);
+    spawn_ghost(&mut commands, &ghost_house, &ghost_textures, &level, &speed_by_level, Clyde);
     commands.insert_resource(ghost_house);
     commands.insert_resource(ghost_textures);
 }
 
-fn spawn_ghost(
+fn spawn_ghost<G: GhostType + Component>(
     commands: &mut Commands,
-    spawn_coordinates: Vec3,
+    ghost_house: &GhostHouse,
+    ghost_textures: &GhostTextures,
     level: &Level,
     speed_by_level: &SpeedByLevel,
-    ghost_type: impl Component,
-    texture: Handle<Image>
+    ghost_type: G,
 
 ) {
+    let spawn_direction = ghost_house.spawn_direction_of::<G>();
+    let spawn_coordinates = ghost_house.spawn_coordinates_of::<G>();
+    let texture = ghost_textures.get_normal_texture_for::<G>(&spawn_direction);
+
     commands
         .spawn()
         .insert_bundle(SpriteBundle {
@@ -52,7 +55,7 @@ fn spawn_ghost(
         .insert(Ghost)
         .insert(ghost_type)
         .insert(Position::from(&spawn_coordinates))
-        .insert(Left)
+        .insert(spawn_direction)
         .insert(speed_by_level.for_ghosts(level).normal)
         .insert(Target::new())
         .insert(State::Spawned)

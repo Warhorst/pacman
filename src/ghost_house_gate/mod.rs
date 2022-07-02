@@ -121,7 +121,11 @@ impl GhostHouseGate {
 
     /// Switch to the global counter. Typically called when pacman died.
     fn switch_to_global_counter(&mut self) {
-        self.counter.switch_to_global()
+        self.counter.switch_to_global();
+        self.release_timer.reset();
+        self.released_ghosts.clear();
+        self.ghost_preference_iterator = GhostPreferenceIterator::new();
+        self.current_waiting_ghost_id = self.ghost_preference_iterator.next().expect("first item should exists");
     }
 
     /// Proceed the release timer and check if the current waiting ghost can be released.

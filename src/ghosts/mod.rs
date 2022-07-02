@@ -3,12 +3,15 @@ use bevy::prelude::*;
 use crate::ghosts::movement::MovePlugin;
 use crate::ghosts::schedule::SchedulePlugin;
 use crate::ghosts::spawn::spawn_ghosts;
-use crate::ghosts::state::StatePlugin;
+use crate::ghosts::state::{StatePlugin, StateSetter};
 use crate::ghosts::target::{Target, TargetPlugin};
 use crate::ghosts::textures::GhostTextures;
 use crate::tunnels::GhostPassedTunnel;
 use crate::common::Direction;
+use crate::ghost_house::GhostHouse;
 use crate::ghosts::state::State;
+use crate::ghosts::state::State::Spawned;
+use crate::pacman::PacmanKilled;
 
 pub mod movement;
 pub mod spawn;
@@ -32,6 +35,15 @@ impl Plugin for GhostPlugin {
             .add_system(update_ghost_appearance::<Pinky>)
             .add_system(update_ghost_appearance::<Inky>)
             .add_system(update_ghost_appearance::<Clyde>)
+            .add_system_set(
+                SystemSet::new()
+                    .with_system(reset_ghosts_when_pacman_was_killed::<Blinky>)
+                    .with_system(reset_ghosts_when_pacman_was_killed::<Pinky>)
+                    .with_system(reset_ghosts_when_pacman_was_killed::<Inky>)
+                    .with_system(reset_ghosts_when_pacman_was_killed::<Clyde>)
+                    .before(StateSetter)
+            )
+
         ;
     }
 }
@@ -85,6 +97,22 @@ fn update_ghost_appearance<G: 'static + Component + GhostType>(
             State::Frightened => *texture = ghost_textures.get_frightened_texture(),
             State::Eaten => *texture = ghost_textures.get_eaten_texture(&direction),
             _ => *texture = ghost_textures.get_normal_texture_for::<G>(&direction)
+        }
+    }
+}
+
+fn reset_ghosts_when_pacman_was_killed<G: GhostType + Component + 'static>(
+    mut event_reader: EventReader<PacmanKilled>,
+    ghost_house: Res<GhostHouse>,
+    mut query: Query<(&mut Direction, &mut State, &mut Target, &mut Transform), With<G>>
+) {
+    for _ in event_reader.iter() {
+        for (mut direction, mut state, mut target, mut transform) in query.iter_mut() {
+            // TODO: Blinky is bugged and randomly switches position/direction when respawning
+            *direction = ghost_house.spawn_direction_of::<G>();
+            target.clear();
+            *state = Spawned;
+            transform.translation = ghost_house.spawn_coordinates_of::<G>();
         }
     }
 }
