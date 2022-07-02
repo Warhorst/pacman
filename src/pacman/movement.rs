@@ -7,6 +7,7 @@ use crate::common::Direction::*;
 use crate::common::Position;
 use crate::constants::{PACMAN_DIMENSION, WALL_DIMENSION};
 use crate::dots::DotEaten;
+use crate::energizer::EnergizerEaten;
 use crate::is;
 use crate::map::board::Board;
 use crate::map::Element;
@@ -19,8 +20,9 @@ impl Plugin for PacmanMovementPlugin {
     fn build(&self, app: &mut App) {
         app
             .insert_resource(PacmanStopTimer::new())
-            .add_system(stop_pacman_when_a_dot_was_eaten)
-            .add_system(move_pacman.after(stop_pacman_when_a_dot_was_eaten))
+            .add_system(stop_pacman_when_a_dot_was_eaten.label("pacman_stop"))
+            .add_system(stop_pacman_when_energizer_was_eaten.label("pacman_stop"))
+            .add_system(move_pacman.after("pacman_stop"))
             .add_system(update_stop_timer.after(move_pacman))
         ;
     }
@@ -38,8 +40,20 @@ impl PacmanStopTimer {
         }
     }
 
+    /// Stop pacman for 1/60 second.
+    ///
+    /// On the arcade machine (which was locked to 60 FPS), pacman just stopped for one frame. This does not have
+    /// the desired effect when playing on 144 or 30 FPS.
     pub fn start_for_dot(&mut self) {
         self.timer = Some(Timer::from_seconds(1.0 / 60.0, false))
+    }
+
+    /// Stop pacman for 3/60 second.
+    ///
+    /// On the arcade machine (which was locked to 60 FPS), pacman just stopped for three frames. This does not have
+    /// the desired effect when playing on 144 or 30 FPS.
+    pub fn start_for_energizer(&mut self) {
+        self.timer = Some(Timer::from_seconds(3.0 / 60.0, false))
     }
 
     pub fn tick(&mut self, delta: Duration) {
@@ -179,18 +193,21 @@ fn center_position(direction: &Direction, new_position: &Position, new_coordinat
 
 /// When pacman eats a dot, he will stop for a moment. This allows
 /// the ghost to catch up on him if he continues to eat dots.
-///
-/// In the original arcade game, his movement update just skipped
-/// for one frame, letting him stop for 1/60 second. This might work on
-/// a frame locked arcade machine but will not have the desired
-/// effect if the game runs on 144 FPS for example. Therefore, a timer
-/// with a fixed duration is used instead.
 fn stop_pacman_when_a_dot_was_eaten(
     mut event_reader: EventReader<DotEaten>,
     mut pacman_stop_timer: ResMut<PacmanStopTimer>,
 ) {
     for _ in event_reader.iter() {
         pacman_stop_timer.start_for_dot();
+    }
+}
+
+fn stop_pacman_when_energizer_was_eaten(
+    mut event_reader: EventReader<EnergizerEaten>,
+    mut pacman_stop_timer: ResMut<PacmanStopTimer>,
+) {
+    for _ in event_reader.iter() {
+        pacman_stop_timer.start_for_energizer();
     }
 }
 
