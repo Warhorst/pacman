@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::common::{Direction, Position};
+use crate::common::{Direction, TransformHelper};
 use crate::common::Direction::*;
 use crate::ghosts::Ghost;
 use crate::ghosts::state::State;
@@ -84,7 +84,7 @@ fn pacman_hits_ghost(
 ) {
     for pacman_transform in pacman_query.iter() {
         for (entity, ghost_transform, state) in ghost_query.iter() {
-            if Position::from(pacman_transform) == Position::from(ghost_transform) {
+            if pacman_transform.pos() == ghost_transform.pos() {
                 if let State::Scatter | State::Chase = state {
                     killed_event_writer.send(PacmanKilled)
                 }

@@ -124,24 +124,6 @@ impl From<&mut Vec3> for Position {
     }
 }
 
-impl From<Transform> for Position {
-    fn from(transform: Transform) -> Self {
-        Position::from(transform.translation)
-    }
-}
-
-impl From<&Transform> for Position {
-    fn from(transform: &Transform) -> Self {
-        Position::from(transform.translation)
-    }
-}
-
-impl From<&mut Transform> for Position {
-    fn from(transform: &mut Transform) -> Self {
-        Position::from(transform.translation)
-    }
-}
-
 impl From<Position> for Vec3 {
     fn from(pos: Position) -> Self {
         let x = (pos.x as f32) * FIELD_DIMENSION;
@@ -221,5 +203,37 @@ impl Direction {
 
     pub fn reverse(&mut self) {
         *self = self.opposite()
+    }
+}
+
+/// Provides helper methods for working with transforms (or their translation, to be more accurate).
+///
+/// The games logic widely uses positions to perform specific checks (like collisions and distance calculations).
+/// These methods aim to make this easier.
+pub trait TransformHelper {
+    fn pos(&self) -> Position;
+
+    fn pos_center(&self) -> Vec3;
+
+    fn set_xy(&mut self, transform: &Transform);
+}
+
+impl TransformHelper for Transform {
+    /// Transform to Position. Shorter that calling from all the time.
+    fn pos(&self) -> Position {
+        Position::from(self.translation)
+    }
+
+    /// The center coordinates of the position the transform belongs to.
+    fn pos_center(&self) -> Vec3 {
+        Vec3::from(Position::from(self.translation))
+    }
+
+    /// Set this transforms x and y to the ones of the other transform.
+    /// The z value defines what is rendered before or after another sprite,
+    /// so this value should not be changed.
+    fn set_xy(&mut self, transform: &Transform) {
+        self.translation.x = transform.translation.x;
+        self.translation.y = transform.translation.y;
     }
 }

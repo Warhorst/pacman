@@ -6,7 +6,7 @@ use crate::walls::WallPositions;
 use crate::common::Direction::*;
 use crate::ghosts::state::State;
 use crate::{state_skip_if, target_skip_if};
-use crate::common::Position;
+use crate::common::TransformHelper;
 
 /// Determine the next target coordinates for a ghost when in "Eaten" state.
 ///
@@ -46,13 +46,12 @@ fn move_in_house_center(components: &mut TargetComponentsItem, ghost_house: &Gho
 
 /// Return if the ghost is just on a position in front of the house.
 fn is_before_entrance(components: &TargetComponentsItem, ghost_house: &GhostHouse) -> bool {
-    ghost_house.positions_in_front_of_entrance().into_iter().any(|pos| pos == &Position::from(components.transform))
+    ghost_house.positions_in_front_of_entrance().into_iter().any(|pos| pos == &components.transform.pos())
 }
 
 fn move_directly_before_entrance(components: &mut TargetComponentsItem, ghost_house: &GhostHouse) {
     let in_front_of_house = ghost_house.coordinates_in_front_of_entrance();
-    // TODO: refactor
-    let position_coordinates = Vec3::from(Position::from(components.transform));
+    let position_coordinates = components.transform.pos_center();
 
     *components.direction = match ghost_house.entrance_direction {
         Up | Down => match in_front_of_house.x < position_coordinates.x {
@@ -89,7 +88,7 @@ fn move_to_respawn<G: Component + GhostType + 'static>(components: &mut TargetCo
 }
 
 fn move_to_nearest_position_before_entrance(components: &mut TargetComponentsItem, ghost_house: &GhostHouse, wall_positions: &WallPositions) {
-    let nearest_spawn_position = Position::from(components.transform).get_nearest_from(ghost_house.positions_in_front_of_entrance());
+    let nearest_spawn_position = components.transform.pos().get_nearest_from(ghost_house.positions_in_front_of_entrance());
     let next_target_neighbour = get_nearest_neighbour(
         components,
         nearest_spawn_position,

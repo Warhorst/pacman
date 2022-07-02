@@ -3,7 +3,7 @@ use bevy::prelude::*;
 
 use crate::constants::ENERGIZER_DIMENSION;
 use crate::pacman::Pacman;
-use crate::common::Position;
+use crate::common::TransformHelper;
 use crate::is;
 use crate::level::Level;
 use crate::map::board::Board;
@@ -103,7 +103,7 @@ fn pacman_eat_energizer(
 ) {
     for pacman_transform in pacman_positions.iter() {
         for (energizer_entity, energizer_transform) in energizer_positions.iter() {
-            if Position::from(energizer_transform) == Position::from(pacman_transform) {
+            if energizer_transform.pos() == pacman_transform.pos() {
                 commands.entity(energizer_entity).despawn();
                 event_writer.send(EnergizerEaten)
             }

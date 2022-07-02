@@ -18,6 +18,7 @@ use crate::random::Random;
 use crate::state_skip_if;
 use crate::target_skip_if;
 use crate::walls::WallPositions;
+use crate::common::TransformHelper;
 
 mod spawned;
 mod eaten;
@@ -110,7 +111,7 @@ fn set_scatter_target<G: Component>(
     for mut components in ghost_query.iter_mut() {
         target_skip_if!(components.target set);
         state_skip_if!(components.state != State::Scatter);
-        let nearest_corner = Position::from(components.transform).get_nearest_from_owned(corner_query.iter().map(Position::from));
+        let nearest_corner = components.transform.pos().get_nearest_from_owned(corner_query.iter().map(TransformHelper::pos));
 
         let next_target_neighbour = get_nearest_neighbour(
             &components,
@@ -135,7 +136,7 @@ fn set_blinky_chase_target(
         for pacman_transform in pacman_query.iter() {
             let next_target_neighbour = get_nearest_neighbour(
                 &components,
-                &Position::from(pacman_transform),
+                &pacman_transform.pos(),
                 |n| !wall_positions.position_is_wall(&n.position) && !ghost_house_positions.position_is_entrance(&n.position)
             );
 
@@ -155,7 +156,7 @@ fn set_pinky_chase_target(
         target_skip_if!(components.target set);
         state_skip_if!(components.state != State::Chase);
         for (pacman_transform, pacman_direction) in pacman_query.iter() {
-            let pinky_target_pos = calculate_pinky_target_position(&Position::from(pacman_transform), pacman_direction);
+            let pinky_target_pos = calculate_pinky_target_position(&pacman_transform.pos(), pacman_direction);
 
             let next_target_neighbour = get_nearest_neighbour(
                 &components,
@@ -197,7 +198,7 @@ fn set_inky_chase_target(
             for mut components in inky_query.iter_mut() {
                 target_skip_if!(components.target set);
                 state_skip_if!(components.state != State::Chase);
-                let target = calculate_inky_target(&Position::from(pacman_transform), pacman_direction, &Position::from(blinky_transform));
+                let target = calculate_inky_target(&pacman_transform.pos(), pacman_direction, &blinky_transform.pos());
                 let next_target_neighbour = get_nearest_neighbour(
                     &components,
                     &target,
@@ -236,10 +237,10 @@ fn set_clyde_chase_target(
         target_skip_if!(components.target set);
         state_skip_if!(components.state != State::Chase);
         for pacman_transform in pacman_query.iter() {
-            let target = if is_clyde_near_pacman(&components, &Position::from(pacman_transform)) {
-                Position::from(components.transform).get_nearest_from_owned(corner_query.iter().map(Position::from))
+            let target = if is_clyde_near_pacman(&components, &pacman_transform.pos()) {
+                components.transform.pos().get_nearest_from_owned(corner_query.iter().map(TransformHelper::pos))
             } else {
-                Position::from(pacman_transform)
+                pacman_transform.pos()
             };
 
             let next_target_neighbour = get_nearest_neighbour(
@@ -270,14 +271,14 @@ fn set_frightened_target(
     for mut components in query.iter_mut() {
         target_skip_if!(components.target set);
         state_skip_if!(components.state != State::Frightened);
-        let possible_neighbours = Position::from(components.transform).get_neighbours()
+        let possible_neighbours = components.transform.pos().get_neighbours()
             .into_iter()
             .filter(|n| n.direction != components.direction.opposite())
             .filter(|n| !wall_positions.position_is_wall(&n.position) && !ghost_house_positions.position_is_entrance(&n.position))
             .collect::<Vec<_>>();
 
         let next_target_neighbour = match possible_neighbours.len() {
-            0 => Position::from(components.transform).neighbour_behind(&components.direction),
+            0 => components.transform.pos().neighbour_behind(&components.direction),
             1 => possible_neighbours.get(0).unwrap().clone(),
             len => possible_neighbours.get(random.zero_to(len)).unwrap().clone()
         };
@@ -293,12 +294,12 @@ fn set_frightened_target(
 /// if due to some circumstances (like bad map design) a ghost has no other way to go, we allow the pour soul to
 /// turn around.
 fn get_nearest_neighbour(components: &TargetComponentsItem, target_position: &Position, position_filter: impl Fn(&Neighbour) -> bool) -> Neighbour {
-    Position::from(components.transform).get_neighbours()
+    components.transform.pos().get_neighbours()
         .into_iter()
         .filter(|n| n.direction != components.direction.opposite())
         .filter(position_filter)
         .min_by(|n_a, n_b| minimal_distance_to_neighbours(&target_position, n_a, n_b))
-        .unwrap_or_else(|| Position::from(components.transform).neighbour_behind(&components.direction))
+        .unwrap_or_else(|| components.transform.pos().neighbour_behind(&components.direction))
 }
 
 fn minimal_distance_to_neighbours(big_target: &Position, neighbour_a: &Neighbour, neighbour_b: &Neighbour) -> Ordering {
