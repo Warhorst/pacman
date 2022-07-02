@@ -91,20 +91,19 @@ fn spawn_energizer(
                 transform: Transform::from_translation(Vec3::from(position)),
                 ..Default::default()
             })
-            .insert(Energizer)
-            .insert(position.clone());
+            .insert(Energizer);
     }
 }
 
 fn pacman_eat_energizer(
     mut commands: Commands,
     mut event_writer: EventWriter<EnergizerEaten>,
-    pacman_positions: Query<&Position, With<Pacman>>,
-    energizer_positions: Query<(Entity, &Position), With<Energizer>>,
+    pacman_positions: Query<&Transform, With<Pacman>>,
+    energizer_positions: Query<(Entity, &Transform), With<Energizer>>,
 ) {
-    for pacman_position in pacman_positions.iter() {
-        for (energizer_entity, energizer_position) in energizer_positions.iter() {
-            if energizer_position == pacman_position {
+    for pacman_transform in pacman_positions.iter() {
+        for (energizer_entity, energizer_transform) in energizer_positions.iter() {
+            if Position::from(energizer_transform) == Position::from(pacman_transform) {
                 commands.entity(energizer_entity).despawn();
                 event_writer.send(EnergizerEaten)
             }

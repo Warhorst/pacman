@@ -137,12 +137,12 @@ fn update_ghost_speed(
     tunnel_positions: Res<TunnelPositions>,
     level: Res<Level>,
     speed_by_level: Res<SpeedByLevel>,
-    mut query: Query<(&Position, &mut Speed, &State), With<Ghost>>
+    mut query: Query<(&Transform, &mut Speed, &State), With<Ghost>>
 ) {
-    for (position, mut speed, state) in query.iter_mut() {
+    for (transform, mut speed, state) in query.iter_mut() {
         let ghost_speed = speed_by_level.for_ghosts(&level);
 
-        if tunnel_positions.contains(position) {
+        if tunnel_positions.contains(&Position::from(transform)) {
             *speed = ghost_speed.tunnel;
         } else if *state == State::Frightened {
             *speed = ghost_speed.frightened

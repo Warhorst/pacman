@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 
-use crate::common::Position;
 use crate::constants::GHOST_DIMENSION;
 use crate::ghost_house::GhostHouse;
 use crate::ghosts::{Blinky, Clyde, Ghost, GhostType, Inky, Pinky};
@@ -54,7 +53,6 @@ fn spawn_ghost<G: GhostType + Component>(
         })
         .insert(Ghost)
         .insert(ghost_type)
-        .insert(Position::from(&spawn_coordinates))
         .insert(spawn_direction)
         .insert(speed_by_level.for_ghosts(level).normal)
         .insert(Target::new())

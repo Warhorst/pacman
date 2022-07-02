@@ -7,7 +7,7 @@ use crate::ghosts::state::{StatePlugin, StateSetter};
 use crate::ghosts::target::{Target, TargetPlugin};
 use crate::ghosts::textures::GhostTextures;
 use crate::tunnels::GhostPassedTunnel;
-use crate::common::{Direction, Position};
+use crate::common::Direction;
 use crate::ghost_house::GhostHouse;
 use crate::ghosts::state::State;
 use crate::ghosts::state::State::Spawned;
@@ -104,15 +104,14 @@ fn update_ghost_appearance<G: 'static + Component + GhostType>(
 fn reset_ghosts_when_pacman_was_killed<G: GhostType + Component + 'static>(
     mut event_reader: EventReader<PacmanKilled>,
     ghost_house: Res<GhostHouse>,
-    mut query: Query<(&mut Direction, &mut State, &mut Target, &mut Position, &mut Transform), With<G>>
+    mut query: Query<(&mut Direction, &mut State, &mut Target, &mut Transform), With<G>>
 ) {
     for _ in event_reader.iter() {
-        for (mut direction, mut state, mut target, mut position, mut transform) in query.iter_mut() {
+        for (mut direction, mut state, mut target, mut transform) in query.iter_mut() {
             *direction = ghost_house.spawn_direction_of::<G>();
             target.clear();
             *state = Spawned;
             let spawn_coordinates = ghost_house.spawn_coordinates_of::<G>();
-            *position = Position::from(spawn_coordinates);
             transform.translation = spawn_coordinates;
         }
     }

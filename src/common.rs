@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use crate::common::Direction::*;
 use crate::constants::FIELD_DIMENSION;
 
-#[derive(Copy, Clone, Component, Deserialize, Hash, Debug, Eq, PartialEq, Serialize)]
+#[derive(Copy, Clone, Deserialize, Hash, Debug, Eq, PartialEq, Serialize)]
 pub struct Position {
     pub x: isize,
     pub y: isize
@@ -84,6 +84,12 @@ impl Position {
             .expect("The given iterator of positions should not be empty!")
     }
 
+    pub fn get_nearest_from_owned<'a, I: IntoIterator<Item=Position>>(&self, iter: I) -> Position {
+        iter.into_iter()
+            .min_by(|pos_0, pos_1| self.distance_to(pos_0).cmp(&self.distance_to(pos_1)))
+            .expect("The given iterator of positions should not be empty!")
+    }
+
     pub fn get_position_in_direction_with_offset(&self, direction: &Direction, offset: usize) -> Self {
         match direction {
             Up => Position::new(self.x, self.y + (offset as isize)),
@@ -115,6 +121,24 @@ impl From<&mut Vec3> for Position {
         let x = (vec.x + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
         let y = (vec.y + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
         Position::new(x as isize, y as isize)
+    }
+}
+
+impl From<Transform> for Position {
+    fn from(transform: Transform) -> Self {
+        Position::from(transform.translation)
+    }
+}
+
+impl From<&Transform> for Position {
+    fn from(transform: &Transform) -> Self {
+        Position::from(transform.translation)
+    }
+}
+
+impl From<&mut Transform> for Position {
+    fn from(transform: &mut Transform) -> Self {
+        Position::from(transform.translation)
     }
 }
 

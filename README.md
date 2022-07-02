@@ -46,6 +46,6 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 - pause menu to quit the game
 
 ### Refactoring
+- There are many helper functions centered around th position. These must be changed to work with Vec3 (or even better Transform)
 - add every map element (walls, tunnels, ghost house) as an entity
 - (Maybe) change the point to a field struct to remove these stupid getters
-- (Maybe) remove the Position component (but keep using it in systems). It can be generated quickly from a transform. This way only the transform needs to be updated.

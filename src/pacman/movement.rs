@@ -78,7 +78,6 @@ impl PacmanStopTimer {
 #[world_query(mutable)]
 struct MoveComponents<'a> {
     direction: &'a Direction,
-    position: &'a mut Position,
     transform: &'a mut Transform,
     speed: &'a Speed,
 }
@@ -104,7 +103,6 @@ fn move_pacman(
         }
 
         move_components.transform.translation = new_coordinates;
-        *move_components.position = new_position;
     }
 }
 

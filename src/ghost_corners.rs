@@ -37,7 +37,7 @@ fn spawn_corner<C: Component + Copy>(
         .for_each(|pos| {
             commands.spawn()
                 .insert(GhostCorner)
-                .insert(*pos)
+                .insert(Transform::from_translation(Vec3::from(pos)))
                 .insert(ghost);
         });
 }

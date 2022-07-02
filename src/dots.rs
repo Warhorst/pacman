@@ -46,20 +46,19 @@ fn spawn_dots(
                 transform: Transform::from_translation(Vec3::from(position)),
                 ..Default::default()
             })
-            .insert(Dot)
-            .insert(position.clone());
+            .insert(Dot);
     }
 }
 
 fn pacman_eat_dot(
     mut commands: Commands,
     mut event_writer: EventWriter<DotEaten>,
-    pacman_positions: Query<&Position, With<Pacman>>,
-    dot_positions: Query<(Entity, &Position), With<Dot>>,
+    pacman_positions: Query<&Transform, With<Pacman>>,
+    dot_positions: Query<(Entity, &Transform), With<Dot>>,
 ) {
-    for pacman_pos in pacman_positions.iter() {
-        for (entity, dot_pos) in dot_positions.iter() {
-            if pacman_pos == dot_pos {
+    for pacman_tf in pacman_positions.iter() {
+        for (entity, dot_tf) in dot_positions.iter() {
+            if Position::from(pacman_tf) == Position::from(dot_tf) {
                 commands.entity(entity).despawn();
                 event_writer.send(DotEaten)
             }

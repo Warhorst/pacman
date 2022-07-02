@@ -63,7 +63,6 @@ pub struct TargetSetter;
 pub struct TargetComponents<'a> {
     target: &'a mut Target,
     direction: &'a mut Direction,
-    position: &'a Position,
     transform: &'a Transform,
     state: &'a State
 }
@@ -105,16 +104,17 @@ fn set_scatter_target<G: Component>(
     wall_positions: Res<WallPositions>,
     ghost_house_positions: Res<GhostHousePositions>,
     mut ghost_query: Query<TargetComponents, With<G>>,
-    corner_query: Query<&Position, (With<G>, With<GhostCorner>)>,
+    // TODO: GhostCorner as a resource might be better suited
+    corner_query: Query<&Transform, (With<G>, With<GhostCorner>)>,
 ) {
     for mut components in ghost_query.iter_mut() {
         target_skip_if!(components.target set);
         state_skip_if!(components.state != State::Scatter);
-        let nearest_corner = components.position.get_nearest_from(corner_query.iter());
+        let nearest_corner = Position::from(components.transform).get_nearest_from_owned(corner_query.iter().map(Position::from));
 
         let next_target_neighbour = get_nearest_neighbour(
             &components,
-            nearest_corner,
+            &nearest_corner,
             |n| !wall_positions.position_is_wall(&n.position) && !ghost_house_positions.position_is_entrance(&n.position)
         );
 
@@ -127,15 +127,15 @@ fn set_blinky_chase_target(
     wall_positions: Res<WallPositions>,
     ghost_house_positions: Res<GhostHousePositions>,
     mut blinky_query: Query<TargetComponents, With<Blinky>>,
-    pacman_query: Query<&Position, With<Pacman>>,
+    pacman_query: Query<&Transform, With<Pacman>>,
 ) {
     for mut components in blinky_query.iter_mut() {
         target_skip_if!(components.target set);
         state_skip_if!(components.state != State::Chase);
-        for pacman_position in pacman_query.iter() {
+        for pacman_transform in pacman_query.iter() {
             let next_target_neighbour = get_nearest_neighbour(
                 &components,
-                &pacman_position,
+                &Position::from(pacman_transform),
                 |n| !wall_positions.position_is_wall(&n.position) && !ghost_house_positions.position_is_entrance(&n.position)
             );
 
@@ -149,13 +149,13 @@ fn set_pinky_chase_target(
     wall_positions: Res<WallPositions>,
     ghost_house_positions: Res<GhostHousePositions>,
     mut pinky_query: Query<TargetComponents, (With<Pinky>, Without<Pacman>)>,
-    pacman_query: Query<(&Position, &Direction), With<Pacman>>,
+    pacman_query: Query<(&Transform, &Direction), With<Pacman>>,
 ) {
     for mut components in pinky_query.iter_mut() {
         target_skip_if!(components.target set);
         state_skip_if!(components.state != State::Chase);
-        for (pacman_position, pacman_direction) in pacman_query.iter() {
-            let pinky_target_pos = calculate_pinky_target_position(pacman_position, pacman_direction);
+        for (pacman_transform, pacman_direction) in pacman_query.iter() {
+            let pinky_target_pos = calculate_pinky_target_position(&Position::from(pacman_transform), pacman_direction);
 
             let next_target_neighbour = get_nearest_neighbour(
                 &components,
@@ -188,16 +188,16 @@ fn calculate_pinky_target_position(
 fn set_inky_chase_target(
     wall_positions: Res<WallPositions>,
     ghost_house_positions: Res<GhostHousePositions>,
-    blinky_query: Query<&Position, With<Blinky>>,
-    pacman_query: Query<(&Position, &Direction), With<Pacman>>,
+    blinky_query: Query<&Transform, With<Blinky>>,
+    pacman_query: Query<(&Transform, &Direction), With<Pacman>>,
     mut inky_query: Query<TargetComponents, (With<Inky>, Without<Pacman>)>
 ) {
-    for (pacman_position, pacman_direction) in pacman_query.iter() {
-        for blinky_position in blinky_query.iter() {
+    for (pacman_transform, pacman_direction) in pacman_query.iter() {
+        for blinky_transform in blinky_query.iter() {
             for mut components in inky_query.iter_mut() {
                 target_skip_if!(components.target set);
                 state_skip_if!(components.state != State::Chase);
-                let target = calculate_inky_target(pacman_position, pacman_direction, blinky_position);
+                let target = calculate_inky_target(&Position::from(pacman_transform), pacman_direction, &Position::from(blinky_transform));
                 let next_target_neighbour = get_nearest_neighbour(
                     &components,
                     &target,
@@ -229,17 +229,17 @@ fn set_clyde_chase_target(
     wall_positions: Res<WallPositions>,
     ghost_house_positions: Res<GhostHousePositions>,
     mut clyde_query: Query<TargetComponents, (With<Clyde>, Without<Pacman>)>,
-    pacman_query: Query<&Position, With<Pacman>>,
-    corner_query: Query<&Position, (With<Clyde>, With<GhostCorner>)>
+    pacman_query: Query<&Transform, With<Pacman>>,
+    corner_query: Query<&Transform, (With<Clyde>, With<GhostCorner>)>
 ) {
     for mut components in clyde_query.iter_mut() {
         target_skip_if!(components.target set);
         state_skip_if!(components.state != State::Chase);
-        for pacman_position in pacman_query.iter() {
-            let target = if is_clyde_near_pacman(&components, pacman_position) {
-                components.position.get_nearest_from(corner_query.iter())
+        for pacman_transform in pacman_query.iter() {
+            let target = if is_clyde_near_pacman(&components, &Position::from(pacman_transform)) {
+                Position::from(components.transform).get_nearest_from_owned(corner_query.iter().map(Position::from))
             } else {
-                pacman_position
+                Position::from(pacman_transform)
             };
 
             let next_target_neighbour = get_nearest_neighbour(
@@ -255,7 +255,7 @@ fn set_clyde_chase_target(
 }
 
 fn is_clyde_near_pacman(components: &TargetComponentsItem, pacman_position: &Position) -> bool {
-    let clyde_coordinates = Vec3::from(components.position);
+    let clyde_coordinates = components.transform.translation;
     let pacman_coordinates = Vec3::from(pacman_position);
     let distance = clyde_coordinates.distance(pacman_coordinates);
     distance < FIELD_DIMENSION * 8.0
@@ -270,14 +270,14 @@ fn set_frightened_target(
     for mut components in query.iter_mut() {
         target_skip_if!(components.target set);
         state_skip_if!(components.state != State::Frightened);
-        let possible_neighbours = components.position.get_neighbours()
+        let possible_neighbours = Position::from(components.transform).get_neighbours()
             .into_iter()
             .filter(|n| n.direction != components.direction.opposite())
             .filter(|n| !wall_positions.position_is_wall(&n.position) && !ghost_house_positions.position_is_entrance(&n.position))
             .collect::<Vec<_>>();
 
         let next_target_neighbour = match possible_neighbours.len() {
-            0 => components.position.neighbour_behind(&components.direction),
+            0 => Position::from(components.transform).neighbour_behind(&components.direction),
             1 => possible_neighbours.get(0).unwrap().clone(),
             len => possible_neighbours.get(random.zero_to(len)).unwrap().clone()
         };
@@ -293,12 +293,12 @@ fn set_frightened_target(
 /// if due to some circumstances (like bad map design) a ghost has no other way to go, we allow the pour soul to
 /// turn around.
 fn get_nearest_neighbour(components: &TargetComponentsItem, target_position: &Position, position_filter: impl Fn(&Neighbour) -> bool) -> Neighbour {
-    components.position.get_neighbours()
+    Position::from(components.transform).get_neighbours()
         .into_iter()
         .filter(|n| n.direction != components.direction.opposite())
         .filter(position_filter)
         .min_by(|n_a, n_b| minimal_distance_to_neighbours(&target_position, n_a, n_b))
-        .unwrap_or_else(|| components.position.neighbour_behind(&components.direction))
+        .unwrap_or_else(|| Position::from(components.transform).neighbour_behind(&components.direction))
 }
 
 fn minimal_distance_to_neighbours(big_target: &Position, neighbour_a: &Neighbour, neighbour_b: &Neighbour) -> Ordering {

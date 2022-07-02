@@ -56,7 +56,6 @@ fn spawn_tunnel(commands: &mut Commands, index: usize, position: Position, direc
             ..Default::default()
         })
         .insert(Tunnel(index))
-        .insert(position)
         .insert(direction);
 }
 

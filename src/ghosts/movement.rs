@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::common::{Direction, Position};
+use crate::common::Direction;
 use crate::common::Direction::*;
 use crate::ghosts::target::{Target, TargetSetter};
 use crate::speed::Speed;
@@ -16,9 +16,9 @@ impl Plugin for MovePlugin {
 
 fn move_ghost(
     time: Res<Time>,
-    mut query: Query<(&Direction, &mut Position, &mut Target, &mut Transform, &Speed)>,
+    mut query: Query<(&Direction, &mut Target, &mut Transform, &Speed)>,
 ) {
-    for (direction, mut position, mut target, mut transform, speed) in query.iter_mut() {
+    for (direction, mut target, mut transform, speed) in query.iter_mut() {
         target_skip_if!(target not set);
         let mut coordinates = &mut transform.translation;
         let delta_seconds = time.delta_seconds();
@@ -31,8 +31,6 @@ fn move_ghost(
             *coordinates = target_coordinates;
             target.clear();
         }
-
-        *position = Position::from(coordinates)
     }
 }
 
