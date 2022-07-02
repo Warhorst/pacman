@@ -9,12 +9,9 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 ### Pacman
 - "waka waka" animation + sound when eating dots (very important)
 
-### Ghosts
-- animations
-
 ### Lifecycle
 - the game ends if pacman dies without remaining lives
-- different ghost behaviour based on level/time
+- reset ghosts when pacman dies
 
 ### Tunnel
 - (Maybe) remove the tunnel component and only use the board resource
@@ -25,11 +22,19 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 - eating the fruits gives pacman points
 
 ### Graphics
-- sprites for pacman
-- sprites for ghosts
-- sprites for dots and energizer
-- sprites for the maze (there are 3 different kinds of walls: outer -> thick, inner -> thin, ghost house -> square)
+- animations for pacman when walking around
+- animations for pacman when he dies
+- animations for ghost when walking around
+- animations for ghost when frightened
+- blinking effect for frightened ghost when the frightened state is almost over
+- sprites for dots
+- sprites for energizer
+- sprites for inner walls
+- sprites for the ghost house entrance
+- sprites for ghost house walls
 - return the correct z coordinate from the board (or only x and y)
+- render points for eating a ghost
+- render points for eating a fruit
 
 ### Appearance
 - proper game start
