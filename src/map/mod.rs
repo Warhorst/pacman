@@ -50,6 +50,7 @@ pub enum Element {
     PinkySpawn,
     InkySpawn,
     ClydeSpawn,
+    FruitSpawn,
     BlinkyCorner,
     PinkyCorner,
     InkyCorner,

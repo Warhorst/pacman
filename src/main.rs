@@ -7,6 +7,7 @@ use crate::camera::CameraPlugin;
 
 use crate::dots::DotPlugin;
 use crate::energizer::EnergizerPlugin;
+use crate::fruit::FruitPlugin;
 use crate::ghost_corners::GhostCornersPlugin;
 use crate::ghost_house::GhostHousePlugin;
 use crate::ghost_house_gate::GhostHouseGatePlugin;
@@ -38,6 +39,7 @@ mod walls;
 mod ghost_house;
 mod ghost_corners;
 mod ghost_house_gate;
+mod fruit;
 
 fn main() {
     App::new()
@@ -66,5 +68,6 @@ fn main() {
         .add_plugin(LevelPlugin)
         .add_plugin(SpeedPlugin)
         .add_plugin(GhostHouseGatePlugin)
+        .add_plugin(FruitPlugin)
         .run()
 }
