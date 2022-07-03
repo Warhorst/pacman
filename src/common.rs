@@ -5,6 +5,11 @@ use bevy::prelude::*;
 use crate::common::Direction::*;
 use crate::constants::FIELD_DIMENSION;
 
+/// A position describes the index of a field on the map. It is used for
+/// collision checks, target settings and entity spawns.
+///
+/// It is not a component, as this would lead to necessary synchronization
+/// between Transform and Position when any of those gets updated.
 #[derive(Copy, Clone, Deserialize, Hash, Debug, Eq, PartialEq, Serialize)]
 pub struct Position {
     pub x: isize,
@@ -16,23 +21,15 @@ impl Position {
         Position {x, y}
     }
 
-    pub fn x(&self) -> isize {
-        self.x
-    }
-
-    pub fn y(&self) -> isize {
-        self.y
-    }
-
     /// Returns the distance between two positions.
     pub fn distance_to(&self, other: &Position) -> isize {
-        let x_diff = match self.x() < other.x() {
-            true => other.x() - self.x(),
-            false => self.x() - other.x()
+        let x_diff = match self.x < other.x {
+            true => other.x - self.x,
+            false => self.x - other.x
         };
-        let y_diff = match self.y() < other.y() {
-            true => other.y() - self.y(),
-            false => self.y() - other.y()
+        let y_diff = match self.y < other.y {
+            true => other.y - self.y,
+            false => self.y - other.y
         };
         x_diff.pow(2) + y_diff.pow(2)
     }
@@ -78,14 +75,9 @@ impl Position {
         ]
     }
 
-    pub fn get_nearest_from<'a, I: IntoIterator<Item=&'a Position>>(&self, iter: I) -> &'a Position {
+    pub fn get_nearest_position_from<'a, I: Into<Position>>(&self, iter: impl IntoIterator<Item=I>) -> Position {
         iter.into_iter()
-            .min_by(|pos_0, pos_1| self.distance_to(pos_0).cmp(&self.distance_to(pos_1)))
-            .expect("The given iterator of positions should not be empty!")
-    }
-
-    pub fn get_nearest_from_owned<'a, I: IntoIterator<Item=Position>>(&self, iter: I) -> Position {
-        iter.into_iter()
+            .map(Into::into)
             .min_by(|pos_0, pos_1| self.distance_to(pos_0).cmp(&self.distance_to(pos_1)))
             .expect("The given iterator of positions should not be empty!")
     }
@@ -97,6 +89,12 @@ impl Position {
             Left => Position::new(self.x - (offset as isize), self.y),
             Right => Position::new(self.x + (offset as isize), self.y)
         }
+    }
+}
+
+impl From<&Position> for Position {
+    fn from(pos: &Position) -> Self {
+        *pos
     }
 }
 
@@ -121,6 +119,24 @@ impl From<&mut Vec3> for Position {
         let x = (vec.x + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
         let y = (vec.y + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
         Position::new(x as isize, y as isize)
+    }
+}
+
+impl From<Transform> for Position {
+    fn from(tf: Transform) -> Self {
+        Position::from(tf.translation)
+    }
+}
+
+impl From<&Transform> for Position {
+    fn from(tf: &Transform) -> Self {
+        Position::from(tf.translation)
+    }
+}
+
+impl From<&mut Transform> for Position {
+    fn from(tf: &mut Transform) -> Self {
+        Position::from(tf.translation)
     }
 }
 
@@ -208,28 +224,34 @@ impl Direction {
     }
 }
 
+/// Transform something into a position. This is way easier than using Into.
+pub trait ToPosition {
+    fn pos(&self) -> Position;
+}
+
+impl ToPosition for Transform {
+    fn pos(&self) -> Position {
+        Position::from(self.translation)
+    }
+}
+
+impl ToPosition for Vec3 {
+    fn pos(&self) -> Position {
+        Position::from(self)
+    }
+}
+
 /// Provides helper methods for working with coordinates (Vec3).
 ///
 /// The games logic widely uses positions to perform specific checks (like collisions and distance calculations).
 /// These methods aim to make this easier.
 pub trait Vec3Helper {
-    fn pos(&self) -> Position;
-
     fn pos_center(&self) -> Vec3;
 
     fn set_xy(&mut self, target: &Vec3);
-
-    fn get_nearest_from(&self, iter: impl IntoIterator<Item = Vec3>) -> Vec3;
-
-    fn get_neighbours(&self) -> [Neighbour; 4];
 }
 
 impl Vec3Helper for Vec3 {
-    /// Vec3 to Position. Shorter that calling from all the time.
-    fn pos(&self) -> Position {
-        Position::from(self)
-    }
-
     /// The center coordinates of the position the coordinates belongs to.
     fn pos_center(&self) -> Vec3 {
         Vec3::from(Position::from(self))
@@ -241,15 +263,5 @@ impl Vec3Helper for Vec3 {
     fn set_xy(&mut self, target: &Vec3) {
         self.x = target.x;
         self.y = target.y;
-    }
-
-    fn get_nearest_from(&self, iter: impl IntoIterator<Item=Vec3>) -> Vec3 {
-        iter.into_iter()
-            .min_by(|t_0, t_1| self.distance(*t_0).partial_cmp(&self.distance(*t_1)).expect("the distance calculation should not create NaN"))
-            .expect("The given iterator of positions should not be empty!")
-    }
-
-    fn get_neighbours(&self) -> [Neighbour; 4] {
-        self.pos().get_neighbours()
     }
 }

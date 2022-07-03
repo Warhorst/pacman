@@ -7,6 +7,7 @@ use crate::common::Direction::*;
 use crate::ghosts::state::State;
 use crate::{state_skip_if, target_skip_if};
 use crate::common::Vec3Helper;
+use crate::common::ToPosition;
 
 /// Determine the next target coordinates for a ghost when in "Eaten" state.
 ///
@@ -88,10 +89,10 @@ fn move_to_respawn<G: Component + GhostType + 'static>(components: &mut TargetCo
 }
 
 fn move_to_nearest_position_before_entrance(components: &mut TargetComponentsItem, ghost_house: &GhostHouse, wall_positions: &WallPositions) {
-    let nearest_spawn_position = components.transform.translation.pos().get_nearest_from(ghost_house.positions_in_front_of_entrance());
+    let nearest_spawn_position = components.transform.translation.pos().get_nearest_position_from(ghost_house.positions_in_front_of_entrance());
     let next_target_neighbour = get_nearest_neighbour(
         components,
-        Vec3::from(nearest_spawn_position),
+        nearest_spawn_position,
         |n| !wall_positions.position_is_wall(&n.position)
     );
 

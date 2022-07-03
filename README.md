@@ -48,4 +48,3 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 ### Refactoring
 - There are many helper functions centered around th position. These must be changed to work with Vec3 (or even better Transform)
 - add every map element (walls, tunnels, ghost house) as an entity
-- (Maybe) change the point to a field struct to remove these stupid getters
