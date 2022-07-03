@@ -9,6 +9,9 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 ### Pacman
 - "waka waka" animation + sound when eating dots (very important)
 
+### Ghosts
+- adapt Blinkys speed based on remaining dots
+
 ### Lifecycle
 - the game ends if pacman dies without remaining lives
 - reset ghosts when pacman dies
