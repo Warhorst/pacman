@@ -147,6 +147,7 @@ impl From<&mut Position> for Vec3 {
         Vec3::new(x, y, 0.0)
     }
 }
+
 impl std::fmt::Display for Position {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "({}, {})", self.x, self.y)
@@ -156,12 +157,13 @@ impl std::fmt::Display for Position {
 #[derive(Copy, Clone)]
 pub struct Neighbour {
     pub position: Position,
+    pub coordinates: Vec3,
     pub direction: Direction
 }
 
 impl Neighbour {
     pub fn new(position: Position, direction: Direction) -> Self {
-        Self { position, direction }
+        Self { position, direction, coordinates: position.into()  }
     }
 }
 
@@ -206,34 +208,48 @@ impl Direction {
     }
 }
 
-/// Provides helper methods for working with transforms (or their translation, to be more accurate).
+/// Provides helper methods for working with coordinates (Vec3).
 ///
 /// The games logic widely uses positions to perform specific checks (like collisions and distance calculations).
 /// These methods aim to make this easier.
-pub trait TransformHelper {
+pub trait Vec3Helper {
     fn pos(&self) -> Position;
 
     fn pos_center(&self) -> Vec3;
 
-    fn set_xy(&mut self, transform: &Transform);
+    fn set_xy(&mut self, target: &Vec3);
+
+    fn get_nearest_from(&self, iter: impl IntoIterator<Item = Vec3>) -> Vec3;
+
+    fn get_neighbours(&self) -> [Neighbour; 4];
 }
 
-impl TransformHelper for Transform {
-    /// Transform to Position. Shorter that calling from all the time.
+impl Vec3Helper for Vec3 {
+    /// Vec3 to Position. Shorter that calling from all the time.
     fn pos(&self) -> Position {
-        Position::from(self.translation)
+        Position::from(self)
     }
 
-    /// The center coordinates of the position the transform belongs to.
+    /// The center coordinates of the position the coordinates belongs to.
     fn pos_center(&self) -> Vec3 {
-        Vec3::from(Position::from(self.translation))
+        Vec3::from(Position::from(self))
     }
 
-    /// Set this transforms x and y to the ones of the other transform.
+    /// Set this coordinates x and y to the ones of the other transform.
     /// The z value defines what is rendered before or after another sprite,
     /// so this value should not be changed.
-    fn set_xy(&mut self, transform: &Transform) {
-        self.translation.x = transform.translation.x;
-        self.translation.y = transform.translation.y;
+    fn set_xy(&mut self, target: &Vec3) {
+        self.x = target.x;
+        self.y = target.y;
+    }
+
+    fn get_nearest_from(&self, iter: impl IntoIterator<Item=Vec3>) -> Vec3 {
+        iter.into_iter()
+            .min_by(|t_0, t_1| self.distance(*t_0).partial_cmp(&self.distance(*t_1)).expect("the distance calculation should not create NaN"))
+            .expect("The given iterator of positions should not be empty!")
+    }
+
+    fn get_neighbours(&self) -> [Neighbour; 4] {
+        self.pos().get_neighbours()
     }
 }

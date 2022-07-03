@@ -2,7 +2,7 @@ use std::ops::RangeInclusive;
 
 use bevy::prelude::*;
 
-use crate::common::TransformHelper;
+use crate::common::Vec3Helper;
 use crate::constants::{GHOST_SPEED, PACMAN_SPEED};
 use crate::energizer::EnergizerTimer;
 use crate::ghosts::Ghost;
@@ -145,7 +145,7 @@ fn update_ghost_speed(
     for (transform, mut speed, state) in query.iter_mut() {
         let ghost_speed = speed_by_level.for_ghosts(&level);
 
-        if tunnel_positions.contains(&transform.pos()) {
+        if tunnel_positions.contains(&transform.translation.pos()) {
             *speed = ghost_speed.tunnel;
         } else if *state == State::Frightened {
             *speed = ghost_speed.frightened

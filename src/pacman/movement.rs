@@ -94,7 +94,7 @@ fn move_pacman(
 
     for mut move_components in query.iter_mut() {
         let mut new_coordinates = calculate_new_coordinates(&mut move_components, delta_seconds);
-        let new_position = Position::from(&new_coordinates);
+        let new_position = new_coordinates.into();
 
         if is_going_to_collide_with_obstacle(&board, &move_components.direction, &new_position, &new_coordinates) {
             process_collision(&move_components.direction, &new_position, &mut new_coordinates)
@@ -165,7 +165,7 @@ fn position_is_obstacle(board: &Board, position: &Position) -> bool {
 
 /// Limit pacmans movement if he reached an obstacle and stop him.
 fn process_collision(direction: &Direction, new_position: &Position, new_coordinates: &mut Vec3) {
-    let field_coordinates = Vec3::from(new_position);
+    let field_coordinates = new_position.into();
     limit_movement(direction, &field_coordinates, new_coordinates);
 }
 

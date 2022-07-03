@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::constants::POINT_DIMENSION;
-use crate::common::TransformHelper;
+use crate::common::Vec3Helper;
 use crate::is;
 use crate::map::board::Board;
 use crate::map::Element;
@@ -58,7 +58,7 @@ fn pacman_eat_dot(
 ) {
     for pacman_tf in pacman_positions.iter() {
         for (entity, dot_tf) in dot_positions.iter() {
-            if pacman_tf.pos() == dot_tf.pos() {
+            if pacman_tf.translation.pos() == dot_tf.translation.pos() {
                 commands.entity(entity).despawn();
                 event_writer.send(DotEaten)
             }
