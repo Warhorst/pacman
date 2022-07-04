@@ -3,7 +3,7 @@ use bevy::prelude::*;
 
 use crate::constants::ENERGIZER_DIMENSION;
 use crate::pacman::Pacman;
-use crate::common::ToPosition;
+use crate::common::position::ToPosition;
 use crate::is;
 use crate::level::Level;
 use crate::map::board::Board;

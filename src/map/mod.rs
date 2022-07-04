@@ -8,7 +8,8 @@ use serde::{Deserialize, Serialize};
 
 use Rotation::*;
 
-use crate::common::{Direction, Position};
+use crate::common::Direction;
+use crate::common::position::Position;
 use crate::map::board::Board;
 
 pub mod board;

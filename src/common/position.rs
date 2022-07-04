@@ -1,7 +1,9 @@
 use std::fmt::Formatter;
-use serde::{Serialize, Deserialize};
-use bevy::prelude::*;
 
+use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
+
+use crate::common::Direction;
 use crate::common::Direction::*;
 use crate::constants::FIELD_DIMENSION;
 
@@ -33,7 +35,7 @@ impl Position {
         };
         x_diff.pow(2) + y_diff.pow(2)
     }
-    
+
     pub fn neighbour_position(&self, direction: &Direction) -> Position {
         match direction {
             Up => Position::new(self.x, self.y + 1),
@@ -180,47 +182,6 @@ pub struct Neighbour {
 impl Neighbour {
     pub fn new(position: Position, direction: Direction) -> Self {
         Self { position, direction, coordinates: position.into()  }
-    }
-}
-
-#[derive(Copy, Clone, Component, Deserialize, Debug, Eq, Hash, PartialEq, PartialOrd, Serialize)]
-pub enum Direction {
-    Up,
-    Down,
-    Left,
-    Right,
-}
-
-impl Direction {
-    pub fn opposite(&self) -> Direction {
-        match self {
-            Up => Down,
-            Down => Up,
-            Right => Left,
-            Left => Right
-        }
-    }
-
-    pub fn rotate_right(&self) -> Direction {
-        match self {
-            Up => Right,
-            Right => Down,
-            Down => Left,
-            Left => Up
-        }
-    }
-
-    pub fn rotate_left(&self) -> Direction {
-        match self {
-            Up => Left,
-            Left => Down,
-            Down => Right,
-            Right => Up
-        }
-    }
-
-    pub fn reverse(&mut self) {
-        *self = self.opposite()
     }
 }
 

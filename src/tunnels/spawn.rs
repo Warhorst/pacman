@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy::utils::HashSet;
-use crate::common::Position;
+use crate::common::position::Position;
 use crate::constants::PACMAN_DIMENSION;
 use crate::is;
 use crate::map::Element;

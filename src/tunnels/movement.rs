@@ -4,8 +4,8 @@ use crate::common::Direction;
 use crate::ghosts::Ghost;
 use crate::pacman::Pacman;
 use crate::tunnels::{GhostPassedTunnel, Tunnel};
-use crate::common::Vec3Helper;
-use crate::common::ToPosition;
+use crate::common::position::Vec3Helper;
+use crate::common::position::ToPosition;
 
 pub (in crate::tunnels) fn move_pacman_through_tunnel(
     tunnel_query_0: Query<(Entity, &Tunnel, &Transform, &Direction), Without<Pacman>>,

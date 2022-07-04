@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
-use crate::common::{Direction, ToPosition};
+use crate::common::Direction;
+use crate::common::position::ToPosition;
 use crate::common::Direction::*;
 use crate::ghosts::Ghost;
 use crate::ghosts::state::State;

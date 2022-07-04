@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::constants::POINT_DIMENSION;
-use crate::common::ToPosition;
+use crate::common::position::ToPosition;
 use crate::is;
 use crate::map::board::Board;
 use crate::map::Element;

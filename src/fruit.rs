@@ -2,7 +2,7 @@ use std::time::Duration;
 use bevy::prelude::*;
 use crate::level::Level;
 use Fruit::*;
-use crate::common::ToPosition;
+use crate::common::position::ToPosition;
 use crate::constants::PACMAN_DIMENSION;
 use crate::dots::DotEaten;
 use crate::pacman::Pacman;

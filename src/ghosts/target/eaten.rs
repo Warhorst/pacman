@@ -6,8 +6,8 @@ use crate::walls::WallPositions;
 use crate::common::Direction::*;
 use crate::ghosts::state::State;
 use crate::{state_skip_if, target_skip_if};
-use crate::common::Vec3Helper;
-use crate::common::ToPosition;
+use crate::common::position::Vec3Helper;
+use crate::common::position::ToPosition;
 
 /// Determine the next target coordinates for a ghost when in "Eaten" state.
 ///

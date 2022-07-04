@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 use bevy::prelude::*;
 use bevy::ecs::query::WorldQuery;
 
-use crate::common::{Neighbour, Position, ToPosition};
+use crate::common::position::{Neighbour, Position, ToPosition};
 use crate::common::Direction;
 use crate::common::Direction::*;
 use crate::constants::FIELD_DIMENSION;

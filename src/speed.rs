@@ -9,7 +9,7 @@ use crate::ghosts::state::State;
 use crate::level::Level;
 use crate::pacman::Pacman;
 use crate::tunnels::spawn::TunnelPositions;
-use crate::common::ToPosition;
+use crate::common::position::ToPosition;
 
 pub struct SpeedPlugin;
 

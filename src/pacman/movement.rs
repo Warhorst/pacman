@@ -4,7 +4,7 @@ use bevy::ecs::query::WorldQuery;
 
 use crate::common::Direction;
 use crate::common::Direction::*;
-use crate::common::Position;
+use crate::common::position::Position;
 use crate::constants::{PACMAN_DIMENSION, WALL_DIMENSION};
 use crate::dots::DotEaten;
 use crate::energizer::EnergizerEaten;

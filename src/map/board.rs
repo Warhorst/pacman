@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::common::Position;
+use crate::common::position::Position;
 use crate::constants::MAP_PATH;
 use crate::map::{Element, Map};
 

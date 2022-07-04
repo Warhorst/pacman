@@ -1,7 +1,7 @@
 use std::any::TypeId;
 use std::collections::{HashMap, HashSet};
 use bevy::prelude::*;
-use crate::common::Position;
+use crate::common::position::Position;
 use crate::{is, map};
 use crate::map::board::Board;
 use map::Element;

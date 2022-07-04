@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::common::Position;
+use crate::common::position::Position;
 use crate::common::Direction::*;
 
 use crate::constants::PACMAN_DIMENSION;
