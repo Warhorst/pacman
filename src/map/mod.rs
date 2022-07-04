@@ -119,7 +119,8 @@ mod tests {
     use std::fs::{File, OpenOptions};
     use std::io::Write;
 
-    use crate::common::{Direction, Position};
+    use crate::common::position::Position;
+    use crate::common::Direction;
     use crate::map::{Element, Field, Map, Rotation, WallType};
     use crate::map::Element::*;
     use crate::map::Rotation::*;
@@ -442,7 +443,9 @@ mod tests {
                 dot(1),
                 wall(1, D270),
                 wall(1, D90),
-                empty(10),
+                empty(4),
+                elem(2, FruitSpawn),
+                empty(4),
                 wall(1, D270),
                 wall(1, D90),
                 dot(1),

@@ -58,6 +58,7 @@ impl GhostHouse {
         Self::assert_positions_valid(&top_right, &entrance_positions, &ghost_house_positions);
 
         let mut spawns = HashMap::with_capacity(4);
+        // TODO: Either remove the <Ghost>Spawn elements or assume they are set and use the board to calculate the spawn
         spawns.insert(TypeId::of::<Blinky>(), Self::create_blinky_spawn(&top_right));
         spawns.insert(TypeId::of::<Pinky>(), Self::create_pinky_spawn(&top_right));
         spawns.insert(TypeId::of::<Inky>(), Self::create_inky_spawn(&top_right));

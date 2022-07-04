@@ -3,6 +3,8 @@ use std::collections::HashMap;
 use crate::common::position::Position;
 use crate::constants::MAP_PATH;
 use crate::map::{Element, Map};
+use crate::Vec3;
+use crate::common::Direction::*;
 
 static EMPTY: Vec<Element> = vec![];
 
@@ -62,6 +64,35 @@ impl Board {
         self.elements_map
             .iter()
             .flat_map(|(pos, elements)| elements.into_iter().map(move |elem| (pos, elem)))
+    }
+
+    /// Return the coordinates between two positions matching the given filter.
+    ///
+    /// There must be exactly two positions matching this filter and these positions must be neighbored.
+    /// This should only fail with invalid map design.
+    pub fn coordinates_between_positions_matching(&self, filter: impl Fn(&Element) -> bool) -> Vec3 {
+        let positions_matching_filter = self.get_positions_matching(filter);
+
+        if positions_matching_filter.len() != 2 {
+            panic!("There must be exactly two positions matching the given filter!")
+        }
+
+        let (pos_0, pos_1) = (positions_matching_filter[0], positions_matching_filter[1]);
+        let neighbour_direction = pos_0.get_neighbour_direction(&pos_1).expect("The two positions must be neighbored!");
+        let (vec_0, vec_1) = (Vec3::from(pos_0), Vec3::from(pos_1));
+
+        match neighbour_direction {
+            Up | Down => {
+                let x = vec_0.x;
+                let y = (vec_0.y + vec_1.y) / 2.0;
+                Vec3::new(x, y, 0.0)
+            },
+            Left | Right => {
+                let x = (vec_0.x + vec_1.x) / 2.0;
+                let y = vec_0.y;
+                Vec3::new(x, y, 0.0)
+            }
+        }
     }
 }
 
