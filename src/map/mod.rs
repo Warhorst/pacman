@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::f32::consts::PI;
 use std::fs::File;
 use std::path::Path;
@@ -9,6 +10,7 @@ use serde::{Deserialize, Serialize};
 use Rotation::*;
 
 use crate::common::Direction;
+use crate::common::Direction::*;
 use crate::common::position::Position;
 use crate::map::board::Board;
 
@@ -22,12 +24,106 @@ impl Plugin for MapPlugin {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+// #[derive(Serialize, Deserialize)]
 pub struct Map {
     fields: Vec<Field>,
+    elements_map: HashMap<Position, Vec<Element>>,
 }
 
-#[derive(Serialize, Deserialize)]
+impl Map {
+    pub fn load<P: AsRef<Path>>(path: P) -> Self {
+        let file = File::open(path).expect("could not open map from given path");
+
+        let fields: Vec<Field> = serde_json::from_reader(file).expect("could not parse map from json");
+
+        Map {
+            elements_map: fields.clone().into_iter()
+                .map(|f| (f.position, f.elements))
+                .collect(),
+            fields,
+        }
+    }
+
+    pub (in crate::map) fn get_width(&self) -> usize {
+        self.fields.iter()
+            .map(|f| f.position.x)
+            .collect::<HashSet<_>>()
+            .len()
+    }
+
+    pub (in crate::map) fn get_height(&self) -> usize {
+        self.fields.iter()
+            .map(|f| f.position.y)
+            .collect::<HashSet<_>>()
+            .len()
+    }
+
+    pub fn get_positions_matching(&self, filter: impl Fn(&Element) -> bool) -> impl IntoIterator<Item=&Position> {
+        self.elements_map.iter()
+            .filter(move |(_, elems)| Self::elements_match_filter(elems.iter(), &filter))
+            .map(|(pos, _)| pos)
+    }
+
+    /// Check if the given position matches the given element filter
+    pub fn position_matches_filter(&self, position: &Position, filter: impl Fn(&Element) -> bool) -> bool {
+        Self::elements_match_filter(self.elements_on_position(position), &filter)
+    }
+
+    fn elements_match_filter<'a>(elems: impl IntoIterator<Item=&'a Element>, filter: &impl Fn(&Element) -> bool) -> bool {
+        elems.into_iter()
+            .map(filter)
+            .max()
+            .unwrap_or(false)
+    }
+
+    /// Return the elements on the given position.
+    ///
+    /// If the position does not exists in the map, return a reference to an empty
+    /// vector.
+    pub fn elements_on_position(&self, position: &Position) -> impl IntoIterator<Item=&Element> {
+        self.elements_map.get(position)
+            .into_iter()
+            .flat_map(|elems| elems.into_iter())
+    }
+
+    /// Return an iterator over all positions and elements.
+    pub fn position_element_iter(&self) -> impl IntoIterator<Item=(&Position, &Element)> {
+        self.elements_map
+            .iter()
+            .flat_map(|(pos, elements)| elements.into_iter().map(move |elem| (pos, elem)))
+    }
+
+    /// Return the coordinates between two positions matching the given filter.
+    ///
+    /// There must be exactly two positions matching this filter and these positions must be neighbored.
+    /// This should only fail with invalid map design.
+    pub fn coordinates_between_positions_matching(&self, filter: impl Fn(&Element) -> bool) -> Vec3 {
+        let positions_matching_filter = self.get_positions_matching(filter).into_iter().collect::<Vec<_>>();
+
+        if positions_matching_filter.len() != 2 {
+            panic!("There must be exactly two positions matching the given filter!")
+        }
+
+        let (pos_0, pos_1) = (positions_matching_filter[0], positions_matching_filter[1]);
+        let neighbour_direction = pos_0.get_neighbour_direction(&pos_1).expect("The two positions must be neighbored!");
+        let (vec_0, vec_1) = (Vec3::from(pos_0), Vec3::from(pos_1));
+
+        match neighbour_direction {
+            Up | Down => {
+                let x = vec_0.x;
+                let y = (vec_0.y + vec_1.y) / 2.0;
+                Vec3::new(x, y, 0.0)
+            },
+            Left | Right => {
+                let x = (vec_0.x + vec_1.x) / 2.0;
+                let y = vec_0.y;
+                Vec3::new(x, y, 0.0)
+            }
+        }
+    }
+}
+
+#[derive(Clone, Serialize, Deserialize)]
 struct Field {
     position: Position,
     elements: Vec<Element>,
@@ -89,27 +185,6 @@ impl Rotation {
             D180 => Quat::from_rotation_z(PI),
             D270 => Quat::from_rotation_z(PI * 0.5),
         }
-    }
-}
-
-impl Map {
-    pub fn load<P: AsRef<Path>>(path: P) -> Self {
-        let file = File::open(path).expect("could not open map from given path");
-        serde_json::from_reader(file).expect("could not parse map from json")
-    }
-
-    pub fn get_width(&self) -> usize {
-        self.fields.iter()
-            .map(|f| f.position.x)
-            .collect::<HashSet<_>>()
-            .len()
-    }
-
-    pub fn get_height(&self) -> usize {
-        self.fields.iter()
-            .map(|f| f.position.y)
-            .collect::<HashSet<_>>()
-            .len()
     }
 }
 
