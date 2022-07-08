@@ -1,16 +1,22 @@
 use std::collections::HashMap;
+use bevy::utils::HashSet;
 
 use crate::common::position::Position;
 use crate::constants::MAP_PATH;
 use crate::map::{Element, Map};
+use crate::map::Element::*;
 use crate::Vec3;
 use crate::common::Direction::*;
+use crate::is;
 
 static EMPTY: Vec<Element> = vec![];
 
 #[derive(Debug)]
 pub struct Board {
     elements_map: HashMap<Position, Vec<Element>>,
+    wall_positions: HashSet<Position>,
+    ghost_house_entrance_positions: HashSet<Position>,
+    tunnel_positions: HashSet<Position>,
     pub width: usize,
     pub height: usize,
 }
@@ -21,15 +27,41 @@ impl Board {
         let width = map.get_width();
         let height = map.get_height();
 
+        let wall_positions = Self::positions_matching_filter(&map, is!(Wall {..} | InvisibleWall));
+        let ghost_house_entrance_positions = Self::positions_matching_filter(&map, is!(GhostHouseEntrance {..}));
+        let tunnel_positions = Self::positions_matching_filter(&map, is!(Tunnel {..} | TunnelEntrance | TunnelHallway));
+
         let elements_map = map.fields.into_iter()
             .map(|f| (f.position, f.elements))
             .collect();
 
         Board {
             elements_map,
+            wall_positions,
+            ghost_house_entrance_positions,
+            tunnel_positions,
             width,
             height,
         }
+    }
+
+    fn positions_matching_filter(map: &Map, filter: impl Fn(&Element) -> bool) -> HashSet<Position> {
+        map.get_positions_matching(filter)
+            .into_iter()
+            .map(ToOwned::to_owned)
+            .collect()
+    }
+
+    pub fn position_is_wall(&self, pos: &Position) -> bool {
+        self.wall_positions.contains(pos)
+    }
+
+    pub fn position_is_ghost_house_entrance(&self, pos: &Position) -> bool {
+        self.ghost_house_entrance_positions.contains(pos)
+    }
+
+    pub fn position_is_tunnel(&self, pos: &Position) -> bool {
+        self.tunnel_positions.contains(pos)
     }
 
     pub fn get_positions_matching(&self, filter: impl Fn(&Element) -> bool) -> Vec<&Position> {
