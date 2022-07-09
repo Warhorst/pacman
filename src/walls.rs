@@ -19,7 +19,7 @@ fn spawn_walls(
     asset_server: Res<AssetServer>,
 ) {
     spawn_labyrinth_walls(&mut commands, &map, &asset_server);
-    spawn_ghost_house_entrance(&mut commands, &map);
+    spawn_ghost_house_entrance(&mut commands, &map, &asset_server);
 }
 
 fn spawn_labyrinth_walls(commands: &mut Commands, map: &Map, asset_server: &AssetServer) {
@@ -60,12 +60,12 @@ fn select_texture(asset_server: &AssetServer, is_corner: bool, wall_type: &WallT
     }
 }
 
-fn spawn_ghost_house_entrance(commands: &mut Commands, map: &Map) {
+fn spawn_ghost_house_entrance(commands: &mut Commands, map: &Map, asset_server: &AssetServer) {
     for position in map.get_positions_matching(is!(Element::GhostHouseEntrance {..})) {
         commands.spawn()
             .insert_bundle(SpriteBundle {
+                texture: asset_server.load("textures/walls/ghost_house_entrance.png"),
                 sprite: Sprite {
-                    color: Color::rgb(1.0, 1.0, 1.0),
                     custom_size: Some(Vec2::new(WALL_DIMENSION, WALL_DIMENSION)),
                     ..default()
                 },
