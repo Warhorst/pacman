@@ -4,8 +4,8 @@ use crate::common::Direction::*;
 use crate::constants::PACMAN_DIMENSION;
 use crate::is;
 use crate::level::Level;
-use crate::map::board::Board;
 use crate::map::Element::PacManSpawn;
+use crate::map::Map;
 use crate::pacman::Pacman;
 use crate::speed::SpeedByLevel;
 
@@ -16,11 +16,11 @@ pub struct PacmanSpawn(Vec3);
 pub fn spawn_pacman(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    board: Res<Board>,
+    map: Res<Map>,
     level: Res<Level>,
     speed_by_level: Res<SpeedByLevel>
 ) {
-    let pacman_spawn = PacmanSpawn(board.coordinates_between_positions_matching(is!(PacManSpawn)));
+    let pacman_spawn = PacmanSpawn(map.coordinates_between_positions_matching(is!(PacManSpawn)));
     let pacman_dimension = Vec2::new(PACMAN_DIMENSION, PACMAN_DIMENSION);
 
     commands.spawn()

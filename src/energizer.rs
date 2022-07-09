@@ -6,8 +6,8 @@ use crate::pacman::Pacman;
 use crate::common::position::ToPosition;
 use crate::is;
 use crate::level::Level;
-use crate::map::board::Board;
 use crate::map::Element::EnergizerSpawn;
+use crate::map::Map;
 
 pub struct EnergizerPlugin;
 
@@ -77,10 +77,10 @@ impl EnergizerTimer {
 
 fn spawn_energizer(
     mut commands: Commands,
-    board: Res<Board>
+    map: Res<Map>
 ) {
     let energizer_dimension = Vec2::new(ENERGIZER_DIMENSION, ENERGIZER_DIMENSION);
-    for position in board.get_positions_matching(is!(EnergizerSpawn)) {
+    for position in map.get_positions_matching(is!(EnergizerSpawn)) {
         commands.spawn()
             .insert_bundle(SpriteBundle {
                 sprite: Sprite {

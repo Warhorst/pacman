@@ -8,9 +8,7 @@ use crate::common::position::Position;
 use crate::constants::{PACMAN_DIMENSION, WALL_DIMENSION};
 use crate::dots::DotEaten;
 use crate::energizer::EnergizerEaten;
-use crate::is;
 use crate::map::board::Board;
-use crate::map::Element;
 use crate::pacman::Pacman;
 use crate::speed::Speed;
 
@@ -159,8 +157,10 @@ pub fn are_coordinates_in_field_center(direction: &Direction, position: &Positio
 }
 
 /// Tells if the given position is an obstacle for pacman.
+///
+/// Pacman cannot walk in walls or the ghost house entrance
 fn position_is_obstacle(board: &Board, position: &Position) -> bool {
-    board.position_matches_filter(position, is!(Element::Wall {..} | Element::GhostHouseEntrance {..} | Element::InvisibleWall))
+    board.position_is_wall(position) || board.position_is_ghost_house_entrance(position)
 }
 
 /// Limit pacmans movement if he reached an obstacle and stop him.

@@ -3,11 +3,11 @@ use std::collections::{HashMap, HashSet};
 use bevy::prelude::*;
 use crate::common::position::Position;
 use crate::{is, map};
-use crate::map::board::Board;
 use map::Element;
 use map::Element::*;
 use crate::ghosts::{Blinky, Clyde, GhostType, Inky, Pinky};
 use crate::common::Direction;
+use crate::map::Map;
 
 pub struct GhostHousePlugin;
 
@@ -49,9 +49,9 @@ pub struct GhostHouse {
 }
 
 impl GhostHouse {
-    pub fn new(board: &Board) -> Self {
-        let entrance_positions = board.get_positions_matching(is!(Element::GhostHouseEntrance {..}));
-        let ghost_house_positions = board.get_positions_matching(is!(Element::GhostHouse));
+    pub fn new(map: &Map) -> Self {
+        let entrance_positions = map.get_positions_matching(is!(Element::GhostHouseEntrance {..})).into_iter().collect();
+        let ghost_house_positions = map.get_positions_matching(is!(Element::GhostHouse)).into_iter().collect::<Vec<_>>();
         let top_right = ghost_house_positions
             .iter()
             .fold(Position::new(isize::MIN, isize::MIN), |acc, pos| Position::new(isize::max(acc.x, pos.x), isize::max(acc.y, pos.y)));
@@ -249,11 +249,11 @@ impl GhostHousePositions {
 
 fn spawn_ghost_house(
     mut commands: Commands,
-    board: Res<Board>
+    map: Res<Map>
 ) {
     let ghost_house_positions = GhostHousePositions::new(
-        board.get_positions_matching(is!(GhostHouseEntrance {..})),
-        board.get_positions_matching(is!(GhostHouse))
+        map.get_positions_matching(is!(GhostHouseEntrance {..})),
+        map.get_positions_matching(is!(GhostHouse))
     );
     commands.insert_resource(ghost_house_positions);
 }

@@ -12,6 +12,7 @@ use Rotation::*;
 use crate::common::Direction;
 use crate::common::Direction::*;
 use crate::common::position::Position;
+use crate::constants::MAP_PATH;
 use crate::map::board::Board;
 
 pub mod board;
@@ -20,53 +21,53 @@ pub struct MapPlugin;
 
 impl Plugin for MapPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(Board::new());
+        let map = Map::load(MAP_PATH);
+        app.insert_resource(Board::new(&map));
+        app.insert_resource(map);
     }
 }
 
-// #[derive(Serialize, Deserialize)]
+/// Resource that knows the spawn locations of every entity, based on an external map file.
+///
+/// The map should only be used to spawn or respawn entities into the world.
 pub struct Map {
-    fields: Vec<Field>,
     elements_map: HashMap<Position, Vec<Element>>,
 }
 
 impl Map {
+    /// Load a map from a given file. The file must be a JSON containing an array of crate::map::Field.
+    ///
+    /// The call fails if the file could not be read.
     pub fn load<P: AsRef<Path>>(path: P) -> Self {
         let file = File::open(path).expect("could not open map from given path");
-
         let fields: Vec<Field> = serde_json::from_reader(file).expect("could not parse map from json");
 
         Map {
             elements_map: fields.clone().into_iter()
                 .map(|f| (f.position, f.elements))
                 .collect(),
-            fields,
         }
     }
 
     pub (in crate::map) fn get_width(&self) -> usize {
-        self.fields.iter()
-            .map(|f| f.position.x)
+        self.elements_map.iter()
+            .map(|(pos, _)| pos.x)
             .collect::<HashSet<_>>()
             .len()
     }
 
     pub (in crate::map) fn get_height(&self) -> usize {
-        self.fields.iter()
-            .map(|f| f.position.y)
+        self.elements_map.iter()
+            .map(|(pos, _)| pos.y)
             .collect::<HashSet<_>>()
             .len()
     }
 
+    /// Return an iterator over all positions matching the given element filter.
     pub fn get_positions_matching(&self, filter: impl Fn(&Element) -> bool) -> impl IntoIterator<Item=&Position> {
         self.elements_map.iter()
             .filter(move |(_, elems)| Self::elements_match_filter(elems.iter(), &filter))
             .map(|(pos, _)| pos)
-    }
-
-    /// Check if the given position matches the given element filter
-    pub fn position_matches_filter(&self, position: &Position, filter: impl Fn(&Element) -> bool) -> bool {
-        Self::elements_match_filter(self.elements_on_position(position), &filter)
     }
 
     fn elements_match_filter<'a>(elems: impl IntoIterator<Item=&'a Element>, filter: &impl Fn(&Element) -> bool) -> bool {
@@ -74,16 +75,6 @@ impl Map {
             .map(filter)
             .max()
             .unwrap_or(false)
-    }
-
-    /// Return the elements on the given position.
-    ///
-    /// If the position does not exists in the map, return a reference to an empty
-    /// vector.
-    pub fn elements_on_position(&self, position: &Position) -> impl IntoIterator<Item=&Element> {
-        self.elements_map.get(position)
-            .into_iter()
-            .flat_map(|elems| elems.into_iter())
     }
 
     /// Return an iterator over all positions and elements.
@@ -186,6 +177,21 @@ impl Rotation {
             D270 => Quat::from_rotation_z(PI * 0.5),
         }
     }
+}
+
+/// Macro which quickly creates an element filter (closure Fn(&Element) -> bool) by passing a pattern.
+///
+/// The alternative would be a match/if let expression, which is much longer and harder to read.
+#[macro_export]
+macro_rules! is {
+    ($pattern:pat) => {
+        {
+            |e: &crate::map::Element| match e {
+                $pattern => true,
+                _ => false
+            }
+        }
+    };
 }
 
 /// This bullshit is only used to generate the json map until I have a better way to do this

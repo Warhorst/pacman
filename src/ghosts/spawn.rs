@@ -7,17 +7,17 @@ use crate::ghosts::state::State;
 use crate::ghosts::target::Target;
 use crate::ghosts::textures::GhostTextures;
 use crate::level::Level;
-use crate::map::board::Board;
+use crate::map::Map;
 use crate::speed::SpeedByLevel;
 
 pub fn spawn_ghosts(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    board: Res<Board>,
+    map: Res<Map>,
     level: Res<Level>,
     speed_by_level: Res<SpeedByLevel>
 ) {
-    let ghost_house = GhostHouse::new(&board);
+    let ghost_house = GhostHouse::new(&map);
     let ghost_textures = GhostTextures::new(&asset_server);
     spawn_ghost(&mut commands, &ghost_house, &ghost_textures, &level, &speed_by_level, Blinky);
     spawn_ghost(&mut commands, &ghost_house, &ghost_textures, &level, &speed_by_level, Pinky);

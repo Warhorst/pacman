@@ -6,8 +6,7 @@ use crate::common::position::ToPosition;
 use crate::constants::PACMAN_DIMENSION;
 use crate::dots::DotEaten;
 use crate::is;
-use crate::map::board::Board;
-use crate::map::Element;
+use crate::map::{Element, Map};
 use crate::pacman::Pacman;
 
 pub struct FruitPlugin;
@@ -31,14 +30,14 @@ impl Plugin for FruitPlugin {
 /// was eaten.
 fn spawn_fruit_when_dot_limit_reached(
     mut commands: Commands,
-    board: Res<Board>,
+    map: Res<Map>,
     level: Res<Level>,
     fruit_dot_counter: Res<FruitDotCounter>,
 ) {
     let eaten_dots = **fruit_dot_counter;
 
     if eaten_dots == 70 || eaten_dots == 170 {
-        let coordinates = board.coordinates_between_positions_matching(is!(Element::FruitSpawn));
+        let coordinates = map.coordinates_between_positions_matching(is!(Element::FruitSpawn));
         let dimension = Vec2::new(PACMAN_DIMENSION, PACMAN_DIMENSION);
 
         commands.spawn()

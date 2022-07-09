@@ -1,8 +1,7 @@
 use bevy::prelude::*;
 use crate::ghosts::{Blinky, Clyde, Inky, Pinky};
 use crate::is;
-use crate::map::board::Board;
-use crate::map::Element;
+use crate::map::{Element, Map};
 
 pub struct GhostCornersPlugin;
 
@@ -18,21 +17,21 @@ pub struct GhostCorner;
 
 fn spawn_ghost_corners(
     mut commands: Commands,
-    board: Res<Board>,
+    map: Res<Map>,
 ) {
-    spawn_corner(&mut commands, &board, is!(Element::BlinkyCorner), Blinky);
-    spawn_corner(&mut commands, &board, is!(Element::PinkyCorner), Pinky);
-    spawn_corner(&mut commands, &board, is!(Element::InkyCorner), Inky);
-    spawn_corner(&mut commands, &board, is!(Element::ClydeCorner), Clyde);
+    spawn_corner(&mut commands, &map, is!(Element::BlinkyCorner), Blinky);
+    spawn_corner(&mut commands, &map, is!(Element::PinkyCorner), Pinky);
+    spawn_corner(&mut commands, &map, is!(Element::InkyCorner), Inky);
+    spawn_corner(&mut commands, &map, is!(Element::ClydeCorner), Clyde);
 }
 
 fn spawn_corner<C: Component + Copy>(
     commands: &mut Commands,
-    board: &Board,
+    map: &Map,
     filter: impl Fn(&Element) -> bool,
     ghost: C
 ) {
-    board.get_positions_matching(filter)
+    map.get_positions_matching(filter)
         .into_iter()
         .for_each(|pos| {
             commands.spawn()
