@@ -8,8 +8,8 @@ use crate::ghosts::Ghost;
 use crate::ghosts::state::State;
 use crate::level::Level;
 use crate::pacman::Pacman;
-use crate::tunnels::spawn::TunnelPositions;
 use crate::common::position::ToPosition;
+use crate::map::board::Board;
 
 pub struct SpeedPlugin;
 
@@ -137,7 +137,7 @@ pub struct GhostSpeed {
 }
 
 fn update_ghost_speed(
-    tunnel_positions: Res<TunnelPositions>,
+    board: Res<Board>,
     level: Res<Level>,
     speed_by_level: Res<SpeedByLevel>,
     mut query: Query<(&Transform, &mut Speed, &State), With<Ghost>>
@@ -145,7 +145,7 @@ fn update_ghost_speed(
     for (transform, mut speed, state) in query.iter_mut() {
         let ghost_speed = speed_by_level.for_ghosts(&level);
 
-        if tunnel_positions.contains(&transform.pos()) {
+        if board.position_is_tunnel(&transform.pos()) {
             *speed = ghost_speed.tunnel;
         } else if *state == State::Frightened {
             *speed = ghost_speed.frightened

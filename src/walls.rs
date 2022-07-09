@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy::utils::HashSet;
 use crate::common::position::Position;
 use crate::constants::WALL_DIMENSION;
 use crate::is;
@@ -14,30 +13,11 @@ impl Plugin for WallsPlugin {
     }
 }
 
-/// Resource that knows the positions of fields that are considered walls.
-#[derive(Deref, DerefMut)]
-pub struct WallPositions(HashSet<Position>);
-
-impl WallPositions {
-    fn new<'a, W: IntoIterator<Item=&'a Position>>(wall_iter: W) -> Self {
-        WallPositions(wall_iter.into_iter().map(|p| *p).collect())
-    }
-
-    pub fn position_is_wall(&self, pos: &Position) -> bool {
-        self.0.contains(pos)
-    }
-}
-
 fn spawn_walls(
     mut commands: Commands,
     map: Res<Map>,
     asset_server: Res<AssetServer>,
 ) {
-    let wall_positions = WallPositions::new(
-        map.get_positions_matching(is!(Wall {..} | InvisibleWall)),
-    );
-    commands.insert_resource(wall_positions);
-
     spawn_labyrinth_walls(&mut commands, &map, &asset_server);
     spawn_ghost_house_entrance(&mut commands, &map);
 }

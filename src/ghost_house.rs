@@ -1,10 +1,9 @@
 use std::any::TypeId;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use bevy::prelude::*;
 use crate::common::position::Position;
 use crate::{is, map};
 use map::Element;
-use map::Element::*;
 use crate::ghosts::{Blinky, Clyde, GhostType, Inky, Pinky};
 use crate::common::Direction;
 use crate::map::Map;
@@ -12,8 +11,8 @@ use crate::map::Map;
 pub struct GhostHousePlugin;
 
 impl Plugin for GhostHousePlugin {
-    fn build(&self, app: &mut App) {
-        app.add_startup_system(spawn_ghost_house);
+    fn build(&self, _app: &mut App) {
+        // TODO: Spawn the ghosthouse here
     }
 }
 
@@ -223,37 +222,4 @@ impl GhostHouse {
 struct Spawn {
     pub coordinates: Vec3,
     pub positions: [Position; 2]
-}
-
-/// Resource that knows where the ghost house and its entrances are.
-/// The walls around a ghost house are not considered part of the ghost house.
-pub struct GhostHousePositions {
-    pub entrances: HashSet<Position>,
-    pub interior: HashSet<Position>
-}
-
-impl GhostHousePositions {
-    fn new<'a, E: IntoIterator<Item=&'a Position>, I: IntoIterator<Item=&'a Position>>(entrance_iter: E, interior_iter: I) -> Self {
-        let entrances = entrance_iter.into_iter().map(|p| *p).collect();
-        let interior = interior_iter.into_iter().map(|p| *p).collect();
-
-        GhostHousePositions {
-            entrances, interior
-        }
-    }
-
-    pub fn position_is_entrance(&self, pos: &Position) -> bool {
-        self.entrances.contains(pos)
-    }
-}
-
-fn spawn_ghost_house(
-    mut commands: Commands,
-    map: Res<Map>
-) {
-    let ghost_house_positions = GhostHousePositions::new(
-        map.get_positions_matching(is!(GhostHouseEntrance {..})),
-        map.get_positions_matching(is!(GhostHouse))
-    );
-    commands.insert_resource(ghost_house_positions);
 }

@@ -50,6 +50,13 @@ impl Board {
         self.ghost_house_entrance_positions.contains(pos)
     }
 
+    /// Returns true if a position is a wall or a ghost house entrance, else false.
+    ///
+    /// These checks are often used in combination, so this method checks them both in one call.
+    pub fn position_is_wall_or_entrance(&self, pos: &Position) -> bool {
+        self.position_is_wall(pos) || self.position_is_ghost_house_entrance(pos)
+    }
+
     pub fn position_is_tunnel(&self, pos: &Position) -> bool {
         self.tunnel_positions.contains(pos)
     }

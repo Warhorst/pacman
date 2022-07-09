@@ -2,20 +2,20 @@ use bevy::prelude::*;
 use crate::ghost_house::GhostHouse;
 use crate::ghosts::GhostType;
 use crate::ghosts::target::{get_nearest_neighbour, TargetComponents, TargetComponentsItem};
-use crate::walls::WallPositions;
 use crate::common::Direction::*;
 use crate::ghosts::state::State;
 use crate::{state_skip_if, target_skip_if};
 use crate::common::position::Vec3Helper;
 use crate::common::position::ToPosition;
+use crate::map::board::Board;
 
 /// Determine the next target coordinates for a ghost when in "Eaten" state.
 ///
 /// When eaten, a ghost walks to the ghost house and enters it. When at the ghost house, he aligns perfectly
 /// before the entrance, moves than to the house center and finally to his spawn coordinates, which depend on the ghost type.
 pub fn set_eaten_target<G: Component + GhostType + 'static>(
+    board: Res<Board>,
     ghost_house: Res<GhostHouse>,
-    wall_positions: Res<WallPositions>,
     mut query: Query<TargetComponents, With<G>>,
 ) {
     for mut components in query.iter_mut() {
@@ -30,7 +30,7 @@ pub fn set_eaten_target<G: Component + GhostType + 'static>(
             move_to_respawn::<G>(&mut components, &ghost_house)
         } else {
             // TODO: Maybe only take this branch when not already in the ghost house, just to avoid bugs
-            move_to_nearest_position_before_entrance(&mut components, &ghost_house, &wall_positions)
+            move_to_nearest_position_before_entrance(&mut components, &ghost_house, &board)
         }
     }
 }
@@ -88,12 +88,12 @@ fn move_to_respawn<G: Component + GhostType + 'static>(components: &mut TargetCo
     components.target.set(respawn);
 }
 
-fn move_to_nearest_position_before_entrance(components: &mut TargetComponentsItem, ghost_house: &GhostHouse, wall_positions: &WallPositions) {
+fn move_to_nearest_position_before_entrance(components: &mut TargetComponentsItem, ghost_house: &GhostHouse, board: &Board) {
     let nearest_spawn_position = components.transform.translation.pos().get_nearest_position_from(ghost_house.positions_in_front_of_entrance());
     let next_target_neighbour = get_nearest_neighbour(
         components,
         nearest_spawn_position,
-        |n| !wall_positions.position_is_wall(&n.position)
+        |n| !board.position_is_wall(&n.position)
     );
 
     *components.direction = next_target_neighbour.direction;

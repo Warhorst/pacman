@@ -34,7 +34,6 @@ fn spawn_ghost<G: GhostType + Component>(
     level: &Level,
     speed_by_level: &SpeedByLevel,
     ghost_type: G,
-
 ) {
     let spawn_direction = ghost_house.spawn_direction_of::<G>();
     let spawn_coordinates = ghost_house.spawn_coordinates_of::<G>();

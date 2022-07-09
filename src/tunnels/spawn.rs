@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy::utils::HashSet;
 use crate::common::position::Position;
 use crate::constants::PACMAN_DIMENSION;
 use crate::is;
@@ -8,26 +7,10 @@ use crate::map::{Element, Map};
 use crate::tunnels::Tunnel;
 use crate::common::Direction;
 
-/// Resource that knows the position of everything that is considered a tunnel.
-pub struct TunnelPositions(HashSet<Position>);
-
-impl TunnelPositions {
-    fn new<'a, I: IntoIterator<Item=&'a Position>>(iter: I) -> Self {
-        TunnelPositions(iter.into_iter().map(|p| *p).collect())
-    }
-
-    pub fn contains(&self, pos: &Position) -> bool {
-        self.0.contains(pos)
-    }
-}
-
 pub(in crate::tunnels) fn spawn_tunnels(
     mut commands: Commands,
     map: Res<Map>,
 ) {
-    let tunnel_positions = TunnelPositions::new(map.get_positions_matching(is!(Element::Tunnel {..} | Element::TunnelEntrance | Element::TunnelHallway)));
-    commands.insert_resource(tunnel_positions);
-
     map.position_element_iter()
         .into_iter()
         .flat_map(|(pos, elem)| match elem {
