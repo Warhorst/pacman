@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use crate::common::position::Position;
 use crate::constants::WALL_DIMENSION;
 use crate::is;
-use crate::map::{Element, Map, Rotation};
+use crate::map::{Element, Map, Rotation, WallType};
 use crate::map::Element::*;
 
 pub struct WallsPlugin;
@@ -24,9 +24,9 @@ fn spawn_walls(
 
 fn spawn_labyrinth_walls(commands: &mut Commands, map: &Map, asset_server: &AssetServer) {
     for (position, element) in map.position_element_iter() {
-        if let Wall { is_corner, rotation, .. } = element {
+        if let Wall { is_corner, rotation, wall_type } = element {
             let transform = create_transform(position, rotation);
-            let texture = select_texture(asset_server, *is_corner);
+            let texture = select_texture(asset_server, *is_corner, wall_type);
             let custom_size = Some(Vec2::new(WALL_DIMENSION, WALL_DIMENSION));
 
             commands.spawn()
@@ -49,11 +49,14 @@ fn create_transform(position: &Position, rotation: &Rotation) -> Transform {
     transform
 }
 
-fn select_texture(asset_server: &AssetServer, is_corner: bool) -> Handle<Image> {
-    if is_corner {
-        asset_server.load("textures/walls/outer_wall_corner.png")
-    } else {
-        asset_server.load("textures/walls/outer_wall.png")
+fn select_texture(asset_server: &AssetServer, is_corner: bool, wall_type: &WallType) -> Handle<Image> {
+    match (wall_type, is_corner) {
+        (WallType::Outer, true) => asset_server.load("textures/walls/outer_wall_corner.png"),
+        (WallType::Outer, false) => asset_server.load("textures/walls/outer_wall.png"),
+        (WallType::Inner, true) => asset_server.load("textures/walls/inner_wall_corner.png"),
+        (WallType::Inner, false) => asset_server.load("textures/walls/inner_wall.png"),
+        (WallType::Ghost, true) => asset_server.load("textures/walls/ghost_house_wall_corner.png"),
+        (WallType::Ghost, false) => asset_server.load("textures/walls/ghost_house_wall.png"),
     }
 }
 
