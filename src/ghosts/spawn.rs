@@ -5,7 +5,7 @@ use crate::ghost_house::GhostHouse;
 use crate::ghosts::{Blinky, Clyde, Ghost, GhostType, Inky, Pinky};
 use crate::ghosts::state::State;
 use crate::ghosts::target::Target;
-use crate::ghosts::textures::GhostTextures;
+use crate::ghosts::textures::{GhostTextures, Phase};
 use crate::level::Level;
 use crate::map::Map;
 use crate::speed::SpeedByLevel;
@@ -37,7 +37,7 @@ fn spawn_ghost<G: GhostType + Component>(
 ) {
     let spawn_direction = ghost_house.spawn_direction_of::<G>();
     let spawn_coordinates = ghost_house.spawn_coordinates_of::<G>();
-    let texture = ghost_textures.get_normal_texture_for::<G>(&spawn_direction);
+    let texture = ghost_textures.get_normal_texture_for::<G>(&spawn_direction, Phase::A);
 
     commands
         .spawn()
