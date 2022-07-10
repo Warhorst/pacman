@@ -7,11 +7,12 @@ use crate::ghosts::Ghost;
 use crate::ghosts::state::State;
 use crate::lives::Life;
 use crate::pacman::spawn::{PacmanSpawn, spawn_pacman};
-use crate::map::Rotation;
 use crate::pacman::movement::PacmanMovementPlugin;
+use crate::pacman::textures::{Animation, update_animation, update_pacman_appearance};
 
 mod movement;
 mod spawn;
+mod textures;
 
 /// Marker component for a pacman entity.
 #[derive(Component)]
@@ -29,14 +30,16 @@ pub struct PacmanPlugin;
 impl Plugin for PacmanPlugin {
     fn build(&self, app: &mut App) {
         app
+            .insert_resource(Animation::new())
             .add_plugin(PacmanMovementPlugin)
             .add_event::<PacmanKilled>()
             .add_event::<PacmanEatsGhost>()
             .add_startup_system(spawn_pacman)
             .add_system(set_direction_based_on_keyboard_input)
-            .add_system(change_appearance_when_direction_changed.after(set_direction_based_on_keyboard_input))
+            .add_system(update_pacman_appearance.after(set_direction_based_on_keyboard_input))
             .add_system(pacman_hits_ghost)
             .add_system(reset_pacman_when_he_died_and_has_lives)
+            .add_system(update_animation)
         ;
     }
 }
@@ -60,19 +63,6 @@ fn set_direction_based_on_keyboard_input(
 
         if keyboard_input.pressed(KeyCode::Down) {
             *direction = Down
-        }
-    }
-}
-
-fn change_appearance_when_direction_changed(
-    mut query: Query<(&Direction, &mut Transform), (With<Pacman>, Changed<Direction>)>
-) {
-    for (direction, mut transform) in query.iter_mut() {
-        match direction {
-            Up => transform.rotation = Rotation::D270.quat_z(),
-            Down => transform.rotation = Rotation::D90.quat_z(),
-            Left => transform.rotation = Rotation::D180.quat_z(),
-            Right => transform.rotation = Rotation::D0.quat_z(),
         }
     }
 }
