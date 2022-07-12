@@ -77,14 +77,15 @@ impl EnergizerTimer {
 
 fn spawn_energizer(
     mut commands: Commands,
+    asset_server: Res<AssetServer>,
     map: Res<Map>
 ) {
     let energizer_dimension = Vec2::new(ENERGIZER_DIMENSION, ENERGIZER_DIMENSION);
     for position in map.get_positions_matching(is!(EnergizerSpawn)) {
         commands.spawn()
             .insert_bundle(SpriteBundle {
+                texture: asset_server.load("textures/energizer.png"),
                 sprite: Sprite {
-                    color: Color::rgb(0.9, 0.0, 0.9),
                     custom_size: Some(energizer_dimension),
                     ..default()
                 },

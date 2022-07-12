@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::constants::POINT_DIMENSION;
+use crate::constants::DOT_DIMENSION;
 use crate::common::position::ToPosition;
 use crate::is;
 use crate::map::{Element, Map};
@@ -31,14 +31,15 @@ pub struct AllDotsEaten;
 
 fn spawn_dots(
     mut commands: Commands,
+    asset_server: Res<AssetServer>,
     map: Res<Map>
 ) {
-    let point_dimension = Vec2::new(POINT_DIMENSION, POINT_DIMENSION);
+    let point_dimension = Vec2::new(DOT_DIMENSION, DOT_DIMENSION);
     for position in map.get_positions_matching(is!(Element::DotSpawn)) {
         commands.spawn()
             .insert_bundle(SpriteBundle {
+                texture: asset_server.load("textures/dot.png"),
                 sprite: Sprite {
-                    color: Color::rgb(1.0, 1.0, 1.0),
                     custom_size: Some(point_dimension),
                     ..default()
                 },
