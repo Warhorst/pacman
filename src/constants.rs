@@ -3,7 +3,7 @@ pub const MAP_PATH: &'static str = "./maps/new_map.json";
 const SCALE: f32 = 1.75;
 
 pub const FIELD_DIMENSION: f32 = 15.0 * SCALE;
-pub const PACMAN_DIMENSION: f32 = 20.0 * SCALE;
+pub const PACMAN_DIMENSION: f32 = 22.5 * SCALE;
 pub const PACMAN_SPEED: f32 = 125.0 * SCALE;
 pub const WALL_DIMENSION: f32 = FIELD_DIMENSION;
 pub const POINT_DIMENSION: f32 = 3.0 * SCALE;
