@@ -83,11 +83,11 @@ impl GhostTextures {
     }
 
     fn load_eaten_textures(asset_server: &AssetServer) -> HashMap<Direction, Handle<Image>> {
-        let mut map = HashMap::new();
-        map.insert(Up, asset_server.load("textures/ghost/eyes_up.png"));
-        map.insert(Down, asset_server.load("textures/ghost/eyes_down.png"));
-        map.insert(Left, asset_server.load("textures/ghost/eyes_left.png"));
-        map.insert(Right, asset_server.load("textures/ghost/eyes_right.png"));
+        let mut map = HashMap::with_capacity(4);
+        map.insert(Up, asset_server.load("textures/ghost/eaten_up.png"));
+        map.insert(Down, asset_server.load("textures/ghost/eaten_down.png"));
+        map.insert(Left, asset_server.load("textures/ghost/eaten_left.png"));
+        map.insert(Right, asset_server.load("textures/ghost/eaten_right.png"));
         map
     }
 
