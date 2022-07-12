@@ -3,6 +3,8 @@ A recreation of the arcade game "Pacman" with rust and the bevy engine.
 
 Despite its age and appearance, Pacman was a quite complex game. Therefore, this project aims to battle test bevy.
 
+[Play the latest build](https://warhorst.github.io/pacman/)
+
 ## TODOs
 (This is a WIP list of things to implement. Will be updated frequently)
 
