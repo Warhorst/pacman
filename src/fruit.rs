@@ -30,6 +30,7 @@ impl Plugin for FruitPlugin {
 /// was eaten.
 fn spawn_fruit_when_dot_limit_reached(
     mut commands: Commands,
+    asset_server: Res<AssetServer>,
     map: Res<Map>,
     level: Res<Level>,
     fruit_dot_counter: Res<FruitDotCounter>,
@@ -39,18 +40,19 @@ fn spawn_fruit_when_dot_limit_reached(
     if eaten_dots == 70 || eaten_dots == 170 {
         let coordinates = map.coordinates_between_positions_matching(is!(Element::FruitSpawn));
         let dimension = Vec2::new(PACMAN_DIMENSION, PACMAN_DIMENSION);
+        let fruit = get_fruit_for_level(&level);
 
         commands.spawn()
             .insert_bundle(SpriteBundle {
+                texture: get_texture_for_fruit(&fruit, &asset_server),
                 sprite: Sprite {
-                    color: Color::rgb(0.0, 1.0, 0.0),
                     custom_size: Some(dimension),
                     ..default()
                 },
                 transform: Transform::from_translation(coordinates),
                 ..Default::default()
             })
-            .insert(get_fruit_for_level(&level));
+            .insert(fruit);
         commands.insert_resource(FruitDespawnTimer::new());
     }
 }
@@ -66,6 +68,19 @@ fn get_fruit_for_level(level: &Level) -> Fruit {
         11 | 12 => Bell,
         _ => Key
     }
+}
+
+fn get_texture_for_fruit(fruit: &Fruit, asset_server: &AssetServer) -> Handle<Image> {
+    asset_server.load(&format!("textures/fruits/{}.png", match fruit {
+        Cherry => "cherry",
+        Strawberry => "strawberry",
+        Peach => "peach",
+        Apple => "cherry",
+        Grapes => "grapes",
+        Galaxian => "galaxian",
+        Bell => "bell",
+        Key => "key"
+    }))
 }
 
 /// When a dot was eaten, increase the dot counter.
