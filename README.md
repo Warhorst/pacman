@@ -7,7 +7,7 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 (This is a WIP list of things to implement. Will be updated frequently)
 
 ### Pacman
-- "waka waka" animation + sound when eating dots (very important)
+- sound when eating dots
 
 ### Ghosts
 - adapt Blinkys speed based on remaining dots
@@ -20,21 +20,11 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 - (Maybe) remove the tunnel component and only use the board resource
 
 ### Fruit
-- enable fruit spawn
-- fruit points and appearance change based on the current level
-- eating the fruits gives pacman points
+- eating the fruits gives the player points
 
 ### Graphics
-- animations for pacman when walking around
 - animations for pacman when he dies
-- animations for ghost when walking around
-- animations for ghost when frightened
 - blinking effect for frightened ghost when the frightened state is almost over
-- sprites for dots
-- sprites for energizer
-- sprites for inner walls
-- sprites for the ghost house entrance
-- sprites for ghost house walls
 - return the correct z coordinate from the board (or only x and y)
 - render points for eating a ghost
 - render points for eating a fruit
