@@ -8,7 +8,7 @@ use crate::ghosts::state::State;
 use crate::lives::Life;
 use crate::pacman::spawn::{PacmanSpawn, spawn_pacman};
 use crate::pacman::movement::PacmanMovementPlugin;
-use crate::pacman::textures::{Animation, update_animation, update_pacman_appearance};
+use crate::pacman::textures::update_pacman_appearance;
 
 mod movement;
 mod spawn;
@@ -30,7 +30,6 @@ pub struct PacmanPlugin;
 impl Plugin for PacmanPlugin {
     fn build(&self, app: &mut App) {
         app
-            .insert_resource(Animation::new())
             .add_plugin(PacmanMovementPlugin)
             .add_event::<PacmanKilled>()
             .add_event::<PacmanEatsGhost>()
@@ -39,7 +38,6 @@ impl Plugin for PacmanPlugin {
             .add_system(update_pacman_appearance.after(set_direction_based_on_keyboard_input))
             .add_system(pacman_hits_ghost)
             .add_system(reset_pacman_when_he_died_and_has_lives)
-            .add_system(update_animation)
         ;
     }
 }

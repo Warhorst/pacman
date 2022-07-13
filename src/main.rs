@@ -3,6 +3,7 @@ extern crate core;
 use bevy::prelude::*;
 
 use pacman::PacmanPlugin;
+use crate::animation::AnimationPlugin;
 use crate::camera::CameraPlugin;
 
 use crate::dots::DotPlugin;
@@ -40,6 +41,7 @@ mod ghost_house;
 mod ghost_corners;
 mod ghost_house_gate;
 mod fruit;
+pub mod animation;
 
 fn main() {
     App::new()
@@ -51,6 +53,7 @@ fn main() {
             ..Default::default()
         })
         .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
+        .add_plugin(AnimationPlugin)
         .add_plugin(CameraPlugin)
         .add_plugins(DefaultPlugins)
         .add_plugin(MapPlugin)
