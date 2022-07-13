@@ -14,7 +14,7 @@ use crate::speed::SpeedByLevel;
 #[derive(Deref, DerefMut)]
 pub struct PacmanSpawn(Vec3);
 
-pub fn spawn_pacman(
+pub (in crate::pacman) fn spawn_pacman(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     map: Res<Map>,
@@ -37,7 +37,7 @@ pub fn spawn_pacman(
         })
         .insert(Pacman)
         .insert(speed_by_level.for_pacman(&level).normal)
-        .insert(Left)
+        .insert(Up)
     ;
     commands.insert_resource(pacman_spawn);
     commands.insert_resource(textures);
