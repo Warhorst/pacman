@@ -5,7 +5,7 @@ use bevy::ecs::query::WorldQuery;
 use crate::common::Direction;
 use crate::common::Direction::*;
 use crate::common::position::Position;
-use crate::constants::{PACMAN_DIMENSION, WALL_DIMENSION};
+use crate::constants::FIELD_DIMENSION;
 use crate::dots::DotEaten;
 use crate::energizer::EnergizerEaten;
 use crate::map::board::Board;
@@ -129,28 +129,28 @@ fn is_going_to_collide_with_obstacle(board: &Board, direction: &Direction, new_p
     if position_is_obstacle(board, &pos_in_direction) {
         true
     } else {
-        !are_coordinates_in_field_center(direction, &pos_in_direction, new_coordinates, PACMAN_DIMENSION)
+        !are_coordinates_in_field_center(direction, &pos_in_direction, new_coordinates)
     }
 }
 
-/// Determines if pacmans current coordinates are in the center of his current position. The center of the position is
-/// its middle point with the width/height of the accumulated distance between pacman and the walls.
-/// Assumes pacman is larger than a wall.
-pub fn are_coordinates_in_field_center(direction: &Direction, position: &Position, coordinates: &Vec3, entity_dimension: f32) -> bool {
+/// Determines if pacmans current coordinates are in the center of his current position.
+///
+/// Pacman can only walk to new fields if he is centered enough to not collide with walls while doing so.
+/// Based on pacmans current direction (horizontally or vertically), his x/y coordinates must be in a specific range.
+/// This range is is target field coordinates x/y plus/minus a deadzone. The deadzone allows the player
+/// to be slightly off when changing directions. It is currently set to 90% FIELD_DIMENSION.
+pub fn are_coordinates_in_field_center(direction: &Direction, position: &Position, coordinates: &Vec3) -> bool {
     let position_coordinates = Vec3::from(position);
-    let entity_wall_distance = match entity_dimension > WALL_DIMENSION {
-        true => entity_dimension - WALL_DIMENSION,
-        false => 0.0
-    };
+    let deadzone = FIELD_DIMENSION * 9.0/10.0;
     match direction {
         Left | Right => {
-            let y_start = position_coordinates.y - entity_wall_distance;
-            let y_end = position_coordinates.y + entity_wall_distance;
+            let y_start = position_coordinates.y - deadzone;
+            let y_end = position_coordinates.y + deadzone;
             coordinates.y >= y_start && coordinates.y <= y_end
         }
         Up | Down => {
-            let x_start = position_coordinates.x - entity_wall_distance;
-            let x_end = position_coordinates.x + entity_wall_distance;
+            let x_start = position_coordinates.x - deadzone;
+            let x_end = position_coordinates.x + deadzone;
             coordinates.x >= x_start && coordinates.x <= x_end
         }
     }
