@@ -5,7 +5,7 @@ use crate::ghosts::schedule::SchedulePlugin;
 use crate::ghosts::spawn::spawn_ghosts;
 use crate::ghosts::state::{StatePlugin, StateSetter};
 use crate::ghosts::target::{Target, TargetPlugin};
-use crate::ghosts::textures::{Animation, update_animation, update_ghost_appearance};
+use crate::ghosts::textures::update_ghost_appearance;
 use crate::tunnels::GhostPassedTunnel;
 use crate::common::Direction;
 use crate::ghost_house::GhostHouse;
@@ -25,7 +25,6 @@ pub struct GhostPlugin;
 impl Plugin for GhostPlugin {
     fn build(&self, app: &mut App) {
         app
-            .insert_resource(Animation::new())
             .add_plugin(MovePlugin)
             .add_plugin(TargetPlugin)
             .add_plugin(StatePlugin)
@@ -36,7 +35,6 @@ impl Plugin for GhostPlugin {
             .add_system(update_ghost_appearance::<Pinky>)
             .add_system(update_ghost_appearance::<Inky>)
             .add_system(update_ghost_appearance::<Clyde>)
-            .add_system(update_animation)
             .add_system_set(
                 SystemSet::new()
                     .with_system(reset_ghosts_when_pacman_was_killed::<Blinky>)

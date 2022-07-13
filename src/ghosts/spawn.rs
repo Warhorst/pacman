@@ -5,7 +5,7 @@ use crate::ghost_house::GhostHouse;
 use crate::ghosts::{Blinky, Clyde, Ghost, GhostType, Inky, Pinky};
 use crate::ghosts::state::State;
 use crate::ghosts::target::Target;
-use crate::ghosts::textures::{GhostTextures, Phase};
+use crate::ghosts::textures::create_animations_for_ghost;
 use crate::level::Level;
 use crate::map::Map;
 use crate::speed::SpeedByLevel;
@@ -15,34 +15,32 @@ pub fn spawn_ghosts(
     asset_server: Res<AssetServer>,
     map: Res<Map>,
     level: Res<Level>,
-    speed_by_level: Res<SpeedByLevel>
+    speed_by_level: Res<SpeedByLevel>,
 ) {
     let ghost_house = GhostHouse::new(&map);
-    let ghost_textures = GhostTextures::new(&asset_server);
-    spawn_ghost(&mut commands, &ghost_house, &ghost_textures, &level, &speed_by_level, Blinky);
-    spawn_ghost(&mut commands, &ghost_house, &ghost_textures, &level, &speed_by_level, Pinky);
-    spawn_ghost(&mut commands, &ghost_house, &ghost_textures, &level, &speed_by_level, Inky);
-    spawn_ghost(&mut commands, &ghost_house, &ghost_textures, &level, &speed_by_level, Clyde);
+    spawn_ghost(&mut commands, &ghost_house, &asset_server, &level, &speed_by_level, Blinky);
+    spawn_ghost(&mut commands, &ghost_house, &asset_server, &level, &speed_by_level, Pinky);
+    spawn_ghost(&mut commands, &ghost_house, &asset_server, &level, &speed_by_level, Inky);
+    spawn_ghost(&mut commands, &ghost_house, &asset_server, &level, &speed_by_level, Clyde);
     commands.insert_resource(ghost_house);
-    commands.insert_resource(ghost_textures);
 }
 
 fn spawn_ghost<G: GhostType + Component>(
     commands: &mut Commands,
     ghost_house: &GhostHouse,
-    ghost_textures: &GhostTextures,
+    asset_server: &AssetServer,
     level: &Level,
     speed_by_level: &SpeedByLevel,
     ghost_type: G,
 ) {
     let spawn_direction = ghost_house.spawn_direction_of::<G>();
     let spawn_coordinates = ghost_house.spawn_coordinates_of::<G>();
-    let texture = ghost_textures.get_normal_texture_for::<G>(&spawn_direction, Phase::A);
+    let animations = create_animations_for_ghost::<G>(asset_server);
 
     commands
         .spawn()
         .insert_bundle(SpriteBundle {
-            texture,
+            texture: animations.get_current_texture(),
             sprite: Sprite {
                 custom_size: Some(Vec2::new(GHOST_DIMENSION, GHOST_DIMENSION)),
                 ..default()
@@ -56,5 +54,6 @@ fn spawn_ghost<G: GhostType + Component>(
         .insert(speed_by_level.for_ghosts(level).normal)
         .insert(Target::new())
         .insert(State::Spawned)
+        .insert(animations)
     ;
 }

@@ -45,3 +45,14 @@ impl Direction {
         *self = self.opposite()
     }
 }
+
+impl ToString for Direction {
+    fn to_string(&self) -> String {
+        match self {
+            Up => "up",
+            Down => "down",
+            Left => "left",
+            Right => "right"
+        }.to_string()
+    }
+}
