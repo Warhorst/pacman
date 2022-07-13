@@ -49,19 +49,19 @@ fn set_direction_based_on_keyboard_input(
     mut query: Query<&mut Direction, With<Pacman>>,
 ) {
     for mut direction in query.iter_mut() {
-        if keyboard_input.pressed(KeyCode::Left) {
+        if keyboard_input.pressed(KeyCode::Left) || keyboard_input.pressed(KeyCode::A) {
             *direction = Left
         }
 
-        if keyboard_input.pressed(KeyCode::Right) {
+        if keyboard_input.pressed(KeyCode::Right) || keyboard_input.pressed(KeyCode::D) {
             *direction = Right
         }
 
-        if keyboard_input.pressed(KeyCode::Up) {
+        if keyboard_input.pressed(KeyCode::Up) || keyboard_input.pressed(KeyCode::W) {
             *direction = Up
         }
 
-        if keyboard_input.pressed(KeyCode::Down) {
+        if keyboard_input.pressed(KeyCode::Down) || keyboard_input.pressed(KeyCode::S) {
             *direction = Down
         }
     }
