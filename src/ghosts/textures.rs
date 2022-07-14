@@ -2,15 +2,21 @@ use std::any::TypeId;
 use bevy::prelude::*;
 use crate::animation::{Animation, Animations};
 use crate::common::Direction;
+use crate::energizer::EnergizerTimer;
 use crate::ghosts::{Blinky, GhostType, Inky, Pinky};
 use crate::ghosts::state::State;
 
 pub (in crate::ghosts) fn update_ghost_appearance<G: 'static + Component + GhostType>(
+    energizer_timer: Res<EnergizerTimer>,
     mut query: Query<(&Direction, &State, &mut Animations), With<G>>
 ) {
     for (direction, state, mut animations) in query.iter_mut() {
         match state {
-            State::Frightened => animations.change_animation_to("frightened"),
+            State::Frightened => match energizer_timer.remaining() {
+                // animate a frightened ghost differently if the energizer timer is almost ending
+                Some(secs) if secs < 2.0 => animations.change_animation_to("frightened_blinking"),
+                _ => animations.change_animation_to("frightened"),
+            },
             State::Eaten => {
                 animations.change_animation_to(format!("eaten_{}", direction.to_string()))
             },
@@ -40,7 +46,8 @@ fn create_animations_for(asset_server: &AssetServer, ghost_name: &'static str) -
             ("eaten_down", create_eaten_animation(asset_server, "down")),
             ("eaten_left", create_eaten_animation(asset_server, "left")),
             ("eaten_right", create_eaten_animation(asset_server, "right")),
-            ("frightened", create_frightened_animation(asset_server))
+            ("frightened", create_frightened_animation(asset_server)),
+            ("frightened_blinking", create_frightened_blinking_animation(asset_server)),
         ],
         "normal_left")
 }
@@ -67,6 +74,19 @@ fn create_frightened_animation(asset_server: &AssetServer) -> Animation {
         [
             asset_server.load("textures/ghost/frightened_a.png"),
             asset_server.load("textures/ghost/frightened_b.png"),
+        ]
+    )
+}
+
+fn create_frightened_blinking_animation(asset_server: &AssetServer) -> Animation {
+    Animation::new(
+        0.5,
+        true,
+        [
+            asset_server.load("textures/ghost/frightened_a.png"),
+            asset_server.load("textures/ghost/frightened_blinking_a.png"),
+            asset_server.load("textures/ghost/frightened_b.png"),
+            asset_server.load("textures/ghost/frightened_blinking_b.png"),
         ]
     )
 }

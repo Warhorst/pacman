@@ -5,7 +5,7 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 
 [Play the latest build (WIP)](https://warhorst.github.io/pacman/)
 
-(Use arrow keys to control pacman. Click into the canvas if it's not working)
+(Use WASD or arrow keys to control pacman. Click into the canvas if it's not working)
 
 ## TODOs
 (This is a WIP list of things to implement. Will be updated frequently)

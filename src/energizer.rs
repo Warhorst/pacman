@@ -73,6 +73,11 @@ impl EnergizerTimer {
             None => true
         }
     }
+
+    /// Return the remaining seconds for this timer (if the timer is active, else None)
+    pub fn remaining(&self) -> Option<f32> {
+        Some(self.timer.as_ref()?.duration().as_secs_f32() - self.timer.as_ref()?.elapsed_secs())
+    }
 }
 
 fn spawn_energizer(

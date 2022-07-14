@@ -52,13 +52,14 @@ pub struct Animation {
 }
 
 impl Animation {
-    pub fn new<const C: usize>(duration_secs: f32, repeating: bool, textures: [Handle<Image>; C]) -> Self {
+    pub fn new(duration_secs: f32, repeating: bool, textures: impl IntoIterator<Item=Handle<Image>>) -> Self {
+        let textures = textures.into_iter().collect::<Vec<_>>();
         Animation {
             num_textures: textures.len(),
             current_texture_index: 0,
             duration_secs,
             timer: Timer::new(Duration::from_secs_f32(duration_secs), repeating),
-            textures: textures.into_iter().collect()
+            textures
         }
     }
 
@@ -107,6 +108,10 @@ impl Animation {
 /// handles must be cloned.
 ///
 /// The animation can be switched at runtime. Every animation is identified by a string.
+///
+/// TODO: We could need an Animations variant with a shared timer between animations.
+///  The ghosts currently use all the same timer duration, and the animation transition could look
+///  smoother this way
 #[derive(Component)]
 pub struct Animations {
     atlas: HashMap<String, Animation>,
@@ -114,7 +119,7 @@ pub struct Animations {
 }
 
 impl Animations {
-    pub fn new<const C: usize, S: ToString>(animations: [(S, Animation); C], current: S) -> Self {
+    pub fn new<C: ToString, S: ToString>(animations: impl IntoIterator<Item=(S, Animation)>, current: C) -> Self {
         Animations {
             atlas: animations.into_iter().map(|(s, anims)| (s.to_string(), anims)).collect(),
             current: current.to_string()
