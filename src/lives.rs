@@ -40,20 +40,21 @@ impl PointsRequiredForExtraLife {
 
 fn spawn_lives(
     mut commands: Commands,
+    asset_server: Res<AssetServer>,
     board: Res<Board>
 ) {
     for i in 0..LIVES {
-        spawn_life(&mut commands, &board, i)
+        spawn_life(&mut commands, &asset_server, &board, i)
     }
 }
 
-fn spawn_life(commands: &mut Commands, board: &Board, life_index: usize) {
-    let life_x = FIELD_DIMENSION * board.width as f32 + (life_index as f32) * (PACMAN_DIMENSION) * 2.0;
+fn spawn_life(commands: &mut Commands, asset_server: &AssetServer, board: &Board, life_index: usize) {
+    let life_x = FIELD_DIMENSION * board.width as f32 + (life_index as f32) * (FIELD_DIMENSION) * 2.0;
 
     commands.spawn()
         .insert_bundle(SpriteBundle {
+            texture: asset_server.load("textures/pacman/pacman_life.png"),
             sprite: Sprite {
-                color: Color::hex("FFEE00").unwrap(),
                 custom_size: Some(Vec2::new(PACMAN_DIMENSION, PACMAN_DIMENSION)),
                 ..default()
             },
@@ -80,6 +81,7 @@ fn remove_life_when_pacman_dies(
 
 fn add_life_if_player_reaches_specific_score(
     mut commands: Commands,
+    asset_server: Res<AssetServer>,
     score: Res<Score>,
     mut points_required_for_extra_life: ResMut<PointsRequiredForExtraLife>,
     board: Res<Board>,
@@ -87,7 +89,7 @@ fn add_life_if_player_reaches_specific_score(
 ) {
     if **score >= **points_required_for_extra_life {
         let index = query.iter().count();
-        spawn_life(&mut commands, &board, index);
+        spawn_life(&mut commands, &asset_server, &board, index);
         points_required_for_extra_life.increase_limit();
     }
 }
