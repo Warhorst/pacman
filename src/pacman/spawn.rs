@@ -23,11 +23,11 @@ pub (in crate::pacman) fn spawn_pacman(
 ) {
     let pacman_spawn = PacmanSpawn(map.coordinates_between_positions_matching(is!(PacManSpawn)));
     let pacman_dimension = Vec2::new(PACMAN_DIMENSION, PACMAN_DIMENSION);
-    let animation = create_pacman_animations(&asset_server);
+    let animations = create_pacman_animations(&asset_server);
 
     commands.spawn()
         .insert_bundle(SpriteBundle {
-            texture: animation.get_current_texture(),
+            texture: animations.get_current_texture(),
             sprite: Sprite {
                 custom_size: Some(pacman_dimension),
                 ..default()
@@ -38,7 +38,7 @@ pub (in crate::pacman) fn spawn_pacman(
         .insert(Pacman)
         .insert(speed_by_level.for_pacman(&level).normal)
         .insert(Up)
-        .insert(animation)
+        .insert(animations)
     ;
     commands.insert_resource(pacman_spawn);
 }

@@ -42,6 +42,7 @@ mod ghost_corners;
 mod ghost_house_gate;
 mod fruit;
 pub mod animation;
+mod helper;
 
 fn main() {
     App::new()

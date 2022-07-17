@@ -47,7 +47,7 @@ fn update_entities_with_animations(
 ///  Unfortunately, the current implementation of bevys sprite sheet (TextureAtlas)
 ///  is very restricted, as a newly created texture atlas does not hold any image handles.
 ///  They are just magically loaded in their examples (https://github.com/bevyengine/bevy/blob/latest/examples/2d/sprite_sheet.rs)
-///  and the current images changes by setting an index of another component (TextureAtlasSprite)
+///  and the current image changes by setting an index of another component (TextureAtlasSprite)
 ///  Until I can
 ///  - create a texture atlas, which directly creates all images
 ///  - access the single images in an easy way (by index/position) (currently it's mapped handle to index ???)
