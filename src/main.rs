@@ -19,6 +19,7 @@ use crate::map::MapPlugin;
 use crate::random::RandomPlugin;
 use crate::score::ScorePlugin;
 use crate::speed::SpeedPlugin;
+use crate::spritesheet::SpriteSheetPlugin;
 use crate::tunnels::TunnelPlugin;
 use crate::walls::WallsPlugin;
 
@@ -43,6 +44,7 @@ mod ghost_house_gate;
 mod fruit;
 pub mod animation;
 mod helper;
+mod spritesheet;
 
 fn main() {
     App::new()
@@ -73,5 +75,6 @@ fn main() {
         .add_plugin(SpeedPlugin)
         .add_plugin(GhostHouseGatePlugin)
         .add_plugin(FruitPlugin)
+        .add_plugin(SpriteSheetPlugin)
         .run()
 }
