@@ -25,7 +25,6 @@ pub (in crate::ghosts) fn update_ghost_appearance<G: 'static + Component + Ghost
     }
 }
 
-
 pub (in crate::ghosts) fn create_animations_for_ghost<G: GhostType + 'static>(asset_server: &AssetServer) -> Animations {
     match TypeId::of::<G>() {
         id if id == TypeId::of::<Blinky>() => create_animations_for(asset_server, "blinky"),
@@ -53,7 +52,7 @@ fn create_animations_for(asset_server: &AssetServer, ghost_name: &'static str) -
 }
 
 fn create_normal_animation(asset_server: &AssetServer, ghost_name: &'static str, direction: &'static str) -> Animation {
-    Animation::new(
+    Animation::from_textures(
         0.5,
         true,
         [
@@ -64,11 +63,11 @@ fn create_normal_animation(asset_server: &AssetServer, ghost_name: &'static str,
 }
 
 fn create_eaten_animation(asset_server: &AssetServer, direction: &'static str) -> Animation {
-    Animation::from_single_texture(asset_server.load(&format!("textures/ghost/eaten_{direction}.png")))
+    Animation::from_texture(asset_server.load(&format!("textures/ghost/eaten_{direction}.png")))
 }
 
 fn create_frightened_animation(asset_server: &AssetServer) -> Animation {
-    Animation::new(
+    Animation::from_textures(
         0.5,
         true,
         [
@@ -79,7 +78,7 @@ fn create_frightened_animation(asset_server: &AssetServer) -> Animation {
 }
 
 fn create_frightened_blinking_animation(asset_server: &AssetServer) -> Animation {
-    Animation::new(
+    Animation::from_textures(
         0.5,
         true,
         [

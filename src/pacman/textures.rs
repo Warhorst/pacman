@@ -34,7 +34,7 @@ pub(in crate::pacman) fn create_pacman_animations(asset_server: &AssetServer) ->
 
 fn create_eating_animation(asset_server: &AssetServer, direction: Direction) -> Animation {
     let direction = direction.to_string();
-    Animation::new(
+    Animation::from_textures(
         0.2,
         true,
         load_textures(asset_server, &[
@@ -47,7 +47,7 @@ fn create_eating_animation(asset_server: &AssetServer, direction: Direction) -> 
 }
 
 fn create_dying_animation(asset_server: &AssetServer) -> Animation {
-    Animation::new(
+    Animation::from_textures(
         2.0,
         true,
         [

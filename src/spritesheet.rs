@@ -55,7 +55,7 @@ impl SpriteSheets {
     /// The sprite sheet cannot be split in seperate images, as it is not loaded yet. The sprite sheet is therefore filled with columns * rows default
     /// images.
     /// When the sheet is loaded (which is checked in update_sprite_sheets), the sheet is split and all handles get updated.
-    /// TODO: This is more or less a hack. Rot reloading does not work and probably other stuff.
+    /// TODO: This is more or less a hack. Hot reloading does not work and probably other stuff too.
     pub fn add_sheet(&mut self, sheet_handle: Handle<Image>, image_assets: &mut Assets<Image>, sprite_dimension: Vec2, columns: usize, rows: usize) -> &SpriteSheet {
         let sheet = SpriteSheet::new(image_assets, sprite_dimension, columns, rows);
         self.sheets.insert(sheet_handle.id, sheet);

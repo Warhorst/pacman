@@ -15,7 +15,7 @@ impl Plugin for AnimationPlugin {
 
 fn update_entities_with_single_animation(
     time: Res<Time>,
-    mut query: Query<(&mut Handle<Image>, &mut Animation)>
+    mut query: Query<(&mut Handle<Image>, &mut Animation)>,
 ) {
     let delta = time.delta();
     for (mut texture, mut animation) in query.iter_mut() {
@@ -26,7 +26,7 @@ fn update_entities_with_single_animation(
 
 fn update_entities_with_animations(
     time: Res<Time>,
-    mut query: Query<(&mut Handle<Image>, &mut Animations)>
+    mut query: Query<(&mut Handle<Image>, &mut Animations)>,
 ) {
     let delta = time.delta();
     for (mut texture, mut animations) in query.iter_mut() {
@@ -53,62 +53,65 @@ fn update_entities_with_animations(
 ///  - access the single images in an easy way (by index/position) (currently it's mapped handle to index ???)
 ///  animations will only be creatable by single or multiple, unique images
 #[derive(Component, Clone)]
-pub struct Animation {
-    num_textures: usize,
-    current_texture_index: usize,
-    duration_secs: f32,
-    timer: Timer,
-    textures: Vec<Handle<Image>>
+pub enum Animation {
+    SingleTexture {
+        texture: Handle<Image>
+    },
+    TextureList {
+        current_texture_index: usize,
+        timer: Timer,
+        repeating: bool,
+        textures: Vec<Handle<Image>>,
+    },
 }
 
 impl Animation {
-    pub fn new(duration_secs: f32, repeating: bool, textures: impl IntoIterator<Item=Handle<Image>>) -> Self {
-        let textures = textures.into_iter().collect::<Vec<_>>();
-        Animation {
-            num_textures: textures.len(),
+    pub fn from_texture(texture: Handle<Image>) -> Self {
+        Animation::SingleTexture { texture }
+    }
+
+    pub fn from_textures(duration_secs: f32, repeating: bool, textures: impl IntoIterator<Item=Handle<Image>>) -> Self {
+        let textures = textures
+            .into_iter()
+            .collect::<Vec<_>>();
+        let texture_display_time = duration_secs / textures.len() as f32;
+
+        Animation::TextureList {
             current_texture_index: 0,
-            duration_secs,
-            timer: Timer::new(Duration::from_secs_f32(duration_secs), repeating),
-            textures
+            timer: Timer::new(Duration::from_secs_f32(texture_display_time), true),
+            repeating,
+            textures,
         }
     }
 
-    /// Create an "animation" from a single texture.
-    ///
-    /// This might be useful if you want to collect multiple animations in an Animations struct,
-    /// but some animations only require a single texture.
-    pub fn from_single_texture(texture: Handle<Image>) -> Self {
-        Animation {
-            num_textures: 1,
-            current_texture_index: 0,
-            duration_secs: 0.0,
-            timer: Timer::new(Duration::from_secs_f32(0.0), false),
-            textures: vec![texture]
-        }
-    }
-
-    /// Proceed the timer and calculate the next texture index
     pub fn update(&mut self, delta: Duration) {
-        self.timer.tick(delta);
-        let elapsed = self.timer.elapsed_secs();
+        if let Animation::TextureList { ref mut current_texture_index, timer, repeating, textures } = self {
+            timer.tick(delta);
 
-        match elapsed < self.duration_secs {
-            true => {
-                let relation = elapsed / self.duration_secs;
-                self.current_texture_index = ((self.num_textures as f32) * relation) as usize
-            },
-            false => self.current_texture_index = self.num_textures - 1
+            if timer.just_finished() {
+                let at_last_index = *current_texture_index == textures.len() - 1;
+                match (repeating, at_last_index) {
+                    (true, true) => *current_texture_index = 0,
+                    (_, false) => *current_texture_index += 1,
+                    (false, true) => ()
+                }
+            }
         }
     }
 
     pub fn get_current_texture(&self) -> Handle<Image> {
-        self.textures.get(self.current_texture_index).expect("the current texture index should be in range of the amount of textures").clone()
+        match self {
+            Animation::SingleTexture { texture } => texture.clone(),
+            Animation::TextureList { current_texture_index, textures, .. } => textures.get(*current_texture_index).expect("the current texture index should be in range of the amount of textures").clone()
+        }
     }
 
     /// Rewind the animation back to the start
     pub fn reset(&mut self) {
-        self.current_texture_index = 0;
-        self.timer.reset()
+        if let Animation::TextureList {ref mut current_texture_index, timer, .. } = self {
+            timer.reset();
+            *current_texture_index = 0
+        }
     }
 }
 
@@ -125,14 +128,14 @@ impl Animation {
 #[derive(Component)]
 pub struct Animations {
     atlas: HashMap<String, Animation>,
-    current: String
+    current: String,
 }
 
 impl Animations {
     pub fn new<C: ToString, S: ToString>(animations: impl IntoIterator<Item=(S, Animation)>, current: C) -> Self {
         Animations {
             atlas: animations.into_iter().map(|(s, anims)| (s.to_string(), anims)).collect(),
-            current: current.to_string()
+            current: current.to_string(),
         }
     }
 
@@ -152,7 +155,7 @@ impl Animations {
     ///
     /// If the new animation is the same as the old animation, nothing is done. This prevents "freezes" when this method
     /// is called very often, every frame for example.
-    pub fn change_animation_to(&mut self, animation_name: impl ToString)  {
+    pub fn change_animation_to(&mut self, animation_name: impl ToString) {
         let new_current = animation_name.to_string();
 
         if new_current != self.current {
