@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use bevy::prelude::*;
 use std::time::Duration;
+use crate::spritesheet::SpriteSheet;
 
 pub struct AnimationPlugin;
 
@@ -42,16 +43,6 @@ fn update_entities_with_animations(
 ///
 /// The animation can be repeatable or not. If it is not repeatable, the last texture
 /// in the vector is returned forever.
-///
-/// TODO: It would be much easier to just load sprite sheets instead of single sprites (so I dont need millions of images).
-///  Unfortunately, the current implementation of bevys sprite sheet (TextureAtlas)
-///  is very restricted, as a newly created texture atlas does not hold any image handles.
-///  They are just magically loaded in their examples (https://github.com/bevyengine/bevy/blob/latest/examples/2d/sprite_sheet.rs)
-///  and the current image changes by setting an index of another component (TextureAtlasSprite)
-///  Until I can
-///  - create a texture atlas, which directly creates all images
-///  - access the single images in an easy way (by index/position) (currently it's mapped handle to index ???)
-///  animations will only be creatable by single or multiple, unique images
 #[derive(Component, Clone)]
 pub enum Animation {
     SingleTexture {
@@ -72,6 +63,25 @@ impl Animation {
 
     pub fn from_textures(duration_secs: f32, repeating: bool, textures: impl IntoIterator<Item=Handle<Image>>) -> Self {
         let textures = textures
+            .into_iter()
+            .collect::<Vec<_>>();
+        let texture_display_time = duration_secs / textures.len() as f32;
+
+        Animation::TextureList {
+            current_texture_index: 0,
+            timer: Timer::new(Duration::from_secs_f32(texture_display_time), true),
+            repeating,
+            textures,
+        }
+    }
+
+    /// Creates an animation from a SpriteSheet.
+    ///
+    /// TODO: This is a custom solution. Replace with a more stable one when bevy provides a build
+    ///  in way to load a sprite sheet and get all sub image handles from it.
+    pub fn from_sprite_sheet(duration_secs: f32, repeating: bool, sprite_sheet: &SpriteSheet) -> Self {
+        let textures = sprite_sheet
+            .get_textures()
             .into_iter()
             .collect::<Vec<_>>();
         let texture_display_time = duration_secs / textures.len() as f32;

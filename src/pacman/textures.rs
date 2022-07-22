@@ -4,7 +4,7 @@ use crate::animation::{Animation, Animations};
 use crate::pacman::Pacman;
 use crate::common::Direction;
 use crate::common::Direction::*;
-use crate::helper::load_textures;
+use crate::spritesheet::SpriteSheets;
 
 pub(in crate::pacman) fn update_pacman_appearance(
     mut query: Query<(&Direction, &mut Animations), With<Pacman>>
@@ -19,30 +19,40 @@ pub(in crate::pacman) fn update_pacman_appearance(
     }
 }
 
-pub(in crate::pacman) fn create_pacman_animations(asset_server: &AssetServer) -> Animations {
+pub(in crate::pacman) fn create_pacman_animations(
+    asset_server: &AssetServer,
+    image_assets: &mut Assets<Image>,
+    sprite_sheets: &mut SpriteSheets
+) -> Animations {
     Animations::new(
         [
-            ("eating_left", create_eating_animation(asset_server, Left)),
-            ("eating_right", create_eating_animation(asset_server, Right)),
-            ("eating_up", create_eating_animation(asset_server, Up)),
-            ("eating_down", create_eating_animation(asset_server, Down)),
+            ("eating_left", create_eating_animation(asset_server, image_assets, sprite_sheets, Left)),
+            ("eating_right", create_eating_animation(asset_server, image_assets, sprite_sheets, Right)),
+            ("eating_up", create_eating_animation(asset_server, image_assets, sprite_sheets, Up)),
+            ("eating_down", create_eating_animation(asset_server, image_assets, sprite_sheets, Down)),
             ("dying", create_dying_animation(asset_server))
         ],
         "eating_up",
     )
 }
 
-fn create_eating_animation(asset_server: &AssetServer, direction: Direction) -> Animation {
+fn create_eating_animation(
+    asset_server: &AssetServer,
+    image_assets: &mut Assets<Image>,
+    sprite_sheets: &mut SpriteSheets,
+    direction: Direction
+) -> Animation {
     let direction = direction.to_string();
-    Animation::from_textures(
+    Animation::from_sprite_sheet(
         0.2,
         true,
-        load_textures(asset_server, &[
-            "textures/pacman/pacman_closed.png".to_string(),
-            format!("textures/pacman/pacman_opening_{direction}.png"),
-            format!("textures/pacman/pacman_open_{direction}.png"),
-            format!("textures/pacman/pacman_opening_{direction}.png")
-        ]),
+        sprite_sheets.add_sheet(
+            asset_server.load(&format!("textures/pacman/pacman_walking_{direction}.png")),
+            image_assets,
+            Vec2::new(16.0, 16.0),
+            4,
+            1
+        )
     )
 }
 

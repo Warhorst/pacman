@@ -1,10 +1,3 @@
-use bevy::asset::AssetPath;
-use bevy::prelude::*;
-
-pub fn load_textures<'a, P: Into<AssetPath<'a>>, I: IntoIterator<Item=P> + 'a>(asset_server: &'a AssetServer, paths: I) -> impl IntoIterator<Item=Handle<Image>> + 'a {
-    paths.into_iter().map(|p| asset_server.load(p))
-}
-
 pub fn get_sub_rect(data: &[u8], data_width: usize, column: usize, row: usize, rect_width: usize, rect_height: usize) -> Vec<u8> {
     let mut rect = Vec::with_capacity(rect_width * rect_height);
     let start_index = data_width * row * rect_height;
