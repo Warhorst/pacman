@@ -30,7 +30,7 @@ fn update_sprite_sheets(
             _ => return
         };
 
-        if let Some(sheet) = sprite_sheets.get_sheet_mut_for_handle(handle.id) {
+        if let Some(sheet) = sprite_sheets.get_sheet_mut_for_handle(handle) {
             let image = image_assets.get(handle.id).unwrap().clone();
             sheet.create_textures(&image, image_assets.deref_mut())
         }
@@ -38,7 +38,7 @@ fn update_sprite_sheets(
 }
 
 pub struct SpriteSheets {
-    sheets: HashMap<HandleId, SpriteSheet>,
+    sheets: HashMap<Handle<Image>, SpriteSheet>,
 }
 
 impl SpriteSheets {
@@ -56,14 +56,14 @@ impl SpriteSheets {
     /// images.
     /// When the sheet is loaded (which is checked in update_sprite_sheets), the sheet is split and all handles get updated.
     /// TODO: This is more or less a hack. Hot reloading does not work and probably other stuff too.
-    pub fn add_sheet(&mut self, sheet_handle: Handle<Image>, image_assets: &mut Assets<Image>, sprite_dimension: Vec2, columns: usize, rows: usize) -> &SpriteSheet {
-        let sheet = SpriteSheet::new(image_assets, sprite_dimension, columns, rows);
-        self.sheets.insert(sheet_handle.id, sheet);
-        self.sheets.get(&sheet_handle.id).unwrap()
+    pub fn add_sheet(&mut self, sheet_handle: Handle<Image>, sprite_dimension: Vec2, columns: usize, rows: usize) -> &SpriteSheet {
+        let sheet = SpriteSheet::new(sprite_dimension, columns, rows);
+        self.sheets.insert(sheet_handle.clone(), sheet);
+        self.sheets.get(&sheet_handle).unwrap()
     }
 
-    fn get_sheet_mut_for_handle(&mut self, handle_id: HandleId) -> Option<&mut SpriteSheet> {
-        self.sheets.get_mut(&handle_id)
+    fn get_sheet_mut_for_handle(&mut self, handle: &Handle<Image>) -> Option<&mut SpriteSheet> {
+        self.sheets.get_mut(handle)
     }
 }
 
@@ -75,9 +75,9 @@ pub struct SpriteSheet {
 }
 
 impl SpriteSheet {
-    fn new(image_assets: &mut Assets<Image>, sprite_dimension: Vec2, columns: usize, rows: usize) -> Self {
+    fn new(sprite_dimension: Vec2, columns: usize, rows: usize) -> Self {
         SpriteSheet {
-            textures: (0..columns * rows).into_iter().map(|_| image_assets.add(Image::default())).collect(),
+            textures: (0..columns * rows).into_iter().map(|_| Handle::weak(HandleId::random::<Image>())).collect(),
             sprite_dimension,
             columns,
             rows,
@@ -88,11 +88,11 @@ impl SpriteSheet {
         self.textures.iter().map(Clone::clone)
     }
 
-    fn create_textures(&mut self, image: &Image, image_assets: &mut Assets<Image>) {
+    fn create_textures(&mut self, sheet_image: &Image, image_assets: &mut Assets<Image>) {
         for y in 0..self.rows {
             for x in 0..self.columns {
                 let index = (y * self.columns) + x;
-                let new_image = self.create_texture(image, x, y);
+                let new_image = self.create_texture(sheet_image, x, y);
                 self.textures[index] = image_assets.set(self.textures[index].id, new_image);
             }
         }

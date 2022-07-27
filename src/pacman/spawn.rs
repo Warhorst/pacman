@@ -18,7 +18,6 @@ pub struct PacmanSpawn(Vec3);
 pub (in crate::pacman) fn spawn_pacman(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut image_assets: ResMut<Assets<Image>>,
     mut sprite_sheets: ResMut<SpriteSheets>,
     map: Res<Map>,
     level: Res<Level>,
@@ -26,7 +25,7 @@ pub (in crate::pacman) fn spawn_pacman(
 ) {
     let pacman_spawn = PacmanSpawn(map.coordinates_between_positions_matching(is!(PacManSpawn)));
     let pacman_dimension = Vec2::new(PACMAN_DIMENSION, PACMAN_DIMENSION);
-    let animations = create_pacman_animations(&asset_server, &mut image_assets, &mut sprite_sheets);
+    let animations = create_pacman_animations(&asset_server, &mut sprite_sheets);
 
     commands.spawn()
         .insert_bundle(SpriteBundle {

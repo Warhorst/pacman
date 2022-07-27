@@ -21,16 +21,15 @@ pub(in crate::pacman) fn update_pacman_appearance(
 
 pub(in crate::pacman) fn create_pacman_animations(
     asset_server: &AssetServer,
-    image_assets: &mut Assets<Image>,
     sprite_sheets: &mut SpriteSheets
 ) -> Animations {
     Animations::new(
         [
-            ("eating_left", create_eating_animation(asset_server, image_assets, sprite_sheets, Left)),
-            ("eating_right", create_eating_animation(asset_server, image_assets, sprite_sheets, Right)),
-            ("eating_up", create_eating_animation(asset_server, image_assets, sprite_sheets, Up)),
-            ("eating_down", create_eating_animation(asset_server, image_assets, sprite_sheets, Down)),
-            ("dying", create_dying_animation(asset_server))
+            ("eating_left", create_eating_animation(asset_server, sprite_sheets, Left)),
+            ("eating_right", create_eating_animation(asset_server, sprite_sheets, Right)),
+            ("eating_up", create_eating_animation(asset_server, sprite_sheets, Up)),
+            ("eating_down", create_eating_animation(asset_server, sprite_sheets, Down)),
+            ("dying", create_dying_animation(asset_server, sprite_sheets))
         ],
         "eating_up",
     )
@@ -38,7 +37,6 @@ pub(in crate::pacman) fn create_pacman_animations(
 
 fn create_eating_animation(
     asset_server: &AssetServer,
-    image_assets: &mut Assets<Image>,
     sprite_sheets: &mut SpriteSheets,
     direction: Direction
 ) -> Animation {
@@ -48,7 +46,6 @@ fn create_eating_animation(
         true,
         sprite_sheets.add_sheet(
             asset_server.load(&format!("textures/pacman/pacman_walking_{direction}.png")),
-            image_assets,
             Vec2::new(16.0, 16.0),
             4,
             1
@@ -56,23 +53,18 @@ fn create_eating_animation(
     )
 }
 
-fn create_dying_animation(asset_server: &AssetServer) -> Animation {
-    Animation::from_textures(
+fn create_dying_animation(
+    asset_server: &AssetServer,
+    sprite_sheets: &mut SpriteSheets,
+) -> Animation {
+    Animation::from_sprite_sheet(
         2.0,
-        true,
-        [
-            asset_server.load("textures/pacman/pacman_dying_a.png"),
-            asset_server.load("textures/pacman/pacman_dying_b.png"),
-            asset_server.load("textures/pacman/pacman_dying_c.png"),
-            asset_server.load("textures/pacman/pacman_dying_d.png"),
-            asset_server.load("textures/pacman/pacman_dying_e.png"),
-            asset_server.load("textures/pacman/pacman_dying_f.png"),
-            asset_server.load("textures/pacman/pacman_dying_g.png"),
-            asset_server.load("textures/pacman/pacman_dying_h.png"),
-            asset_server.load("textures/pacman/pacman_dying_i.png"),
-            asset_server.load("textures/pacman/pacman_dying_j.png"),
-            asset_server.load("textures/pacman/pacman_dying_k.png"),
-            asset_server.load("textures/pacman/pacman_dying_l.png"),
-        ],
+        false,
+        sprite_sheets.add_sheet(
+            asset_server.load("textures/pacman/pacman_dying.png"),
+            Vec2::new(16.0, 16.0),
+            12,
+            1
+        )
     )
 }
