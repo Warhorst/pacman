@@ -40,7 +40,6 @@ fn spawn_ghost<G: GhostType + Component>(
     commands
         .spawn()
         .insert_bundle(SpriteBundle {
-            texture: animations.get_current_texture(),
             sprite: Sprite {
                 custom_size: Some(Vec2::new(GHOST_DIMENSION, GHOST_DIMENSION)),
                 ..default()

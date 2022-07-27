@@ -9,7 +9,6 @@ use crate::map::Map;
 use crate::pacman::Pacman;
 use crate::pacman::textures::create_pacman_animations;
 use crate::speed::SpeedByLevel;
-use crate::spritesheet::SpriteSheets;
 
 /// Resource that tells at which position pacman spawns.
 #[derive(Deref, DerefMut)]
@@ -18,14 +17,13 @@ pub struct PacmanSpawn(Vec3);
 pub (in crate::pacman) fn spawn_pacman(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut sprite_sheets: ResMut<SpriteSheets>,
     map: Res<Map>,
     level: Res<Level>,
     speed_by_level: Res<SpeedByLevel>
 ) {
     let pacman_spawn = PacmanSpawn(map.coordinates_between_positions_matching(is!(PacManSpawn)));
     let pacman_dimension = Vec2::new(PACMAN_DIMENSION, PACMAN_DIMENSION);
-    let animations = create_pacman_animations(&asset_server, &mut sprite_sheets);
+    let animations = create_pacman_animations(&asset_server);
 
     commands.spawn()
         .insert_bundle(SpriteBundle {
