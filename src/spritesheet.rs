@@ -19,10 +19,7 @@ impl Plugin for SpriteSheetPlugin {
     }
 }
 
-const EXTENSIONS: &[&str] = &[
-    "sheet",
-];
-
+/// A loaded sprite sheet with handles to all loaded sub images.
 #[derive(TypeUuid)]
 #[uuid = "997f1174-eb67-4d02-8ee6-fb41c987bb18"]
 pub struct SpriteSheet {
@@ -37,7 +34,18 @@ impl SpriteSheet {
 
 pub struct SpriteSheetLoader;
 
+const EXTENSIONS: &[&str] = &[
+    "sheet",
+];
+
 impl AssetLoader for SpriteSheetLoader {
+    /// Creates a sprite sheet from bytes of data, which was originally an image.
+    ///
+    /// The image itself is not enough to load the sheet. The information about where which sprite is is also required.
+    /// This is provided by an extra json file in the same directory.
+    ///
+    /// TODO: Currently only grids are provided. A vector of rectangles or similar would be better
+    /// TODO: Currently, only PNGs are supported.
     fn load<'a>(
         &'a self,
         bytes: &'a [u8],
@@ -46,11 +54,13 @@ impl AssetLoader for SpriteSheetLoader {
         Box::pin(async move {
             let mut data_file_path = PathBuf::from(load_context.path());
             data_file_path.set_extension("json");
-            let grid: Grid = serde_json::from_reader(File::open(format!("./assets/{}", data_file_path.to_str().unwrap())).unwrap()).unwrap();
+            let grid_file_path = format!("./assets/{}", data_file_path.to_str().unwrap());
+            let grid_file = File::open(grid_file_path).unwrap();
+            let grid: Grid = serde_json::from_reader(grid_file).unwrap();
 
             let image = Image::from_buffer(
                 bytes,
-                ImageType::Extension("png"), // only png for now
+                ImageType::Extension("png"),
                 CompressedImageFormats::all(),
                 true,
             )?;
