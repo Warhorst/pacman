@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use crate::common::Direction;
 use crate::common::position::Position;
 use crate::energizer::{EnergizerEaten, EnergizerOver};
+use crate::game_state::GameState;
 use crate::ghosts::schedule::ScheduleChanged;
 use crate::ghosts::target::Target;
 use crate::pacman::PacmanEatsGhost;
@@ -16,7 +17,7 @@ pub struct StatePlugin;
 impl Plugin for StatePlugin {
     fn build(&self, app: &mut App) {
         app.add_system_set(
-            SystemSet::new()
+            SystemSet::on_update(GameState::Running)
                 .with_system(update_frightened_state)
                 .with_system(update_spawned_state::<Blinky>)
                 .with_system(update_spawned_state::<Pinky>)

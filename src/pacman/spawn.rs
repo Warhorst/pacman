@@ -39,5 +39,4 @@ pub (in crate::pacman) fn spawn_pacman(
         .insert(Up)
         .insert(animations)
     ;
-    commands.insert_resource(pacman_spawn);
 }

@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 use crate::common::Direction;
 use crate::common::Direction::*;
+use crate::game_state::GameState;
 use crate::ghosts::target::{Target, TargetSetter};
 use crate::speed::Speed;
 use crate::target_skip_if;
@@ -10,7 +11,10 @@ pub struct MovePlugin;
 
 impl Plugin for MovePlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(move_ghost.after(TargetSetter));
+        app.add_system_set(
+            SystemSet::on_update(GameState::Running)
+                .with_system(move_ghost.after(TargetSetter))
+        );
     }
 }
 

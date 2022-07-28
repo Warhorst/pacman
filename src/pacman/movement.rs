@@ -8,6 +8,7 @@ use crate::common::position::Position;
 use crate::constants::FIELD_DIMENSION;
 use crate::dots::DotEaten;
 use crate::energizer::EnergizerEaten;
+use crate::game_state::GameState;
 use crate::map::board::Board;
 use crate::pacman::Pacman;
 use crate::speed::Speed;
@@ -18,10 +19,13 @@ impl Plugin for PacmanMovementPlugin {
     fn build(&self, app: &mut App) {
         app
             .insert_resource(PacmanStopTimer::new())
-            .add_system(stop_pacman_when_a_dot_was_eaten.label("pacman_stop"))
-            .add_system(stop_pacman_when_energizer_was_eaten.label("pacman_stop"))
-            .add_system(move_pacman.after("pacman_stop"))
-            .add_system(update_stop_timer.after(move_pacman))
+            .add_system_set(
+                SystemSet::on_update(GameState::Running)
+                    .with_system(stop_pacman_when_a_dot_was_eaten.label("pacman_stop"))
+                    .with_system(stop_pacman_when_energizer_was_eaten.label("pacman_stop"))
+                    .with_system(move_pacman.after("pacman_stop"))
+                    .with_system(update_stop_timer.after(move_pacman))
+            )
         ;
     }
 }

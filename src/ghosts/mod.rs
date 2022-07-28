@@ -3,15 +3,11 @@ use bevy::prelude::*;
 use crate::ghosts::movement::MovePlugin;
 use crate::ghosts::schedule::SchedulePlugin;
 use crate::ghosts::spawn::spawn_ghosts;
-use crate::ghosts::state::{StatePlugin, StateSetter};
+use crate::ghosts::state::StatePlugin;
 use crate::ghosts::target::{Target, TargetPlugin};
 use crate::ghosts::textures::update_ghost_appearance;
 use crate::tunnels::GhostPassedTunnel;
-use crate::common::Direction;
-use crate::ghost_house::GhostHouse;
-use crate::ghosts::state::State;
-use crate::ghosts::state::State::Spawned;
-use crate::pacman::PacmanKilled;
+use crate::game_state::GameState;
 
 pub mod movement;
 pub mod spawn;
@@ -29,21 +25,20 @@ impl Plugin for GhostPlugin {
             .add_plugin(TargetPlugin)
             .add_plugin(StatePlugin)
             .add_plugin(SchedulePlugin)
-            .add_startup_system(spawn_ghosts)
-            .add_system(ghost_passed_tunnel)
-            .add_system(update_ghost_appearance::<Blinky>)
-            .add_system(update_ghost_appearance::<Pinky>)
-            .add_system(update_ghost_appearance::<Inky>)
-            .add_system(update_ghost_appearance::<Clyde>)
             .add_system_set(
-                SystemSet::new()
-                    .with_system(reset_ghosts_when_pacman_was_killed::<Blinky>)
-                    .with_system(reset_ghosts_when_pacman_was_killed::<Pinky>)
-                    .with_system(reset_ghosts_when_pacman_was_killed::<Inky>)
-                    .with_system(reset_ghosts_when_pacman_was_killed::<Clyde>)
-                    .before(StateSetter)
+                SystemSet::on_enter(GameState::Running).with_system(spawn_ghosts)
             )
-
+            .add_system_set(
+                SystemSet::on_update(GameState::Running)
+                    .with_system(ghost_passed_tunnel)
+                    .with_system(update_ghost_appearance::<Blinky>)
+                    .with_system(update_ghost_appearance::<Pinky>)
+                    .with_system(update_ghost_appearance::<Inky>)
+                    .with_system(update_ghost_appearance::<Clyde>)
+            )
+            .add_system_set(
+                SystemSet::on_enter(GameState::PacmanDying).with_system(despawn_ghosts)
+            )
         ;
     }
 }
@@ -88,18 +83,11 @@ fn ghost_passed_tunnel(
     }
 }
 
-fn reset_ghosts_when_pacman_was_killed<G: GhostType + Component + 'static>(
-    mut event_reader: EventReader<PacmanKilled>,
-    ghost_house: Res<GhostHouse>,
-    mut query: Query<(&mut Direction, &mut State, &mut Target, &mut Transform), With<G>>
+fn despawn_ghosts(
+    mut commands: Commands,
+    query: Query<Entity, With<Ghost>>
 ) {
-    for _ in event_reader.iter() {
-        for (mut direction, mut state, mut target, mut transform) in query.iter_mut() {
-            *direction = ghost_house.spawn_direction_of::<G>();
-            target.clear();
-            *state = Spawned;
-            let spawn_coordinates = ghost_house.spawn_coordinates_of::<G>();
-            transform.translation = spawn_coordinates;
-        }
+    for entity in query.iter() {
+        commands.entity(entity).despawn();
     }
 }

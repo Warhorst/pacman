@@ -1,12 +1,13 @@
 use bevy::prelude::*;
+use crate::animation::Animations;
 
 use crate::common::Direction;
 use crate::common::position::ToPosition;
 use crate::common::Direction::*;
+use crate::game_state::GameState;
 use crate::ghosts::Ghost;
 use crate::ghosts::state::State;
-use crate::lives::Life;
-use crate::pacman::spawn::{PacmanSpawn, spawn_pacman};
+use crate::pacman::spawn::spawn_pacman;
 use crate::pacman::movement::PacmanMovementPlugin;
 use crate::pacman::textures::update_pacman_appearance;
 
@@ -33,11 +34,25 @@ impl Plugin for PacmanPlugin {
             .add_plugin(PacmanMovementPlugin)
             .add_event::<PacmanKilled>()
             .add_event::<PacmanEatsGhost>()
-            .add_startup_system(spawn_pacman)
-            .add_system(set_direction_based_on_keyboard_input)
-            .add_system(update_pacman_appearance.after(set_direction_based_on_keyboard_input))
-            .add_system(pacman_hits_ghost)
-            .add_system(reset_pacman_when_he_died_and_has_lives)
+            .add_system_set(
+                SystemSet::on_enter(GameState::Running).with_system(spawn_pacman)
+            )
+            .add_system_set(
+                SystemSet::on_update(GameState::Running)
+                    .with_system(switch_to_dying_when_pacman_was_hit)
+                    .with_system(set_direction_based_on_keyboard_input)
+                    .with_system(update_pacman_appearance.after(set_direction_based_on_keyboard_input))
+                    .with_system(pacman_hits_ghost)
+            )
+            .add_system_set(
+                SystemSet::on_enter(GameState::PacmanDying).with_system(play_the_dying_animation)
+            )
+            .add_system_set(
+                SystemSet::on_update(GameState::PacmanDying).with_system(switch_to_dead_when_the_dying_animation_stopped)
+            )
+            .add_system_set(
+                SystemSet::on_enter(GameState::PacmanDead).with_system(despawn_pacman)
+            )
         ;
     }
 }
@@ -86,17 +101,39 @@ fn pacman_hits_ghost(
     }
 }
 
-fn reset_pacman_when_he_died_and_has_lives(
-    pacman_spawn: Res<PacmanSpawn>,
+fn play_the_dying_animation(
+    mut query: Query<&mut Animations, With<Pacman>>
+) {
+    for mut animations in query.iter_mut() {
+        animations.change_animation_to("dying")
+    }
+}
+
+fn switch_to_dead_when_the_dying_animation_stopped(
+    mut game_state: ResMut<bevy::ecs::schedule::State<GameState>>,
+    query: Query<&Animations, With<Pacman>>
+) {
+    for animations in query.iter() {
+        if animations.is_current_animation_completely_finished() {
+            game_state.set(GameState::PacmanDead).unwrap()
+        }
+    }
+}
+
+fn despawn_pacman(
+    mut commands: Commands,
+    query: Query<Entity, With<Pacman>>
+) {
+    for entity in query.iter() {
+        commands.entity(entity).despawn()
+    }
+}
+
+fn switch_to_dying_when_pacman_was_hit(
     mut event_reader: EventReader<PacmanKilled>,
-    live_query: Query<&Life>,
-    mut pacman_query: Query<&mut Transform, With<Pacman>>,
+    mut game_state: ResMut<bevy::ecs::schedule::State<GameState>>,
 ) {
     for _ in event_reader.iter() {
-        if live_query.iter().count() == 0 { return; }
-
-        for mut transform in pacman_query.iter_mut() {
-            transform.translation = **pacman_spawn
-        }
+        game_state.set(GameState::PacmanHit).unwrap()
     }
 }
