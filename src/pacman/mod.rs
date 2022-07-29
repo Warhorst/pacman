@@ -48,6 +48,9 @@ impl Plugin for PacmanPlugin {
                     .with_system(pacman_hits_ghost)
             )
             .add_system_set(
+                SystemSet::on_enter(GameState::PacmanHit).with_system(stop_animation_when_hit)
+            )
+            .add_system_set(
                 SystemSet::on_enter(GameState::PacmanDying).with_system(play_the_dying_animation)
             )
             .add_system_set(
@@ -104,6 +107,14 @@ fn pacman_hits_ghost(
     }
 }
 
+fn stop_animation_when_hit(
+    mut query: Query<&mut Animations, With<Pacman>>
+) {
+    for mut animations in query.iter_mut() {
+        animations.current_mut().stop()
+    }
+}
+
 fn play_the_dying_animation(
     mut query: Query<&mut Animations, With<Pacman>>
 ) {
@@ -117,7 +128,7 @@ fn check_if_pacman_finished_dying(
     query: Query<&Animations, With<Pacman>>
 ) {
     for animations in query.iter() {
-        if animations.is_current_animation_completely_finished() {
+        if animations.current().is_completely_finished() {
             event_writer.send(PacmanDead)
         }
     }

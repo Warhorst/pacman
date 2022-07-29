@@ -36,9 +36,9 @@ fn update_entities_with_animations(
 ) {
     let delta = time.delta();
     for (mut texture, mut animations) in query.iter_mut() {
-        animations.update(delta);
+        animations.current_mut().update(delta);
 
-        if let Some(a) = animations.get_current_texture(&sheets) {
+        if let Some(a) = animations.current().get_current_texture(&sheets) {
             *texture = a
         }
     }
@@ -63,6 +63,7 @@ pub enum Animation {
         timer: Timer,
         repeating: bool,
         textures: Vec<Handle<Image>>,
+        running: bool,
     },
     SpriteSheet {
         current_texture_index: usize,
@@ -70,6 +71,7 @@ pub enum Animation {
         repeating: bool,
         num_textures: usize,
         sheet: Handle<SpriteSheet>,
+        running: bool,
     },
 }
 
@@ -93,6 +95,7 @@ impl Animation {
             timer: Timer::new(Duration::from_secs_f32(texture_display_time), true),
             repeating,
             textures,
+            running: true,
         }
     }
 
@@ -110,10 +113,27 @@ impl Animation {
             repeating,
             num_textures,
             sheet,
+            running: true,
         }
     }
 
+    /// Update the animation.
+    ///
+    /// For texture lists and sprite sheet, this process is mostly the same: The timer for the current sprite gets
+    /// updated with the given delta.
+    /// If the timer finished, increase the current texture index.
+    /// But if the index is at its max, set it to zero if the animation does not repeat.
+    ///
+    /// If the animation is stopped or it is a single texture animation, do nothing.
     pub fn update(&mut self, delta: Duration) {
+        let running = match self {
+            Animation::SingleTexture { .. } => return,
+            Animation::TextureList { running, .. } => *running,
+            Animation::SpriteSheet { running, .. } => *running
+        };
+
+        if !running { return; }
+
         let (current_texture_index, timer, repeating, num_textures) = match self {
             Animation::SingleTexture { .. } => return,
             Animation::TextureList { ref mut current_texture_index, timer, repeating, textures, .. } => (current_texture_index, timer, repeating, textures.len()),
@@ -140,16 +160,20 @@ impl Animation {
         }
     }
 
-    /// Rewind the animation back to the start
+    /// Rewind the animation back to the start. This means:
+    /// - reset the timer
+    /// - set the current texture index to zero
+    /// - set running to true
     pub fn reset(&mut self) {
-        let (current_texture_index, timer) = match self {
+        let (current_texture_index, timer, running) = match self {
             Animation::SingleTexture { .. } => return,
-            Animation::TextureList { ref mut current_texture_index, timer, .. } => (current_texture_index, timer),
-            Animation::SpriteSheet { ref mut current_texture_index, timer, .. } => (current_texture_index, timer)
+            Animation::TextureList { ref mut current_texture_index, timer, running, .. } => (current_texture_index, timer, running),
+            Animation::SpriteSheet { ref mut current_texture_index, timer, running, .. } => (current_texture_index, timer, running)
         };
 
         timer.reset();
-        *current_texture_index = 0
+        *current_texture_index = 0;
+        *running = true;
     }
 
     /// Return if the current animation iteration is over
@@ -172,6 +196,15 @@ impl Animation {
         };
 
         !repeating && self.is_finished()
+    }
+
+    /// Stop the animation from getting updated.
+    pub fn stop(&mut self) {
+        match self {
+            Animation::SingleTexture { .. } => return,
+            Animation::TextureList { ref mut running, .. } => *running = false,
+            Animation::SpriteSheet { ref mut running, .. } => *running = false,
+        }
     }
 }
 
@@ -199,14 +232,12 @@ impl Animations {
         }
     }
 
-    /// Update the currently selected animation
-    pub fn update(&mut self, delta: Duration) {
-        self.atlas.get_mut(&self.current).expect("current set animation is not part of the animation atlas").update(delta)
+    pub fn current(&self) -> &Animation {
+        self.atlas.get(&self.current).expect("current set animation is not part of the animation atlas")
     }
 
-    /// Return the current texture just like a single animation.
-    pub fn get_current_texture(&self, sheets: &Assets<SpriteSheet>) -> Option<Handle<Image>> {
-        self.atlas.get(&self.current)?.get_current_texture(sheets)
+    pub fn current_mut(&mut self) -> &mut Animation {
+        self.atlas.get_mut(&self.current).expect("current set animation is not part of the animation atlas")
     }
 
     /// Change the current animation.
@@ -222,9 +253,5 @@ impl Animations {
             self.atlas.get_mut(&new_current).expect("the new selected animation does not exist in the atlas").reset();
             self.current = new_current;
         }
-    }
-
-    pub fn is_current_animation_completely_finished(&self) -> bool {
-        self.atlas.get(&self.current).expect("current set animation is not part of the animation atlas").is_completely_finished()
     }
 }
