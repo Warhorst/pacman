@@ -5,6 +5,7 @@ use Fruit::*;
 use crate::common::position::ToPosition;
 use crate::constants::PACMAN_DIMENSION;
 use crate::dots::DotEaten;
+use crate::game_state::GameState;
 use crate::is;
 use crate::map::{Element, Map};
 use crate::pacman::Pacman;
@@ -16,12 +17,15 @@ impl Plugin for FruitPlugin {
         app
             .add_event::<FruitEaten>()
             .insert_resource(FruitDotCounter::new())
-            .add_system(spawn_fruit_when_dot_limit_reached)
-            .add_system(update_despawn_timer)
-            .add_system(increase_dot_counter_when_dot_was_eaten)
-            .add_system(despawn_fruit_if_timer_exceeded)
-            .add_system(reset_fruit_dot_counter_and_despawn_timer_when_level_changed)
-            .add_system(eat_fruit_when_pacman_touches_it)
+            .add_system_set(
+                SystemSet::on_update(GameState::Running)
+                    .with_system(spawn_fruit_when_dot_limit_reached)
+                    .with_system(update_despawn_timer)
+                    .with_system(increase_dot_counter_when_dot_was_eaten)
+                    .with_system(despawn_fruit_if_timer_exceeded)
+                    .with_system(reset_fruit_dot_counter_and_despawn_timer_when_level_changed)
+                    .with_system(eat_fruit_when_pacman_touches_it)
+            )
         ;
     }
 }

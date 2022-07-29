@@ -7,7 +7,7 @@ use crate::dots::DotEaten;
 use crate::game_state::GameState;
 use crate::ghosts::{Blinky, Clyde, GhostType, Inky, Pinky};
 use crate::level::Level;
-use crate::pacman::PacmanKilled;
+use crate::pacman::PacmanHit;
 use crate::ghost_house_gate::counter::Counter;
 
 mod counter;
@@ -54,7 +54,7 @@ fn increment_counter_when_dot_eaten(
 }
 
 fn switch_to_global_counter_when_pacman_got_killed(
-    mut event_reader: EventReader<PacmanKilled>,
+    mut event_reader: EventReader<PacmanHit>,
     mut ghost_house_gate: ResMut<GhostHouseGate>,
 ) {
     for _ in event_reader.iter() {

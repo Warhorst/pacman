@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use crate::constants::{FIELD_DIMENSION, POINTS_PER_DOT, POINTS_PER_ENERGIZER, POINTS_PER_GHOST};
 use crate::dots::DotEaten;
 use crate::energizer::{EnergizerEaten, EnergizerOver};
+use crate::game_state::GameState;
 use crate::map::board::Board;
 use crate::pacman::PacmanEatsGhost;
 
@@ -14,11 +15,14 @@ impl Plugin for ScorePlugin {
             .insert_resource(Score(0))
             .insert_resource(EatenGhostCounter(0))
             .add_startup_system(create_scoreboard)
-            .add_system(update_scoreboard)
-            .add_system(add_points_for_eaten_dot)
-            .add_system(add_points_for_eaten_energizer)
-            .add_system(add_points_for_eaten_ghost)
-            .add_system(reset_eaten_ghost_counter_when_energizer_is_over)
+            .add_system_set(
+                SystemSet::on_update(GameState::Running)
+                    .with_system(update_scoreboard)
+                    .with_system(add_points_for_eaten_dot)
+                    .with_system(add_points_for_eaten_energizer)
+                    .with_system(add_points_for_eaten_ghost)
+                    .with_system(reset_eaten_ghost_counter_when_energizer_is_over)
+            )
         ;
     }
 }

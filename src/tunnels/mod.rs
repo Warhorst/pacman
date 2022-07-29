@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use crate::game_state::GameState;
 
 use crate::tunnels::movement::{move_ghost_trough_tunnel, move_pacman_through_tunnel};
 use crate::tunnels::spawn::spawn_tunnels;
@@ -13,8 +14,12 @@ impl Plugin for TunnelPlugin {
         app
             .add_event::<GhostPassedTunnel>()
             .add_startup_system(spawn_tunnels)
-            .add_system(move_pacman_through_tunnel)
-            .add_system(move_ghost_trough_tunnel);
+            .add_system_set(
+                SystemSet::on_update(GameState::Running)
+                    .with_system(move_pacman_through_tunnel)
+                    .with_system(move_ghost_trough_tunnel)
+            )
+        ;
     }
 }
 

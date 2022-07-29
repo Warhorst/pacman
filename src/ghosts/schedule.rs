@@ -2,6 +2,7 @@ use std::ops::RangeInclusive;
 use bevy::prelude::*;
 use bevy::utils::Duration;
 use crate::energizer::EnergizerTimer;
+use crate::game_state::GameState;
 use crate::level::Level;
 use crate::ghosts::state::State;
 use crate::ghosts::state::State::*;
@@ -14,8 +15,12 @@ impl Plugin for SchedulePlugin {
             .add_event::<ScheduleChanged>()
             .insert_resource(create_schedules())
             .add_startup_system(register_start_schedule)
-            .add_system(update_schedule_when_level_changed)
-            .add_system(update_schedule);
+            .add_system_set(
+                SystemSet::on_update(GameState::Running)
+                    .with_system(update_schedule_when_level_changed)
+                    .with_system(update_schedule)
+            )
+        ;
     }
 }
 

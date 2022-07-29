@@ -19,8 +19,11 @@ mod textures;
 #[derive(Component)]
 pub struct Pacman;
 
-/// Fired when pacman was killed by a ghost.
-pub struct PacmanKilled;
+/// Fired when pacman was hit by a ghost.
+pub struct PacmanHit;
+
+/// Fired when pacman died.
+pub struct PacmanDead;
 
 /// Fired when Pacman ate a ghost in frightened state.
 #[derive(Deref)]
@@ -32,14 +35,14 @@ impl Plugin for PacmanPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_plugin(PacmanMovementPlugin)
-            .add_event::<PacmanKilled>()
+            .add_event::<PacmanHit>()
+            .add_event::<PacmanDead>()
             .add_event::<PacmanEatsGhost>()
             .add_system_set(
                 SystemSet::on_enter(GameState::Running).with_system(spawn_pacman)
             )
             .add_system_set(
                 SystemSet::on_update(GameState::Running)
-                    .with_system(switch_to_dying_when_pacman_was_hit)
                     .with_system(set_direction_based_on_keyboard_input)
                     .with_system(update_pacman_appearance.after(set_direction_based_on_keyboard_input))
                     .with_system(pacman_hits_ghost)
@@ -48,7 +51,7 @@ impl Plugin for PacmanPlugin {
                 SystemSet::on_enter(GameState::PacmanDying).with_system(play_the_dying_animation)
             )
             .add_system_set(
-                SystemSet::on_update(GameState::PacmanDying).with_system(switch_to_dead_when_the_dying_animation_stopped)
+                SystemSet::on_update(GameState::PacmanDying).with_system(check_if_pacman_finished_dying)
             )
             .add_system_set(
                 SystemSet::on_enter(GameState::PacmanDead).with_system(despawn_pacman)
@@ -81,7 +84,7 @@ fn set_direction_based_on_keyboard_input(
 }
 
 fn pacman_hits_ghost(
-    mut killed_event_writer: EventWriter<PacmanKilled>,
+    mut killed_event_writer: EventWriter<PacmanHit>,
     mut eat_event_writer: EventWriter<PacmanEatsGhost>,
     pacman_query: Query<&Transform, With<Pacman>>,
     ghost_query: Query<(Entity, &Transform, &State), With<Ghost>>,
@@ -90,7 +93,7 @@ fn pacman_hits_ghost(
         for (entity, ghost_transform, state) in ghost_query.iter() {
             if pacman_transform.pos() == ghost_transform.pos() {
                 if let State::Scatter | State::Chase = state {
-                    killed_event_writer.send(PacmanKilled)
+                    killed_event_writer.send(PacmanHit)
                 }
 
                 if let State::Frightened = state {
@@ -109,13 +112,13 @@ fn play_the_dying_animation(
     }
 }
 
-fn switch_to_dead_when_the_dying_animation_stopped(
-    mut game_state: ResMut<bevy::ecs::schedule::State<GameState>>,
+fn check_if_pacman_finished_dying(
+    mut event_writer: EventWriter<PacmanDead>,
     query: Query<&Animations, With<Pacman>>
 ) {
     for animations in query.iter() {
         if animations.is_current_animation_completely_finished() {
-            game_state.set(GameState::PacmanDead).unwrap()
+            event_writer.send(PacmanDead)
         }
     }
 }
@@ -126,14 +129,5 @@ fn despawn_pacman(
 ) {
     for entity in query.iter() {
         commands.entity(entity).despawn()
-    }
-}
-
-fn switch_to_dying_when_pacman_was_hit(
-    mut event_reader: EventReader<PacmanKilled>,
-    mut game_state: ResMut<bevy::ecs::schedule::State<GameState>>,
-) {
-    for _ in event_reader.iter() {
-        game_state.set(GameState::PacmanHit).unwrap()
     }
 }

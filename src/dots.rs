@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 use crate::constants::DOT_DIMENSION;
 use crate::common::position::ToPosition;
+use crate::game_state::GameState;
 use crate::is;
 use crate::map::{Element, Map};
 use crate::pacman::Pacman;
@@ -14,8 +15,11 @@ impl Plugin for DotPlugin {
             .add_event::<DotEaten>()
             .add_event::<AllDotsEaten>()
             .add_startup_system(spawn_dots)
-            .add_system(pacman_eat_dot)
-            .add_system(send_event_when_all_dots_are_eaten)
+            .add_system_set(
+                SystemSet::on_update(GameState::Running)
+                    .with_system(pacman_eat_dot)
+                    .with_system(send_event_when_all_dots_are_eaten)
+            )
         ;
     }
 }

@@ -46,6 +46,7 @@ impl AssetLoader for SpriteSheetLoader {
     ///
     /// TODO: Currently only grids are provided. A vector of rectangles or similar would be better
     /// TODO: Currently, only PNGs are supported.
+    /// TODO: There are asset labels, like in the gltf example (https://bevyengine.org/news/bevy-0-7/#gltf-animation-importing), but i dont know how to use them. Maybe these could be used to provide the grid via string rather than file
     fn load<'a>(
         &'a self,
         bytes: &'a [u8],
