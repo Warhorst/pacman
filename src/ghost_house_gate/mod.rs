@@ -4,10 +4,10 @@ use std::collections::HashSet;
 use std::time::Duration;
 
 use crate::dots::DotEaten;
-use crate::game_state::GameState;
+use crate::life_cylce::LifeCycle::*;
 use crate::ghosts::{Blinky, Clyde, GhostType, Inky, Pinky};
 use crate::level::Level;
-use crate::pacman::PacmanHit;
+use crate::pacman::EPacmanHit;
 use crate::ghost_house_gate::counter::Counter;
 
 mod counter;
@@ -19,9 +19,11 @@ pub struct GhostHouseGatePlugin;
 impl Plugin for GhostHouseGatePlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_startup_system(create_gate)
             .add_system_set(
-                SystemSet::on_update(GameState::Running)
+                SystemSet::on_enter(Start).with_system(create_gate)
+            )
+            .add_system_set(
+                SystemSet::on_update(Running)
                     .with_system(update_ghost_house_gate)
                     .with_system(increment_counter_when_dot_eaten)
                     .with_system(switch_to_global_counter_when_pacman_got_killed)
@@ -54,7 +56,7 @@ fn increment_counter_when_dot_eaten(
 }
 
 fn switch_to_global_counter_when_pacman_got_killed(
-    mut event_reader: EventReader<PacmanHit>,
+    mut event_reader: EventReader<EPacmanHit>,
     mut ghost_house_gate: ResMut<GhostHouseGate>,
 ) {
     for _ in event_reader.iter() {

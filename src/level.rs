@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 use crate::constants::FIELD_DIMENSION;
 use crate::dots::AllDotsEaten;
-use crate::game_state::GameState;
+use crate::life_cylce::LifeCycle;
+use crate::life_cylce::LifeCycle::Start;
 use crate::map::board::Board;
 
 pub struct LevelPlugin;
@@ -10,9 +11,11 @@ impl Plugin for LevelPlugin {
     fn build(&self, app: &mut App) {
         app
             .insert_resource(Level(1))
-            .add_startup_system(spawn_level_ui)
             .add_system_set(
-                SystemSet::on_update(GameState::Running).with_system(increase_level_when_all_dots_eaten)
+                SystemSet::on_enter(Start).with_system(spawn_level_ui)
+            )
+            .add_system_set(
+                SystemSet::on_update(LifeCycle::Running).with_system(increase_level_when_all_dots_eaten)
             )
         ;
     }

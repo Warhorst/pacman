@@ -7,7 +7,7 @@ use crate::common::position::{Neighbour, Position, ToPosition};
 use crate::common::Direction;
 use crate::common::Direction::*;
 use crate::constants::FIELD_DIMENSION;
-use crate::game_state::GameState;
+use crate::life_cylce::LifeCycle::*;
 use crate::ghost_corners::GhostCorner;
 use crate::ghosts::{Blinky, Clyde, Inky, Pinky};
 use crate::ghosts::state::{State, StateSetter};
@@ -28,7 +28,7 @@ impl Plugin for TargetPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_system_set(
-                SystemSet::on_update(GameState::Running)
+                SystemSet::on_update(Running)
                     .with_system(set_spawned_target::<Blinky>)
                     .with_system(set_spawned_target::<Pinky>)
                     .with_system(set_spawned_target::<Inky>)

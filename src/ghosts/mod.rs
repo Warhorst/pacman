@@ -7,7 +7,7 @@ use crate::ghosts::state::StatePlugin;
 use crate::ghosts::target::{Target, TargetPlugin};
 use crate::ghosts::textures::update_ghost_appearance;
 use crate::tunnels::GhostPassedTunnel;
-use crate::game_state::GameState;
+use crate::life_cylce::LifeCycle::*;
 
 pub mod movement;
 pub mod spawn;
@@ -26,10 +26,10 @@ impl Plugin for GhostPlugin {
             .add_plugin(StatePlugin)
             .add_plugin(SchedulePlugin)
             .add_system_set(
-                SystemSet::on_enter(GameState::Running).with_system(spawn_ghosts)
+                SystemSet::on_enter(Ready).with_system(spawn_ghosts)
             )
             .add_system_set(
-                SystemSet::on_update(GameState::Running)
+                SystemSet::on_update(Running)
                     .with_system(ghost_passed_tunnel)
                     .with_system(update_ghost_appearance::<Blinky>)
                     .with_system(update_ghost_appearance::<Pinky>)
@@ -37,7 +37,7 @@ impl Plugin for GhostPlugin {
                     .with_system(update_ghost_appearance::<Clyde>)
             )
             .add_system_set(
-                SystemSet::on_enter(GameState::PacmanDying).with_system(despawn_ghosts)
+                SystemSet::on_enter(PacmanDying).with_system(despawn_ghosts)
             )
         ;
     }

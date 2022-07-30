@@ -9,7 +9,7 @@ use crate::camera::CameraPlugin;
 use crate::dots::DotPlugin;
 use crate::energizer::EnergizerPlugin;
 use crate::fruit::FruitPlugin;
-use crate::game_state::GameStatePlugin;
+use crate::life_cylce::GameStatePlugin;
 use crate::ghost_corners::GhostCornersPlugin;
 use crate::ghost_house::GhostHousePlugin;
 use crate::ghost_house_gate::GhostHouseGatePlugin;
@@ -46,7 +46,7 @@ mod fruit;
 pub mod animation;
 mod helper;
 mod spritesheet;
-mod game_state;
+mod life_cylce;
 
 fn main() {
     App::new()

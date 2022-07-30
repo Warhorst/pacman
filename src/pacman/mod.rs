@@ -4,7 +4,7 @@ use crate::animation::Animations;
 use crate::common::Direction;
 use crate::common::position::ToPosition;
 use crate::common::Direction::*;
-use crate::game_state::GameState;
+use crate::life_cylce::LifeCycle::*;
 use crate::ghosts::Ghost;
 use crate::ghosts::state::State;
 use crate::pacman::spawn::spawn_pacman;
@@ -20,14 +20,14 @@ mod textures;
 pub struct Pacman;
 
 /// Fired when pacman was hit by a ghost.
-pub struct PacmanHit;
+pub struct EPacmanHit;
 
 /// Fired when pacman died.
-pub struct PacmanDead;
+pub struct EPacmanDead;
 
 /// Fired when Pacman ate a ghost in frightened state.
 #[derive(Deref)]
-pub struct PacmanEatsGhost(Entity);
+pub struct EPacmanEatsGhost(Entity);
 
 pub struct PacmanPlugin;
 
@@ -35,29 +35,29 @@ impl Plugin for PacmanPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_plugin(PacmanMovementPlugin)
-            .add_event::<PacmanHit>()
-            .add_event::<PacmanDead>()
-            .add_event::<PacmanEatsGhost>()
+            .add_event::<EPacmanHit>()
+            .add_event::<EPacmanDead>()
+            .add_event::<EPacmanEatsGhost>()
             .add_system_set(
-                SystemSet::on_enter(GameState::Running).with_system(spawn_pacman)
+                SystemSet::on_enter(Ready).with_system(spawn_pacman)
             )
             .add_system_set(
-                SystemSet::on_update(GameState::Running)
+                SystemSet::on_update(Running)
                     .with_system(set_direction_based_on_keyboard_input)
                     .with_system(update_pacman_appearance.after(set_direction_based_on_keyboard_input))
                     .with_system(pacman_hits_ghost)
             )
             .add_system_set(
-                SystemSet::on_enter(GameState::PacmanHit).with_system(stop_animation_when_hit)
+                SystemSet::on_enter(PacmanHit).with_system(stop_animation_when_hit)
             )
             .add_system_set(
-                SystemSet::on_enter(GameState::PacmanDying).with_system(play_the_dying_animation)
+                SystemSet::on_enter(PacmanDying).with_system(play_the_dying_animation)
             )
             .add_system_set(
-                SystemSet::on_update(GameState::PacmanDying).with_system(check_if_pacman_finished_dying)
+                SystemSet::on_update(PacmanDying).with_system(check_if_pacman_finished_dying)
             )
             .add_system_set(
-                SystemSet::on_enter(GameState::PacmanDead).with_system(despawn_pacman)
+                SystemSet::on_enter(PacmanDead).with_system(despawn_pacman)
             )
         ;
     }
@@ -87,8 +87,8 @@ fn set_direction_based_on_keyboard_input(
 }
 
 fn pacman_hits_ghost(
-    mut killed_event_writer: EventWriter<PacmanHit>,
-    mut eat_event_writer: EventWriter<PacmanEatsGhost>,
+    mut killed_event_writer: EventWriter<EPacmanHit>,
+    mut eat_event_writer: EventWriter<EPacmanEatsGhost>,
     pacman_query: Query<&Transform, With<Pacman>>,
     ghost_query: Query<(Entity, &Transform, &State), With<Ghost>>,
 ) {
@@ -96,11 +96,11 @@ fn pacman_hits_ghost(
         for (entity, ghost_transform, state) in ghost_query.iter() {
             if pacman_transform.pos() == ghost_transform.pos() {
                 if let State::Scatter | State::Chase = state {
-                    killed_event_writer.send(PacmanHit)
+                    killed_event_writer.send(EPacmanHit)
                 }
 
                 if let State::Frightened = state {
-                    eat_event_writer.send(PacmanEatsGhost(entity))
+                    eat_event_writer.send(EPacmanEatsGhost(entity))
                 }
             }
         }
@@ -124,12 +124,12 @@ fn play_the_dying_animation(
 }
 
 fn check_if_pacman_finished_dying(
-    mut event_writer: EventWriter<PacmanDead>,
+    mut event_writer: EventWriter<EPacmanDead>,
     query: Query<&Animations, With<Pacman>>
 ) {
     for animations in query.iter() {
         if animations.current().is_completely_finished() {
-            event_writer.send(PacmanDead)
+            event_writer.send(EPacmanDead)
         }
     }
 }

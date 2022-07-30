@@ -1,8 +1,9 @@
 use bevy::prelude::*;
 use crate::constants::{FIELD_DIMENSION, PACMAN_DIMENSION};
-use crate::game_state::GameState;
+use crate::life_cylce::LifeCycle;
+use crate::life_cylce::LifeCycle::Start;
 use crate::map::board::Board;
-use crate::pacman::PacmanHit;
+use crate::pacman::EPacmanHit;
 use crate::score::Score;
 
 pub struct LivesPlugin;
@@ -11,9 +12,11 @@ impl Plugin for LivesPlugin {
     fn build(&self, app: &mut App) {
         app
             .insert_resource(PointsRequiredForExtraLife::new())
-            .add_startup_system(spawn_lives)
             .add_system_set(
-                SystemSet::on_update(GameState::Running)
+                SystemSet::on_enter(Start).with_system(spawn_lives)
+            )
+            .add_system_set(
+                SystemSet::on_update(LifeCycle::Running)
                     .with_system(remove_life_when_pacman_dies)
                     .with_system(add_life_if_player_reaches_specific_score)
             )
@@ -70,7 +73,7 @@ fn spawn_life(commands: &mut Commands, asset_server: &AssetServer, board: &Board
 
 fn remove_life_when_pacman_dies(
     mut commands: Commands,
-    mut event_reader: EventReader<PacmanHit>,
+    mut event_reader: EventReader<EPacmanHit>,
     query: Query<(Entity, &Life)>,
 ) {
     for _ in event_reader.iter() {

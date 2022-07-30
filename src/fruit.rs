@@ -5,7 +5,7 @@ use Fruit::*;
 use crate::common::position::ToPosition;
 use crate::constants::PACMAN_DIMENSION;
 use crate::dots::DotEaten;
-use crate::game_state::GameState;
+use crate::life_cylce::LifeCycle;
 use crate::is;
 use crate::map::{Element, Map};
 use crate::pacman::Pacman;
@@ -18,7 +18,7 @@ impl Plugin for FruitPlugin {
             .add_event::<FruitEaten>()
             .insert_resource(FruitDotCounter::new())
             .add_system_set(
-                SystemSet::on_update(GameState::Running)
+                SystemSet::on_update(LifeCycle::Running)
                     .with_system(spawn_fruit_when_dot_limit_reached)
                     .with_system(update_despawn_timer)
                     .with_system(increase_dot_counter_when_dot_was_eaten)

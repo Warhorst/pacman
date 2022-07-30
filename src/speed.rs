@@ -9,7 +9,7 @@ use crate::ghosts::state::State;
 use crate::level::Level;
 use crate::pacman::Pacman;
 use crate::common::position::ToPosition;
-use crate::game_state::GameState;
+use crate::life_cylce::LifeCycle;
 use crate::map::board::Board;
 
 pub struct SpeedPlugin;
@@ -19,7 +19,7 @@ impl Plugin for SpeedPlugin {
         app
             .insert_resource(SpeedByLevel::new())
             .add_system_set(
-                SystemSet::on_update(GameState::Running)
+                SystemSet::on_update(LifeCycle::Running)
                     .with_system(update_ghost_speed)
                     .with_system(update_pacman_speed)
             )

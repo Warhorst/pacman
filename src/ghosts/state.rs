@@ -3,10 +3,10 @@ use bevy::prelude::*;
 use crate::common::Direction;
 use crate::common::position::Position;
 use crate::energizer::{EnergizerEaten, EnergizerOver};
-use crate::game_state::GameState;
+use crate::life_cylce::LifeCycle::*;
 use crate::ghosts::schedule::ScheduleChanged;
 use crate::ghosts::target::Target;
-use crate::pacman::PacmanEatsGhost;
+use crate::pacman::EPacmanEatsGhost;
 use crate::ghost_house::GhostHouse;
 use crate::ghosts::{Blinky, Clyde, Ghost, GhostType, Inky, Pinky};
 use crate::ghosts::schedule::Schedule;
@@ -17,7 +17,7 @@ pub struct StatePlugin;
 impl Plugin for StatePlugin {
     fn build(&self, app: &mut App) {
         app.add_system_set(
-            SystemSet::on_update(GameState::Running)
+            SystemSet::on_update(Running)
                 .with_system(update_frightened_state)
                 .with_system(update_spawned_state::<Blinky>)
                 .with_system(update_spawned_state::<Pinky>)
@@ -145,7 +145,7 @@ fn set_frightened_when_pacman_ate_energizer(
 }
 
 fn set_eaten_when_hit_by_pacman(
-    mut event_reader: EventReader<PacmanEatsGhost>,
+    mut event_reader: EventReader<EPacmanEatsGhost>,
     mut ghost_query: Query<(Entity, &mut State), With<Ghost>>,
 ) {
     for event in event_reader.iter() {

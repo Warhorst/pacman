@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use crate::constants::ENERGIZER_DIMENSION;
 use crate::pacman::Pacman;
 use crate::common::position::ToPosition;
-use crate::game_state::GameState;
+use crate::life_cylce::LifeCycle::*;
 use crate::is;
 use crate::level::Level;
 use crate::map::Element::EnergizerSpawn;
@@ -18,9 +18,11 @@ impl Plugin for EnergizerPlugin {
             .add_event::<EnergizerEaten>()
             .add_event::<EnergizerOver>()
             .insert_resource(EnergizerTimer::new())
-            .add_startup_system(spawn_energizer)
             .add_system_set(
-                SystemSet::on_update(GameState::Running)
+                SystemSet::on_enter(Start).with_system(spawn_energizer)
+            )
+            .add_system_set(
+                SystemSet::on_update(Running)
                     .with_system(pacman_eat_energizer)
                     .with_system(start_energizer_timer_when_energizer_eaten.after(pacman_eat_energizer))
                     .with_system(update_energizer_timer.after(start_energizer_timer_when_energizer_eaten))
