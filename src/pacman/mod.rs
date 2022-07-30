@@ -4,7 +4,7 @@ use crate::animation::Animations;
 use crate::common::Direction;
 use crate::common::position::ToPosition;
 use crate::common::Direction::*;
-use crate::life_cylce::LifeCycle::*;
+use crate::life_cycle::LifeCycle::*;
 use crate::ghosts::Ghost;
 use crate::ghosts::state::State;
 use crate::pacman::spawn::spawn_pacman;

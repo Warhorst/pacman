@@ -8,7 +8,7 @@ use crate::common::position::Position;
 use crate::constants::FIELD_DIMENSION;
 use crate::dots::DotEaten;
 use crate::energizer::EnergizerEaten;
-use crate::life_cylce::LifeCycle::*;
+use crate::life_cycle::LifeCycle::*;
 use crate::map::board::Board;
 use crate::pacman::Pacman;
 use crate::speed::Speed;

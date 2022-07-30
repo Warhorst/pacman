@@ -7,7 +7,7 @@ use crate::common::position::{Neighbour, Position, ToPosition};
 use crate::common::Direction;
 use crate::common::Direction::*;
 use crate::constants::FIELD_DIMENSION;
-use crate::life_cylce::LifeCycle::*;
+use crate::life_cycle::LifeCycle::*;
 use crate::ghost_corners::GhostCorner;
 use crate::ghosts::{Blinky, Clyde, Inky, Pinky};
 use crate::ghosts::state::{State, StateSetter};

@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 use crate::constants::FIELD_DIMENSION;
 use crate::dots::AllDotsEaten;
-use crate::life_cylce::LifeCycle;
-use crate::life_cylce::LifeCycle::Start;
+use crate::life_cycle::LifeCycle;
+use crate::life_cycle::LifeCycle::Start;
 use crate::map::board::Board;
 
 pub struct LevelPlugin;

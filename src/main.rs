@@ -9,7 +9,8 @@ use crate::camera::CameraPlugin;
 use crate::dots::DotPlugin;
 use crate::energizer::EnergizerPlugin;
 use crate::fruit::FruitPlugin;
-use crate::life_cylce::GameStatePlugin;
+use crate::game_over_screen::GameOverScreenPlugin;
+use crate::life_cycle::GameStatePlugin;
 use crate::ghost_corners::GhostCornersPlugin;
 use crate::ghost_house::GhostHousePlugin;
 use crate::ghost_house_gate::GhostHouseGatePlugin;
@@ -18,6 +19,7 @@ use crate::level::LevelPlugin;
 use crate::lives::LivesPlugin;
 use crate::map::MapPlugin;
 use crate::random::RandomPlugin;
+use crate::ready_screen::ReadyScreenPlugin;
 use crate::score::ScorePlugin;
 use crate::speed::SpeedPlugin;
 use crate::spritesheet::SpriteSheetPlugin;
@@ -46,7 +48,9 @@ mod fruit;
 pub mod animation;
 mod helper;
 mod spritesheet;
-mod life_cylce;
+mod life_cycle;
+mod ready_screen;
+mod game_over_screen;
 
 fn main() {
     App::new()
@@ -79,5 +83,7 @@ fn main() {
         .add_plugin(GhostHouseGatePlugin)
         .add_plugin(FruitPlugin)
         .add_plugin(SpriteSheetPlugin)
+        .add_plugin(ReadyScreenPlugin)
+        .add_plugin(GameOverScreenPlugin)
         .run()
 }

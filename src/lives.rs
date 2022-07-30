@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use crate::constants::{FIELD_DIMENSION, PACMAN_DIMENSION};
-use crate::life_cylce::LifeCycle;
-use crate::life_cylce::LifeCycle::Start;
+use crate::life_cycle::LifeCycle;
+use crate::life_cycle::LifeCycle::Start;
 use crate::map::board::Board;
 use crate::pacman::EPacmanHit;
 use crate::score::Score;

@@ -2,11 +2,11 @@ use std::ops::RangeInclusive;
 use bevy::prelude::*;
 use bevy::utils::Duration;
 use crate::energizer::EnergizerTimer;
-use crate::life_cylce::LifeCycle::*;
+use crate::life_cycle::LifeCycle::*;
 use crate::level::Level;
 use crate::ghosts::state::State;
 use crate::ghosts::state::State::*;
-use crate::life_cylce::LifeCycle::Start;
+use crate::life_cycle::LifeCycle::Start;
 
 pub(super) struct SchedulePlugin;
 

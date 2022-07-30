@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::life_cylce::LifeCycle::*;
+use crate::life_cycle::LifeCycle::*;
 
 use crate::tunnels::movement::{move_ghost_trough_tunnel, move_pacman_through_tunnel};
 use crate::tunnels::spawn::spawn_tunnels;

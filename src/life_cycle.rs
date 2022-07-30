@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use crate::pacman::{EPacmanDead, EPacmanHit};
 use LifeCycle::*;
+use crate::lives::Life;
 
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub enum LifeCycle {
@@ -48,7 +49,7 @@ impl Plugin for GameStatePlugin {
                 SystemSet::on_enter(PacmanDead).with_system(start_state_timer)
             )
             .add_system_set(
-                SystemSet::on_update(PacmanDead).with_system(switch_state_when_state_timer_finished)
+                SystemSet::on_update(PacmanDead).with_system(switch_dead_state_when_timer_finished)
             )
         ;
     }
@@ -64,7 +65,7 @@ fn start_state_timer(
     life_cycle: Res<State<LifeCycle>>
 ) {
     let state_time = match life_cycle.current() {
-        Start => 2.0,
+        Start => 1.0,
         Ready => 1.0,
         PacmanHit => 1.0,
         PacmanDead => 1.0,
@@ -89,7 +90,6 @@ fn switch_state_when_state_timer_finished(
             Start => Ready,
             Ready => Running,
             PacmanHit => PacmanDying,
-            PacmanDead => Ready,
             _ => return
         };
 
@@ -112,6 +112,26 @@ fn switch_to_dead_when_pacman_is_dead(
 ) {
     for _ in event_reader.iter() {
         game_state.set(PacmanDead).unwrap()
+    }
+}
+
+fn switch_dead_state_when_timer_finished(
+    mut commands: Commands,
+    time: Res<Time>,
+    mut state_timer: ResMut<StateTimer>,
+    mut life_cycle: ResMut<State<LifeCycle>>,
+    query: Query<&Life>
+) {
+    state_timer.tick(time.delta());
+
+    if state_timer.finished() {
+        commands.remove_resource::<StateTimer>();
+
+        if query.iter().count() > 0 {
+            life_cycle.set(Ready).unwrap()
+        } else {
+            life_cycle.set(GameOver).unwrap()
+        }
     }
 }
 

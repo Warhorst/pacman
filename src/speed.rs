@@ -9,7 +9,7 @@ use crate::ghosts::state::State;
 use crate::level::Level;
 use crate::pacman::Pacman;
 use crate::common::position::ToPosition;
-use crate::life_cylce::LifeCycle;
+use crate::life_cycle::LifeCycle;
 use crate::map::board::Board;
 
 pub struct SpeedPlugin;

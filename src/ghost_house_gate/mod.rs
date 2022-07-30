@@ -4,7 +4,7 @@ use std::collections::HashSet;
 use std::time::Duration;
 
 use crate::dots::DotEaten;
-use crate::life_cylce::LifeCycle::*;
+use crate::life_cycle::LifeCycle::*;
 use crate::ghosts::{Blinky, Clyde, GhostType, Inky, Pinky};
 use crate::level::Level;
 use crate::pacman::EPacmanHit;

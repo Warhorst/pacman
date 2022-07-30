@@ -5,7 +5,7 @@ use Fruit::*;
 use crate::common::position::ToPosition;
 use crate::constants::PACMAN_DIMENSION;
 use crate::dots::DotEaten;
-use crate::life_cylce::LifeCycle;
+use crate::life_cycle::LifeCycle;
 use crate::is;
 use crate::map::{Element, Map};
 use crate::pacman::Pacman;

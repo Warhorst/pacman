@@ -7,7 +7,7 @@ use crate::ghosts::state::StatePlugin;
 use crate::ghosts::target::{Target, TargetPlugin};
 use crate::ghosts::textures::update_ghost_appearance;
 use crate::tunnels::GhostPassedTunnel;
-use crate::life_cylce::LifeCycle::*;
+use crate::life_cycle::LifeCycle::*;
 
 pub mod movement;
 pub mod spawn;

@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::common::Direction;
 use crate::common::Direction::*;
-use crate::life_cylce::LifeCycle::*;
+use crate::life_cycle::LifeCycle::*;
 use crate::ghosts::target::{Target, TargetSetter};
 use crate::speed::Speed;
 use crate::target_skip_if;
