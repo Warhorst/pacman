@@ -14,7 +14,7 @@ fn spawn_camera(
     mut commands: Commands,
     board: Res<Board>,
 ) {
-    let mut bundle = OrthographicCameraBundle::new_2d();
+    let mut bundle = Camera2dBundle::default();
     modify_camera_x_y(&board, &mut bundle.transform.translation);
     commands.spawn().insert_bundle(bundle);
 }

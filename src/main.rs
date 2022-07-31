@@ -1,6 +1,7 @@
 extern crate core;
 
 use bevy::prelude::*;
+use bevy::render::texture::ImageSettings;
 
 use pacman::PacmanPlugin;
 use crate::animation::AnimationPlugin;
@@ -62,6 +63,7 @@ fn main() {
             ..Default::default()
         })
         .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
+        .insert_resource(ImageSettings::default_nearest())
         .add_plugin(GameStatePlugin)
         .add_plugin(AnimationPlugin)
         .add_plugin(CameraPlugin)

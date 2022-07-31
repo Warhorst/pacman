@@ -26,20 +26,23 @@ struct ReadyScreen;
 fn spawn_screen(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    map: Res<Map>
+    map: Res<Map>,
 ) {
     let coordinates = map.coordinates_between_positions_matching(is!(Element::FruitSpawn));
     commands.spawn_bundle(Text2dBundle {
-        text: Text::with_section("Ready!".to_string(),
-                                 TextStyle {
-                                     font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                     font_size: 40.0,
-                                     color: Color::rgb(1.0, 1.0, 0.0),
-                                 },
-                                 TextAlignment {
-                                     vertical: VerticalAlign::Center,
-                                     horizontal: HorizontalAlign::Center,
-                                 }),
+        text: Text::from_section(
+            "Ready!".to_string(),
+            TextStyle {
+                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                font_size: 40.0,
+                color: Color::rgb(1.0, 1.0, 0.0),
+            },
+        ).with_alignment(
+            TextAlignment {
+                vertical: VerticalAlign::Center,
+                horizontal: HorizontalAlign::Center,
+            }
+        ),
         transform: Transform::from_translation(coordinates),
         ..Default::default()
     })
@@ -48,7 +51,7 @@ fn spawn_screen(
 
 fn despawn_screen(
     mut commands: Commands,
-    query: Query<Entity, With<ReadyScreen>>
+    query: Query<Entity, With<ReadyScreen>>,
 ) {
     for entity in query.iter() {
         commands.entity(entity).despawn()

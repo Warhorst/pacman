@@ -156,7 +156,7 @@ impl Animation {
         match self {
             Animation::SingleTexture { texture } => Some(texture.clone()),
             Animation::TextureList { current_texture_index, textures, .. } => textures.get(*current_texture_index).map(Clone::clone),
-            Animation::SpriteSheet { current_texture_index, sheet, .. } => sheets.get(sheet.id)?.textures.get(*current_texture_index).map(Clone::clone)
+            Animation::SpriteSheet { current_texture_index, sheet, .. } => sheets.get(sheet)?.textures.get(*current_texture_index).map(Clone::clone)
         }
     }
 
