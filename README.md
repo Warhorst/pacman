@@ -16,9 +16,6 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 ### Ghosts
 - adapt Blinkys speed based on remaining dots
 
-### Lifecycle
-- level transition when all dots eaten
-
 ### Fruit
 - eating the fruits gives the player points
 
