@@ -48,7 +48,7 @@ impl Plugin for PacmanPlugin {
                     .with_system(pacman_hits_ghost)
             )
             .add_system_set(
-                SystemSet::on_enter(PacmanHit).with_system(stop_animation_when_hit)
+                SystemSet::on_enter(PacmanHit).with_system(stop_animation)
             )
             .add_system_set(
                 SystemSet::on_enter(PacmanDying).with_system(play_the_dying_animation)
@@ -58,6 +58,12 @@ impl Plugin for PacmanPlugin {
             )
             .add_system_set(
                 SystemSet::on_enter(PacmanDead).with_system(despawn_pacman)
+            )
+            .add_system_set(
+                SystemSet::on_enter(LevelTransition).with_system(stop_animation)
+            )
+            .add_system_set(
+                SystemSet::on_exit(LevelTransition).with_system(despawn_pacman)
             )
         ;
     }
@@ -107,7 +113,7 @@ fn pacman_hits_ghost(
     }
 }
 
-fn stop_animation_when_hit(
+fn stop_animation(
     mut query: Query<&mut Animations, With<Pacman>>
 ) {
     for mut animations in query.iter_mut() {

@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::common::Direction;
 use crate::common::position::Position;
-use crate::energizer::{EnergizerEaten, EnergizerOver};
+use crate::edibles::energizer::{EnergizerEaten, EnergizerOver};
 use crate::life_cycle::LifeCycle::*;
 use crate::ghosts::schedule::ScheduleChanged;
 use crate::ghosts::target::Target;

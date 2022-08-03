@@ -1,7 +1,7 @@
 use std::ops::RangeInclusive;
 use bevy::prelude::*;
 use bevy::utils::Duration;
-use crate::energizer::EnergizerTimer;
+use crate::edibles::energizer::EnergizerTimer;
 use crate::life_cycle::LifeCycle::*;
 use crate::level::Level;
 use crate::ghosts::state::State;

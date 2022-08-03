@@ -159,7 +159,7 @@ pub enum Element {
     InvisibleWall,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Serialize, Deserialize, Hash)]
 pub enum WallType {
     Outer,
     Inner,

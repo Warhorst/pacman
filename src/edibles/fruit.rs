@@ -4,7 +4,8 @@ use crate::level::Level;
 use Fruit::*;
 use crate::common::position::ToPosition;
 use crate::constants::PACMAN_DIMENSION;
-use crate::dots::DotEaten;
+use crate::edibles::dots::DotEaten;
+use crate::edibles::Edible;
 use crate::life_cycle::LifeCycle;
 use crate::is;
 use crate::map::{Element, Map};
@@ -56,7 +57,9 @@ fn spawn_fruit_when_dot_limit_reached(
                 transform: Transform::from_translation(coordinates),
                 ..Default::default()
             })
-            .insert(fruit);
+            .insert(fruit)
+            .insert(Edible)
+        ;
         commands.insert_resource(FruitDespawnTimer::new());
     }
 }

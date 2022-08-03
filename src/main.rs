@@ -6,10 +6,8 @@ use bevy::render::texture::ImageSettings;
 use pacman::PacmanPlugin;
 use crate::animation::AnimationPlugin;
 use crate::camera::CameraPlugin;
+use crate::edibles::EdiblePlugin;
 
-use crate::dots::DotPlugin;
-use crate::energizer::EnergizerPlugin;
-use crate::fruit::FruitPlugin;
 use crate::game_over_screen::GameOverScreenPlugin;
 use crate::life_cycle::GameStatePlugin;
 use crate::ghost_corners::GhostCornersPlugin;
@@ -31,11 +29,9 @@ mod camera;
 mod constants;
 mod common;
 mod pacman;
-mod dots;
 mod score;
 mod ghosts;
 mod tunnels;
-mod energizer;
 mod random;
 mod lives;
 mod level;
@@ -45,13 +41,13 @@ mod walls;
 mod ghost_house;
 mod ghost_corners;
 mod ghost_house_gate;
-mod fruit;
 pub mod animation;
 mod helper;
 mod spritesheet;
 mod life_cycle;
 mod ready_screen;
 mod game_over_screen;
+mod edibles;
 
 fn main() {
     App::new()
@@ -70,20 +66,18 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(MapPlugin)
         .add_plugin(WallsPlugin)
+        .add_plugin(EdiblePlugin)
         .add_plugin(GhostHousePlugin)
         .add_plugin(GhostCornersPlugin)
         .add_plugin(PacmanPlugin)
-        .add_plugin(DotPlugin)
         .add_plugin(ScorePlugin)
         .add_plugin(GhostPlugin)
         .add_plugin(TunnelPlugin)
-        .add_plugin(EnergizerPlugin)
         .add_plugin(RandomPlugin)
         .add_plugin(LivesPlugin)
         .add_plugin(LevelPlugin)
         .add_plugin(SpeedPlugin)
         .add_plugin(GhostHouseGatePlugin)
-        .add_plugin(FruitPlugin)
         .add_plugin(SpriteSheetPlugin)
         .add_plugin(ReadyScreenPlugin)
         .add_plugin(GameOverScreenPlugin)

@@ -1,8 +1,6 @@
 use bevy::prelude::*;
 use crate::constants::FIELD_DIMENSION;
-use crate::dots::AllDotsEaten;
-use crate::life_cycle::LifeCycle;
-use crate::life_cycle::LifeCycle::Start;
+use crate::life_cycle::LifeCycle::{LevelTransition, Start};
 use crate::map::board::Board;
 
 pub struct LevelPlugin;
@@ -15,7 +13,7 @@ impl Plugin for LevelPlugin {
                 SystemSet::on_enter(Start).with_system(spawn_level_ui)
             )
             .add_system_set(
-                SystemSet::on_update(LifeCycle::Running).with_system(increase_level_when_all_dots_eaten)
+                SystemSet::on_exit(LevelTransition).with_system(increase_level)
             )
         ;
     }
@@ -59,16 +57,13 @@ fn spawn_level_ui(
         .insert(LevelUi);
 }
 
-fn increase_level_when_all_dots_eaten(
-    mut event_reader: EventReader<AllDotsEaten>,
+fn increase_level(
     mut level: ResMut<Level>,
     mut query: Query<&mut Text, With<LevelUi>>,
 ) {
-    for _ in event_reader.iter() {
-        level.increase();
+    level.increase();
 
-        for mut text in query.iter_mut() {
-            text.sections[0].value = format!("Level: {}", **level)
-        }
+    for mut text in query.iter_mut() {
+        text.sections[0].value = format!("Level: {}", **level)
     }
 }

@@ -2,7 +2,7 @@ use std::any::TypeId;
 use bevy::prelude::*;
 use crate::animation::{Animation, Animations};
 use crate::common::Direction;
-use crate::energizer::EnergizerTimer;
+use crate::edibles::energizer::EnergizerTimer;
 use crate::ghosts::{Blinky, GhostType, Inky, Pinky};
 use crate::ghosts::state::State;
 

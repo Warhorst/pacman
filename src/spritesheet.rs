@@ -29,6 +29,12 @@ fn register_sheet_loader(
                 ("textures/pacman/pacman_walking_left.png.sheet", Grid::new(16,16,4,1)),
                 ("textures/pacman/pacman_walking_right.png.sheet", Grid::new(16,16,4,1)),
                 ("textures/pacman/pacman_dying.png.sheet", Grid::new(16,16,12,1)),
+                ("textures/walls/outer_wall_corner_blinking.png.sheet", Grid::new(16, 16, 2, 1)),
+                ("textures/walls/outer_wall_blinking.png.sheet", Grid::new(16, 16, 2, 1)),
+                ("textures/walls/inner_wall_corner_blinking.png.sheet", Grid::new(16, 16, 2, 1)),
+                ("textures/walls/inner_wall_blinking.png.sheet", Grid::new(16, 16, 2, 1)),
+                ("textures/walls/ghost_house_wall_corner_blinking.png.sheet", Grid::new(16, 16, 2, 1)),
+                ("textures/walls/ghost_house_wall_blinking.png.sheet", Grid::new(16, 16, 2, 1)),
             ]
         )
     )

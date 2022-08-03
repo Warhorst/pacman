@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 use crate::constants::DOT_DIMENSION;
 use crate::common::position::ToPosition;
+use crate::edibles::Edible;
 use crate::life_cycle::LifeCycle::*;
 use crate::is;
 use crate::map::{Element, Map};
@@ -13,14 +14,14 @@ impl Plugin for DotPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<DotEaten>()
-            .add_event::<AllDotsEaten>()
             .add_system_set(
                 SystemSet::on_enter(Start).with_system(spawn_dots)
             )
             .add_system_set(
-                SystemSet::on_update(Running)
-                    .with_system(pacman_eat_dot)
-                    .with_system(send_event_when_all_dots_are_eaten)
+                SystemSet::on_update(Running).with_system(pacman_eat_dot)
+            )
+            .add_system_set(
+                SystemSet::on_exit(LevelTransition).with_system(spawn_dots)
             )
         ;
     }
@@ -32,13 +33,10 @@ pub struct Dot;
 /// Event. Fired when pacman eats a dot.
 pub struct DotEaten;
 
-/// Event. Fired when all dots are eaten.
-pub struct AllDotsEaten;
-
 fn spawn_dots(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    map: Res<Map>
+    map: Res<Map>,
 ) {
     let point_dimension = Vec2::new(DOT_DIMENSION, DOT_DIMENSION);
     for position in map.get_positions_matching(is!(Element::DotSpawn)) {
@@ -52,7 +50,9 @@ fn spawn_dots(
                 transform: Transform::from_translation(Vec3::from(position)),
                 ..Default::default()
             })
-            .insert(Dot);
+            .insert(Dot)
+            .insert(Edible)
+        ;
     }
 }
 
@@ -70,13 +70,4 @@ fn pacman_eat_dot(
             }
         }
     }
-}
-
-fn send_event_when_all_dots_are_eaten(
-    mut event_writer: EventWriter<AllDotsEaten>,
-    query: Query<&Dot>,
-) {
-    if query.iter().count() > 0 { return; }
-
-    event_writer.send(AllDotsEaten);
 }

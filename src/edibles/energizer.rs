@@ -103,7 +103,9 @@ fn spawn_energizer(
                 transform: Transform::from_translation(Vec3::from(position)),
                 ..Default::default()
             })
-            .insert(Energizer);
+            .insert(Energizer)
+            .insert(Energizer)
+        ;
     }
 }
 

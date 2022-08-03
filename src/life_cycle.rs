@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use crate::pacman::{EPacmanDead, EPacmanHit};
 use LifeCycle::*;
+use crate::edibles::EAllEdiblesEaten;
 use crate::lives::Life;
 
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
@@ -34,7 +35,9 @@ impl Plugin for GameStatePlugin {
                 SystemSet::on_update(Ready).with_system(switch_state_when_state_timer_finished)
             )
             .add_system_set(
-                SystemSet::on_update(Running).with_system(switch_to_dying_when_pacman_was_hit)
+                SystemSet::on_update(Running)
+                    .with_system(switch_to_dying_when_pacman_was_hit)
+                    .with_system(switch_to_level_transition_when_all_edibles_eaten)
             )
             .add_system_set(
                 SystemSet::on_enter(PacmanHit).with_system(start_state_timer)
@@ -50,6 +53,12 @@ impl Plugin for GameStatePlugin {
             )
             .add_system_set(
                 SystemSet::on_update(PacmanDead).with_system(switch_dead_state_when_timer_finished)
+            )
+            .add_system_set(
+                SystemSet::on_enter(LevelTransition).with_system(start_state_timer)
+            )
+            .add_system_set(
+                SystemSet::on_update(LevelTransition).with_system(switch_state_when_state_timer_finished)
             )
         ;
     }
@@ -69,6 +78,7 @@ fn start_state_timer(
         Ready => 1.0,
         PacmanHit => 1.0,
         PacmanDead => 1.0,
+        LevelTransition => 3.0,
         _ => return
     };
 
@@ -90,6 +100,7 @@ fn switch_state_when_state_timer_finished(
             Start => Ready,
             Ready => Running,
             PacmanHit => PacmanDying,
+            LevelTransition => Ready,
             _ => return
         };
 
@@ -135,3 +146,11 @@ fn switch_dead_state_when_timer_finished(
     }
 }
 
+fn switch_to_level_transition_when_all_edibles_eaten(
+    mut event_reader: EventReader<EAllEdiblesEaten>,
+    mut life_cycle: ResMut<State<LifeCycle>>
+) {
+    for _ in event_reader.iter() {
+        life_cycle.set(LevelTransition).unwrap()
+    }
+}

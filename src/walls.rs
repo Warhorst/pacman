@@ -1,17 +1,33 @@
 use bevy::prelude::*;
+use bevy::utils::HashMap;
+use crate::animation::{Animation, Animations};
 use crate::common::position::Position;
 use crate::constants::WALL_DIMENSION;
 use crate::is;
+use crate::life_cycle::LifeCycle::{LevelTransition, Start};
 use crate::map::{Element, Map, Rotation, WallType};
-use crate::map::Element::*;
 
 pub struct WallsPlugin;
 
 impl Plugin for WallsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(spawn_walls);
+        app
+            .add_system_set(
+                SystemSet::on_enter(Start).with_system(spawn_walls)
+            )
+            .add_system_set(
+                SystemSet::on_enter(LevelTransition).with_system(set_animation_to_blinking)
+            )
+            .add_system_set(
+                SystemSet::on_exit(LevelTransition).with_system(set_animation_to_idle)
+            )
+        ;
     }
 }
+
+/// Component to identify a wall
+#[derive(Component)]
+pub struct Wall;
 
 fn spawn_walls(
     mut commands: Commands,
@@ -23,22 +39,26 @@ fn spawn_walls(
 }
 
 fn spawn_labyrinth_walls(commands: &mut Commands, map: &Map, asset_server: &AssetServer) {
+    let wall_animations_map = create_animations(asset_server);
+
     for (position, element) in map.position_element_iter() {
-        if let Wall { is_corner, rotation, wall_type } = element {
+        if let Element::Wall { is_corner, rotation, wall_type } = element {
             let transform = create_transform(position, rotation);
-            let texture = select_texture(asset_server, *is_corner, wall_type);
+            let animations = wall_animations_map.get(&(*wall_type, *is_corner)).unwrap().clone();
             let custom_size = Some(Vec2::new(WALL_DIMENSION, WALL_DIMENSION));
 
             commands.spawn()
                 .insert_bundle(SpriteBundle {
-                    texture,
                     sprite: Sprite {
                         custom_size,
                         ..default()
                     },
                     transform,
                     ..Default::default()
-                });
+                })
+                .insert(animations)
+                .insert(Wall)
+            ;
         }
     }
 }
@@ -49,15 +69,24 @@ fn create_transform(position: &Position, rotation: &Rotation) -> Transform {
     transform
 }
 
-fn select_texture(asset_server: &AssetServer, is_corner: bool, wall_type: &WallType) -> Handle<Image> {
-    match (wall_type, is_corner) {
-        (WallType::Outer, true) => asset_server.load("textures/walls/outer_wall_corner.png"),
-        (WallType::Outer, false) => asset_server.load("textures/walls/outer_wall.png"),
-        (WallType::Inner, true) => asset_server.load("textures/walls/inner_wall_corner.png"),
-        (WallType::Inner, false) => asset_server.load("textures/walls/inner_wall.png"),
-        (WallType::Ghost, true) => asset_server.load("textures/walls/ghost_house_wall_corner.png"),
-        (WallType::Ghost, false) => asset_server.load("textures/walls/ghost_house_wall.png"),
-    }
+fn create_animations(asset_server: &AssetServer) -> HashMap<(WallType, bool), Animations> {
+    [
+        (WallType::Outer, true, "textures/walls/outer_wall_corner.png", "textures/walls/outer_wall_corner_blinking.png.sheet"),
+        (WallType::Outer, false, "textures/walls/outer_wall.png", "textures/walls/outer_wall_blinking.png.sheet"),
+        (WallType::Inner, true, "textures/walls/inner_wall_corner.png", "textures/walls/inner_wall_corner_blinking.png.sheet"),
+        (WallType::Inner, false, "textures/walls/inner_wall.png", "textures/walls/inner_wall_blinking.png.sheet"),
+        (WallType::Ghost, true, "textures/walls/ghost_house_wall_corner.png", "textures/walls/ghost_house_wall_corner_blinking.png.sheet"),
+        (WallType::Ghost, false, "textures/walls/ghost_house_wall.png", "textures/walls/ghost_house_wall_blinking.png.sheet"),
+    ]
+        .into_iter()
+        .map(|(tp, is_corner, idle_path, blinking_path)| ((tp, is_corner), Animations::new(
+            [
+                ("idle", Animation::from_texture(asset_server.load(idle_path))),
+                ("blinking", Animation::from_sprite_sheet(0.5, true, 2, asset_server.load(blinking_path)))
+            ]
+            , "idle"
+        )))
+        .collect()
 }
 
 fn spawn_ghost_house_entrance(commands: &mut Commands, map: &Map, asset_server: &AssetServer) {
@@ -72,5 +101,21 @@ fn spawn_ghost_house_entrance(commands: &mut Commands, map: &Map, asset_server: 
                 transform: Transform::from_translation(Vec3::from(position)),
                 ..Default::default()
             });
+    }
+}
+
+fn set_animation_to_blinking(
+    mut query: Query<&mut Animations, With<Wall>>
+) {
+    for mut animations in &mut query {
+        animations.change_animation_to("blinking")
+    }
+}
+
+fn set_animation_to_idle(
+    mut query: Query<&mut Animations, With<Wall>>
+) {
+    for mut animations in &mut query {
+        animations.change_animation_to("idle")
     }
 }

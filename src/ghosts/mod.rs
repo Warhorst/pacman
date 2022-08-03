@@ -39,6 +39,9 @@ impl Plugin for GhostPlugin {
             .add_system_set(
                 SystemSet::on_enter(PacmanDying).with_system(despawn_ghosts)
             )
+            .add_system_set(
+                SystemSet::on_enter(LevelTransition).with_system(despawn_ghosts)
+            )
         ;
     }
 }

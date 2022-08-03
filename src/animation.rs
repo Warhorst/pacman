@@ -218,7 +218,7 @@ impl Animation {
 /// TODO: We could need an Animations variant with a shared timer between animations.
 ///  The ghosts currently use all the same timer duration, and the animation transition could look
 ///  smoother this way
-#[derive(Component)]
+#[derive(Clone, Component)]
 pub struct Animations {
     atlas: HashMap<String, Animation>,
     current: String,

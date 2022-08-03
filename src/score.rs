@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 
 use crate::constants::{FIELD_DIMENSION, POINTS_PER_DOT, POINTS_PER_ENERGIZER, POINTS_PER_GHOST};
-use crate::dots::DotEaten;
-use crate::energizer::{EnergizerEaten, EnergizerOver};
+use crate::edibles::dots::DotEaten;
+use crate::edibles::energizer::{EnergizerEaten, EnergizerOver};
 use crate::life_cycle::LifeCycle;
 use crate::life_cycle::LifeCycle::Start;
 use crate::map::board::Board;

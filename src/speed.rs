@@ -3,7 +3,7 @@ use std::ops::RangeInclusive;
 use bevy::prelude::*;
 
 use crate::constants::{GHOST_SPEED, PACMAN_SPEED};
-use crate::energizer::EnergizerTimer;
+use crate::edibles::energizer::EnergizerTimer;
 use crate::ghosts::Ghost;
 use crate::ghosts::state::State;
 use crate::level::Level;
