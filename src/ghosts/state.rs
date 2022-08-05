@@ -150,7 +150,7 @@ fn set_eaten_when_hit_by_pacman(
 ) {
     for event in event_reader.iter() {
         for (entity, mut state) in ghost_query.iter_mut() {
-            if entity != **event {
+            if entity != event.0 {
                 continue;
             }
 

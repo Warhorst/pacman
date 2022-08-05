@@ -1,11 +1,13 @@
+use std::time::Duration;
 use bevy::prelude::*;
 
 use crate::constants::{FIELD_DIMENSION, POINTS_PER_DOT, POINTS_PER_ENERGIZER, POINTS_PER_GHOST};
 use crate::edibles::energizer::EnergizerOver;
-use crate::interactions::{EDotEaten, EEnergizerEaten, EPacmanEatsGhost};
+use crate::interactions::{EDotEaten, EEnergizerEaten, EFruitEaten, EPacmanEatsGhost};
 use crate::life_cycle::LifeCycle;
 use crate::life_cycle::LifeCycle::Start;
 use crate::map::board::Board;
+use crate::edibles::fruit::Fruit::*;
 
 pub struct ScorePlugin;
 
@@ -22,8 +24,10 @@ impl Plugin for ScorePlugin {
                     .with_system(update_scoreboard)
                     .with_system(add_points_for_eaten_dot)
                     .with_system(add_points_for_eaten_energizer)
-                    .with_system(add_points_for_eaten_ghost)
+                    .with_system(add_points_for_eaten_ghost_and_display_score_text)
                     .with_system(reset_eaten_ghost_counter_when_energizer_is_over)
+                    .with_system(add_points_for_eaten_fruit_and_display_score_text)
+                    .with_system(update_score_texts)
             )
         ;
     }
@@ -41,6 +45,12 @@ impl Score {
 
 #[derive(Component)]
 pub struct Scoreboard;
+
+#[derive(Component)]
+pub struct ScoreText;
+
+#[derive(Component, Deref, DerefMut)]
+pub struct ScoreTextTimer(Timer);
 
 #[derive(Deref, DerefMut)]
 struct EatenGhostCounter(usize);
@@ -101,14 +111,18 @@ fn add_points_for_eaten_energizer(
     }
 }
 
-fn add_points_for_eaten_ghost(
+fn add_points_for_eaten_ghost_and_display_score_text(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
     mut score: ResMut<Score>,
     mut eaten_ghost_counter: ResMut<EatenGhostCounter>,
     mut event_reader: EventReader<EPacmanEatsGhost>,
 ) {
-    for _ in event_reader.iter() {
-        score.add(POINTS_PER_GHOST * 2usize.pow(**eaten_ghost_counter as u32));
-        **eaten_ghost_counter += 1
+    for event in event_reader.iter() {
+        let points = POINTS_PER_GHOST * 2usize.pow(**eaten_ghost_counter as u32);
+        score.add(points);
+        **eaten_ghost_counter += 1;
+        spawn_score_text(&mut commands, &asset_server, Color::hex("31FFFF").unwrap(), points, event.1.translation)
     }
 }
 
@@ -118,5 +132,73 @@ fn reset_eaten_ghost_counter_when_energizer_is_over(
 ) {
     for _ in event_reader.iter() {
         **eaten_ghost_counter = 0
+    }
+}
+
+fn add_points_for_eaten_fruit_and_display_score_text(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut score: ResMut<Score>,
+    mut event_reader: EventReader<EFruitEaten>,
+) {
+    for event in event_reader.iter() {
+        let (fruit, transform) = (event.0, event.1);
+
+        let points = match fruit {
+            Cherry => 100,
+            Strawberry => 300,
+            Peach => 500,
+            Apple => 700,
+            Grapes => 1000,
+            Galaxian => 2000,
+            Bell => 3000,
+            Key => 5000
+        };
+
+        score.add(points);
+        spawn_score_text(&mut commands, &asset_server, Color::hex("FFBDFF").unwrap(), points, transform.translation)
+    }
+}
+
+fn spawn_score_text(
+    commands: &mut Commands,
+    asset_server: &AssetServer,
+    color: Color,
+    points: usize,
+    coordinates: Vec3
+) {
+    commands.spawn_bundle(Text2dBundle {
+        text: Text::from_section(
+            points.to_string(),
+            TextStyle {
+                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                font_size: 20.0,
+                color,
+            },
+        ).with_alignment(
+            TextAlignment {
+                vertical: VerticalAlign::Center,
+                horizontal: HorizontalAlign::Center,
+            }
+        ),
+        transform: Transform::from_translation(coordinates),
+        ..Default::default()
+    })
+        .insert(ScoreText)
+        .insert(ScoreTextTimer(Timer::new(Duration::from_secs(2), false)))
+    ;
+}
+
+fn update_score_texts(
+    mut commands: Commands,
+    time: Res<Time>,
+    mut query: Query<(Entity, &mut ScoreTextTimer), With<ScoreText>>
+) {
+    for (entity, mut timer) in &mut query {
+        timer.tick(time.delta());
+
+        if timer.finished() {
+            commands.entity(entity).despawn();
+        }
     }
 }

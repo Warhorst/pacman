@@ -16,9 +16,6 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 ### Ghosts
 - adapt Blinkys speed based on remaining dots
 
-### Fruit
-- eating the fruits gives the player points
-
 ### Graphics
 - return the correct z coordinate from the board (or only x and y)
 - render points for eating a ghost

@@ -34,8 +34,7 @@ impl Plugin for InteractionsPlugin {
 pub struct EPacmanHit;
 
 /// Fired when Pacman ate a ghost in frightened state.
-#[derive(Deref)]
-pub struct EPacmanEatsGhost(Entity);
+pub struct EPacmanEatsGhost(pub Entity, pub Transform);
 
 /// Fired when pacman eats a dot.
 pub struct EDotEaten;
@@ -44,7 +43,7 @@ pub struct EDotEaten;
 pub struct EEnergizerEaten;
 
 /// Event that gets fired when pacman ate a fruit.
-pub struct EFruitEaten;
+pub struct EFruitEaten(pub Fruit, pub Transform);
 
 fn pacman_hits_ghost(
     mut killed_event_writer: EventWriter<EPacmanHit>,
@@ -60,7 +59,7 @@ fn pacman_hits_ghost(
                 }
 
                 if let State::Frightened = state {
-                    eat_event_writer.send(EPacmanEatsGhost(entity))
+                    eat_event_writer.send(EPacmanEatsGhost(entity, *ghost_transform))
                 }
             }
         }
@@ -104,14 +103,14 @@ fn eat_fruit_when_pacman_touches_it(
     mut commands: Commands,
     mut event_writer: EventWriter<EFruitEaten>,
     pacman_query: Query<&Transform, With<Pacman>>,
-    fruit_query: Query<(Entity, &Transform), With<Fruit>>
+    fruit_query: Query<(Entity, &Fruit, &Transform)>
 ) {
     for pacman_tf in &pacman_query {
-        for (entity, fruit_tf) in &fruit_query {
+        for (entity, fruit, fruit_tf) in &fruit_query {
             if pacman_tf.pos() == fruit_tf.pos() {
                 commands.entity(entity).despawn();
                 commands.remove_resource::<FruitDespawnTimer>();
-                event_writer.send(EFruitEaten)
+                event_writer.send(EFruitEaten(*fruit, *fruit_tf))
             }
         }
     }

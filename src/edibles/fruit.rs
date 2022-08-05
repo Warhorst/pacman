@@ -27,7 +27,7 @@ impl Plugin for FruitPlugin {
     }
 }
 
-#[derive(Component)]
+#[derive(Copy, Clone, Component)]
 pub enum Fruit {
     Cherry,
     Strawberry,
