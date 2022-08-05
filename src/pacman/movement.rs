@@ -6,8 +6,7 @@ use crate::common::Direction;
 use crate::common::Direction::*;
 use crate::common::position::Position;
 use crate::constants::FIELD_DIMENSION;
-use crate::edibles::dots::DotEaten;
-use crate::edibles::energizer::EnergizerEaten;
+use crate::interactions::{EDotEaten, EEnergizerEaten};
 use crate::life_cycle::LifeCycle::*;
 use crate::map::board::Board;
 use crate::pacman::Pacman;
@@ -196,7 +195,7 @@ fn center_position(direction: &Direction, new_position: &Position, new_coordinat
 /// When pacman eats a dot, he will stop for a moment. This allows
 /// the ghost to catch up on him if he continues to eat dots.
 fn stop_pacman_when_a_dot_was_eaten(
-    mut event_reader: EventReader<DotEaten>,
+    mut event_reader: EventReader<EDotEaten>,
     mut pacman_stop_timer: ResMut<PacmanStopTimer>,
 ) {
     for _ in event_reader.iter() {
@@ -205,7 +204,7 @@ fn stop_pacman_when_a_dot_was_eaten(
 }
 
 fn stop_pacman_when_energizer_was_eaten(
-    mut event_reader: EventReader<EnergizerEaten>,
+    mut event_reader: EventReader<EEnergizerEaten>,
     mut pacman_stop_timer: ResMut<PacmanStopTimer>,
 ) {
     for _ in event_reader.iter() {

@@ -14,6 +14,7 @@ use crate::ghost_corners::GhostCornersPlugin;
 use crate::ghost_house::GhostHousePlugin;
 use crate::ghost_house_gate::GhostHouseGatePlugin;
 use crate::ghosts::GhostPlugin;
+use crate::interactions::InteractionsPlugin;
 use crate::level::LevelPlugin;
 use crate::lives::LivesPlugin;
 use crate::map::MapPlugin;
@@ -48,6 +49,7 @@ mod life_cycle;
 mod ready_screen;
 mod game_over_screen;
 mod edibles;
+mod interactions;
 
 fn main() {
     App::new()
@@ -77,6 +79,7 @@ fn main() {
         .add_plugin(LivesPlugin)
         .add_plugin(LevelPlugin)
         .add_plugin(SpeedPlugin)
+        .add_plugin(InteractionsPlugin)
         .add_plugin(GhostHouseGatePlugin)
         .add_plugin(SpriteSheetPlugin)
         .add_plugin(ReadyScreenPlugin)

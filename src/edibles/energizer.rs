@@ -2,8 +2,7 @@ use std::time::Duration;
 use bevy::prelude::*;
 
 use crate::constants::ENERGIZER_DIMENSION;
-use crate::pacman::Pacman;
-use crate::common::position::ToPosition;
+use crate::interactions::EEnergizerEaten;
 use crate::life_cycle::LifeCycle::*;
 use crate::is;
 use crate::level::Level;
@@ -15,7 +14,7 @@ pub struct EnergizerPlugin;
 impl Plugin for EnergizerPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_event::<EnergizerEaten>()
+
             .add_event::<EnergizerOver>()
             .insert_resource(EnergizerTimer::new())
             .add_system_set(
@@ -23,8 +22,7 @@ impl Plugin for EnergizerPlugin {
             )
             .add_system_set(
                 SystemSet::on_update(Running)
-                    .with_system(pacman_eat_energizer)
-                    .with_system(start_energizer_timer_when_energizer_eaten.after(pacman_eat_energizer))
+                    .with_system(start_energizer_timer_when_energizer_eaten)
                     .with_system(update_energizer_timer.after(start_energizer_timer_when_energizer_eaten))
             )
         ;
@@ -34,9 +32,6 @@ impl Plugin for EnergizerPlugin {
 /// An energizer that allows pacman to eat ghosts.
 #[derive(Component)]
 pub struct Energizer;
-
-/// Fired when pacman eats an energizer.
-pub struct EnergizerEaten;
 
 /// Fired when an energizer is no longer active
 pub struct EnergizerOver;
@@ -109,24 +104,8 @@ fn spawn_energizer(
     }
 }
 
-fn pacman_eat_energizer(
-    mut commands: Commands,
-    mut event_writer: EventWriter<EnergizerEaten>,
-    pacman_positions: Query<&Transform, With<Pacman>>,
-    energizer_positions: Query<(Entity, &Transform), With<Energizer>>,
-) {
-    for pacman_transform in pacman_positions.iter() {
-        for (energizer_entity, energizer_transform) in energizer_positions.iter() {
-            if energizer_transform.pos() == pacman_transform.pos() {
-                commands.entity(energizer_entity).despawn();
-                event_writer.send(EnergizerEaten)
-            }
-        }
-    }
-}
-
 fn start_energizer_timer_when_energizer_eaten(
-    mut event_reader: EventReader<EnergizerEaten>,
+    mut event_reader: EventReader<EEnergizerEaten>,
     level: Res<Level>,
     mut energizer_timer: ResMut<EnergizerTimer>
 ) {

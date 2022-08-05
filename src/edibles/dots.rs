@@ -1,24 +1,18 @@
 use bevy::prelude::*;
 
 use crate::constants::DOT_DIMENSION;
-use crate::common::position::ToPosition;
 use crate::edibles::Edible;
 use crate::life_cycle::LifeCycle::*;
 use crate::is;
 use crate::map::{Element, Map};
-use crate::pacman::Pacman;
 
 pub struct DotPlugin;
 
 impl Plugin for DotPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_event::<DotEaten>()
             .add_system_set(
                 SystemSet::on_enter(Start).with_system(spawn_dots)
-            )
-            .add_system_set(
-                SystemSet::on_update(Running).with_system(pacman_eat_dot)
             )
             .add_system_set(
                 SystemSet::on_exit(LevelTransition).with_system(spawn_dots)
@@ -29,9 +23,6 @@ impl Plugin for DotPlugin {
 
 #[derive(Component)]
 pub struct Dot;
-
-/// Event. Fired when pacman eats a dot.
-pub struct DotEaten;
 
 fn spawn_dots(
     mut commands: Commands,
@@ -53,21 +44,5 @@ fn spawn_dots(
             .insert(Dot)
             .insert(Edible)
         ;
-    }
-}
-
-fn pacman_eat_dot(
-    mut commands: Commands,
-    mut event_writer: EventWriter<DotEaten>,
-    pacman_positions: Query<&Transform, With<Pacman>>,
-    dot_positions: Query<(Entity, &Transform), With<Dot>>,
-) {
-    for pacman_tf in pacman_positions.iter() {
-        for (entity, dot_tf) in dot_positions.iter() {
-            if pacman_tf.pos() == dot_tf.pos() {
-                commands.entity(entity).despawn();
-                event_writer.send(DotEaten)
-            }
-        }
     }
 }

@@ -2,14 +2,14 @@ use bevy::prelude::*;
 
 use crate::common::Direction;
 use crate::common::position::Position;
-use crate::edibles::energizer::{EnergizerEaten, EnergizerOver};
+use crate::edibles::energizer::EnergizerOver;
 use crate::life_cycle::LifeCycle::*;
 use crate::ghosts::schedule::ScheduleChanged;
 use crate::ghosts::target::Target;
-use crate::pacman::EPacmanEatsGhost;
 use crate::ghost_house::GhostHouse;
 use crate::ghosts::{Blinky, Clyde, Ghost, GhostType, Inky, Pinky};
 use crate::ghosts::schedule::Schedule;
+use crate::interactions::{EEnergizerEaten, EPacmanEatsGhost};
 use crate::state_skip_if;
 
 pub struct StatePlugin;
@@ -122,7 +122,7 @@ fn update_eaten_state<G: Component + GhostType + 'static>(
 }
 
 fn set_frightened_when_pacman_ate_energizer(
-    mut event_reader: EventReader<EnergizerEaten>,
+    mut event_reader: EventReader<EEnergizerEaten>,
     mut query: Query<(&mut Direction, &mut Target, &mut State, &Transform), With<Ghost>>,
 ) {
     for _ in event_reader.iter() {

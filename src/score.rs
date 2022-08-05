@@ -1,12 +1,11 @@
 use bevy::prelude::*;
 
 use crate::constants::{FIELD_DIMENSION, POINTS_PER_DOT, POINTS_PER_ENERGIZER, POINTS_PER_GHOST};
-use crate::edibles::dots::DotEaten;
-use crate::edibles::energizer::{EnergizerEaten, EnergizerOver};
+use crate::edibles::energizer::EnergizerOver;
+use crate::interactions::{EDotEaten, EEnergizerEaten, EPacmanEatsGhost};
 use crate::life_cycle::LifeCycle;
 use crate::life_cycle::LifeCycle::Start;
 use crate::map::board::Board;
-use crate::pacman::EPacmanEatsGhost;
 
 pub struct ScorePlugin;
 
@@ -86,7 +85,7 @@ fn update_scoreboard(
 
 fn add_points_for_eaten_dot(
     mut score: ResMut<Score>,
-    mut event_reader: EventReader<DotEaten>,
+    mut event_reader: EventReader<EDotEaten>,
 ) {
     for _ in event_reader.iter() {
         score.add(POINTS_PER_DOT)
@@ -95,7 +94,7 @@ fn add_points_for_eaten_dot(
 
 fn add_points_for_eaten_energizer(
     mut score: ResMut<Score>,
-    mut event_reader: EventReader<EnergizerEaten>,
+    mut event_reader: EventReader<EEnergizerEaten>,
 ) {
     for _ in event_reader.iter() {
         score.add(POINTS_PER_ENERGIZER)

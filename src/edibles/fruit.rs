@@ -2,21 +2,18 @@ use std::time::Duration;
 use bevy::prelude::*;
 use crate::level::Level;
 use Fruit::*;
-use crate::common::position::ToPosition;
 use crate::constants::PACMAN_DIMENSION;
-use crate::edibles::dots::DotEaten;
 use crate::edibles::Edible;
+use crate::interactions::EDotEaten;
 use crate::life_cycle::LifeCycle;
 use crate::is;
 use crate::map::{Element, Map};
-use crate::pacman::Pacman;
 
 pub struct FruitPlugin;
 
 impl Plugin for FruitPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_event::<FruitEaten>()
             .insert_resource(FruitDotCounter::new())
             .add_system_set(
                 SystemSet::on_update(LifeCycle::Running)
@@ -25,9 +22,42 @@ impl Plugin for FruitPlugin {
                     .with_system(increase_dot_counter_when_dot_was_eaten)
                     .with_system(despawn_fruit_if_timer_exceeded)
                     .with_system(reset_fruit_dot_counter_and_despawn_timer_when_level_changed)
-                    .with_system(eat_fruit_when_pacman_touches_it)
             )
         ;
+    }
+}
+
+#[derive(Component)]
+pub enum Fruit {
+    Cherry,
+    Strawberry,
+    Peach,
+    Apple,
+    Grapes,
+    Galaxian,
+    Bell,
+    Key,
+}
+
+#[derive(Deref, DerefMut)]
+pub struct FruitDespawnTimer(Timer);
+
+impl FruitDespawnTimer {
+    fn new() -> Self {
+        FruitDespawnTimer(Timer::new(Duration::from_secs_f32(9.5), false))
+    }
+}
+
+#[derive(Deref, DerefMut)]
+struct FruitDotCounter(usize);
+
+impl FruitDotCounter {
+    fn new() -> Self {
+        FruitDotCounter(0)
+    }
+
+    fn increase(&mut self) {
+        self.0 += 1
     }
 }
 
@@ -92,7 +122,7 @@ fn get_texture_for_fruit(fruit: &Fruit, asset_server: &AssetServer) -> Handle<Im
 
 /// When a dot was eaten, increase the dot counter.
 fn increase_dot_counter_when_dot_was_eaten(
-    mut event_reader: EventReader<DotEaten>,
+    mut event_reader: EventReader<EDotEaten>,
     mut fruit_dot_counter: ResMut<FruitDotCounter>
 ) {
     for _ in event_reader.iter() {
@@ -135,60 +165,5 @@ fn reset_fruit_dot_counter_and_despawn_timer_when_level_changed(
     if level.is_changed() {
         commands.remove_resource::<FruitDespawnTimer>();
         **fruit_dot_counter = 0
-    }
-}
-
-/// If pacman touches the fruit, despawn it, remove the timer and send an event.
-fn eat_fruit_when_pacman_touches_it(
-    mut commands: Commands,
-    mut event_writer: EventWriter<FruitEaten>,
-    pacman_query: Query<&Transform, With<Pacman>>,
-    fruit_query: Query<(Entity, &Transform), With<Fruit>>
-) {
-    for pacman_tf in pacman_query.iter() {
-        for (entity, fruit_tf) in fruit_query.iter() {
-            if pacman_tf.pos() == fruit_tf.pos() {
-                commands.entity(entity).despawn();
-                commands.remove_resource::<FruitDespawnTimer>();
-                event_writer.send(FruitEaten)
-            }
-        }
-    }
-}
-
-#[derive(Component)]
-enum Fruit {
-    Cherry,
-    Strawberry,
-    Peach,
-    Apple,
-    Grapes,
-    Galaxian,
-    Bell,
-    Key,
-}
-
-/// Event that gets fired when pacman ate a fruit.
-pub struct FruitEaten;
-
-#[derive(Deref, DerefMut)]
-struct FruitDespawnTimer(Timer);
-
-impl FruitDespawnTimer {
-    fn new() -> Self {
-        FruitDespawnTimer(Timer::new(Duration::from_secs_f32(9.5), false))
-    }
-}
-
-#[derive(Deref, DerefMut)]
-struct FruitDotCounter(usize);
-
-impl FruitDotCounter {
-    fn new() -> Self {
-        FruitDotCounter(0)
-    }
-
-    fn increase(&mut self) {
-        self.0 += 1
     }
 }

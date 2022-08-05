@@ -1,7 +1,8 @@
 use bevy::prelude::*;
-use crate::pacman::{EPacmanDead, EPacmanHit};
+use crate::pacman::{EPacmanDead};
 use LifeCycle::*;
 use crate::edibles::EAllEdiblesEaten;
+use crate::interactions::EPacmanHit;
 use crate::lives::Life;
 
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]

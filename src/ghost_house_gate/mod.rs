@@ -3,12 +3,11 @@ use std::any::TypeId;
 use std::collections::HashSet;
 use std::time::Duration;
 
-use crate::edibles::dots::DotEaten;
 use crate::life_cycle::LifeCycle::*;
 use crate::ghosts::{Blinky, Clyde, GhostType, Inky, Pinky};
 use crate::level::Level;
-use crate::pacman::EPacmanHit;
 use crate::ghost_house_gate::counter::Counter;
+use crate::interactions::{EDotEaten, EPacmanHit};
 
 mod counter;
 
@@ -47,7 +46,7 @@ fn update_ghost_house_gate(
 }
 
 fn increment_counter_when_dot_eaten(
-    mut event_reader: EventReader<DotEaten>,
+    mut event_reader: EventReader<EDotEaten>,
     mut ghost_house_gate: ResMut<GhostHouseGate>,
 ) {
     for _ in event_reader.iter() {
