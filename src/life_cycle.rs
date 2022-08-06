@@ -2,11 +2,13 @@ use bevy::prelude::*;
 use crate::pacman::{EPacmanDead};
 use LifeCycle::*;
 use crate::edibles::EAllEdiblesEaten;
+use crate::game_assets::EAllAssetsLoaded;
 use crate::interactions::EPacmanHit;
 use crate::lives::Life;
 
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub enum LifeCycle {
+    Loading,
     Start,
     Ready,
     Running,
@@ -22,7 +24,10 @@ pub struct GameStatePlugin;
 impl Plugin for GameStatePlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_state(Start)
+            .add_state(Loading)
+            .add_system_set(
+                SystemSet::on_update(Loading).with_system(start_game_when_all_assets_loaded)
+            )
             .add_system_set(
                 SystemSet::on_enter(Start).with_system(start_state_timer)
             )
@@ -69,6 +74,15 @@ impl Plugin for GameStatePlugin {
 /// handle these states
 #[derive(Deref, DerefMut)]
 struct StateTimer(Timer);
+
+fn start_game_when_all_assets_loaded(
+    mut life_cycle: ResMut<State<LifeCycle>>,
+    mut event_reader: EventReader<EAllAssetsLoaded>
+) {
+    for _ in event_reader.iter() {
+        life_cycle.set(Start).unwrap()
+    }
+}
 
 fn start_state_timer(
     mut commands: Commands,
