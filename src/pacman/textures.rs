@@ -42,7 +42,7 @@ fn create_eating_animation(
         0.2,
         true,
         4,
-        asset_server.load(&format!("textures/pacman/pacman_walking_{direction}.png.sheet"))
+        asset_server.load(&format!("textures/pacman/pacman_walking_{direction}.sheet.png"))
     )
 }
 
@@ -53,6 +53,6 @@ fn create_dying_animation(
         2.0,
         false,
         12,
-        asset_server.load("textures/pacman/pacman_dying.png.sheet"),
+        asset_server.load("textures/pacman/pacman_dying.sheet.png"),
     )
 }

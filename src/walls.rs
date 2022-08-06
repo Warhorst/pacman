@@ -71,12 +71,12 @@ fn create_transform(position: &Position, rotation: &Rotation) -> Transform {
 
 fn create_animations(asset_server: &AssetServer) -> HashMap<(WallType, bool), Animations> {
     [
-        (WallType::Outer, true, "textures/walls/outer_wall_corner.png", "textures/walls/outer_wall_corner_blinking.png.sheet"),
-        (WallType::Outer, false, "textures/walls/outer_wall.png", "textures/walls/outer_wall_blinking.png.sheet"),
-        (WallType::Inner, true, "textures/walls/inner_wall_corner.png", "textures/walls/inner_wall_corner_blinking.png.sheet"),
-        (WallType::Inner, false, "textures/walls/inner_wall.png", "textures/walls/inner_wall_blinking.png.sheet"),
-        (WallType::Ghost, true, "textures/walls/ghost_house_wall_corner.png", "textures/walls/ghost_house_wall_corner_blinking.png.sheet"),
-        (WallType::Ghost, false, "textures/walls/ghost_house_wall.png", "textures/walls/ghost_house_wall_blinking.png.sheet"),
+        (WallType::Outer, true, "textures/walls/outer_wall_corner.png", "textures/walls/outer_wall_corner_blinking.sheet.png"),
+        (WallType::Outer, false, "textures/walls/outer_wall.png", "textures/walls/outer_wall_blinking.sheet.png"),
+        (WallType::Inner, true, "textures/walls/inner_wall_corner.png", "textures/walls/inner_wall_corner_blinking.sheet.png"),
+        (WallType::Inner, false, "textures/walls/inner_wall.png", "textures/walls/inner_wall_blinking.sheet.png"),
+        (WallType::Ghost, true, "textures/walls/ghost_house_wall_corner.png", "textures/walls/ghost_house_wall_corner_blinking.sheet.png"),
+        (WallType::Ghost, false, "textures/walls/ghost_house_wall.png", "textures/walls/ghost_house_wall_blinking.sheet.png"),
     ]
         .into_iter()
         .map(|(tp, is_corner, idle_path, blinking_path)| ((tp, is_corner), Animations::new(

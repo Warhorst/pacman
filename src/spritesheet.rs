@@ -24,17 +24,17 @@ fn register_sheet_loader(
     asset_loader.add_loader(
         SpriteSheetLoader::from_path_grid_iter(
             [
-                ("textures/pacman/pacman_walking_up.png.sheet", Grid::new(16,16,4,1)),
-                ("textures/pacman/pacman_walking_down.png.sheet", Grid::new(16,16,4,1)),
-                ("textures/pacman/pacman_walking_left.png.sheet", Grid::new(16,16,4,1)),
-                ("textures/pacman/pacman_walking_right.png.sheet", Grid::new(16,16,4,1)),
-                ("textures/pacman/pacman_dying.png.sheet", Grid::new(16,16,12,1)),
-                ("textures/walls/outer_wall_corner_blinking.png.sheet", Grid::new(16, 16, 2, 1)),
-                ("textures/walls/outer_wall_blinking.png.sheet", Grid::new(16, 16, 2, 1)),
-                ("textures/walls/inner_wall_corner_blinking.png.sheet", Grid::new(16, 16, 2, 1)),
-                ("textures/walls/inner_wall_blinking.png.sheet", Grid::new(16, 16, 2, 1)),
-                ("textures/walls/ghost_house_wall_corner_blinking.png.sheet", Grid::new(16, 16, 2, 1)),
-                ("textures/walls/ghost_house_wall_blinking.png.sheet", Grid::new(16, 16, 2, 1)),
+                ("textures/pacman/pacman_walking_up.sheet.png", Grid::new(16,16,4,1)),
+                ("textures/pacman/pacman_walking_down.sheet.png", Grid::new(16,16,4,1)),
+                ("textures/pacman/pacman_walking_left.sheet.png", Grid::new(16,16,4,1)),
+                ("textures/pacman/pacman_walking_right.sheet.png", Grid::new(16,16,4,1)),
+                ("textures/pacman/pacman_dying.sheet.png", Grid::new(16,16,12,1)),
+                ("textures/walls/outer_wall_corner_blinking.sheet.png", Grid::new(16, 16, 2, 1)),
+                ("textures/walls/outer_wall_blinking.sheet.png", Grid::new(16, 16, 2, 1)),
+                ("textures/walls/inner_wall_corner_blinking.sheet.png", Grid::new(16, 16, 2, 1)),
+                ("textures/walls/inner_wall_blinking.sheet.png", Grid::new(16, 16, 2, 1)),
+                ("textures/walls/ghost_house_wall_corner_blinking.sheet.png", Grid::new(16, 16, 2, 1)),
+                ("textures/walls/ghost_house_wall_blinking.sheet.png", Grid::new(16, 16, 2, 1)),
             ]
         )
     )
@@ -76,7 +76,7 @@ impl SpriteSheetLoader {
 }
 
 const EXTENSIONS: &[&str] = &[
-    "sheet",
+    "sheet.png"
 ];
 
 impl AssetLoader for SpriteSheetLoader {
