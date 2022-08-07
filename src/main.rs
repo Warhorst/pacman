@@ -1,9 +1,7 @@
-extern crate core;
-
 use bevy::prelude::*;
 use bevy::render::texture::ImageSettings;
 
-use pacman::PacmanPlugin;
+use crate::pacman::PacmanPlugin;
 use crate::animation::AnimationPlugin;
 use crate::camera::CameraPlugin;
 use crate::edibles::EdiblePlugin;
@@ -43,7 +41,7 @@ mod walls;
 mod ghost_house;
 mod ghost_corners;
 mod ghost_house_gate;
-pub mod animation;
+mod animation;
 mod helper;
 mod spritesheet;
 mod life_cycle;
