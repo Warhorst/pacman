@@ -9,6 +9,47 @@ pub const PACMAN_WALKING_LEFT: &'static str = "textures/pacman/pacman_walking_le
 pub const PACMAN_WALKING_RIGHT: &'static str = "textures/pacman/pacman_walking_right.sheet.png";
 pub const PACMAN_DYING: &'static str = "textures/pacman/pacman_dying.sheet.png";
 
+pub const BLINKY_UP: &'static str = "textures/ghost/blinky_up.sheet.png";
+pub const BLINKY_DOWN: &'static str = "textures/ghost/blinky_down.sheet.png";
+pub const BLINKY_LEFT: &'static str = "textures/ghost/blinky_left.sheet.png";
+pub const BLINKY_RIGHT: &'static str = "textures/ghost/blinky_right.sheet.png";
+
+pub const PINKY_UP: &'static str = "textures/ghost/pinky_up.sheet.png";
+pub const PINKY_DOWN: &'static str = "textures/ghost/pinky_down.sheet.png";
+pub const PINKY_LEFT: &'static str = "textures/ghost/pinky_left.sheet.png";
+pub const PINKY_RIGHT: &'static str = "textures/ghost/pinky_right.sheet.png";
+
+pub const INKY_UP: &'static str = "textures/ghost/inky_up.sheet.png";
+pub const INKY_DOWN: &'static str = "textures/ghost/inky_down.sheet.png";
+pub const INKY_LEFT: &'static str = "textures/ghost/inky_left.sheet.png";
+pub const INKY_RIGHT: &'static str = "textures/ghost/inky_right.sheet.png";
+
+pub const CLYDE_UP: &'static str = "textures/ghost/clyde_up.sheet.png";
+pub const CLYDE_DOWN: &'static str = "textures/ghost/clyde_down.sheet.png";
+pub const CLYDE_LEFT: &'static str = "textures/ghost/clyde_left.sheet.png";
+pub const CLYDE_RIGHT: &'static str = "textures/ghost/clyde_right.sheet.png";
+
+pub const FRIGHTENED: &'static str = "textures/ghost/frightened.sheet.png";
+pub const FRIGHTENED_BLINKING: &'static str = "textures/ghost/frightened_blinking.sheet.png";
+
+pub const EATEN_UP: &'static str = "textures/ghost/eaten_up.png";
+pub const EATEN_DOWN: &'static str = "textures/ghost/eaten_down.png";
+pub const EATEN_LEFT: &'static str = "textures/ghost/eaten_left.png";
+pub const EATEN_RIGHT: &'static str = "textures/ghost/eaten_right.png";
+
+pub const OUTER_WALL_CORNER: &'static str = "textures/walls/outer_wall_corner.png";
+pub const OUTER_WALL_CORNER_BLINKING: &'static str = "textures/walls/outer_wall_corner_blinking.sheet.png";
+pub const OUTER_WALL: &'static str = "textures/walls/outer_wall.png";
+pub const OUTER_WALL_BLINKING: &'static str = "textures/walls/outer_wall_blinking.sheet.png";
+pub const INNER_WALL_CORNER: &'static str = "textures/walls/inner_wall_corner.png";
+pub const INNER_WALL_CORNER_BLINKING: &'static str = "textures/walls/inner_wall_corner_blinking.sheet.png";
+pub const INNER_WALL: &'static str = "textures/walls/inner_wall.png";
+pub const INNER_WALL_BLINKING: &'static str = "textures/walls/inner_wall_blinking.sheet.png";
+pub const GHOST_WALL_CORNER: &'static str = "textures/walls/ghost_house_wall_corner.png";
+pub const GHOST_WALL_CORNER_BLINKING: &'static str = "textures/walls/ghost_house_wall_corner_blinking.sheet.png";
+pub const GHOST_WALL: &'static str = "textures/walls/ghost_house_wall.png";
+pub const GHOST_WALL_BLINKING: &'static str = "textures/walls/ghost_house_wall_blinking.sheet.png";
+
 pub struct GameAssetsPlugin;
 
 impl Plugin for GameAssetsPlugin {
@@ -22,6 +63,74 @@ impl Plugin for GameAssetsPlugin {
                 SystemSet::on_update(Loading).with_system(notify_when_all_assets_loaded)
             )
         ;
+    }
+}
+
+/// Load all required game assets here.
+///
+/// TODO: reading the whole asset folder might be easier, but the related method from the asset server (load_folder) does not return the paths of the
+///  loaded assets. And loading from a directory directly does not work in WASM.
+fn create_game_assets(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>
+) {
+    commands.insert_resource(GameAssets::from_handles([
+        load(PACMAN_WALKING_UP, &asset_server),
+        load(PACMAN_WALKING_DOWN, &asset_server),
+        load(PACMAN_WALKING_LEFT, &asset_server),
+        load(PACMAN_WALKING_RIGHT, &asset_server),
+        load(PACMAN_DYING, &asset_server),
+        load(BLINKY_UP, &asset_server),
+        load(BLINKY_DOWN, &asset_server),
+        load(BLINKY_LEFT, &asset_server),
+        load(BLINKY_RIGHT, &asset_server),
+        load(PINKY_UP, &asset_server),
+        load(PINKY_DOWN, &asset_server),
+        load(PINKY_LEFT, &asset_server),
+        load(PINKY_RIGHT, &asset_server),
+        load(INKY_UP, &asset_server),
+        load(INKY_DOWN, &asset_server),
+        load(INKY_LEFT, &asset_server),
+        load(INKY_RIGHT, &asset_server),
+        load(CLYDE_UP, &asset_server),
+        load(CLYDE_DOWN, &asset_server),
+        load(CLYDE_LEFT, &asset_server),
+        load(CLYDE_RIGHT, &asset_server),
+        load(FRIGHTENED, &asset_server),
+        load(FRIGHTENED_BLINKING, &asset_server),
+        load(EATEN_UP, &asset_server),
+        load(EATEN_DOWN, &asset_server),
+        load(EATEN_LEFT, &asset_server),
+        load(EATEN_RIGHT, &asset_server),
+        load(OUTER_WALL_CORNER, &asset_server),
+        load(OUTER_WALL_CORNER_BLINKING, &asset_server),
+        load(OUTER_WALL, &asset_server),
+        load(OUTER_WALL_BLINKING, &asset_server),
+        load(INNER_WALL_CORNER, &asset_server),
+        load(INNER_WALL_CORNER_BLINKING, &asset_server),
+        load(INNER_WALL, &asset_server),
+        load(INNER_WALL_BLINKING, &asset_server),
+        load(GHOST_WALL_CORNER, &asset_server),
+        load(GHOST_WALL_CORNER_BLINKING, &asset_server),
+        load(GHOST_WALL, &asset_server),
+        load(GHOST_WALL_BLINKING, &asset_server),
+    ]))
+}
+
+fn load<S: ToString>(key: S, asset_server: &AssetServer) -> (S, HandleUntyped) {
+    let handle = asset_server.load_untyped(&key.to_string());
+    (key, handle)
+}
+
+fn notify_when_all_assets_loaded(
+    asset_server: Res<AssetServer>,
+    game_assets: Res<GameAssets>,
+    mut event_writer: EventWriter<EAllAssetsLoaded>
+) {
+    match asset_server.get_group_load_state(game_assets.id_iter()) {
+        LoadState::Failed => panic!("some assets failed loading, abort"),
+        LoadState::Loaded => event_writer.send(EAllAssetsLoaded),
+        _ => ()
     }
 }
 
@@ -47,40 +156,6 @@ impl GameAssets {
 
     pub fn id_iter<'a>(&'a self) -> impl IntoIterator<Item=HandleId> + 'a {
         self.handles.values().map(|handle| handle.id)
-    }
-}
-
-/// Load all required game assets here.
-///
-/// TODO: reading the whole asset folder might be easier, but the related method from the asset server (load_folder) does not return the paths of the
-///  loaded assets. And loading from a directory directly does not work in WASM.
-fn create_game_assets(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>
-) {
-    commands.insert_resource(GameAssets::from_handles([
-        load(PACMAN_WALKING_UP, &asset_server),
-        load(PACMAN_WALKING_DOWN, &asset_server),
-        load(PACMAN_WALKING_LEFT, &asset_server),
-        load(PACMAN_WALKING_RIGHT, &asset_server),
-        load(PACMAN_DYING, &asset_server),
-    ]))
-}
-
-fn load<S: ToString>(key: S, asset_server: &AssetServer) -> (S, HandleUntyped) {
-    let handle = asset_server.load_untyped(&key.to_string());
-    (key, handle)
-}
-
-fn notify_when_all_assets_loaded(
-    asset_server: Res<AssetServer>,
-    game_assets: Res<GameAssets>,
-    mut event_writer: EventWriter<EAllAssetsLoaded>
-) {
-    match asset_server.get_group_load_state(game_assets.id_iter()) {
-        LoadState::Failed => panic!("some assets failed loading, abort"),
-        LoadState::Loaded => event_writer.send(EAllAssetsLoaded),
-        _ => ()
     }
 }
 

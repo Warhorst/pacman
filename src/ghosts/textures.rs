@@ -3,12 +3,13 @@ use bevy::prelude::*;
 use crate::animation::{Animation, Animations};
 use crate::common::Direction;
 use crate::edibles::energizer::EnergizerTimer;
+use crate::game_assets::{BLINKY_DOWN, BLINKY_LEFT, BLINKY_RIGHT, BLINKY_UP, CLYDE_DOWN, CLYDE_LEFT, CLYDE_RIGHT, CLYDE_UP, EATEN_DOWN, EATEN_LEFT, EATEN_RIGHT, EATEN_UP, FRIGHTENED, FRIGHTENED_BLINKING, GameAssets, INKY_DOWN, INKY_LEFT, INKY_RIGHT, INKY_UP, PINKY_DOWN, PINKY_LEFT, PINKY_RIGHT, PINKY_UP};
 use crate::ghosts::{Blinky, GhostType, Inky, Pinky};
 use crate::ghosts::state::State;
 
-pub (in crate::ghosts) fn update_ghost_appearance<G: 'static + Component + GhostType>(
+pub(in crate::ghosts) fn update_ghost_appearance<G: 'static + Component + GhostType>(
     energizer_timer: Res<EnergizerTimer>,
-    mut query: Query<(&Direction, &State, &mut Animations), With<G>>
+    mut query: Query<(&Direction, &State, &mut Animations), With<G>>,
 ) {
     for (direction, state, mut animations) in query.iter_mut() {
         match state {
@@ -19,73 +20,65 @@ pub (in crate::ghosts) fn update_ghost_appearance<G: 'static + Component + Ghost
             },
             State::Eaten => {
                 animations.change_animation_to(format!("eaten_{}", direction.to_string()))
-            },
+            }
             _ => animations.change_animation_to(format!("normal_{}", direction.to_string()))
         }
     }
 }
 
-pub (in crate::ghosts) fn create_animations_for_ghost<G: GhostType + 'static>(asset_server: &AssetServer) -> Animations {
+pub(in crate::ghosts) fn create_animations_for_ghost<G: GhostType + 'static>(game_assets: &GameAssets) -> Animations {
     match TypeId::of::<G>() {
-        id if id == TypeId::of::<Blinky>() => create_animations_for(asset_server, "blinky"),
-        id if id == TypeId::of::<Pinky>() => create_animations_for(asset_server, "pinky"),
-        id if id == TypeId::of::<Inky>() => create_animations_for(asset_server, "inky"),
-        _ => create_animations_for(asset_server, "clyde"),
+        id if id == TypeId::of::<Blinky>() => create_animations_for(game_assets, [BLINKY_UP, BLINKY_DOWN, BLINKY_LEFT, BLINKY_RIGHT]),
+        id if id == TypeId::of::<Pinky>() => create_animations_for(game_assets, [PINKY_UP, PINKY_DOWN, PINKY_LEFT, PINKY_RIGHT]),
+        id if id == TypeId::of::<Inky>() => create_animations_for(game_assets, [INKY_UP, INKY_DOWN, INKY_LEFT, INKY_RIGHT]),
+        _ => create_animations_for(game_assets, [CLYDE_UP, CLYDE_DOWN, CLYDE_LEFT, CLYDE_RIGHT]),
     }
 }
 
-fn create_animations_for(asset_server: &AssetServer, ghost_name: &'static str) -> Animations {
+fn create_animations_for(game_assets: &GameAssets, normal_animation_keys: [&'static str; 4]) -> Animations {
     Animations::new(
         [
-            ("normal_up", create_normal_animation(asset_server, ghost_name, "up")),
-            ("normal_down", create_normal_animation(asset_server, ghost_name, "down")),
-            ("normal_left", create_normal_animation(asset_server, ghost_name, "left")),
-            ("normal_right", create_normal_animation(asset_server, ghost_name, "right")),
-            ("eaten_up", create_eaten_animation(asset_server, "up")),
-            ("eaten_down", create_eaten_animation(asset_server, "down")),
-            ("eaten_left", create_eaten_animation(asset_server, "left")),
-            ("eaten_right", create_eaten_animation(asset_server, "right")),
-            ("frightened", create_frightened_animation(asset_server)),
-            ("frightened_blinking", create_frightened_blinking_animation(asset_server)),
+            ("normal_up", create_normal_animation(game_assets, normal_animation_keys[0])),
+            ("normal_down", create_normal_animation(game_assets, normal_animation_keys[1])),
+            ("normal_left", create_normal_animation(game_assets, normal_animation_keys[2])),
+            ("normal_right", create_normal_animation(game_assets, normal_animation_keys[3])),
+            ("eaten_up", create_eaten_animation(game_assets, EATEN_UP)),
+            ("eaten_down", create_eaten_animation(game_assets, EATEN_DOWN)),
+            ("eaten_left", create_eaten_animation(game_assets, EATEN_LEFT)),
+            ("eaten_right", create_eaten_animation(game_assets, EATEN_RIGHT)),
+            ("frightened", create_frightened_animation(game_assets)),
+            ("frightened_blinking", create_frightened_blinking_animation(game_assets)),
         ],
         "normal_left")
 }
 
-fn create_normal_animation(asset_server: &AssetServer, ghost_name: &'static str, direction: &'static str) -> Animation {
-    Animation::from_textures(
+fn create_normal_animation(game_assets: &GameAssets, key: &'static str) -> Animation {
+    Animation::from_sprite_sheet(
         0.5,
         true,
-        [
-            asset_server.load(&format!("textures/ghost/{ghost_name}_{direction}_a.png")),
-            asset_server.load(&format!("textures/ghost/{ghost_name}_{direction}_b.png")),
-        ]
+        2,
+        game_assets.get_handle(key),
     )
 }
 
-fn create_eaten_animation(asset_server: &AssetServer, direction: &'static str) -> Animation {
-    Animation::from_texture(asset_server.load(&format!("textures/ghost/eaten_{direction}.png")))
+fn create_eaten_animation(game_assets: &GameAssets, key: &'static str) -> Animation {
+    Animation::from_texture(game_assets.get_handle(key))
 }
 
-fn create_frightened_animation(asset_server: &AssetServer) -> Animation {
-    Animation::from_textures(
+fn create_frightened_animation(game_assets: &GameAssets) -> Animation {
+    Animation::from_sprite_sheet(
         0.5,
         true,
-        [
-            asset_server.load("textures/ghost/frightened_a.png"),
-            asset_server.load("textures/ghost/frightened_b.png"),
-        ]
+        2,
+        game_assets.get_handle(FRIGHTENED),
     )
 }
 
-fn create_frightened_blinking_animation(asset_server: &AssetServer) -> Animation {
-    Animation::from_textures(
+fn create_frightened_blinking_animation(game_assets: &GameAssets) -> Animation {
+    Animation::from_sprite_sheet(
         0.5,
         true,
-        [
-            asset_server.load("textures/ghost/frightened_a.png"),
-            asset_server.load("textures/ghost/frightened_blinking_a.png"),
-            asset_server.load("textures/ghost/frightened_b.png"),
-            asset_server.load("textures/ghost/frightened_blinking_b.png"),
-        ]
+        4,
+        game_assets.get_handle(FRIGHTENED_BLINKING),
     )
 }

@@ -4,6 +4,7 @@ use bevy::prelude::*;
 use bevy::reflect::TypeUuid;
 use bevy::render::texture::{CompressedImageFormats, ImageType, TextureFormatPixelInfo};
 use wgpu_types::Extent3d;
+use crate::game_assets::{BLINKY_DOWN, BLINKY_LEFT, BLINKY_RIGHT, BLINKY_UP, CLYDE_DOWN, CLYDE_LEFT, CLYDE_RIGHT, CLYDE_UP, FRIGHTENED, FRIGHTENED_BLINKING, GHOST_WALL_BLINKING, GHOST_WALL_CORNER_BLINKING, INKY_DOWN, INKY_LEFT, INKY_RIGHT, INKY_UP, INNER_WALL_BLINKING, INNER_WALL_CORNER_BLINKING, OUTER_WALL_BLINKING, OUTER_WALL_CORNER_BLINKING, PACMAN_DYING, PACMAN_WALKING_DOWN, PACMAN_WALKING_LEFT, PACMAN_WALKING_RIGHT, PACMAN_WALKING_UP, PINKY_DOWN, PINKY_LEFT, PINKY_RIGHT, PINKY_UP};
 use crate::helper::get_sub_rect;
 
 pub struct SpriteSheetPlugin;
@@ -24,17 +25,35 @@ fn register_sheet_loader(
     asset_loader.add_loader(
         SpriteSheetLoader::from_path_grid_iter(
             [
-                ("textures/pacman/pacman_walking_up.sheet.png", Grid::new(16,16,4,1)),
-                ("textures/pacman/pacman_walking_down.sheet.png", Grid::new(16,16,4,1)),
-                ("textures/pacman/pacman_walking_left.sheet.png", Grid::new(16,16,4,1)),
-                ("textures/pacman/pacman_walking_right.sheet.png", Grid::new(16,16,4,1)),
-                ("textures/pacman/pacman_dying.sheet.png", Grid::new(16,16,12,1)),
-                ("textures/walls/outer_wall_corner_blinking.sheet.png", Grid::new(16, 16, 2, 1)),
-                ("textures/walls/outer_wall_blinking.sheet.png", Grid::new(16, 16, 2, 1)),
-                ("textures/walls/inner_wall_corner_blinking.sheet.png", Grid::new(16, 16, 2, 1)),
-                ("textures/walls/inner_wall_blinking.sheet.png", Grid::new(16, 16, 2, 1)),
-                ("textures/walls/ghost_house_wall_corner_blinking.sheet.png", Grid::new(16, 16, 2, 1)),
-                ("textures/walls/ghost_house_wall_blinking.sheet.png", Grid::new(16, 16, 2, 1)),
+                (PACMAN_WALKING_UP, Grid::new(16,16,4,1)),
+                (PACMAN_WALKING_DOWN, Grid::new(16,16,4,1)),
+                (PACMAN_WALKING_LEFT, Grid::new(16,16,4,1)),
+                (PACMAN_WALKING_RIGHT, Grid::new(16,16,4,1)),
+                (PACMAN_DYING, Grid::new(16,16,12,1)),
+                (BLINKY_UP, Grid::new(16,16,2,1)),
+                (BLINKY_DOWN, Grid::new(16,16,2,1)),
+                (BLINKY_LEFT, Grid::new(16,16,2,1)),
+                (BLINKY_RIGHT, Grid::new(16,16,2,1)),
+                (PINKY_UP, Grid::new(16,16,2,1)),
+                (PINKY_DOWN, Grid::new(16,16,2,1)),
+                (PINKY_LEFT, Grid::new(16,16,2,1)),
+                (PINKY_RIGHT, Grid::new(16,16,2,1)),
+                (INKY_UP, Grid::new(16,16,2,1)),
+                (INKY_DOWN, Grid::new(16,16,2,1)),
+                (INKY_LEFT, Grid::new(16,16,2,1)),
+                (INKY_RIGHT, Grid::new(16,16,2,1)),
+                (CLYDE_UP, Grid::new(16,16,2,1)),
+                (CLYDE_DOWN, Grid::new(16,16,2,1)),
+                (CLYDE_LEFT, Grid::new(16,16,2,1)),
+                (CLYDE_RIGHT, Grid::new(16,16,2,1)),
+                (FRIGHTENED, Grid::new(16,16,2,1)),
+                (FRIGHTENED_BLINKING, Grid::new(16,16,4,1)),
+                (OUTER_WALL_CORNER_BLINKING, Grid::new(16, 16, 2, 1)),
+                (OUTER_WALL_BLINKING, Grid::new(16, 16, 2, 1)),
+                (INNER_WALL_CORNER_BLINKING, Grid::new(16, 16, 2, 1)),
+                (INNER_WALL_BLINKING, Grid::new(16, 16, 2, 1)),
+                (GHOST_WALL_CORNER_BLINKING, Grid::new(16, 16, 2, 1)),
+                (GHOST_WALL_BLINKING, Grid::new(16, 16, 2, 1)),
             ]
         )
     )
