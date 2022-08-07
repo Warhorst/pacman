@@ -1,12 +1,17 @@
 use bevy::prelude::*;
 use crate::constants::FIELD_DIMENSION;
+use crate::life_cycle::LifeCycle::Start;
 use crate::map::board::Board;
 
 pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(spawn_camera);
+        app
+            .add_system_set(
+                SystemSet::on_enter(Start).with_system(spawn_camera)
+            )
+        ;
     }
 }
 

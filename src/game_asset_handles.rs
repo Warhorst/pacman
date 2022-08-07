@@ -7,6 +7,8 @@ use keys::*;
 pub mod keys {
     pub const FONT: &'static str = "fonts/FiraSans-Bold.ttf";
 
+    pub const MAP: &'static str = "maps/default.map.json";
+
     pub const PACMAN_WALKING_UP: &'static str = "textures/pacman/pacman_walking_up.sheet.png";
     pub const PACMAN_WALKING_DOWN: &'static str = "textures/pacman/pacman_walking_down.sheet.png";
     pub const PACMAN_WALKING_LEFT: &'static str = "textures/pacman/pacman_walking_left.sheet.png";
@@ -81,6 +83,7 @@ fn create_game_asset_handles(
 ) {
     commands.insert_resource(GameAssetHandles::from_handles([
         load(FONT, &asset_server),
+        load(MAP, &asset_server),
         load(PACMAN_WALKING_UP, &asset_server),
         load(PACMAN_WALKING_DOWN, &asset_server),
         load(PACMAN_WALKING_LEFT, &asset_server),

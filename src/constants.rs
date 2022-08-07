@@ -1,5 +1,3 @@
-pub const MAP_PATH: &'static str = "./maps/new_map.json";
-
 const SCALE: f32 = 1.75;
 
 pub const FIELD_DIMENSION: f32 = 15.0 * SCALE;

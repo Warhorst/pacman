@@ -1,13 +1,18 @@
 use bevy::prelude::*;
 use crate::ghosts::{Blinky, Clyde, Inky, Pinky};
 use crate::is;
+use crate::life_cycle::LifeCycle::Start;
 use crate::map::{Element, Map};
 
 pub struct GhostCornersPlugin;
 
 impl Plugin for GhostCornersPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(spawn_ghost_corners);
+        app
+            .add_system_set(
+                SystemSet::on_enter(Start).with_system(spawn_ghost_corners)
+            )
+        ;
     }
 }
 
