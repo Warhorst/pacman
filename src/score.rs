@@ -8,6 +8,8 @@ use crate::life_cycle::LifeCycle;
 use crate::life_cycle::LifeCycle::Start;
 use crate::map::board::Board;
 use crate::edibles::fruit::Fruit::*;
+use crate::game_asset_handles::GameAssetHandles;
+use crate::game_asset_handles::keys::FONT;
 
 pub struct ScorePlugin;
 
@@ -57,14 +59,14 @@ struct EatenGhostCounter(usize);
 
 fn create_scoreboard(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
+    game_asset_handles: Res<GameAssetHandles>,
     board: Res<Board>,
 ) {
     commands.spawn_bundle(Text2dBundle {
         text: Text::from_section(
             "Score".to_string(),
             TextStyle {
-                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                font: game_asset_handles.get_handle(FONT),
                 font_size: 40.0,
                 color: Color::rgb(1.0, 1.0, 1.0),
             },
@@ -113,7 +115,7 @@ fn add_points_for_eaten_energizer(
 
 fn add_points_for_eaten_ghost_and_display_score_text(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
+    game_asset_handles: Res<GameAssetHandles>,
     mut score: ResMut<Score>,
     mut eaten_ghost_counter: ResMut<EatenGhostCounter>,
     mut event_reader: EventReader<EPacmanEatsGhost>,
@@ -122,7 +124,7 @@ fn add_points_for_eaten_ghost_and_display_score_text(
         let points = POINTS_PER_GHOST * 2usize.pow(**eaten_ghost_counter as u32);
         score.add(points);
         **eaten_ghost_counter += 1;
-        spawn_score_text(&mut commands, &asset_server, Color::hex("31FFFF").unwrap(), points, event.1.translation)
+        spawn_score_text(&mut commands, &game_asset_handles, Color::hex("31FFFF").unwrap(), points, event.1.translation)
     }
 }
 
@@ -137,7 +139,7 @@ fn reset_eaten_ghost_counter_when_energizer_is_over(
 
 fn add_points_for_eaten_fruit_and_display_score_text(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
+    game_asset_handles: Res<GameAssetHandles>,
     mut score: ResMut<Score>,
     mut event_reader: EventReader<EFruitEaten>,
 ) {
@@ -156,13 +158,13 @@ fn add_points_for_eaten_fruit_and_display_score_text(
         };
 
         score.add(points);
-        spawn_score_text(&mut commands, &asset_server, Color::hex("FFBDFF").unwrap(), points, transform.translation)
+        spawn_score_text(&mut commands, &game_asset_handles, Color::hex("FFBDFF").unwrap(), points, transform.translation)
     }
 }
 
 fn spawn_score_text(
     commands: &mut Commands,
-    asset_server: &AssetServer,
+    game_asset_handles: &GameAssetHandles,
     color: Color,
     points: usize,
     coordinates: Vec3
@@ -171,7 +173,7 @@ fn spawn_score_text(
         text: Text::from_section(
             points.to_string(),
             TextStyle {
-                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                font: game_asset_handles.get_handle(FONT),
                 font_size: 20.0,
                 color,
             },

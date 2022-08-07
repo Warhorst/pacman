@@ -5,6 +5,8 @@ use crate::life_cycle::LifeCycle::Loading;
 use keys::*;
 
 pub mod keys {
+    pub const FONT: &'static str = "fonts/FiraSans-Bold.ttf";
+
     pub const PACMAN_WALKING_UP: &'static str = "textures/pacman/pacman_walking_up.sheet.png";
     pub const PACMAN_WALKING_DOWN: &'static str = "textures/pacman/pacman_walking_down.sheet.png";
     pub const PACMAN_WALKING_LEFT: &'static str = "textures/pacman/pacman_walking_left.sheet.png";
@@ -60,7 +62,7 @@ impl Plugin for GameAssetHandlesPlugin {
         app
             .add_event::<EAllAssetsLoaded>()
             .add_system_set(
-                SystemSet::on_enter(Loading).with_system(create_game_assets)
+                SystemSet::on_enter(Loading).with_system(create_game_asset_handles)
             )
             .add_system_set(
                 SystemSet::on_update(Loading).with_system(notify_when_all_assets_loaded)
@@ -69,15 +71,16 @@ impl Plugin for GameAssetHandlesPlugin {
     }
 }
 
-/// Load all required game assets here.
+/// Load all required game assets here and store their handles.
 ///
 /// TODO: reading the whole asset folder might be easier, but the related method from the asset server (load_folder) does not return the paths of the
 ///  loaded assets. And loading from a directory directly does not work in WASM.
-fn create_game_assets(
+fn create_game_asset_handles(
     mut commands: Commands,
     asset_server: Res<AssetServer>
 ) {
     commands.insert_resource(GameAssetHandles::from_handles([
+        load(FONT, &asset_server),
         load(PACMAN_WALKING_UP, &asset_server),
         load(PACMAN_WALKING_DOWN, &asset_server),
         load(PACMAN_WALKING_LEFT, &asset_server),

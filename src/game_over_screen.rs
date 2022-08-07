@@ -1,4 +1,6 @@
 use bevy::prelude::*;
+use crate::game_asset_handles::GameAssetHandles;
+use crate::game_asset_handles::keys::FONT;
 use crate::is;
 use crate::life_cycle::LifeCycle::GameOver;
 use crate::map::Map;
@@ -21,7 +23,7 @@ struct GameOverScreen;
 
 fn spawn_screen(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
+    game_asset_handles: Res<GameAssetHandles>,
     map: Res<Map>,
 ) {
     let coordinates = map.coordinates_between_positions_matching(is!(Element::FruitSpawn));
@@ -29,7 +31,7 @@ fn spawn_screen(
         text: Text::from_section(
             "GAME OVER".to_string(),
             TextStyle {
-                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                font: game_asset_handles.get_handle(FONT),
                 font_size: 40.0,
                 color: Color::rgb(1.0, 0.0, 0.0),
             },
