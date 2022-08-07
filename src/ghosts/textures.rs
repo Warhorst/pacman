@@ -3,7 +3,8 @@ use bevy::prelude::*;
 use crate::animation::{Animation, Animations};
 use crate::common::Direction;
 use crate::edibles::energizer::EnergizerTimer;
-use crate::game_assets::{BLINKY_DOWN, BLINKY_LEFT, BLINKY_RIGHT, BLINKY_UP, CLYDE_DOWN, CLYDE_LEFT, CLYDE_RIGHT, CLYDE_UP, EATEN_DOWN, EATEN_LEFT, EATEN_RIGHT, EATEN_UP, FRIGHTENED, FRIGHTENED_BLINKING, GameAssets, INKY_DOWN, INKY_LEFT, INKY_RIGHT, INKY_UP, PINKY_DOWN, PINKY_LEFT, PINKY_RIGHT, PINKY_UP};
+use crate::game_asset_handles::GameAssetHandles;
+use crate::game_asset_handles::keys::*;
 use crate::ghosts::{Blinky, GhostType, Inky, Pinky};
 use crate::ghosts::state::State;
 
@@ -26,7 +27,7 @@ pub(in crate::ghosts) fn update_ghost_appearance<G: 'static + Component + GhostT
     }
 }
 
-pub(in crate::ghosts) fn create_animations_for_ghost<G: GhostType + 'static>(game_assets: &GameAssets) -> Animations {
+pub(in crate::ghosts) fn create_animations_for_ghost<G: GhostType + 'static>(game_assets: &GameAssetHandles) -> Animations {
     match TypeId::of::<G>() {
         id if id == TypeId::of::<Blinky>() => create_animations_for(game_assets, [BLINKY_UP, BLINKY_DOWN, BLINKY_LEFT, BLINKY_RIGHT]),
         id if id == TypeId::of::<Pinky>() => create_animations_for(game_assets, [PINKY_UP, PINKY_DOWN, PINKY_LEFT, PINKY_RIGHT]),
@@ -35,7 +36,7 @@ pub(in crate::ghosts) fn create_animations_for_ghost<G: GhostType + 'static>(gam
     }
 }
 
-fn create_animations_for(game_assets: &GameAssets, normal_animation_keys: [&'static str; 4]) -> Animations {
+fn create_animations_for(game_assets: &GameAssetHandles, normal_animation_keys: [&'static str; 4]) -> Animations {
     Animations::new(
         [
             ("normal_up", create_normal_animation(game_assets, normal_animation_keys[0])),
@@ -52,7 +53,7 @@ fn create_animations_for(game_assets: &GameAssets, normal_animation_keys: [&'sta
         "normal_left")
 }
 
-fn create_normal_animation(game_assets: &GameAssets, key: &'static str) -> Animation {
+fn create_normal_animation(game_assets: &GameAssetHandles, key: &'static str) -> Animation {
     Animation::from_sprite_sheet(
         0.5,
         true,
@@ -61,11 +62,11 @@ fn create_normal_animation(game_assets: &GameAssets, key: &'static str) -> Anima
     )
 }
 
-fn create_eaten_animation(game_assets: &GameAssets, key: &'static str) -> Animation {
+fn create_eaten_animation(game_assets: &GameAssetHandles, key: &'static str) -> Animation {
     Animation::from_texture(game_assets.get_handle(key))
 }
 
-fn create_frightened_animation(game_assets: &GameAssets) -> Animation {
+fn create_frightened_animation(game_assets: &GameAssetHandles) -> Animation {
     Animation::from_sprite_sheet(
         0.5,
         true,
@@ -74,7 +75,7 @@ fn create_frightened_animation(game_assets: &GameAssets) -> Animation {
     )
 }
 
-fn create_frightened_blinking_animation(game_assets: &GameAssets) -> Animation {
+fn create_frightened_blinking_animation(game_assets: &GameAssetHandles) -> Animation {
     Animation::from_sprite_sheet(
         0.5,
         true,

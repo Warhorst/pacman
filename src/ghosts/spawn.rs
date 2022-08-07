@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::constants::GHOST_DIMENSION;
-use crate::game_assets::GameAssets;
+use crate::game_asset_handles::GameAssetHandles;
 use crate::ghost_house::GhostHouse;
 use crate::ghosts::{Blinky, Clyde, Ghost, GhostType, Inky, Pinky};
 use crate::ghosts::state::State;
@@ -13,7 +13,7 @@ use crate::speed::SpeedByLevel;
 
 pub fn spawn_ghosts(
     mut commands: Commands,
-    game_assets: Res<GameAssets>,
+    game_assets: Res<GameAssetHandles>,
     map: Res<Map>,
     level: Res<Level>,
     speed_by_level: Res<SpeedByLevel>,
@@ -29,7 +29,7 @@ pub fn spawn_ghosts(
 fn spawn_ghost<G: GhostType + Component>(
     commands: &mut Commands,
     ghost_house: &GhostHouse,
-    game_assets: &GameAssets,
+    game_assets: &GameAssetHandles,
     level: &Level,
     speed_by_level: &SpeedByLevel,
     ghost_type: G,

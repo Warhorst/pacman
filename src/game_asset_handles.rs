@@ -2,57 +2,60 @@ use std::collections::HashMap;
 use bevy::asset::{Asset, HandleId, LoadState};
 use bevy::prelude::*;
 use crate::life_cycle::LifeCycle::Loading;
+use keys::*;
 
-pub const PACMAN_WALKING_UP: &'static str = "textures/pacman/pacman_walking_up.sheet.png";
-pub const PACMAN_WALKING_DOWN: &'static str = "textures/pacman/pacman_walking_down.sheet.png";
-pub const PACMAN_WALKING_LEFT: &'static str = "textures/pacman/pacman_walking_left.sheet.png";
-pub const PACMAN_WALKING_RIGHT: &'static str = "textures/pacman/pacman_walking_right.sheet.png";
-pub const PACMAN_DYING: &'static str = "textures/pacman/pacman_dying.sheet.png";
+pub mod keys {
+    pub const PACMAN_WALKING_UP: &'static str = "textures/pacman/pacman_walking_up.sheet.png";
+    pub const PACMAN_WALKING_DOWN: &'static str = "textures/pacman/pacman_walking_down.sheet.png";
+    pub const PACMAN_WALKING_LEFT: &'static str = "textures/pacman/pacman_walking_left.sheet.png";
+    pub const PACMAN_WALKING_RIGHT: &'static str = "textures/pacman/pacman_walking_right.sheet.png";
+    pub const PACMAN_DYING: &'static str = "textures/pacman/pacman_dying.sheet.png";
 
-pub const BLINKY_UP: &'static str = "textures/ghost/blinky_up.sheet.png";
-pub const BLINKY_DOWN: &'static str = "textures/ghost/blinky_down.sheet.png";
-pub const BLINKY_LEFT: &'static str = "textures/ghost/blinky_left.sheet.png";
-pub const BLINKY_RIGHT: &'static str = "textures/ghost/blinky_right.sheet.png";
+    pub const BLINKY_UP: &'static str = "textures/ghost/blinky_up.sheet.png";
+    pub const BLINKY_DOWN: &'static str = "textures/ghost/blinky_down.sheet.png";
+    pub const BLINKY_LEFT: &'static str = "textures/ghost/blinky_left.sheet.png";
+    pub const BLINKY_RIGHT: &'static str = "textures/ghost/blinky_right.sheet.png";
 
-pub const PINKY_UP: &'static str = "textures/ghost/pinky_up.sheet.png";
-pub const PINKY_DOWN: &'static str = "textures/ghost/pinky_down.sheet.png";
-pub const PINKY_LEFT: &'static str = "textures/ghost/pinky_left.sheet.png";
-pub const PINKY_RIGHT: &'static str = "textures/ghost/pinky_right.sheet.png";
+    pub const PINKY_UP: &'static str = "textures/ghost/pinky_up.sheet.png";
+    pub const PINKY_DOWN: &'static str = "textures/ghost/pinky_down.sheet.png";
+    pub const PINKY_LEFT: &'static str = "textures/ghost/pinky_left.sheet.png";
+    pub const PINKY_RIGHT: &'static str = "textures/ghost/pinky_right.sheet.png";
 
-pub const INKY_UP: &'static str = "textures/ghost/inky_up.sheet.png";
-pub const INKY_DOWN: &'static str = "textures/ghost/inky_down.sheet.png";
-pub const INKY_LEFT: &'static str = "textures/ghost/inky_left.sheet.png";
-pub const INKY_RIGHT: &'static str = "textures/ghost/inky_right.sheet.png";
+    pub const INKY_UP: &'static str = "textures/ghost/inky_up.sheet.png";
+    pub const INKY_DOWN: &'static str = "textures/ghost/inky_down.sheet.png";
+    pub const INKY_LEFT: &'static str = "textures/ghost/inky_left.sheet.png";
+    pub const INKY_RIGHT: &'static str = "textures/ghost/inky_right.sheet.png";
 
-pub const CLYDE_UP: &'static str = "textures/ghost/clyde_up.sheet.png";
-pub const CLYDE_DOWN: &'static str = "textures/ghost/clyde_down.sheet.png";
-pub const CLYDE_LEFT: &'static str = "textures/ghost/clyde_left.sheet.png";
-pub const CLYDE_RIGHT: &'static str = "textures/ghost/clyde_right.sheet.png";
+    pub const CLYDE_UP: &'static str = "textures/ghost/clyde_up.sheet.png";
+    pub const CLYDE_DOWN: &'static str = "textures/ghost/clyde_down.sheet.png";
+    pub const CLYDE_LEFT: &'static str = "textures/ghost/clyde_left.sheet.png";
+    pub const CLYDE_RIGHT: &'static str = "textures/ghost/clyde_right.sheet.png";
 
-pub const FRIGHTENED: &'static str = "textures/ghost/frightened.sheet.png";
-pub const FRIGHTENED_BLINKING: &'static str = "textures/ghost/frightened_blinking.sheet.png";
+    pub const FRIGHTENED: &'static str = "textures/ghost/frightened.sheet.png";
+    pub const FRIGHTENED_BLINKING: &'static str = "textures/ghost/frightened_blinking.sheet.png";
 
-pub const EATEN_UP: &'static str = "textures/ghost/eaten_up.png";
-pub const EATEN_DOWN: &'static str = "textures/ghost/eaten_down.png";
-pub const EATEN_LEFT: &'static str = "textures/ghost/eaten_left.png";
-pub const EATEN_RIGHT: &'static str = "textures/ghost/eaten_right.png";
+    pub const EATEN_UP: &'static str = "textures/ghost/eaten_up.png";
+    pub const EATEN_DOWN: &'static str = "textures/ghost/eaten_down.png";
+    pub const EATEN_LEFT: &'static str = "textures/ghost/eaten_left.png";
+    pub const EATEN_RIGHT: &'static str = "textures/ghost/eaten_right.png";
 
-pub const OUTER_WALL_CORNER: &'static str = "textures/walls/outer_wall_corner.png";
-pub const OUTER_WALL_CORNER_BLINKING: &'static str = "textures/walls/outer_wall_corner_blinking.sheet.png";
-pub const OUTER_WALL: &'static str = "textures/walls/outer_wall.png";
-pub const OUTER_WALL_BLINKING: &'static str = "textures/walls/outer_wall_blinking.sheet.png";
-pub const INNER_WALL_CORNER: &'static str = "textures/walls/inner_wall_corner.png";
-pub const INNER_WALL_CORNER_BLINKING: &'static str = "textures/walls/inner_wall_corner_blinking.sheet.png";
-pub const INNER_WALL: &'static str = "textures/walls/inner_wall.png";
-pub const INNER_WALL_BLINKING: &'static str = "textures/walls/inner_wall_blinking.sheet.png";
-pub const GHOST_WALL_CORNER: &'static str = "textures/walls/ghost_house_wall_corner.png";
-pub const GHOST_WALL_CORNER_BLINKING: &'static str = "textures/walls/ghost_house_wall_corner_blinking.sheet.png";
-pub const GHOST_WALL: &'static str = "textures/walls/ghost_house_wall.png";
-pub const GHOST_WALL_BLINKING: &'static str = "textures/walls/ghost_house_wall_blinking.sheet.png";
+    pub const OUTER_WALL_CORNER: &'static str = "textures/walls/outer_wall_corner.png";
+    pub const OUTER_WALL_CORNER_BLINKING: &'static str = "textures/walls/outer_wall_corner_blinking.sheet.png";
+    pub const OUTER_WALL: &'static str = "textures/walls/outer_wall.png";
+    pub const OUTER_WALL_BLINKING: &'static str = "textures/walls/outer_wall_blinking.sheet.png";
+    pub const INNER_WALL_CORNER: &'static str = "textures/walls/inner_wall_corner.png";
+    pub const INNER_WALL_CORNER_BLINKING: &'static str = "textures/walls/inner_wall_corner_blinking.sheet.png";
+    pub const INNER_WALL: &'static str = "textures/walls/inner_wall.png";
+    pub const INNER_WALL_BLINKING: &'static str = "textures/walls/inner_wall_blinking.sheet.png";
+    pub const GHOST_WALL_CORNER: &'static str = "textures/walls/ghost_house_wall_corner.png";
+    pub const GHOST_WALL_CORNER_BLINKING: &'static str = "textures/walls/ghost_house_wall_corner_blinking.sheet.png";
+    pub const GHOST_WALL: &'static str = "textures/walls/ghost_house_wall.png";
+    pub const GHOST_WALL_BLINKING: &'static str = "textures/walls/ghost_house_wall_blinking.sheet.png";
+}
 
-pub struct GameAssetsPlugin;
+pub struct GameAssetHandlesPlugin;
 
-impl Plugin for GameAssetsPlugin {
+impl Plugin for GameAssetHandlesPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<EAllAssetsLoaded>()
@@ -74,7 +77,7 @@ fn create_game_assets(
     mut commands: Commands,
     asset_server: Res<AssetServer>
 ) {
-    commands.insert_resource(GameAssets::from_handles([
+    commands.insert_resource(GameAssetHandles::from_handles([
         load(PACMAN_WALKING_UP, &asset_server),
         load(PACMAN_WALKING_DOWN, &asset_server),
         load(PACMAN_WALKING_LEFT, &asset_server),
@@ -124,7 +127,7 @@ fn load<S: ToString>(key: S, asset_server: &AssetServer) -> (S, HandleUntyped) {
 
 fn notify_when_all_assets_loaded(
     asset_server: Res<AssetServer>,
-    game_assets: Res<GameAssets>,
+    game_assets: Res<GameAssetHandles>,
     mut event_writer: EventWriter<EAllAssetsLoaded>
 ) {
     match asset_server.get_group_load_state(game_assets.id_iter()) {
@@ -138,14 +141,14 @@ fn notify_when_all_assets_loaded(
 pub struct EAllAssetsLoaded;
 
 /// Resource that holds handles for all assets used in the game.
-pub struct GameAssets {
+pub struct GameAssetHandles {
     handles: HashMap<String, HandleUntyped>,
 }
 
-impl GameAssets {
+impl GameAssetHandles {
     pub fn from_handles<H, S>(handles: H) -> Self
         where H: IntoIterator<Item=(S, HandleUntyped)>, S: ToString {
-        GameAssets {
+        GameAssetHandles {
             handles: handles.into_iter().map(|(key, h)| (key.to_string(), h)).collect()
         }
     }
@@ -163,7 +166,7 @@ impl GameAssets {
 mod tests {
     use bevy::asset::HandleId;
     use bevy::prelude::*;
-    use crate::game_assets::GameAssets;
+    use crate::game_asset_handles::GameAssetHandles;
     use crate::spritesheet::SpriteSheet;
 
     #[test]
@@ -175,7 +178,7 @@ mod tests {
         ];
         let num_handles = handles.len();
 
-        let assets = GameAssets::from_handles(handles);
+        let assets = GameAssetHandles::from_handles(handles);
         assert_eq!(assets.handles.len(), num_handles)
     }
 
@@ -183,7 +186,7 @@ mod tests {
     pub fn a_registered_handle_can_be_retrieved() {
         let handle = Handle::weak(HandleId::random::<Image>());
         let key = "my_image";
-        let assets = GameAssets::from_handles(Some((key, handle.clone_untyped())));
+        let assets = GameAssetHandles::from_handles(Some((key, handle.clone_untyped())));
 
         let image_handle: Handle<Image> = assets.get_handle(key);
 
@@ -194,7 +197,7 @@ mod tests {
     #[should_panic]
     pub fn retrieving_an_unregistered_handle_panics() {
         let handle: Handle<Image> = Handle::weak(HandleId::random::<Image>());
-        let assets = GameAssets::from_handles(Some(("my_image", handle.clone_untyped())));
+        let assets = GameAssetHandles::from_handles(Some(("my_image", handle.clone_untyped())));
 
         assets.get_handle::<_, Image>("not_my_image");
     }
@@ -213,7 +216,7 @@ mod tests {
             ("my_sheet", HandleUntyped::weak(handle_ids[2])),
         ];
 
-        let assets = GameAssets::from_handles(handles);
+        let assets = GameAssetHandles::from_handles(handles);
 
         let retrieved_ids = assets.id_iter().into_iter().collect::<Vec<_>>();
 

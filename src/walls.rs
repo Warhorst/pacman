@@ -3,7 +3,8 @@ use bevy::utils::HashMap;
 use crate::animation::{Animation, Animations};
 use crate::common::position::Position;
 use crate::constants::WALL_DIMENSION;
-use crate::game_assets::{GameAssets, INNER_WALL, INNER_WALL_BLINKING, INNER_WALL_CORNER, INNER_WALL_CORNER_BLINKING, OUTER_WALL, OUTER_WALL_BLINKING, OUTER_WALL_CORNER, OUTER_WALL_CORNER_BLINKING};
+use crate::game_asset_handles::GameAssetHandles;
+use crate::game_asset_handles::keys::*;
 use crate::is;
 use crate::life_cycle::LifeCycle::{LevelTransition, Start};
 use crate::map::{Element, Map, Rotation, WallType};
@@ -33,7 +34,7 @@ pub struct Wall;
 fn spawn_walls(
     mut commands: Commands,
     map: Res<Map>,
-    game_assets: Res<GameAssets>,
+    game_assets: Res<GameAssetHandles>,
     asset_server: Res<AssetServer>,
 ) {
     spawn_labyrinth_walls(&mut commands, &map, &game_assets);
@@ -43,7 +44,7 @@ fn spawn_walls(
 fn spawn_labyrinth_walls(
     commands: &mut Commands,
     map: &Map,
-    game_assets: &GameAssets
+    game_assets: &GameAssetHandles
 ) {
     let wall_animations_map = create_animations(game_assets);
 
@@ -75,7 +76,7 @@ fn create_transform(position: &Position, rotation: &Rotation) -> Transform {
     transform
 }
 
-fn create_animations(game_assets: &GameAssets) -> HashMap<(WallType, bool), Animations> {
+fn create_animations(game_assets: &GameAssetHandles) -> HashMap<(WallType, bool), Animations> {
     [
         (WallType::Outer, true, game_assets.get_handle(OUTER_WALL_CORNER), game_assets.get_handle(OUTER_WALL_CORNER_BLINKING)),
         (WallType::Outer, false, game_assets.get_handle(OUTER_WALL), game_assets.get_handle(OUTER_WALL_BLINKING)),

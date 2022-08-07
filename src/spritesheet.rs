@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use bevy::reflect::TypeUuid;
 use bevy::render::texture::{CompressedImageFormats, ImageType, TextureFormatPixelInfo};
 use wgpu_types::Extent3d;
-use crate::game_assets::{BLINKY_DOWN, BLINKY_LEFT, BLINKY_RIGHT, BLINKY_UP, CLYDE_DOWN, CLYDE_LEFT, CLYDE_RIGHT, CLYDE_UP, FRIGHTENED, FRIGHTENED_BLINKING, GHOST_WALL_BLINKING, GHOST_WALL_CORNER_BLINKING, INKY_DOWN, INKY_LEFT, INKY_RIGHT, INKY_UP, INNER_WALL_BLINKING, INNER_WALL_CORNER_BLINKING, OUTER_WALL_BLINKING, OUTER_WALL_CORNER_BLINKING, PACMAN_DYING, PACMAN_WALKING_DOWN, PACMAN_WALKING_LEFT, PACMAN_WALKING_RIGHT, PACMAN_WALKING_UP, PINKY_DOWN, PINKY_LEFT, PINKY_RIGHT, PINKY_UP};
+use crate::game_asset_handles::keys::*;
 use crate::helper::get_sub_rect;
 
 pub struct SpriteSheetPlugin;

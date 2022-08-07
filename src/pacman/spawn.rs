@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use crate::common::Direction::*;
 
 use crate::constants::PACMAN_DIMENSION;
-use crate::game_assets::GameAssets;
+use crate::game_asset_handles::GameAssetHandles;
 use crate::is;
 use crate::level::Level;
 use crate::map::Element::PacManSpawn;
@@ -17,7 +17,7 @@ pub struct PacmanSpawn(Vec3);
 
 pub (in crate::pacman) fn spawn_pacman(
     mut commands: Commands,
-    game_assets: Res<GameAssets>,
+    game_assets: Res<GameAssetHandles>,
     map: Res<Map>,
     level: Res<Level>,
     speed_by_level: Res<SpeedByLevel>
