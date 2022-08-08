@@ -8,24 +8,8 @@ pub struct AnimationPlugin;
 impl Plugin for AnimationPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_system(update_entities_with_single_animation)
             .add_system(update_entities_with_animations)
         ;
-    }
-}
-
-fn update_entities_with_single_animation(
-    time: Res<Time>,
-    sheets: Res<Assets<SpriteSheet>>,
-    mut query: Query<(&mut Handle<Image>, &mut Animation)>,
-) {
-    let delta = time.delta();
-    for (mut texture, mut animation) in query.iter_mut() {
-        animation.update(delta);
-
-        if let Some(a) = animation.get_current_texture(&sheets) {
-            *texture = a
-        }
     }
 }
 
@@ -53,7 +37,7 @@ fn update_entities_with_animations(
 /// in the vector is returned forever.
 ///
 /// TODO: add the ability to check if an animation changed
-#[derive(Component, Clone)]
+#[derive(Clone)]
 pub enum Animation {
     SingleTexture {
         texture: Handle<Image>
