@@ -4,8 +4,9 @@ use crate::animation::{Animation, Animations};
 use crate::pacman::Pacman;
 use crate::common::Direction;
 use crate::common::Direction::*;
-use crate::game_asset_handles::GameAssetHandles;
-use crate::game_asset_handles::keys::*;
+use crate::game_assets::handles::GameAssetHandles;
+use crate::game_assets::keys::*;
+use crate::game_assets::keys::sprite_sheets::PACMAN_DYING;
 use crate::spritesheet::SpriteSheet;
 
 pub(in crate::pacman) fn update_pacman_appearance(

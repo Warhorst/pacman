@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use LifeCycle::Ready;
-use crate::game_asset_handles::GameAssetHandles;
-use crate::game_asset_handles::keys::FONT;
+use crate::game_assets::handles::GameAssetHandles;
+use crate::game_assets::keys::FONT;
 use crate::is;
 use crate::life_cycle::LifeCycle;
 use crate::map::Map;

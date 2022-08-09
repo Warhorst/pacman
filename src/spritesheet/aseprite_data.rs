@@ -4,12 +4,29 @@ use std::collections::BTreeMap;
 use crate::common::position::Position;
 use crate::spritesheet::rectangles::{Rect, RectIter};
 
-#[derive(Deserialize)]
+/// Represents the json data for a sprite sheet that can be generated when exporting a sheet.
+/// Used to load sheets from images using the data from the json file.
+#[derive(Deserialize, bevy::reflect::TypeUuid)]
+#[uuid = "187ce97b-0f53-4bf6-824d-b5f8289c4bfe"]
 pub struct AsepriteData {
     frames: BTreeMap<String, FrameValue>
 }
 
 impl IntoIterator for AsepriteData {
+    type Item = Rect;
+    type IntoIter = RectIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        RectIter::new(
+            self.frames
+                .values()
+                .map(|fv| fv.frame)
+                .map(|f| Rect::new(Position::new(f.x as isize, f.y as isize), f.w, f.h))
+        )
+    }
+}
+
+impl IntoIterator for &AsepriteData {
     type Item = Rect;
     type IntoIter = RectIter;
 

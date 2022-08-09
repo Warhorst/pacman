@@ -5,7 +5,7 @@ use crate::pacman::PacmanPlugin;
 use crate::animation::AnimationPlugin;
 use crate::camera::CameraPlugin;
 use crate::edibles::EdiblePlugin;
-use crate::game_asset_handles::GameAssetHandlesPlugin;
+use crate::game_assets::GameAssetsPlugin;
 
 use crate::game_over_screen::GameOverScreenPlugin;
 use crate::life_cycle::GameStatePlugin;
@@ -49,7 +49,7 @@ mod ready_screen;
 mod game_over_screen;
 mod edibles;
 mod interactions;
-mod game_asset_handles;
+mod game_assets;
 
 fn main() {
     App::new()
@@ -63,7 +63,7 @@ fn main() {
         .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
         .insert_resource(ImageSettings::default_nearest())
         .add_plugin(GameStatePlugin)
-        .add_plugin(GameAssetHandlesPlugin)
+        .add_plugin(GameAssetsPlugin)
         .add_plugin(AnimationPlugin)
         .add_plugin(CameraPlugin)
         .add_plugins(DefaultPlugins)

@@ -22,4 +22,4 @@ mod ready_screen;
 mod game_over_screen;
 mod edibles;
 mod interactions;
-mod game_asset_handles;
+mod game_assets;

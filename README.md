@@ -28,3 +28,6 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 ### UI
 - main menu to start the game (and later access the high score)
 - pause menu to quit the game
+
+### Other
+- the memory consumption keeps rising when doing nothing (from 90MB initial to up to 500MB after an hour) -> the app might create some resources infinitely

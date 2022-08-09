@@ -8,8 +8,8 @@ use crate::life_cycle::LifeCycle;
 use crate::life_cycle::LifeCycle::Start;
 use crate::map::board::Board;
 use crate::edibles::fruit::Fruit::*;
-use crate::game_asset_handles::GameAssetHandles;
-use crate::game_asset_handles::keys::FONT;
+use crate::game_assets::handles::GameAssetHandles;
+use crate::game_assets::keys::FONT;
 
 pub struct ScorePlugin;
 

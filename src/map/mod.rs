@@ -11,8 +11,8 @@ use Rotation::*;
 use crate::common::Direction;
 use crate::common::Direction::*;
 use crate::common::position::Position;
-use crate::game_asset_handles::GameAssetHandles;
-use crate::game_asset_handles::keys::MAP;
+use crate::game_assets::handles::GameAssetHandles;
+use crate::game_assets::keys::MAP;
 use crate::life_cycle::LifeCycle::Loading;
 use crate::map::board::Board;
 

@@ -2,13 +2,13 @@ use bevy::prelude::*;
 use crate::common::Direction::*;
 
 use crate::constants::PACMAN_DIMENSION;
-use crate::game_asset_handles::GameAssetHandles;
 use crate::is;
 use crate::level::Level;
 use crate::map::Element::PacManSpawn;
 use crate::map::Map;
 use crate::pacman::Pacman;
 use crate::pacman::textures::create_pacman_animations;
+use crate::game_assets::handles::GameAssetHandles;
 use crate::speed::SpeedByLevel;
 
 /// Resource that tells at which position pacman spawns.

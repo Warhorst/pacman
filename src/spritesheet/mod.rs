@@ -4,14 +4,16 @@ use bevy::asset::{AssetLoader, BoxedFuture, LoadContext, LoadedAsset};
 use bevy::prelude::*;
 use bevy::reflect::TypeUuid;
 use bevy::render::texture::{CompressedImageFormats, ImageType, TextureFormatPixelInfo};
+use bevy_common_assets::json::JsonAssetPlugin;
 use wgpu_types::Extent3d;
 
-use crate::game_asset_handles::keys::*;
+use crate::game_assets::keys::*;
 use crate::helper::get_sub_rect;
+use crate::spritesheet::aseprite_data::AsepriteData;
 use crate::spritesheet::rectangles::Rect;
 
-mod rectangles;
-mod aseprite_data;
+pub mod rectangles;
+pub mod aseprite_data;
 
 pub struct SpriteSheetPlugin;
 
@@ -19,6 +21,7 @@ impl Plugin for SpriteSheetPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_asset::<SpriteSheet>()
+            .add_plugin(JsonAssetPlugin::<AsepriteData>::new(&["aseprite.json"]))
             .add_startup_system(register_sheet_loader)
         ;
     }
@@ -35,7 +38,7 @@ fn register_sheet_loader(
                 (PACMAN_WALKING_DOWN, Grid::new(16, 16, 4, 1)),
                 (PACMAN_WALKING_LEFT, Grid::new(16, 16, 4, 1)),
                 (PACMAN_WALKING_RIGHT, Grid::new(16, 16, 4, 1)),
-                (PACMAN_DYING, Grid::new(16, 16, 12, 1)),
+                // (PACMAN_DYING, Grid::new(16, 16, 12, 1)),
                 (BLINKY_UP, Grid::new(16, 16, 2, 1)),
                 (BLINKY_DOWN, Grid::new(16, 16, 2, 1)),
                 (BLINKY_LEFT, Grid::new(16, 16, 2, 1)),
@@ -73,8 +76,10 @@ pub struct SpriteSheet {
 }
 
 impl SpriteSheet {
-    pub fn new(textures: Vec<Handle<Image>>) -> Self {
-        Self { textures }
+    pub fn new(handles: impl IntoIterator<Item=Handle<Image>>) -> Self {
+        Self {
+            textures: handles.into_iter().collect()
+        }
     }
 }
 
@@ -130,7 +135,7 @@ impl AssetLoader for SpriteSheetLoader {
                 .into_iter()
                 .enumerate()
                 .map(|(i, img)| load_context.set_labeled_asset(&format!("{}_{}", sheet_path, i), LoadedAsset::new(img)))
-                .collect();
+                .collect::<Vec<_>>();
             load_context.set_default_asset(LoadedAsset::new(SpriteSheet::new(textures)));
 
             Ok(())
@@ -186,18 +191,6 @@ struct Grid {
 impl Grid {
     pub fn new(width: usize, height: usize, columns: usize, rows: usize) -> Self {
         Self { width, height, columns, rows }
-    }
-}
-
-struct SpriteSheetNew {
-    handles: Vec<Handle<Image>>,
-}
-
-impl SpriteSheetNew {
-    pub fn new(handles: impl IntoIterator<Item=Handle<Image>>) -> Self {
-        SpriteSheetNew {
-            handles: handles.into_iter().collect()
-        }
     }
 }
 

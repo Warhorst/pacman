@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use crate::constants::FIELD_DIMENSION;
-use crate::game_asset_handles::GameAssetHandles;
-use crate::game_asset_handles::keys::FONT;
+use crate::game_assets::handles::GameAssetHandles;
+use crate::game_assets::keys::FONT;
 use crate::life_cycle::LifeCycle::{LevelTransition, Start};
 use crate::map::board::Board;
 

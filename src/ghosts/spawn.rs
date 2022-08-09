@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::constants::GHOST_DIMENSION;
-use crate::game_asset_handles::GameAssetHandles;
+use crate::game_assets::handles::GameAssetHandles;
 use crate::ghost_house::GhostHouse;
 use crate::ghosts::{Blinky, Clyde, Ghost, GhostType, Inky, Pinky};
 use crate::ghosts::state::State;

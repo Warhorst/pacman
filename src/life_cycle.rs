@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use crate::pacman::{EPacmanDead};
 use LifeCycle::*;
 use crate::edibles::EAllEdiblesEaten;
-use crate::game_asset_handles::EAllAssetsLoaded;
+use crate::game_assets::EAllAssetsLoaded;
 use crate::interactions::EPacmanHit;
 use crate::lives::Life;
 
