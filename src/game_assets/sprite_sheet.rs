@@ -39,7 +39,7 @@ pub fn create_sprite_sheets_when_texture_and_data_are_loaded(
         let data = sheet_data.get(&data_handle).expect("data should be loaded");
 
         let sheet = SpriteSheet::new(
-            split_image_by_rectangles(&image, data)
+            split_image_by_rectangles(&image, data.rect_iter())
                 .into_iter()
                 .map(|image| images.add(image))
         );
