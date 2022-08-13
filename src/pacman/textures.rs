@@ -22,38 +22,37 @@ pub(in crate::pacman) fn update_pacman_appearance(
 }
 
 pub(in crate::pacman) fn create_pacman_animations(
-    game_assets: &GameAssetHandles
+    game_assets: &GameAssetHandles,
+    sprite_sheets: &Assets<SpriteSheet>
 ) -> Animations {
     Animations::new(
         [
-            ("eating_left", create_eating_animation(game_assets.get_handle(PACMAN_WALKING_LEFT))),
-            ("eating_right", create_eating_animation(game_assets.get_handle(PACMAN_WALKING_RIGHT))),
-            ("eating_up", create_eating_animation(game_assets.get_handle(PACMAN_WALKING_UP))),
-            ("eating_down", create_eating_animation(game_assets.get_handle(PACMAN_WALKING_DOWN))),
-            ("dying", create_dying_animation(game_assets.get_handle(PACMAN_DYING)))
+            ("eating_left", create_eating_animation(game_assets.get_asset(PACMAN_WALKING_LEFT, sprite_sheets))),
+            ("eating_right", create_eating_animation(game_assets.get_asset(PACMAN_WALKING_RIGHT, sprite_sheets))),
+            ("eating_up", create_eating_animation(game_assets.get_asset(PACMAN_WALKING_UP, sprite_sheets))),
+            ("eating_down", create_eating_animation(game_assets.get_asset(PACMAN_WALKING_DOWN, sprite_sheets))),
+            ("dying", create_dying_animation(game_assets.get_asset(PACMAN_DYING, sprite_sheets)))
         ],
         "eating_up",
     )
 }
 
 fn create_eating_animation(
-    sheet_handle: Handle<SpriteSheet>,
+    sheet: &SpriteSheet,
 ) -> Animation {
-    Animation::from_sprite_sheet(
+    Animation::from_textures(
         0.2,
         true,
-        4,
-        sheet_handle
+        sheet.images_at(0..4)
     )
 }
 
 fn create_dying_animation(
-    sheet_handle: Handle<SpriteSheet>,
+    sheet: &SpriteSheet,
 ) -> Animation {
-    Animation::from_sprite_sheet(
+    Animation::from_textures(
         2.0,
         false,
-        12,
-        sheet_handle,
+        sheet.images_at(0..12),
     )
 }

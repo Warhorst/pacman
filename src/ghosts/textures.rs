@@ -8,6 +8,7 @@ use crate::game_assets::keys::*;
 use crate::game_assets::keys::sprite_sheets::*;
 use crate::ghosts::{Blinky, GhostType, Inky, Pinky};
 use crate::ghosts::state::State;
+use crate::sprite_sheet::SpriteSheet;
 
 pub(in crate::ghosts) fn update_ghost_appearance<G: 'static + Component + GhostType>(
     energizer_timer: Res<EnergizerTimer>,
@@ -28,38 +29,37 @@ pub(in crate::ghosts) fn update_ghost_appearance<G: 'static + Component + GhostT
     }
 }
 
-pub(in crate::ghosts) fn create_animations_for_ghost<G: GhostType + 'static>(game_assets: &GameAssetHandles) -> Animations {
+pub(in crate::ghosts) fn create_animations_for_ghost<G: GhostType + 'static>(game_assets: &GameAssetHandles, sprite_sheets: &Assets<SpriteSheet>) -> Animations {
     match TypeId::of::<G>() {
-        id if id == TypeId::of::<Blinky>() => create_animations_for(game_assets, [BLINKY_UP, BLINKY_DOWN, BLINKY_LEFT, BLINKY_RIGHT]),
-        id if id == TypeId::of::<Pinky>() => create_animations_for(game_assets, [PINKY_UP, PINKY_DOWN, PINKY_LEFT, PINKY_RIGHT]),
-        id if id == TypeId::of::<Inky>() => create_animations_for(game_assets, [INKY_UP, INKY_DOWN, INKY_LEFT, INKY_RIGHT]),
-        _ => create_animations_for(game_assets, [CLYDE_UP, CLYDE_DOWN, CLYDE_LEFT, CLYDE_RIGHT]),
+        id if id == TypeId::of::<Blinky>() => create_animations_for(game_assets, sprite_sheets, [BLINKY_UP, BLINKY_DOWN, BLINKY_LEFT, BLINKY_RIGHT]),
+        id if id == TypeId::of::<Pinky>() => create_animations_for(game_assets, sprite_sheets, [PINKY_UP, PINKY_DOWN, PINKY_LEFT, PINKY_RIGHT]),
+        id if id == TypeId::of::<Inky>() => create_animations_for(game_assets, sprite_sheets, [INKY_UP, INKY_DOWN, INKY_LEFT, INKY_RIGHT]),
+        _ => create_animations_for(game_assets, sprite_sheets, [CLYDE_UP, CLYDE_DOWN, CLYDE_LEFT, CLYDE_RIGHT]),
     }
 }
 
-fn create_animations_for(game_assets: &GameAssetHandles, normal_animation_keys: [&'static str; 4]) -> Animations {
+fn create_animations_for(game_assets: &GameAssetHandles, sprite_sheets: &Assets<SpriteSheet>, normal_animation_keys: [&'static str; 4]) -> Animations {
     Animations::new(
         [
-            ("normal_up", create_normal_animation(game_assets, normal_animation_keys[0])),
-            ("normal_down", create_normal_animation(game_assets, normal_animation_keys[1])),
-            ("normal_left", create_normal_animation(game_assets, normal_animation_keys[2])),
-            ("normal_right", create_normal_animation(game_assets, normal_animation_keys[3])),
+            ("normal_up", create_normal_animation(game_assets.get_asset(normal_animation_keys[0], sprite_sheets))),
+            ("normal_down", create_normal_animation(game_assets.get_asset(normal_animation_keys[1], sprite_sheets))),
+            ("normal_left", create_normal_animation(game_assets.get_asset(normal_animation_keys[2], sprite_sheets))),
+            ("normal_right", create_normal_animation(game_assets.get_asset(normal_animation_keys[3], sprite_sheets))),
             ("eaten_up", create_eaten_animation(game_assets, EATEN_UP)),
             ("eaten_down", create_eaten_animation(game_assets, EATEN_DOWN)),
             ("eaten_left", create_eaten_animation(game_assets, EATEN_LEFT)),
             ("eaten_right", create_eaten_animation(game_assets, EATEN_RIGHT)),
-            ("frightened", create_frightened_animation(game_assets)),
-            ("frightened_blinking", create_frightened_blinking_animation(game_assets)),
+            ("frightened", create_frightened_animation(game_assets.get_asset(FRIGHTENED, sprite_sheets))),
+            ("frightened_blinking", create_frightened_blinking_animation(game_assets.get_asset(FRIGHTENED_BLINKING, sprite_sheets))),
         ],
         "normal_left")
 }
 
-fn create_normal_animation(game_assets: &GameAssetHandles, key: &'static str) -> Animation {
-    Animation::from_sprite_sheet(
+fn create_normal_animation(sprite_sheet: &SpriteSheet) -> Animation {
+    Animation::from_textures(
         0.5,
         true,
-        2,
-        game_assets.get_handle(key),
+        sprite_sheet.images_at(0..2),
     )
 }
 
@@ -67,20 +67,18 @@ fn create_eaten_animation(game_assets: &GameAssetHandles, key: &'static str) -> 
     Animation::from_texture(game_assets.get_handle(key))
 }
 
-fn create_frightened_animation(game_assets: &GameAssetHandles) -> Animation {
-    Animation::from_sprite_sheet(
+fn create_frightened_animation(sprite_sheet: &SpriteSheet) -> Animation {
+    Animation::from_textures(
         0.5,
         true,
-        2,
-        game_assets.get_handle(FRIGHTENED),
+        sprite_sheet.images_at(0..2)
     )
 }
 
-fn create_frightened_blinking_animation(game_assets: &GameAssetHandles) -> Animation {
-    Animation::from_sprite_sheet(
+fn create_frightened_blinking_animation(sprite_sheet: &SpriteSheet) -> Animation {
+    Animation::from_textures(
         0.5,
         true,
-        4,
-        game_assets.get_handle(FRIGHTENED_BLINKING),
+        sprite_sheet.images_at(0..4)
     )
 }

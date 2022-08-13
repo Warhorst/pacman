@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use bevy::prelude::*;
 use std::time::Duration;
-use crate::sprite_sheet::SpriteSheet;
 
 pub struct AnimationPlugin;
 
@@ -15,16 +14,12 @@ impl Plugin for AnimationPlugin {
 
 fn update_entities_with_animations(
     time: Res<Time>,
-    sheets: Res<Assets<SpriteSheet>>,
     mut query: Query<(&mut Handle<Image>, &mut Animations)>,
 ) {
     let delta = time.delta();
     for (mut texture, mut animations) in query.iter_mut() {
         animations.current_mut().update(delta);
-
-        if let Some(a) = animations.current().get_current_texture(&sheets) {
-            *texture = a
-        }
+        *texture = animations.current().texture()
     }
 }
 
@@ -47,14 +42,6 @@ pub enum Animation {
         timer: Timer,
         repeating: bool,
         textures: Vec<Handle<Image>>,
-        running: bool,
-    },
-    SpriteSheet {
-        current_texture_index: usize,
-        timer: Timer,
-        repeating: bool,
-        num_textures: usize,
-        sheet: Handle<SpriteSheet>,
         running: bool,
     },
 }
@@ -83,24 +70,6 @@ impl Animation {
         }
     }
 
-    /// Create an animation from a sprite sheet handle.
-    ///
-    /// Only the sheet handle is stored. When get_current_texture is called, the current texture handle is cloned from the sheet.
-    ///
-    /// TODO: maybe cache the current handle or at least prevent Assets access when the animation did not change
-    /// TODO: num_textures must be provided currently, as this information is available after the sheet loaded. But it might be possible to start without it and update later
-    pub fn from_sprite_sheet(duration_secs: f32, repeating: bool, num_textures: usize, sheet: Handle<SpriteSheet>) -> Self {
-        let texture_display_time = duration_secs / num_textures as f32;
-        Animation::SpriteSheet {
-            current_texture_index: 0,
-            timer: Timer::new(Duration::from_secs_f32(texture_display_time), true),
-            repeating,
-            num_textures,
-            sheet,
-            running: true,
-        }
-    }
-
     /// Update the animation.
     ///
     /// For texture lists and sprite sheet, this process is mostly the same: The timer for the current sprite gets
@@ -113,7 +82,6 @@ impl Animation {
         let running = match self {
             Animation::SingleTexture { .. } => return,
             Animation::TextureList { running, .. } => *running,
-            Animation::SpriteSheet { running, .. } => *running
         };
 
         if !running { return; }
@@ -121,7 +89,6 @@ impl Animation {
         let (current_texture_index, timer, repeating, num_textures) = match self {
             Animation::SingleTexture { .. } => return,
             Animation::TextureList { ref mut current_texture_index, timer, repeating, textures, .. } => (current_texture_index, timer, repeating, textures.len()),
-            Animation::SpriteSheet { ref mut current_texture_index, timer, repeating, num_textures, .. } => (current_texture_index, timer, repeating, *num_textures)
         };
 
         timer.tick(delta);
@@ -136,11 +103,10 @@ impl Animation {
         }
     }
 
-    pub fn get_current_texture(&self, sheets: &Assets<SpriteSheet>) -> Option<Handle<Image>> {
+    pub fn texture(&self) -> Handle<Image> {
         match self {
-            Animation::SingleTexture { texture } => Some(texture.clone()),
-            Animation::TextureList { current_texture_index, textures, .. } => textures.get(*current_texture_index).map(Clone::clone),
-            Animation::SpriteSheet { current_texture_index, sheet, .. } => sheets.get(sheet)?.textures.get(*current_texture_index).map(Clone::clone)
+            Animation::SingleTexture { texture } => texture.clone(),
+            Animation::TextureList { current_texture_index, textures, .. } => textures.get(*current_texture_index).unwrap().clone(),
         }
     }
 
@@ -152,7 +118,6 @@ impl Animation {
         let (current_texture_index, timer, running) = match self {
             Animation::SingleTexture { .. } => return,
             Animation::TextureList { ref mut current_texture_index, timer, running, .. } => (current_texture_index, timer, running),
-            Animation::SpriteSheet { ref mut current_texture_index, timer, running, .. } => (current_texture_index, timer, running)
         };
 
         timer.reset();
@@ -165,7 +130,6 @@ impl Animation {
         let (current_texture_index, timer, num_textures) = match self {
             Animation::SingleTexture { .. } => return true,
             Animation::TextureList { current_texture_index, timer, textures, .. } => (current_texture_index, timer, textures.len()),
-            Animation::SpriteSheet { current_texture_index, timer, num_textures, .. } => (current_texture_index, timer, *num_textures)
         };
 
         *current_texture_index == num_textures - 1 && timer.just_finished()
@@ -176,7 +140,6 @@ impl Animation {
         let repeating = match self {
             Animation::SingleTexture { .. } => false,
             Animation::TextureList { repeating, .. } => *repeating,
-            Animation::SpriteSheet { repeating, .. } => *repeating
         };
 
         !repeating && self.is_finished()
@@ -187,7 +150,6 @@ impl Animation {
         match self {
             Animation::SingleTexture { .. } => return,
             Animation::TextureList { ref mut running, .. } => *running = false,
-            Animation::SpriteSheet { ref mut running, .. } => *running = false,
         }
     }
 }

@@ -47,7 +47,7 @@ fn spawn_labyrinth_walls(
     commands: &mut Commands,
     map: &Map,
     game_assets: &GameAssetHandles,
-    sprite_sheets: &Assets<SpriteSheet>
+    sprite_sheets: &Assets<SpriteSheet>,
 ) {
     let wall_animations_map = create_animations(game_assets, sprite_sheets);
 
@@ -59,6 +59,7 @@ fn spawn_labyrinth_walls(
 
             commands.spawn()
                 .insert_bundle(SpriteBundle {
+                    texture: animations.current().texture(),
                     sprite: Sprite {
                         custom_size,
                         ..default()
@@ -89,18 +90,17 @@ fn create_animations(game_assets: &GameAssetHandles, sprite_sheets: &Assets<Spri
         (WallType::Ghost, false, game_assets.get_handle(OUTER_WALL)),
     ]
         .into_iter()
-        .map(|(tp, is_corner, sheet_handle)| ((tp, is_corner), create_wall_animations(sheet_handle, sprite_sheets)))
+        .map(|(tp, is_corner, sheet_handle)| ((tp, is_corner), create_wall_animations(sprite_sheets.get(&sheet_handle).expect("sheet should be present"))))
         .collect()
 }
 
-fn create_wall_animations(sheet_handle: Handle<SpriteSheet>, sprite_sheets: &Assets<SpriteSheet>) -> Animations {
-    let sheet = sprite_sheets.get(&sheet_handle).expect("sheet should be present");
+fn create_wall_animations(sheet: &SpriteSheet) -> Animations {
     Animations::new(
         [
-            ("idle", Animation::from_texture(sheet[0].clone())),
-            ("blinking", Animation::from_sprite_sheet(0.5, true, 2, sheet_handle))
+            ("idle", Animation::from_texture(sheet.image_at(0))),
+            ("blinking", Animation::from_textures(0.5, true, sheet.images_at([0, 1])))
         ]
-        , "idle"
+        , "idle",
     )
 }
 

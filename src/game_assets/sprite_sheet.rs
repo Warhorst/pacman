@@ -151,7 +151,6 @@ mod tests {
     use bevy::prelude::*;
     use crate::game_assets::sprite_sheet::SheetsToLoad;
     use crate::sprite_sheet::aseprite_data::AsepriteData;
-    use crate::sprite_sheet::SpriteSheet;
 
     #[test]
     fn it_can_be_created_from_an_iterator_of_keys_to_handles() {

@@ -1,4 +1,3 @@
-use std::ops::Index;
 use bevy::prelude::*;
 use bevy::reflect::TypeUuid;
 use bevy::render::texture::TextureFormatPixelInfo;
@@ -34,6 +33,14 @@ impl SpriteSheet {
         Self {
             textures: handles.into_iter().collect()
         }
+    }
+
+    pub fn image_at(&self, index: usize) -> Handle<Image> {
+        self.textures[index].clone()
+    }
+
+    pub fn images_at(&self, indexes: impl IntoIterator<Item=usize>) -> Vec<Handle<Image>> {
+        indexes.into_iter().map(|i| self.textures[i].clone()).collect()
     }
 }
 
@@ -75,14 +82,6 @@ fn extract_rectangle(data: &[u8], rect: Rect, data_width: usize, pixel_width: us
     extracted
 }
 
-impl<'a> Index<usize> for SpriteSheet {
-    type Output = Handle<Image>;
-
-    fn index(&self, index: usize) -> &Self::Output {
-        self.textures.get(index).expect(&format!("there is no texture at index {index}"))
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use bevy::asset::HandleId;
@@ -91,7 +90,6 @@ mod tests {
 
     use crate::common::position::Position;
     use crate::sprite_sheet::{extract_rectangle, split_image_by_rectangles, SpriteSheet};
-    use crate::sprite_sheet::aseprite_data::AsepriteData;
     use crate::sprite_sheet::rectangles::Rect;
 
     #[test]
@@ -165,7 +163,7 @@ mod tests {
     }
 
     #[test]
-    fn sprite_sheet_can_be_indexed_by_a_number_and_return_a_reference() {
+    fn sprite_sheet_can_be_indexed_by_a_number() {
         let handles = [
             Handle::weak(HandleId::random::<Image>()),
             Handle::weak(HandleId::random::<Font>())
@@ -173,7 +171,23 @@ mod tests {
 
         let sheet = SpriteSheet::new(handles.clone());
 
-        assert_eq!(sheet[0], handles[0]);
-        assert_eq!(sheet[1], handles[1]);
+        assert_eq!(sheet.image_at(0), handles[0]);
+        assert_eq!(sheet.image_at(1), handles[1]);
+    }
+
+    #[test]
+    fn sprite_sheet_can_be_indexed_by_an_array_of_numbers() {
+        let handles = [
+            Handle::weak(HandleId::random::<Image>()),
+            Handle::weak(HandleId::random::<Font>()),
+            Handle::weak(HandleId::random::<TextureAtlas>()),
+        ];
+
+        let sheet = SpriteSheet::new(handles.clone());
+        let indexed = sheet.images_at([0,1,2]);
+
+        for (i, h) in handles.into_iter().enumerate() {
+            assert_eq!(&h, &indexed[i])
+        }
     }
 }

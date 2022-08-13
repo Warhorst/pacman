@@ -23,6 +23,11 @@ impl GameAssetHandles {
     pub fn add_handle(&mut self, key: impl ToString, handle: HandleUntyped) {
         self.handles.insert(key.to_string(), handle);
     }
+
+    pub fn get_asset<'a, T: Asset>(&'a self, key: impl ToString, assets: &'a Assets<T>) -> &T {
+        let handle = self.get_handle::<_, T>(key);
+        assets.get(&handle).unwrap()
+    }
 }
 
 impl Default for GameAssetHandles {
