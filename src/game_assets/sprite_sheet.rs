@@ -19,12 +19,12 @@ pub fn start_sprite_sheet_load(
                 PACMAN_WALKING_LEFT,
                 PACMAN_WALKING_RIGHT,
                 PACMAN_DYING,
-                OUTER_WALL_CORNER_BLINKING,
-                OUTER_WALL_BLINKING,
-                INNER_WALL_CORNER_BLINKING,
-                INNER_WALL_BLINKING,
-                GHOST_WALL_CORNER_BLINKING,
-                GHOST_WALL_BLINKING,
+                OUTER_WALL_CORNER,
+                OUTER_WALL,
+                INNER_WALL_CORNER,
+                INNER_WALL,
+                GHOST_WALL_CORNER,
+                GHOST_WALL,
                 BLINKY_UP,
                 BLINKY_DOWN,
                 BLINKY_LEFT,
@@ -151,6 +151,7 @@ mod tests {
     use bevy::prelude::*;
     use crate::game_assets::sprite_sheet::SheetsToLoad;
     use crate::sprite_sheet::aseprite_data::AsepriteData;
+    use crate::sprite_sheet::SpriteSheet;
 
     #[test]
     fn it_can_be_created_from_an_iterator_of_keys_to_handles() {

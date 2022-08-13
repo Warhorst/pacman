@@ -15,12 +15,6 @@ pub fn start_base_assets_load(
         load(EATEN_DOWN, &asset_server),
         load(EATEN_LEFT, &asset_server),
         load(EATEN_RIGHT, &asset_server),
-        load(OUTER_WALL_CORNER, &asset_server),
-        load(OUTER_WALL, &asset_server),
-        load(INNER_WALL_CORNER, &asset_server),
-        load(INNER_WALL, &asset_server),
-        load(GHOST_WALL_CORNER, &asset_server),
-        load(GHOST_WALL, &asset_server),
     ]))
 }
 

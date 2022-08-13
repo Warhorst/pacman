@@ -4,11 +4,11 @@ use crate::animation::{Animation, Animations};
 use crate::common::position::Position;
 use crate::constants::WALL_DIMENSION;
 use crate::game_assets::handles::GameAssetHandles;
-use crate::game_assets::keys::*;
 use crate::game_assets::keys::sprite_sheets::*;
 use crate::is;
 use crate::life_cycle::LifeCycle::{LevelTransition, Start};
 use crate::map::{Element, Map, Rotation, WallType};
+use crate::sprite_sheet::SpriteSheet;
 
 pub struct WallsPlugin;
 
@@ -35,19 +35,21 @@ pub struct Wall;
 fn spawn_walls(
     mut commands: Commands,
     map: Res<Map>,
-    game_assets: Res<GameAssetHandles>,
+    game_asset_handles: Res<GameAssetHandles>,
+    sprite_sheets: Res<Assets<SpriteSheet>>,
     asset_server: Res<AssetServer>,
 ) {
-    spawn_labyrinth_walls(&mut commands, &map, &game_assets);
+    spawn_labyrinth_walls(&mut commands, &map, &game_asset_handles, &sprite_sheets);
     spawn_ghost_house_entrance(&mut commands, &map, &asset_server);
 }
 
 fn spawn_labyrinth_walls(
     commands: &mut Commands,
     map: &Map,
-    game_assets: &GameAssetHandles
+    game_assets: &GameAssetHandles,
+    sprite_sheets: &Assets<SpriteSheet>
 ) {
-    let wall_animations_map = create_animations(game_assets);
+    let wall_animations_map = create_animations(game_assets, sprite_sheets);
 
     for (position, element) in map.position_element_iter() {
         if let Element::Wall { is_corner, rotation, wall_type } = element {
@@ -77,24 +79,29 @@ fn create_transform(position: &Position, rotation: &Rotation) -> Transform {
     transform
 }
 
-fn create_animations(game_assets: &GameAssetHandles) -> HashMap<(WallType, bool), Animations> {
+fn create_animations(game_assets: &GameAssetHandles, sprite_sheets: &Assets<SpriteSheet>) -> HashMap<(WallType, bool), Animations> {
     [
-        (WallType::Outer, true, game_assets.get_handle(OUTER_WALL_CORNER), game_assets.get_handle(OUTER_WALL_CORNER_BLINKING)),
-        (WallType::Outer, false, game_assets.get_handle(OUTER_WALL), game_assets.get_handle(OUTER_WALL_BLINKING)),
-        (WallType::Inner, true, game_assets.get_handle(INNER_WALL_CORNER), game_assets.get_handle(INNER_WALL_CORNER_BLINKING)),
-        (WallType::Inner, false, game_assets.get_handle(INNER_WALL), game_assets.get_handle(INNER_WALL_BLINKING)),
-        (WallType::Ghost, true, game_assets.get_handle(OUTER_WALL_CORNER), game_assets.get_handle(OUTER_WALL_CORNER_BLINKING)),
-        (WallType::Ghost, false, game_assets.get_handle(OUTER_WALL), game_assets.get_handle(OUTER_WALL_BLINKING)),
+        (WallType::Outer, true, game_assets.get_handle(OUTER_WALL_CORNER)),
+        (WallType::Outer, false, game_assets.get_handle(OUTER_WALL)),
+        (WallType::Inner, true, game_assets.get_handle(INNER_WALL_CORNER)),
+        (WallType::Inner, false, game_assets.get_handle(INNER_WALL)),
+        (WallType::Ghost, true, game_assets.get_handle(OUTER_WALL_CORNER)),
+        (WallType::Ghost, false, game_assets.get_handle(OUTER_WALL)),
     ]
         .into_iter()
-        .map(|(tp, is_corner, idle_handle, blinking_handle)| ((tp, is_corner), Animations::new(
-            [
-                ("idle", Animation::from_texture(idle_handle)),
-                ("blinking", Animation::from_sprite_sheet(0.5, true, 2, blinking_handle))
-            ]
-            , "idle"
-        )))
+        .map(|(tp, is_corner, sheet_handle)| ((tp, is_corner), create_wall_animations(sheet_handle, sprite_sheets)))
         .collect()
+}
+
+fn create_wall_animations(sheet_handle: Handle<SpriteSheet>, sprite_sheets: &Assets<SpriteSheet>) -> Animations {
+    let sheet = sprite_sheets.get(&sheet_handle).expect("sheet should be present");
+    Animations::new(
+        [
+            ("idle", Animation::from_texture(sheet[0].clone())),
+            ("blinking", Animation::from_sprite_sheet(0.5, true, 2, sheet_handle))
+        ]
+        , "idle"
+    )
 }
 
 fn spawn_ghost_house_entrance(commands: &mut Commands, map: &Map, asset_server: &AssetServer) {

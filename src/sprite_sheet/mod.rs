@@ -1,3 +1,4 @@
+use std::ops::Index;
 use bevy::prelude::*;
 use bevy::reflect::TypeUuid;
 use bevy::render::texture::TextureFormatPixelInfo;
@@ -74,13 +75,23 @@ fn extract_rectangle(data: &[u8], rect: Rect, data_width: usize, pixel_width: us
     extracted
 }
 
+impl<'a> Index<usize> for SpriteSheet {
+    type Output = Handle<Image>;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        self.textures.get(index).expect(&format!("there is no texture at index {index}"))
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use bevy::asset::HandleId;
     use bevy::prelude::*;
     use wgpu_types::{Extent3d, TextureDimension, TextureFormat};
 
     use crate::common::position::Position;
-    use crate::sprite_sheet::{extract_rectangle, split_image_by_rectangles};
+    use crate::sprite_sheet::{extract_rectangle, split_image_by_rectangles, SpriteSheet};
+    use crate::sprite_sheet::aseprite_data::AsepriteData;
     use crate::sprite_sheet::rectangles::Rect;
 
     #[test]
@@ -151,5 +162,18 @@ mod tests {
         assert_eq!(sub_images[0].texture_descriptor.size, expected_one.texture_descriptor.size);
         assert_eq!(sub_images[1].data, expected_two.data);
         assert_eq!(sub_images[1].texture_descriptor.size, expected_two.texture_descriptor.size);
+    }
+
+    #[test]
+    fn sprite_sheet_can_be_indexed_by_a_number_and_return_a_reference() {
+        let handles = [
+            Handle::weak(HandleId::random::<Image>()),
+            Handle::weak(HandleId::random::<Font>())
+        ];
+
+        let sheet = SpriteSheet::new(handles.clone());
+
+        assert_eq!(sheet[0], handles[0]);
+        assert_eq!(sheet[1], handles[1]);
     }
 }

@@ -7,13 +7,6 @@ pub const EATEN_DOWN: &'static str = "textures/ghost/eaten_down.png";
 pub const EATEN_LEFT: &'static str = "textures/ghost/eaten_left.png";
 pub const EATEN_RIGHT: &'static str = "textures/ghost/eaten_right.png";
 
-pub const OUTER_WALL_CORNER: &'static str = "textures/walls/outer_wall_corner.png";
-pub const OUTER_WALL: &'static str = "textures/walls/outer_wall.png";
-pub const INNER_WALL_CORNER: &'static str = "textures/walls/inner_wall_corner.png";
-pub const INNER_WALL: &'static str = "textures/walls/inner_wall.png";
-pub const GHOST_WALL_CORNER: &'static str = "textures/walls/ghost_house_wall_corner.png";
-pub const GHOST_WALL: &'static str = "textures/walls/ghost_house_wall.png";
-
 pub mod sprite_sheets {
     pub const PACMAN_WALKING_UP: &'static str = "textures/pacman/pacman_walking_up";
     pub const PACMAN_WALKING_DOWN: &'static str = "textures/pacman/pacman_walking_down";
@@ -21,12 +14,12 @@ pub mod sprite_sheets {
     pub const PACMAN_WALKING_RIGHT: &'static str = "textures/pacman/pacman_walking_right";
     pub const PACMAN_DYING: &'static str = "textures/pacman/pacman_dying";
 
-    pub const OUTER_WALL_CORNER_BLINKING: &'static str = "textures/walls/outer_wall_corner_blinking";
-    pub const OUTER_WALL_BLINKING: &'static str = "textures/walls/outer_wall_blinking";
-    pub const INNER_WALL_CORNER_BLINKING: &'static str = "textures/walls/inner_wall_corner_blinking";
-    pub const INNER_WALL_BLINKING: &'static str = "textures/walls/inner_wall_blinking";
-    pub const GHOST_WALL_CORNER_BLINKING: &'static str = "textures/walls/ghost_house_wall_corner_blinking";
-    pub const GHOST_WALL_BLINKING: &'static str = "textures/walls/ghost_house_wall_blinking";
+    pub const OUTER_WALL_CORNER: &'static str = "textures/walls/outer_wall_corner";
+    pub const OUTER_WALL: &'static str = "textures/walls/outer_wall";
+    pub const INNER_WALL_CORNER: &'static str = "textures/walls/inner_wall_corner";
+    pub const INNER_WALL: &'static str = "textures/walls/inner_wall";
+    pub const GHOST_WALL_CORNER: &'static str = "textures/walls/ghost_house_wall_corner";
+    pub const GHOST_WALL: &'static str = "textures/walls/ghost_house_wall";
 
     pub const BLINKY_UP: &'static str = "textures/ghost/blinky_up";
     pub const BLINKY_DOWN: &'static str = "textures/ghost/blinky_down";
