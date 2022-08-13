@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use serde::Deserialize;
 
 use crate::common::position::Position;
-use crate::spritesheet::rectangles::{Rect, RectIter};
+use crate::sprite_sheet::rectangles::{Rect, RectIter};
 
 /// Represents the json data for a sprite sheet that can be generated when exporting a sheet.
 /// Used to load sheets from images using the data from the json file.
@@ -54,8 +54,8 @@ mod tests {
     use std::fs::File;
     use std::io::BufReader;
     use crate::common::position::Position;
-    use crate::spritesheet::aseprite_data::{AsepriteData, Frame};
-    use crate::spritesheet::rectangles::Rect;
+    use crate::sprite_sheet::aseprite_data::{AsepriteData, Frame};
+    use crate::sprite_sheet::rectangles::Rect;
 
     #[test]
     fn it_can_be_deserialized() {

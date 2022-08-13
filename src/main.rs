@@ -21,7 +21,7 @@ use crate::random::RandomPlugin;
 use crate::ready_screen::ReadyScreenPlugin;
 use crate::score::ScorePlugin;
 use crate::speed::SpeedPlugin;
-use crate::spritesheet::SpriteSheetPlugin;
+use crate::sprite_sheet::SpriteSheetPlugin;
 use crate::tunnels::TunnelPlugin;
 use crate::walls::WallsPlugin;
 
@@ -42,8 +42,7 @@ mod ghost_house;
 mod ghost_corners;
 mod ghost_house_gate;
 mod animation;
-mod helper;
-mod spritesheet;
+mod sprite_sheet;
 mod life_cycle;
 mod ready_screen;
 mod game_over_screen;

@@ -5,6 +5,7 @@ use crate::common::Direction;
 use crate::edibles::energizer::EnergizerTimer;
 use crate::game_assets::handles::GameAssetHandles;
 use crate::game_assets::keys::*;
+use crate::game_assets::keys::sprite_sheets::*;
 use crate::ghosts::{Blinky, GhostType, Inky, Pinky};
 use crate::ghosts::state::State;
 

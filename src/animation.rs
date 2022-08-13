@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use bevy::prelude::*;
 use std::time::Duration;
-use crate::spritesheet::SpriteSheet;
+use crate::sprite_sheet::SpriteSheet;
 
 pub struct AnimationPlugin;
 

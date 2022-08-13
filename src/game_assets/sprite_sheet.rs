@@ -2,17 +2,72 @@ use bevy::prelude::*;
 use std::collections::HashMap;
 use bevy::asset::{HandleId, LoadState};
 use crate::game_assets::handles::GameAssetHandles;
-use crate::game_assets::keys::sprite_sheets::{PACMAN_DYING, PACMAN_DYING_DATA, PACMAN_DYING_IMAGE};
-use crate::spritesheet::aseprite_data::AsepriteData;
-use crate::spritesheet::{split_image_by_rectangles, SpriteSheet};
+use crate::game_assets::keys::sprite_sheets::*;
+use crate::sprite_sheet::aseprite_data::AsepriteData;
+use crate::sprite_sheet::{split_image_by_rectangles, SpriteSheet};
 
 pub fn start_sprite_sheet_load(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
 ) {
-    commands.insert_resource(SheetsToLoad::from_keys_and_handles([
-        (PACMAN_DYING, (asset_server.load(PACMAN_DYING_IMAGE), asset_server.load(PACMAN_DYING_DATA)))
-    ]));
+    commands.insert_resource(SheetsToLoad::from_keys_and_handles(
+        load_sheets(
+            &asset_server,
+            [
+                PACMAN_WALKING_UP,
+                PACMAN_WALKING_DOWN,
+                PACMAN_WALKING_LEFT,
+                PACMAN_WALKING_RIGHT,
+                PACMAN_DYING,
+                OUTER_WALL_CORNER_BLINKING,
+                OUTER_WALL_BLINKING,
+                INNER_WALL_CORNER_BLINKING,
+                INNER_WALL_BLINKING,
+                GHOST_WALL_CORNER_BLINKING,
+                GHOST_WALL_BLINKING,
+                BLINKY_UP,
+                BLINKY_DOWN,
+                BLINKY_LEFT,
+                BLINKY_RIGHT,
+                PINKY_UP,
+                PINKY_DOWN,
+                PINKY_LEFT,
+                PINKY_RIGHT,
+                INKY_UP,
+                INKY_DOWN,
+                INKY_LEFT,
+                INKY_RIGHT,
+                CLYDE_UP,
+                CLYDE_DOWN,
+                CLYDE_LEFT,
+                CLYDE_RIGHT,
+                FRIGHTENED,
+                FRIGHTENED_BLINKING,
+            ],
+        )));
+}
+
+/// Load the image and data sheet for every given key.
+///
+/// The key is the identifier and path of the sprite sheet. To load its
+/// data and image, it is used to generate the correct path.
+///
+/// Following conventions apply:
+/// - the sheet key is the path relative to the assets directory without a file ending
+/// - the image must be in the same path with a png ending
+/// - the data must be in the same path with an aseprite.json ending
+fn load_sheets<'a>(
+    asset_server: &'a AssetServer,
+    keys: impl IntoIterator<Item=&'static str> + 'a,
+) -> impl IntoIterator<Item=(&'static str, (Handle<Image>, Handle<AsepriteData>))> + 'a {
+    keys.into_iter().map(|k|
+        (k,
+         (
+             asset_server.load(&format!("{k}.png")),
+             asset_server.load(&format!("{k}.aseprite.json"))
+         )
+        )
+    )
 }
 
 pub fn create_sprite_sheets_when_texture_and_data_are_loaded(
@@ -95,7 +150,7 @@ mod tests {
     use bevy::asset::HandleId;
     use bevy::prelude::*;
     use crate::game_assets::sprite_sheet::SheetsToLoad;
-    use crate::spritesheet::aseprite_data::AsepriteData;
+    use crate::sprite_sheet::aseprite_data::AsepriteData;
 
     #[test]
     fn it_can_be_created_from_an_iterator_of_keys_to_handles() {

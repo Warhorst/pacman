@@ -5,6 +5,7 @@ use crate::common::position::Position;
 use crate::constants::WALL_DIMENSION;
 use crate::game_assets::handles::GameAssetHandles;
 use crate::game_assets::keys::*;
+use crate::game_assets::keys::sprite_sheets::*;
 use crate::is;
 use crate::life_cycle::LifeCycle::{LevelTransition, Start};
 use crate::map::{Element, Map, Rotation, WallType};

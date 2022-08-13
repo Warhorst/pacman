@@ -11,45 +11,16 @@ pub fn start_base_assets_load(
     commands.insert_resource(BaseAssetsToLoad::from_keys_and_handles([
         load(FONT, &asset_server),
         load(MAP, &asset_server),
-        load(PACMAN_WALKING_UP, &asset_server),
-        load(PACMAN_WALKING_DOWN, &asset_server),
-        load(PACMAN_WALKING_LEFT, &asset_server),
-        load(PACMAN_WALKING_RIGHT, &asset_server),
-        // load(PACMAN_DYING, &asset_server),
-        load(BLINKY_UP, &asset_server),
-        load(BLINKY_DOWN, &asset_server),
-        load(BLINKY_LEFT, &asset_server),
-        load(BLINKY_RIGHT, &asset_server),
-        load(PINKY_UP, &asset_server),
-        load(PINKY_DOWN, &asset_server),
-        load(PINKY_LEFT, &asset_server),
-        load(PINKY_RIGHT, &asset_server),
-        load(INKY_UP, &asset_server),
-        load(INKY_DOWN, &asset_server),
-        load(INKY_LEFT, &asset_server),
-        load(INKY_RIGHT, &asset_server),
-        load(CLYDE_UP, &asset_server),
-        load(CLYDE_DOWN, &asset_server),
-        load(CLYDE_LEFT, &asset_server),
-        load(CLYDE_RIGHT, &asset_server),
-        load(FRIGHTENED, &asset_server),
-        load(FRIGHTENED_BLINKING, &asset_server),
         load(EATEN_UP, &asset_server),
         load(EATEN_DOWN, &asset_server),
         load(EATEN_LEFT, &asset_server),
         load(EATEN_RIGHT, &asset_server),
         load(OUTER_WALL_CORNER, &asset_server),
-        load(OUTER_WALL_CORNER_BLINKING, &asset_server),
         load(OUTER_WALL, &asset_server),
-        load(OUTER_WALL_BLINKING, &asset_server),
         load(INNER_WALL_CORNER, &asset_server),
-        load(INNER_WALL_CORNER_BLINKING, &asset_server),
         load(INNER_WALL, &asset_server),
-        load(INNER_WALL_BLINKING, &asset_server),
         load(GHOST_WALL_CORNER, &asset_server),
-        load(GHOST_WALL_CORNER_BLINKING, &asset_server),
         load(GHOST_WALL, &asset_server),
-        load(GHOST_WALL_BLINKING, &asset_server),
     ]))
 }
 
@@ -130,7 +101,7 @@ mod tests {
     use bevy::prelude::*;
 
     use crate::game_assets::base_assets::BaseAssetsToLoad;
-    use crate::spritesheet::SpriteSheet;
+    use crate::sprite_sheet::SpriteSheet;
 
     #[test]
     fn it_can_be_created_from_an_iterator_of_keys_and_handles() {

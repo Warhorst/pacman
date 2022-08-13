@@ -38,7 +38,7 @@ mod tests {
     use bevy::asset::HandleId;
     use bevy::prelude::*;
     use crate::game_assets::handles::GameAssetHandles;
-    use crate::spritesheet::SpriteSheet;
+    use crate::sprite_sheet::SpriteSheet;
 
     #[test]
     pub fn can_be_created_from_iterator_of_keys_and_untyped_handles() {
