@@ -41,7 +41,8 @@ fn spawn_ghost<G: GhostType + Component>(
     let spawn_direction = ghost_house.spawn_direction_of::<G>();
     let mut spawn_coordinates = ghost_house.spawn_coordinates_of::<G>();
     spawn_coordinates.z = z_value;
-    let animations = create_animations_for_ghost::<G>(game_assets, sprite_sheets);
+    let mut animations = create_animations_for_ghost::<G>(game_assets, sprite_sheets);
+    animations.current_mut().stop();
 
     commands
         .spawn()

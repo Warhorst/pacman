@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use crate::animation::Animations;
 
 use crate::ghosts::movement::MovePlugin;
 use crate::ghosts::schedule::SchedulePlugin;
@@ -46,6 +47,28 @@ impl Plugin for GhostPlugin {
     }
 }
 
+fn ghost_passed_tunnel(
+    mut event_reader: EventReader<GhostPassedTunnel>,
+    mut query: Query<(Entity, &mut Target), With<Ghost>>,
+) {
+    for event in event_reader.iter() {
+        for (entity, mut target) in query.iter_mut() {
+            if entity == **event {
+                target.clear();
+            }
+        }
+    }
+}
+
+fn despawn_ghosts(
+    mut commands: Commands,
+    query: Query<Entity, With<Ghost>>
+) {
+    for entity in query.iter() {
+        commands.entity(entity).despawn();
+    }
+}
+
 /// Used to mark every ghost.
 #[derive(Component, Eq, PartialEq)]
 pub struct Ghost;
@@ -72,25 +95,3 @@ impl GhostType for Pinky {}
 impl GhostType for Inky {}
 
 impl GhostType for Clyde {}
-
-fn ghost_passed_tunnel(
-    mut event_reader: EventReader<GhostPassedTunnel>,
-    mut query: Query<(Entity, &mut Target), With<Ghost>>,
-) {
-    for event in event_reader.iter() {
-        for (entity, mut target) in query.iter_mut() {
-            if entity == **event {
-                target.clear();
-            }
-        }
-    }
-}
-
-fn despawn_ghosts(
-    mut commands: Commands,
-    query: Query<Entity, With<Ghost>>
-) {
-    for entity in query.iter() {
-        commands.entity(entity).despawn();
-    }
-}
