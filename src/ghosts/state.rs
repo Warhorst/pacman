@@ -11,6 +11,7 @@ use crate::ghosts::{Blinky, Clyde, Ghost, GhostType, Inky, Pinky};
 use crate::ghosts::schedule::Schedule;
 use crate::interactions::{EEnergizerEaten, EPacmanEatsGhost};
 use crate::state_skip_if;
+use crate::common::XYEqual;
 
 pub struct StatePlugin;
 
@@ -61,7 +62,7 @@ fn update_spawned_state<G: GhostType + Component + 'static>(
 
         let coordinates = transform.translation;
 
-        if coordinates == ghost_house.coordinates_in_front_of_entrance() {
+        if coordinates.xy_equal_to(&ghost_house.coordinates_in_front_of_entrance()) {
             *state = schedule.current_state();
             *direction = ghost_house.entrance_direction.rotate_left();
         }
@@ -115,7 +116,7 @@ fn update_eaten_state<G: Component + GhostType + 'static>(
 
         let coordinates = transform.translation;
 
-        if coordinates == ghost_house.respawn_coordinates_of::<G>() {
+        if coordinates.xy_equal_to(&ghost_house.respawn_coordinates_of::<G>()) {
             *state = State::Spawned
         }
     }

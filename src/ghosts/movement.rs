@@ -32,7 +32,8 @@ fn move_ghost(
 
         if on_target(*coordinates, target_coordinates, direction) {
             // Fix slight errors which might cause ghost to get stuck
-            *coordinates = target_coordinates;
+            coordinates.x = target_coordinates.x;
+            coordinates.y = target_coordinates.y;
             target.clear();
         }
     }

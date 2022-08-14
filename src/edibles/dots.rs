@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::constants::DOT_DIMENSION;
+use crate::constants::{DOT_DIMENSION, DOT_Z};
 use crate::edibles::Edible;
 use crate::life_cycle::LifeCycle::*;
 use crate::is;
@@ -31,6 +31,9 @@ fn spawn_dots(
 ) {
     let point_dimension = Vec2::new(DOT_DIMENSION, DOT_DIMENSION);
     for position in map.get_positions_matching(is!(Element::DotSpawn)) {
+        let mut coordinates = Vec3::from(position);
+        coordinates.z = DOT_Z;
+
         commands.spawn()
             .insert_bundle(SpriteBundle {
                 texture: asset_server.load("textures/dot.png"),
@@ -38,7 +41,7 @@ fn spawn_dots(
                     custom_size: Some(point_dimension),
                     ..default()
                 },
-                transform: Transform::from_translation(Vec3::from(position)),
+                transform: Transform::from_translation(coordinates),
                 ..Default::default()
             })
             .insert(Dot)

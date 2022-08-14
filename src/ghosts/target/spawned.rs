@@ -9,6 +9,7 @@ use crate::ghosts::target::Target;
 use crate::common::Direction;
 use crate::common::Direction::*;
 use crate::ghost_house_gate::GhostHouseGate;
+use crate::common::XYEqual;
 
 #[derive(WorldQuery)]
 #[world_query(mutable)]
@@ -50,15 +51,15 @@ fn bounce_around<G: GhostType + Component + 'static>(components: &mut SpawnedTar
     let above_respawn = coordinates_slightly_in_direction(respawn, ghost_house.entrance_direction);
     let below_respawn = coordinates_slightly_in_direction(respawn, ghost_house.entrance_direction.opposite());
 
-    if coordinates == respawn {
+    if coordinates.xy_equal_to(&respawn) {
         match *components.direction {
             dir if dir == ghost_house.entrance_direction => components.target.set(above_respawn),
             _ => components.target.set(below_respawn)
         };
-    } else if coordinates == above_respawn {
+    } else if coordinates.xy_equal_to(&above_respawn) {
         components.target.set(below_respawn);
         *components.direction = ghost_house.entrance_direction.opposite();
-    } else if coordinates == below_respawn {
+    } else if coordinates.xy_equal_to(&below_respawn) {
         components.target.set(above_respawn);
         *components.direction = ghost_house.entrance_direction;
     }
@@ -123,9 +124,9 @@ fn move_near_center<G: GhostType + Component + 'static>(components: &mut Spawned
 fn coordinates_slightly_in_direction(v: Vec3, d: Direction) -> Vec3 {
     let distance = FIELD_DIMENSION / 2.0;
     match d {
-        Up => Vec3::new(v.x, v.y + distance, 0.0),
-        Down => Vec3::new(v.x, v.y - distance, 0.0),
-        Left => Vec3::new(v.x - distance, v.y, 0.0),
-        Right => Vec3::new(v.x + distance, v.y, 0.0),
+        Up => Vec3::new(v.x, v.y + distance, v.z),
+        Down => Vec3::new(v.x, v.y - distance, v.z),
+        Left => Vec3::new(v.x - distance, v.y, v.z),
+        Right => Vec3::new(v.x + distance, v.y, v.z),
     }
 }

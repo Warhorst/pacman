@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::constants::GHOST_DIMENSION;
+use crate::constants::{BLINKY_Z, CLYDE_Z, GHOST_DIMENSION, INKY_Z, PINKY_Z};
 use crate::game_assets::handles::GameAssetHandles;
 use crate::ghost_house::GhostHouse;
 use crate::ghosts::{Blinky, Clyde, Ghost, GhostType, Inky, Pinky};
@@ -21,10 +21,10 @@ pub fn spawn_ghosts(
     speed_by_level: Res<SpeedByLevel>,
 ) {
     let ghost_house = GhostHouse::new(&map);
-    spawn_ghost(&mut commands, &ghost_house, &game_assets, &sprite_sheets, &level, &speed_by_level, Blinky);
-    spawn_ghost(&mut commands, &ghost_house, &game_assets, &sprite_sheets, &level, &speed_by_level, Pinky);
-    spawn_ghost(&mut commands, &ghost_house, &game_assets, &sprite_sheets, &level, &speed_by_level, Inky);
-    spawn_ghost(&mut commands, &ghost_house, &game_assets, &sprite_sheets, &level, &speed_by_level, Clyde);
+    spawn_ghost(&mut commands, &ghost_house, &game_assets, &sprite_sheets, &level, &speed_by_level, Blinky, BLINKY_Z);
+    spawn_ghost(&mut commands, &ghost_house, &game_assets, &sprite_sheets, &level, &speed_by_level, Pinky, PINKY_Z);
+    spawn_ghost(&mut commands, &ghost_house, &game_assets, &sprite_sheets, &level, &speed_by_level, Inky, INKY_Z);
+    spawn_ghost(&mut commands, &ghost_house, &game_assets, &sprite_sheets, &level, &speed_by_level, Clyde, CLYDE_Z);
     commands.insert_resource(ghost_house);
 }
 
@@ -36,9 +36,11 @@ fn spawn_ghost<G: GhostType + Component>(
     level: &Level,
     speed_by_level: &SpeedByLevel,
     ghost_type: G,
+    z_value: f32
 ) {
     let spawn_direction = ghost_house.spawn_direction_of::<G>();
-    let spawn_coordinates = ghost_house.spawn_coordinates_of::<G>();
+    let mut spawn_coordinates = ghost_house.spawn_coordinates_of::<G>();
+    spawn_coordinates.z = z_value;
     let animations = create_animations_for_ghost::<G>(game_assets, sprite_sheets);
 
     commands

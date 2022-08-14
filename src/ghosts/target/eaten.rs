@@ -8,6 +8,7 @@ use crate::{state_skip_if, target_skip_if};
 use crate::common::position::Vec3Helper;
 use crate::common::position::ToPosition;
 use crate::map::board::Board;
+use crate::common::XYEqual;
 
 /// Determine the next target coordinates for a ghost when in "Eaten" state.
 ///
@@ -37,7 +38,7 @@ pub fn set_eaten_target<G: Component + GhostType + 'static>(
 
 /// Return if the ghost is perfectly centered in front of the ghost house entrance.
 fn is_directly_before_entrance(components: &TargetComponentsItem, ghost_house: &GhostHouse) -> bool {
-    components.transform.translation == ghost_house.coordinates_in_front_of_entrance()
+    components.transform.translation.xy_equal_to(&ghost_house.coordinates_in_front_of_entrance())
 }
 
 fn move_in_house_center(components: &mut TargetComponentsItem, ghost_house: &GhostHouse) {
@@ -68,7 +69,7 @@ fn move_directly_before_entrance(components: &mut TargetComponentsItem, ghost_ho
 }
 
 fn is_in_center(components: &TargetComponentsItem, ghost_house: &GhostHouse) -> bool {
-    components.transform.translation == ghost_house.center_coordinates()
+    components.transform.translation.xy_equal_to(&ghost_house.center_coordinates())
 }
 
 fn move_to_respawn<G: Component + GhostType + 'static>(components: &mut TargetComponentsItem, ghost_house: &GhostHouse) {

@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use LifeCycle::Ready;
+use crate::constants::TEXT_Z;
 use crate::game_assets::handles::GameAssetHandles;
 use crate::game_assets::keys::FONT;
 use crate::is;
@@ -30,7 +31,9 @@ fn spawn_screen(
     game_asset_handles: Res<GameAssetHandles>,
     map: Res<Map>,
 ) {
-    let coordinates = map.coordinates_between_positions_matching(is!(Element::FruitSpawn));
+    let mut coordinates = map.coordinates_between_positions_matching(is!(Element::FruitSpawn));
+    coordinates.z = TEXT_Z;
+
     commands.spawn_bundle(Text2dBundle {
         text: Text::from_section(
             "Ready!".to_string(),

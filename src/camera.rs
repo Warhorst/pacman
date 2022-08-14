@@ -20,6 +20,7 @@ fn spawn_camera(
     board: Res<Board>,
 ) {
     let mut bundle = Camera2dBundle::default();
+    println!("Camera Z: {}", bundle.transform.translation.z);
     modify_camera_x_y(&board, &mut bundle.transform.translation);
     commands.spawn().insert_bundle(bundle);
 }

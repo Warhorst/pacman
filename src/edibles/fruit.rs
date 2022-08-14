@@ -2,7 +2,7 @@ use std::time::Duration;
 use bevy::prelude::*;
 use crate::level::Level;
 use Fruit::*;
-use crate::constants::PACMAN_DIMENSION;
+use crate::constants::{FRUIT_Z, PACMAN_DIMENSION};
 use crate::edibles::Edible;
 use crate::interactions::EDotEaten;
 use crate::life_cycle::LifeCycle;
@@ -73,7 +73,8 @@ fn spawn_fruit_when_dot_limit_reached(
     let eaten_dots = **fruit_dot_counter;
 
     if eaten_dots == 70 || eaten_dots == 170 {
-        let coordinates = map.coordinates_between_positions_matching(is!(Element::FruitSpawn));
+        let mut coordinates = map.coordinates_between_positions_matching(is!(Element::FruitSpawn));
+        coordinates.z = FRUIT_Z;
         let dimension = Vec2::new(PACMAN_DIMENSION, PACMAN_DIMENSION);
         let fruit = get_fruit_for_level(&level);
 

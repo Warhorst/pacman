@@ -56,3 +56,13 @@ impl ToString for Direction {
         }.to_string()
     }
 }
+
+pub trait XYEqual {
+    fn xy_equal_to(&self, other: &Self) -> bool;
+}
+
+impl XYEqual for Vec3 {
+    fn xy_equal_to(&self, other: &Self) -> bool {
+        self.x == other.x && self.y == other.y
+    }
+}

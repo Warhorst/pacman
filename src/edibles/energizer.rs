@@ -1,7 +1,7 @@
 use std::time::Duration;
 use bevy::prelude::*;
 
-use crate::constants::ENERGIZER_DIMENSION;
+use crate::constants::{ENERGIZER_DIMENSION, ENERGIZER_Z};
 use crate::interactions::EEnergizerEaten;
 use crate::life_cycle::LifeCycle::*;
 use crate::is;
@@ -88,6 +88,9 @@ fn spawn_energizer(
 ) {
     let energizer_dimension = Vec2::new(ENERGIZER_DIMENSION, ENERGIZER_DIMENSION);
     for position in map.get_positions_matching(is!(EnergizerSpawn)) {
+        let mut coordinates = Vec3::from(position);
+        coordinates.z = ENERGIZER_Z;
+
         commands.spawn()
             .insert_bundle(SpriteBundle {
                 texture: asset_server.load("textures/energizer.png"),
@@ -95,7 +98,7 @@ fn spawn_energizer(
                     custom_size: Some(energizer_dimension),
                     ..default()
                 },
-                transform: Transform::from_translation(Vec3::from(position)),
+                transform: Transform::from_translation(coordinates),
                 ..Default::default()
             })
             .insert(Energizer)

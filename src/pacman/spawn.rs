@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use crate::common::Direction::*;
 
-use crate::constants::PACMAN_DIMENSION;
+use crate::constants::{PACMAN_DIMENSION, PACMAN_Z};
 use crate::is;
 use crate::level::Level;
 use crate::map::Element::PacManSpawn;
@@ -24,18 +24,19 @@ pub (in crate::pacman) fn spawn_pacman(
     level: Res<Level>,
     speed_by_level: Res<SpeedByLevel>
 ) {
-    let pacman_spawn = PacmanSpawn(map.coordinates_between_positions_matching(is!(PacManSpawn)));
-    let pacman_dimension = Vec2::new(PACMAN_DIMENSION, PACMAN_DIMENSION);
+    let mut spawn_coordinates = map.coordinates_between_positions_matching(is!(PacManSpawn));
+    spawn_coordinates.z = PACMAN_Z;
+    let dimension = Vec2::new(PACMAN_DIMENSION, PACMAN_DIMENSION);
     let animations = create_pacman_animations(&game_assets, &sprite_sheets);
 
     commands.spawn()
         .insert_bundle(SpriteBundle {
             texture: animations.current().texture(),
             sprite: Sprite {
-                custom_size: Some(pacman_dimension),
+                custom_size: Some(dimension),
                 ..default()
             },
-            transform: Transform::from_translation(*pacman_spawn),
+            transform: Transform::from_translation(spawn_coordinates),
             ..Default::default()
         })
         .insert(Pacman)

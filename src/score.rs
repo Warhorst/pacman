@@ -1,7 +1,7 @@
 use std::time::Duration;
 use bevy::prelude::*;
 
-use crate::constants::{FIELD_DIMENSION, POINTS_PER_DOT, POINTS_PER_ENERGIZER, POINTS_PER_GHOST};
+use crate::constants::{FIELD_DIMENSION, POINTS_PER_DOT, POINTS_PER_ENERGIZER, POINTS_PER_GHOST, TEXT_Z};
 use crate::edibles::energizer::EnergizerOver;
 use crate::interactions::{EDotEaten, EEnergizerEaten, EFruitEaten, EPacmanEatsGhost};
 use crate::life_cycle::LifeCycle;
@@ -124,7 +124,10 @@ fn add_points_for_eaten_ghost_and_display_score_text(
         let points = POINTS_PER_GHOST * 2usize.pow(**eaten_ghost_counter as u32);
         score.add(points);
         **eaten_ghost_counter += 1;
-        spawn_score_text(&mut commands, &game_asset_handles, Color::hex("31FFFF").unwrap(), points, event.1.translation)
+
+        let mut coordinates = event.1.translation;
+        coordinates.z = TEXT_Z;
+        spawn_score_text(&mut commands, &game_asset_handles, Color::hex("31FFFF").unwrap(), points, coordinates)
     }
 }
 
@@ -157,8 +160,11 @@ fn add_points_for_eaten_fruit_and_display_score_text(
             Key => 5000
         };
 
+        let mut coordinates = transform.translation;
+        coordinates.z = TEXT_Z;
+
         score.add(points);
-        spawn_score_text(&mut commands, &game_asset_handles, Color::hex("FFBDFF").unwrap(), points, transform.translation)
+        spawn_score_text(&mut commands, &game_asset_handles, Color::hex("FFBDFF").unwrap(), points, coordinates)
     }
 }
 
