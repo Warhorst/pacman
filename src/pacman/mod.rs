@@ -6,7 +6,7 @@ use crate::common::Direction::*;
 use crate::life_cycle::LifeCycle::*;
 use crate::pacman::spawn::spawn_pacman;
 use crate::pacman::movement::{move_pacman, stop_pacman_when_a_dot_was_eaten, stop_pacman_when_a_ghost_was_eaten, stop_pacman_when_energizer_was_eaten};
-use crate::pacman::textures::update_pacman_appearance;
+use crate::pacman::textures::{start_animation, update_pacman_appearance};
 use crate::stop::ENoLongerStopped;
 
 mod movement;
@@ -28,6 +28,9 @@ impl Plugin for PacmanPlugin {
             .add_event::<EPacmanDead>()
             .add_system_set(
                 SystemSet::on_enter(Ready).with_system(spawn_pacman)
+            )
+            .add_system_set(
+                SystemSet::on_enter(Running).with_system(start_animation)
             )
             .add_system_set(
                 SystemSet::on_update(Running)
@@ -93,7 +96,7 @@ fn stop_animation(
     mut query: Query<&mut Animations, With<Pacman>>
 ) {
     for mut animations in query.iter_mut() {
-        animations.current_mut().stop()
+        animations.stop()
     }
 }
 

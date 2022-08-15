@@ -6,19 +6,19 @@ use crate::edibles::energizer::EnergizerTimer;
 use crate::game_assets::handles::GameAssetHandles;
 use crate::game_assets::keys::*;
 use crate::game_assets::keys::sprite_sheets::*;
-use crate::ghosts::{Blinky, GhostType, Inky, Pinky};
+use crate::ghosts::{Blinky, Ghost, GhostType, Inky, Pinky};
 use crate::ghosts::state::State;
 use crate::sprite_sheet::SpriteSheet;
 
 pub(in crate::ghosts) fn update_ghost_appearance<G: 'static + Component + GhostType>(
-    energizer_timer: Res<EnergizerTimer>,
+    energizer_timer: Option<Res<EnergizerTimer>>,
     mut query: Query<(&Direction, &State, &mut Animations), With<G>>,
 ) {
     for (direction, state, mut animations) in query.iter_mut() {
         match state {
-            State::Frightened => match energizer_timer.remaining() {
+            State::Frightened => match energizer_timer {
                 // animate a frightened ghost differently if the energizer timer is almost ending
-                Some(secs) if secs < 2.0 => animations.change_animation_to("frightened_blinking"),
+                Some(ref timer) if timer.remaining() < 2.0 => animations.change_animation_to("frightened_blinking"),
                 _ => animations.change_animation_to("frightened"),
             },
             State::Eaten => {
@@ -81,4 +81,13 @@ fn create_frightened_blinking_animation(sprite_sheet: &SpriteSheet) -> Animation
         true,
         sprite_sheet.images_at(0..4)
     )
+}
+
+/// The ghosts start with stopped animations. Restart them here
+pub(in crate::ghosts) fn start_animation(
+    mut query: Query<&mut Animations, With<Ghost>>
+) {
+    for mut anim in &mut query {
+        anim.resume()
+    }
 }

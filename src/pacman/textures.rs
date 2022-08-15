@@ -56,3 +56,12 @@ fn create_dying_animation(
         sheet.images_at(0..12),
     )
 }
+
+/// pacman starts with stopped animations. Restart them here
+pub(in crate::pacman) fn start_animation(
+    mut query: Query<&mut Animations, With<Pacman>>
+) {
+    for mut anim in &mut query {
+        anim.resume()
+    }
+}

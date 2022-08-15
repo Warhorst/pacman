@@ -16,7 +16,6 @@ impl Plugin for EnergizerPlugin {
         app
 
             .add_event::<EnergizerOver>()
-            .insert_resource(EnergizerTimer::new())
             .add_system_set(
                 SystemSet::on_enter(Start).with_system(spawn_energizer)
             )
@@ -37,47 +36,35 @@ pub struct Energizer;
 pub struct EnergizerOver;
 
 pub struct EnergizerTimer {
-    timer: Option<Timer>,
+    timer: Timer,
 }
 
 impl EnergizerTimer {
-    pub fn new() -> Self {
-        EnergizerTimer {
-            timer: None
-        }
-    }
-
     /// The energizer is active for the full time at level 1.
     /// Its time gets reduced every level until level 19, were it stops instantly.
     ///
     /// I use a linear function to calculate the energizer time per level. This is only speculation.
     /// It is unclear how the time an energizer is active gets calculated.
-    pub fn start(&mut self, level: &Level) {
+    pub fn start(level: &Level) -> Self {
         let level = **level as f32 - 1.0;
         let time = f32::max(8.0 - level * (8.0 / 18.0), 0.0);
-        self.timer = Some(Timer::from_seconds(time, false))
+
+        EnergizerTimer {
+            timer: Timer::from_seconds(time, false)
+        }
     }
 
     pub fn tick(&mut self, delta: Duration) {
-        if let Some(ref mut t) = self.timer {
-            t.tick(delta);
-        }
-
-        if self.is_finished() {
-            self.timer = None
-        }
+        self.timer.tick(delta);
     }
 
     pub fn is_finished(&self) -> bool {
-        match self.timer {
-            Some(ref t) => t.finished(),
-            None => true
-        }
+        self.timer.finished()
     }
 
     /// Return the remaining seconds for this timer (if the timer is active, else None)
-    pub fn remaining(&self) -> Option<f32> {
-        Some(self.timer.as_ref()?.duration().as_secs_f32() - self.timer.as_ref()?.elapsed_secs())
+    pub fn remaining(&self) -> f32 {
+        self.timer.duration().as_secs_f32() - self.timer.elapsed_secs()
     }
 }
 
@@ -108,23 +95,29 @@ fn spawn_energizer(
 }
 
 fn start_energizer_timer_when_energizer_eaten(
+    mut commands: Commands,
     mut event_reader: EventReader<EEnergizerEaten>,
     level: Res<Level>,
-    mut energizer_timer: ResMut<EnergizerTimer>
 ) {
     for _ in event_reader.iter() {
-        energizer_timer.start(&level)
+        commands.insert_resource(EnergizerTimer::start(&level));
     }
 }
 
 fn update_energizer_timer(
+    mut commands: Commands,
     mut event_writer: EventWriter<EnergizerOver>,
-    mut energizer_timer: ResMut<EnergizerTimer>,
+    energizer_timer: Option<ResMut<EnergizerTimer>>,
     time: Res<Time>
 ) {
-    energizer_timer.tick(time.delta());
+    if let Some(mut timer) = energizer_timer {
+        timer.tick(time.delta());
 
-    if energizer_timer.is_finished() {
-        event_writer.send(EnergizerOver)
+        if timer.is_finished() {
+            commands.remove_resource::<EnergizerTimer>();
+            event_writer.send(EnergizerOver);
+        }
     }
+
+
 }

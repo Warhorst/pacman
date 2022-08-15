@@ -28,7 +28,7 @@ pub (in crate::pacman) fn spawn_pacman(
     spawn_coordinates.z = PACMAN_Z;
     let dimension = Vec2::new(PACMAN_DIMENSION, PACMAN_DIMENSION);
     let mut animations = create_pacman_animations(&game_assets, &sprite_sheets);
-    animations.current_mut().stop();
+    animations.stop();
 
     commands.spawn()
         .insert_bundle(SpriteBundle {

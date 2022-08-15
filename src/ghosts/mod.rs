@@ -5,7 +5,7 @@ use crate::ghosts::schedule::SchedulePlugin;
 use crate::ghosts::spawn::spawn_ghosts;
 use crate::ghosts::state::StatePlugin;
 use crate::ghosts::target::{Target, TargetPlugin};
-use crate::ghosts::textures::update_ghost_appearance;
+use crate::ghosts::textures::{start_animation, update_ghost_appearance};
 use crate::tunnels::GhostPassedTunnel;
 use crate::life_cycle::LifeCycle::*;
 
@@ -27,6 +27,9 @@ impl Plugin for GhostPlugin {
             .add_plugin(SchedulePlugin)
             .add_system_set(
                 SystemSet::on_enter(Ready).with_system(spawn_ghosts)
+            )
+            .add_system_set(
+                SystemSet::on_enter(Running).with_system(start_animation)
             )
             .add_system_set(
                 SystemSet::on_update(Running)

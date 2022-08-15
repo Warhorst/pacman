@@ -162,13 +162,13 @@ fn update_ghost_speed(
 fn update_pacman_speed(
     level: Res<Level>,
     speed_by_level: Res<SpeedByLevel>,
-    energizer_timer: Res<EnergizerTimer>,
+    energizer_timer: Option<Res<EnergizerTimer>>,
     mut query: Query<&mut Speed, With<Pacman>>,
 ) {
     for mut speed in query.iter_mut() {
         let pacman_speed = speed_by_level.for_pacman(&level);
 
-        if !energizer_timer.is_finished() {
+        if energizer_timer.is_some() {
             *speed = pacman_speed.frightened;
         } else {
             *speed = pacman_speed.normal;

@@ -19,8 +19,10 @@ fn update_entities_with_animations(
 ) {
     let delta = time.delta();
     for (mut texture, mut animations) in query.iter_mut() {
-        animations.current_mut().update(delta);
-        *texture = animations.current().texture()
+        if animations.is_running() {
+            animations.current_mut().update(delta);
+            *texture = animations.current().texture()
+        }
     }
 }
 
@@ -43,7 +45,6 @@ pub enum Animation {
         timer: Timer,
         repeating: bool,
         textures: Vec<Handle<Image>>,
-        running: bool,
     },
 }
 
@@ -67,7 +68,6 @@ impl Animation {
             timer: Timer::new(Duration::from_secs_f32(texture_display_time), true),
             repeating,
             textures,
-            running: true,
         }
     }
 
@@ -80,13 +80,6 @@ impl Animation {
     ///
     /// If the animation is stopped or it is a single texture animation, do nothing.
     pub fn update(&mut self, delta: Duration) {
-        let running = match self {
-            Animation::SingleTexture { .. } => return,
-            Animation::TextureList { running, .. } => *running,
-        };
-
-        if !running { return; }
-
         let (current_texture_index, timer, repeating, num_textures) = match self {
             Animation::SingleTexture { .. } => return,
             Animation::TextureList { ref mut current_texture_index, timer, repeating, textures, .. } => (current_texture_index, timer, repeating, textures.len()),
@@ -114,16 +107,14 @@ impl Animation {
     /// Rewind the animation back to the start. This means:
     /// - reset the timer
     /// - set the current texture index to zero
-    /// - set running to true
     pub fn reset(&mut self) {
-        let (current_texture_index, timer, running) = match self {
+        let (current_texture_index, timer) = match self {
             Animation::SingleTexture { .. } => return,
-            Animation::TextureList { ref mut current_texture_index, timer, running, .. } => (current_texture_index, timer, running),
+            Animation::TextureList { ref mut current_texture_index, timer, .. } => (current_texture_index, timer),
         };
 
         timer.reset();
         *current_texture_index = 0;
-        *running = true;
     }
 
     /// Return if the current animation iteration is over
@@ -145,14 +136,6 @@ impl Animation {
 
         !repeating && self.is_finished()
     }
-
-    /// Stop the animation from getting updated.
-    pub fn stop(&mut self) {
-        match self {
-            Animation::SingleTexture { .. } => return,
-            Animation::TextureList { ref mut running, .. } => *running = false,
-        }
-    }
 }
 
 /// Component for entities that might have more than one animation.
@@ -169,6 +152,7 @@ impl Animation {
 pub struct Animations {
     atlas: HashMap<String, Animation>,
     current: String,
+    running: bool
 }
 
 impl Animations {
@@ -176,6 +160,7 @@ impl Animations {
         Animations {
             atlas: animations.into_iter().map(|(s, anims)| (s.to_string(), anims)).collect(),
             current: current.to_string(),
+            running: true
         }
     }
 
@@ -200,5 +185,19 @@ impl Animations {
             self.atlas.get_mut(&new_current).expect("the new selected animation does not exist in the atlas").reset();
             self.current = new_current;
         }
+    }
+
+    pub fn is_running(&self) -> bool {
+        self.running
+    }
+
+    /// Stop the animations from getting updated.
+    pub fn stop(&mut self) {
+        self.running = false
+    }
+
+    /// Resume to update the animations after being stopped.
+    pub fn resume(&mut self) {
+        self.running = true
     }
 }

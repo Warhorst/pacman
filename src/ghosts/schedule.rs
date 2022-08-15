@@ -58,11 +58,11 @@ fn update_schedule_when_level_changed(
 /// The schedule does not proceed while an energizer is active.
 fn update_schedule(
     time: Res<Time>,
-    energizer_timer: Res<EnergizerTimer>,
+    energizer_timer: Option<Res<EnergizerTimer>>,
     mut schedule: ResMut<Schedule>,
     mut event_writer: EventWriter<ScheduleChanged>,
 ) {
-    if !energizer_timer.is_finished() { return; }
+    if energizer_timer.is_some() { return; }
 
     let old_state = schedule.current_state();
     let new_state = schedule.state_after_tick(time.delta());
