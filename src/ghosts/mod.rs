@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use crate::animation::Animations;
 
 use crate::ghosts::movement::MovePlugin;
 use crate::ghosts::schedule::SchedulePlugin;

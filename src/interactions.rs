@@ -34,6 +34,7 @@ impl Plugin for InteractionsPlugin {
 pub struct EPacmanHit;
 
 /// Fired when Pacman ate a ghost in frightened state.
+/// Contains the eaten ghost entity and transform.
 pub struct EPacmanEatsGhost(pub Entity, pub Transform);
 
 /// Fired when pacman eats a dot.

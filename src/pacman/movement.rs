@@ -1,4 +1,3 @@
-use std::time::Duration;
 use bevy::prelude::*;
 use bevy::ecs::query::WorldQuery;
 
@@ -6,91 +5,25 @@ use crate::common::Direction;
 use crate::common::Direction::*;
 use crate::common::position::Position;
 use crate::constants::FIELD_DIMENSION;
-use crate::interactions::{EDotEaten, EEnergizerEaten};
-use crate::life_cycle::LifeCycle::*;
+use crate::interactions::{EDotEaten, EEnergizerEaten, EPacmanEatsGhost};
 use crate::map::board::Board;
 use crate::pacman::Pacman;
 use crate::speed::Speed;
-
-pub struct PacmanMovementPlugin;
-
-impl Plugin for PacmanMovementPlugin {
-    fn build(&self, app: &mut App) {
-        app
-            .insert_resource(PacmanStopTimer::new())
-            .add_system_set(
-                SystemSet::on_update(Running)
-                    .with_system(stop_pacman_when_a_dot_was_eaten.label("pacman_stop"))
-                    .with_system(stop_pacman_when_energizer_was_eaten.label("pacman_stop"))
-                    .with_system(move_pacman.after("pacman_stop"))
-                    .with_system(update_stop_timer.after(move_pacman))
-            )
-        ;
-    }
-}
-
-/// Timer that tells how long pacman will be unable to move.
-struct PacmanStopTimer {
-    timer: Option<Timer>,
-}
-
-impl PacmanStopTimer {
-    pub fn new() -> Self {
-        PacmanStopTimer {
-            timer: None
-        }
-    }
-
-    /// Stop pacman for 1/60 second.
-    ///
-    /// On the arcade machine (which was locked to 60 FPS), pacman just stopped for one frame. This does not have
-    /// the desired effect when playing on 144 or 30 FPS.
-    pub fn start_for_dot(&mut self) {
-        self.timer = Some(Timer::from_seconds(1.0 / 60.0, false))
-    }
-
-    /// Stop pacman for 3/60 second.
-    ///
-    /// On the arcade machine (which was locked to 60 FPS), pacman just stopped for three frames. This does not have
-    /// the desired effect when playing on 144 or 30 FPS.
-    pub fn start_for_energizer(&mut self) {
-        self.timer = Some(Timer::from_seconds(3.0 / 60.0, false))
-    }
-
-    pub fn tick(&mut self, delta: Duration) {
-        if let Some(ref mut timer) = self.timer {
-            timer.tick(delta);
-        }
-    }
-
-    pub fn is_finished(&self) -> bool {
-        match self.timer {
-            None => true,
-            Some(ref t) => t.finished()
-        }
-    }
-
-    pub fn is_active(&self) -> bool {
-        !self.is_finished()
-    }
-}
+use crate::stop::Stop;
 
 #[derive(WorldQuery)]
 #[world_query(mutable)]
-struct MoveComponents<'a> {
+pub(in crate::pacman) struct MoveComponents<'a> {
     direction: &'a Direction,
     transform: &'a mut Transform,
     speed: &'a Speed,
 }
 
-fn move_pacman(
+pub(in crate::pacman) fn move_pacman(
     board: Res<Board>,
     time: Res<Time>,
-    pacman_stop_timer: Res<PacmanStopTimer>,
-    mut query: Query<MoveComponents, With<Pacman>>,
+    mut query: Query<MoveComponents, (With<Pacman>, Without<Stop>)>,
 ) {
-    if pacman_stop_timer.is_active() { return; }
-
     let delta_seconds = time.delta_seconds();
 
     for mut move_components in query.iter_mut() {
@@ -194,27 +127,39 @@ fn center_position(direction: &Direction, new_position: &Position, new_coordinat
 
 /// When pacman eats a dot, he will stop for a moment. This allows
 /// the ghost to catch up on him if he continues to eat dots.
-fn stop_pacman_when_a_dot_was_eaten(
+pub(in crate::pacman) fn stop_pacman_when_a_dot_was_eaten(
+    mut commands: Commands,
     mut event_reader: EventReader<EDotEaten>,
-    mut pacman_stop_timer: ResMut<PacmanStopTimer>,
+    query: Query<Entity, (With<Pacman>, Without<Stop>)>
 ) {
     for _ in event_reader.iter() {
-        pacman_stop_timer.start_for_dot();
+        for e in &query {
+            commands.entity(e).insert(Stop::for_seconds(1.0 / 60.0));
+        }
     }
 }
 
-fn stop_pacman_when_energizer_was_eaten(
+pub(in crate::pacman) fn stop_pacman_when_energizer_was_eaten(
+    mut commands: Commands,
     mut event_reader: EventReader<EEnergizerEaten>,
-    mut pacman_stop_timer: ResMut<PacmanStopTimer>,
+    query: Query<Entity, (With<Pacman>, Without<Stop>)>
 ) {
     for _ in event_reader.iter() {
-        pacman_stop_timer.start_for_energizer();
+        for e in &query {
+            commands.entity(e).insert(Stop::for_seconds(3.0 / 60.0));
+        }
     }
 }
 
-fn update_stop_timer(
-    time: Res<Time>,
-    mut pacman_stop_timer: ResMut<PacmanStopTimer>,
+pub(in crate::pacman) fn stop_pacman_when_a_ghost_was_eaten(
+    mut commands: Commands,
+    mut event_reader: EventReader<EPacmanEatsGhost>,
+    mut query: Query<(Entity, &mut Visibility), (With<Pacman>, Without<Stop>)>
 ) {
-    pacman_stop_timer.tick(time.delta());
+    for _ in event_reader.iter() {
+        for (entity, mut vis) in &mut query {
+            vis.is_visible = false;
+            commands.entity(entity).insert(Stop::for_seconds(1.0));
+        }
+    }
 }
