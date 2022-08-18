@@ -104,6 +104,7 @@ fn play_the_dying_animation(
     mut query: Query<&mut Animations, With<Pacman>>
 ) {
     for mut animations in query.iter_mut() {
+        animations.resume();
         animations.change_animation_to("dying")
     }
 }

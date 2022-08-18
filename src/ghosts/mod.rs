@@ -8,6 +8,7 @@ use crate::ghosts::target::{Target, TargetPlugin};
 use crate::ghosts::textures::{start_animation, update_ghost_appearance};
 use crate::tunnels::GhostPassedTunnel;
 use crate::life_cycle::LifeCycle::*;
+use crate::stop::ENoLongerStopped;
 
 pub mod movement;
 pub mod spawn;
@@ -38,6 +39,7 @@ impl Plugin for GhostPlugin {
                     .with_system(update_ghost_appearance::<Pinky>)
                     .with_system(update_ghost_appearance::<Inky>)
                     .with_system(update_ghost_appearance::<Clyde>)
+                    .with_system(set_ghosts_visible_when_stop_ended)
             )
             .add_system_set(
                 SystemSet::on_enter(PacmanDying).with_system(despawn_ghosts)
@@ -68,6 +70,19 @@ fn despawn_ghosts(
 ) {
     for entity in query.iter() {
         commands.entity(entity).despawn();
+    }
+}
+
+fn set_ghosts_visible_when_stop_ended(
+    mut event_reader: EventReader<ENoLongerStopped>,
+    mut query: Query<(Entity, &mut Visibility), With<Ghost>>
+) {
+    for event in event_reader.iter() {
+        for (e, mut vis) in &mut query {
+            if e == event.0 {
+                vis.is_visible = true
+            }
+        }
     }
 }
 

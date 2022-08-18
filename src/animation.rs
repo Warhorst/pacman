@@ -15,7 +15,7 @@ impl Plugin for AnimationPlugin {
 
 fn update_entities_with_animations(
     time: Res<Time>,
-    mut query: Query<(&mut Handle<Image>, &mut Animations), Without<Stop>>,
+    mut query: Query<(&mut Handle<Image>, &mut Animations)>,
 ) {
     let delta = time.delta();
     for (mut texture, mut animations) in query.iter_mut() {

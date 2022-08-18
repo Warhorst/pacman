@@ -158,6 +158,7 @@ pub(in crate::pacman) fn stop_pacman_when_a_ghost_was_eaten(
 ) {
     for _ in event_reader.iter() {
         for (entity, mut vis) in &mut query {
+            // TODO: A system in movement sets pacman invisible?
             vis.is_visible = false;
             commands.entity(entity).insert(Stop::for_seconds(1.0));
         }

@@ -2,10 +2,14 @@ use bevy::prelude::*;
 
 use crate::common::Direction;
 use crate::common::Direction::*;
+use crate::ghosts::Ghost;
 use crate::life_cycle::LifeCycle::*;
 use crate::ghosts::target::{Target, TargetSetter};
+use crate::interactions::EPacmanEatsGhost;
 use crate::speed::Speed;
+use crate::stop::Stop;
 use crate::target_skip_if;
+use crate::ghosts::state::State;
 
 pub struct MovePlugin;
 
@@ -13,29 +17,51 @@ impl Plugin for MovePlugin {
     fn build(&self, app: &mut App) {
         app.add_system_set(
             SystemSet::on_update(Running)
-                .with_system(move_ghost.after(TargetSetter))
+                .with_system(move_ghosts.after(TargetSetter))
+                .with_system(move_stopped_ghosts_when_they_are_eaten.after(TargetSetter))
+                .with_system(stop_ghosts_when_a_ghost_was_eaten)
         );
     }
 }
 
-fn move_ghost(
+fn move_ghosts(
     time: Res<Time>,
-    mut query: Query<(&Direction, &mut Target, &mut Transform, &Speed)>,
+    mut query: Query<(&Direction, &mut Target, &mut Transform, &Speed), Without<Stop>>,
 ) {
     for (direction, mut target, mut transform, speed) in query.iter_mut() {
-        target_skip_if!(target not set);
-        let mut coordinates = &mut transform.translation;
-        let delta_seconds = time.delta_seconds();
-        let target_coordinates = target.get();
-        move_in_direction(&mut coordinates, delta_seconds, &direction, speed);
-        limit_movement(&mut coordinates, &direction, &target_coordinates);
+        move_ghost(&time, direction, &mut target, &mut transform, speed)
+    }
+}
 
-        if on_target(*coordinates, target_coordinates, direction) {
-            // Fix slight errors which might cause ghost to get stuck
-            coordinates.x = target_coordinates.x;
-            coordinates.y = target_coordinates.y;
-            target.clear();
+fn move_stopped_ghosts_when_they_are_eaten(
+    time: Res<Time>,
+    mut query: Query<(&Direction, &State, &mut Target, &mut Transform, &Speed), With<Stop>>,
+) {
+    for (direction, state, mut target, mut transform, speed) in query.iter_mut() {
+        if state != &State::Eaten {
+            continue
         }
+
+        move_ghost(&time, direction, &mut target, &mut transform, speed)
+    }
+}
+
+fn move_ghost(time: &Time, direction: &Direction, target: &mut Target, transform: &mut Transform, speed: &Speed) {
+    if target.is_not_set() {
+        return;
+    }
+
+    let mut coordinates = &mut transform.translation;
+    let delta_seconds = time.delta_seconds();
+    let target_coordinates = target.get();
+    move_in_direction(&mut coordinates, delta_seconds, &direction, speed);
+    limit_movement(&mut coordinates, &direction, &target_coordinates);
+
+    if on_target(*coordinates, target_coordinates, direction) {
+        // Fix slight errors which might cause ghost to get stuck
+        coordinates.x = target_coordinates.x;
+        coordinates.y = target_coordinates.y;
+        target.clear();
     }
 }
 
@@ -68,5 +94,21 @@ fn on_target(coordinates: Vec3, target: Vec3, direction: &Direction) -> bool {
     match direction {
         Up | Down => coordinates.y == target.y,
         Left | Right => coordinates.x == target.x
+    }
+}
+
+fn stop_ghosts_when_a_ghost_was_eaten(
+    mut commands: Commands,
+    mut event_reader: EventReader<EPacmanEatsGhost>,
+    mut query: Query<(Entity, &mut Visibility), (With<Ghost>, Without<Stop>)>
+) {
+    for event in event_reader.iter() {
+        for (entity, mut vis) in &mut query {
+            if entity == event.0 {
+                vis.is_visible = false;
+            }
+
+            commands.entity(entity).insert(Stop::for_seconds(1.0));
+        }
     }
 }
