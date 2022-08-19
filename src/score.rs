@@ -193,7 +193,7 @@ fn spawn_score_text(
         ..Default::default()
     })
         .insert(ScoreText)
-        .insert(ScoreTextTimer(Timer::new(Duration::from_secs(2), false)))
+        .insert(ScoreTextTimer(Timer::new(Duration::from_secs(1), false)))
     ;
 }
 

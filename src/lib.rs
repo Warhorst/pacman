@@ -22,4 +22,3 @@ mod game_over_screen;
 mod edibles;
 mod interactions;
 mod game_assets;
-mod stop;

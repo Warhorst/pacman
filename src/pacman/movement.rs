@@ -5,11 +5,11 @@ use crate::common::Direction;
 use crate::common::Direction::*;
 use crate::common::position::Position;
 use crate::constants::FIELD_DIMENSION;
-use crate::interactions::{EDotEaten, EEnergizerEaten, EPacmanEatsGhost};
 use crate::map::board::Board;
+use crate::pacman::edible_eaten::EdibleEatenStop;
+use crate::pacman::ghost_eaten::GhostEatenStop;
 use crate::pacman::Pacman;
 use crate::speed::Speed;
-use crate::stop::Stop;
 
 #[derive(WorldQuery)]
 #[world_query(mutable)]
@@ -22,7 +22,7 @@ pub(in crate::pacman) struct MoveComponents<'a> {
 pub(in crate::pacman) fn move_pacman(
     board: Res<Board>,
     time: Res<Time>,
-    mut query: Query<MoveComponents, (With<Pacman>, Without<Stop>)>,
+    mut query: Query<MoveComponents, (With<Pacman>, Without<EdibleEatenStop>, Without<GhostEatenStop>)>,
 ) {
     let delta_seconds = time.delta_seconds();
 
@@ -122,45 +122,5 @@ fn center_position(direction: &Direction, new_position: &Position, new_coordinat
     match direction {
         Up | Down => new_coordinates.x = position_coordinates.x,
         Left | Right => new_coordinates.y = position_coordinates.y
-    }
-}
-
-/// When pacman eats a dot, he will stop for a moment. This allows
-/// the ghost to catch up on him if he continues to eat dots.
-pub(in crate::pacman) fn stop_pacman_when_a_dot_was_eaten(
-    mut commands: Commands,
-    mut event_reader: EventReader<EDotEaten>,
-    query: Query<Entity, (With<Pacman>, Without<Stop>)>
-) {
-    for _ in event_reader.iter() {
-        for e in &query {
-            commands.entity(e).insert(Stop::for_seconds(1.0 / 60.0));
-        }
-    }
-}
-
-pub(in crate::pacman) fn stop_pacman_when_energizer_was_eaten(
-    mut commands: Commands,
-    mut event_reader: EventReader<EEnergizerEaten>,
-    query: Query<Entity, (With<Pacman>, Without<Stop>)>
-) {
-    for _ in event_reader.iter() {
-        for e in &query {
-            commands.entity(e).insert(Stop::for_seconds(3.0 / 60.0));
-        }
-    }
-}
-
-pub(in crate::pacman) fn stop_pacman_when_a_ghost_was_eaten(
-    mut commands: Commands,
-    mut event_reader: EventReader<EPacmanEatsGhost>,
-    mut query: Query<(Entity, &mut Visibility), (With<Pacman>, Without<Stop>)>
-) {
-    for _ in event_reader.iter() {
-        for (entity, mut vis) in &mut query {
-            // TODO: A system in movement sets pacman invisible?
-            vis.is_visible = false;
-            commands.entity(entity).insert(Stop::for_seconds(1.0));
-        }
     }
 }

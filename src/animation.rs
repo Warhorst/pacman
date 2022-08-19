@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use bevy::prelude::*;
 use std::time::Duration;
-use crate::stop::Stop;
 
 pub struct AnimationPlugin;
 
@@ -15,11 +14,11 @@ impl Plugin for AnimationPlugin {
 
 fn update_entities_with_animations(
     time: Res<Time>,
-    mut query: Query<(&mut Handle<Image>, &mut Animations)>,
+    mut query: Query<(&Visibility, &mut Handle<Image>, &mut Animations)>,
 ) {
     let delta = time.delta();
-    for (mut texture, mut animations) in query.iter_mut() {
-        if animations.is_running() {
+    for (visibility, mut texture, mut animations) in query.iter_mut() {
+        if visibility.is_visible && animations.is_running() {
             animations.current_mut().update(delta);
             *texture = animations.current().texture()
         }

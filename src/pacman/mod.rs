@@ -4,14 +4,17 @@ use crate::animation::Animations;
 use crate::common::Direction;
 use crate::common::Direction::*;
 use crate::life_cycle::LifeCycle::*;
+use crate::pacman::edible_eaten::EdibleEatenPlugin;
+use crate::pacman::ghost_eaten::GhostEatenPlugin;
 use crate::pacman::spawn::spawn_pacman;
-use crate::pacman::movement::{move_pacman, stop_pacman_when_a_dot_was_eaten, stop_pacman_when_a_ghost_was_eaten, stop_pacman_when_energizer_was_eaten};
+use crate::pacman::movement::move_pacman;
 use crate::pacman::textures::{start_animation, update_pacman_appearance};
-use crate::stop::ENoLongerStopped;
 
 mod movement;
 mod spawn;
 mod textures;
+mod edible_eaten;
+mod ghost_eaten;
 
 /// Marker component for a pacman entity.
 #[derive(Component)]
@@ -26,6 +29,8 @@ impl Plugin for PacmanPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<EPacmanDead>()
+            .add_plugin(EdibleEatenPlugin)
+            .add_plugin(GhostEatenPlugin)
             .add_system_set(
                 SystemSet::on_enter(Ready).with_system(spawn_pacman)
             )
@@ -34,18 +39,9 @@ impl Plugin for PacmanPlugin {
             )
             .add_system_set(
                 SystemSet::on_update(Running)
-                    .with_system(stop_pacman_when_a_dot_was_eaten.label("pacman_stop"))
-                    .with_system(stop_pacman_when_energizer_was_eaten.label("pacman_stop"))
-                    .with_system(
-                        stop_pacman_when_a_ghost_was_eaten
-                            .label("pacman_stop")
-                            .after(stop_pacman_when_a_dot_was_eaten)
-                            .after(stop_pacman_when_energizer_was_eaten)
-                    )
                     .with_system(move_pacman.after("pacman_stop"))
                     .with_system(set_direction_based_on_keyboard_input)
                     .with_system(update_pacman_appearance.after(set_direction_based_on_keyboard_input))
-                    .with_system(set_visible_when_stop_ended)
             )
             .add_system_set(
                 SystemSet::on_enter(PacmanHit).with_system(stop_animation)
@@ -126,18 +122,5 @@ fn despawn_pacman(
 ) {
     for entity in query.iter() {
         commands.entity(entity).despawn()
-    }
-}
-
-fn set_visible_when_stop_ended(
-    mut event_reader: EventReader<ENoLongerStopped>,
-    mut query: Query<(Entity, &mut Visibility), With<Pacman>>
-) {
-    for event in event_reader.iter() {
-        for (e, mut vis) in &mut query {
-            if e == event.0 {
-                vis.is_visible = true
-            }
-        }
     }
 }

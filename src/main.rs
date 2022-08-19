@@ -22,7 +22,6 @@ use crate::ready_screen::ReadyScreenPlugin;
 use crate::score::ScorePlugin;
 use crate::speed::SpeedPlugin;
 use crate::sprite_sheet::SpriteSheetPlugin;
-use crate::stop::StopPlugin;
 use crate::tunnels::TunnelPlugin;
 use crate::walls::WallsPlugin;
 
@@ -50,7 +49,6 @@ mod game_over_screen;
 mod edibles;
 mod interactions;
 mod game_assets;
-mod stop;
 
 fn main() {
     App::new()
@@ -86,6 +84,5 @@ fn main() {
         .add_plugin(SpriteSheetPlugin)
         .add_plugin(ReadyScreenPlugin)
         .add_plugin(GameOverScreenPlugin)
-        .add_plugin(StopPlugin)
         .run()
 }
