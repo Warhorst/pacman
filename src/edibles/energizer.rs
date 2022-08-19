@@ -24,6 +24,9 @@ impl Plugin for EnergizerPlugin {
                     .with_system(start_energizer_timer_when_energizer_eaten)
                     .with_system(update_energizer_timer.after(start_energizer_timer_when_energizer_eaten))
             )
+            .add_system_set(
+                SystemSet::on_exit(LevelTransition).with_system(spawn_energizer)
+            )
         ;
     }
 }
@@ -71,7 +74,7 @@ impl EnergizerTimer {
 fn spawn_energizer(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    map: Res<Map>
+    map: Res<Map>,
 ) {
     let energizer_dimension = Vec2::new(ENERGIZER_DIMENSION, ENERGIZER_DIMENSION);
     for position in map.get_positions_matching(is!(EnergizerSpawn)) {
@@ -108,7 +111,7 @@ fn update_energizer_timer(
     mut commands: Commands,
     mut event_writer: EventWriter<EnergizerOver>,
     energizer_timer: Option<ResMut<EnergizerTimer>>,
-    time: Res<Time>
+    time: Res<Time>,
 ) {
     if let Some(mut timer) = energizer_timer {
         timer.tick(time.delta());
@@ -118,6 +121,4 @@ fn update_energizer_timer(
             event_writer.send(EnergizerOver);
         }
     }
-
-
 }
