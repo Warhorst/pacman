@@ -63,22 +63,26 @@ impl SpeedByLevel {
             GhostLevelRangeSpeed::new(Level(1)..=Level(1), GhostSpeed {
                 normal: Speed(0.75 * GHOST_SPEED),
                 frightened: Speed(0.5 * GHOST_SPEED),
-                tunnel: Speed(0.4 * GHOST_SPEED)
+                tunnel: Speed(0.4 * GHOST_SPEED),
+                eaten: Speed(1.5 * GHOST_SPEED)
             }),
             GhostLevelRangeSpeed::new(Level(2)..=Level(4), GhostSpeed {
                 normal: Speed(0.85 * GHOST_SPEED),
                 frightened: Speed(0.55 * GHOST_SPEED),
-                tunnel: Speed(0.45 * GHOST_SPEED)
+                tunnel: Speed(0.45 * GHOST_SPEED),
+                eaten: Speed(1.5 * GHOST_SPEED)
             }),
             GhostLevelRangeSpeed::new(Level(5)..=Level(20), GhostSpeed {
                 normal: Speed(0.95 * GHOST_SPEED),
                 frightened: Speed(0.6 * GHOST_SPEED),
-                tunnel: Speed(0.5 * GHOST_SPEED)
+                tunnel: Speed(0.5 * GHOST_SPEED),
+                eaten: Speed(1.5 * GHOST_SPEED)
             }),
             GhostLevelRangeSpeed::new(Level(21)..=Level(usize::MAX), GhostSpeed {
                 normal: Speed(0.95 * GHOST_SPEED),
                 frightened: Speed(0.95 * GHOST_SPEED),
-                tunnel: Speed(0.5 * GHOST_SPEED)
+                tunnel: Speed(0.5 * GHOST_SPEED),
+                eaten: Speed(1.5 * GHOST_SPEED)
             }),
         ];
 
@@ -137,7 +141,8 @@ impl GhostLevelRangeSpeed {
 pub struct GhostSpeed {
     pub normal: Speed,
     pub frightened: Speed,
-    pub tunnel: Speed
+    pub tunnel: Speed,
+    pub eaten: Speed
 }
 
 fn update_ghost_speed(
@@ -149,7 +154,9 @@ fn update_ghost_speed(
     for (transform, mut speed, state) in query.iter_mut() {
         let ghost_speed = speed_by_level.for_ghosts(&level);
 
-        if board.position_is_tunnel(&transform.pos()) {
+        if *state == State::Eaten {
+            *speed = ghost_speed.eaten
+        } else if board.position_is_tunnel(&transform.pos()) {
             *speed = ghost_speed.tunnel;
         } else if *state == State::Frightened {
             *speed = ghost_speed.frightened
