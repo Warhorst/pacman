@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::constants::{BLINKY_Z, CLYDE_Z, GHOST_DIMENSION, INKY_Z, PINKY_Z};
+use crate::constants::{BLINKY_Z, CLYDE_Z, GHOST_DIMENSION, GHOST_SPEED, INKY_Z, PINKY_Z};
 use crate::game_assets::handles::GameAssetHandles;
 use crate::ghost_house::GhostHouse;
 use crate::ghosts::{Blinky, Clyde, Ghost, GhostType, Inky, Pinky};
@@ -9,7 +9,8 @@ use crate::ghosts::target::Target;
 use crate::ghosts::textures::create_animations_for_ghost;
 use crate::level::Level;
 use crate::map::Map;
-use crate::speed::SpeedByLevel;
+use crate::specs_per_level::SpecsPerLevel;
+use crate::speed::Speed;
 use crate::sprite_sheet::SpriteSheet;
 
 pub fn spawn_ghosts(
@@ -18,13 +19,13 @@ pub fn spawn_ghosts(
     sprite_sheets: Res<Assets<SpriteSheet>>,
     map: Res<Map>,
     level: Res<Level>,
-    speed_by_level: Res<SpeedByLevel>,
+    specs_per_level: Res<SpecsPerLevel>,
 ) {
     let ghost_house = GhostHouse::new(&map);
-    spawn_ghost(&mut commands, &ghost_house, &game_assets, &sprite_sheets, &level, &speed_by_level, Blinky, BLINKY_Z);
-    spawn_ghost(&mut commands, &ghost_house, &game_assets, &sprite_sheets, &level, &speed_by_level, Pinky, PINKY_Z);
-    spawn_ghost(&mut commands, &ghost_house, &game_assets, &sprite_sheets, &level, &speed_by_level, Inky, INKY_Z);
-    spawn_ghost(&mut commands, &ghost_house, &game_assets, &sprite_sheets, &level, &speed_by_level, Clyde, CLYDE_Z);
+    spawn_ghost(&mut commands, &ghost_house, &game_assets, &sprite_sheets, &level, &specs_per_level, Blinky, BLINKY_Z);
+    spawn_ghost(&mut commands, &ghost_house, &game_assets, &sprite_sheets, &level, &specs_per_level, Pinky, PINKY_Z);
+    spawn_ghost(&mut commands, &ghost_house, &game_assets, &sprite_sheets, &level, &specs_per_level, Inky, INKY_Z);
+    spawn_ghost(&mut commands, &ghost_house, &game_assets, &sprite_sheets, &level, &specs_per_level, Clyde, CLYDE_Z);
     commands.insert_resource(ghost_house);
 }
 
@@ -34,7 +35,7 @@ fn spawn_ghost<G: GhostType + Component>(
     game_assets: &GameAssetHandles,
     sprite_sheets: &Assets<SpriteSheet>,
     level: &Level,
-    speed_by_level: &SpeedByLevel,
+    specs_per_level: &SpecsPerLevel,
     ghost_type: G,
     z_value: f32
 ) {
@@ -58,7 +59,7 @@ fn spawn_ghost<G: GhostType + Component>(
         .insert(Ghost)
         .insert(ghost_type)
         .insert(spawn_direction)
-        .insert(speed_by_level.for_ghosts(level).normal)
+        .insert(Speed(GHOST_SPEED * specs_per_level.get_for(level).ghost_normal_speed_modifier))
         .insert(Target::new())
         .insert(State::Spawned)
         .insert(animations)

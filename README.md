@@ -18,16 +18,10 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 ### Pacman
 - sound when eating dots
 
-### Ghosts
-- adapt Blinkys speed based on remaining dots
-
 ### Graphics
 - return the correct z coordinate from the board (or only x and y)
-- render points for eating a ghost
-- render points for eating a fruit
 
 ### Appearance
-- dramatic pauses when specific actions happen (like eating ghosts)
 - sound (this one might be split later)
 
 ### UI

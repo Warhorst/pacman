@@ -39,7 +39,7 @@ impl Plugin for PacmanPlugin {
             )
             .add_system_set(
                 SystemSet::on_update(Running)
-                    .with_system(move_pacman.after("pacman_stop"))
+                    .with_system(move_pacman)
                     .with_system(set_direction_based_on_keyboard_input)
                     .with_system(update_pacman_appearance.after(set_direction_based_on_keyboard_input))
             )

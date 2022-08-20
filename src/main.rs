@@ -20,6 +20,7 @@ use crate::map::MapPlugin;
 use crate::random::RandomPlugin;
 use crate::ready_screen::ReadyScreenPlugin;
 use crate::score::ScorePlugin;
+use crate::specs_per_level::SpecsPerLevelPlugin;
 use crate::speed::SpeedPlugin;
 use crate::sprite_sheet::SpriteSheetPlugin;
 use crate::tunnels::TunnelPlugin;
@@ -49,6 +50,7 @@ mod game_over_screen;
 mod edibles;
 mod interactions;
 mod game_assets;
+mod specs_per_level;
 
 fn main() {
     App::new()
@@ -84,5 +86,6 @@ fn main() {
         .add_plugin(SpriteSheetPlugin)
         .add_plugin(ReadyScreenPlugin)
         .add_plugin(GameOverScreenPlugin)
+        .add_plugin(SpecsPerLevelPlugin)
         .run()
 }

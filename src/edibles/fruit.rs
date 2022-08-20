@@ -3,8 +3,8 @@ use bevy::prelude::*;
 use crate::level::Level;
 use Fruit::*;
 use crate::constants::{FRUIT_Z, PACMAN_DIMENSION};
+use crate::edibles::dots::EatenDots;
 use crate::edibles::Edible;
-use crate::interactions::EDotEaten;
 use crate::life_cycle::LifeCycle;
 use crate::is;
 use crate::map::{Element, Map};
@@ -14,21 +14,20 @@ pub struct FruitPlugin;
 impl Plugin for FruitPlugin {
     fn build(&self, app: &mut App) {
         app
-            .insert_resource(FruitDotCounter::new())
             .add_system_set(
                 SystemSet::on_update(LifeCycle::Running)
                     .with_system(spawn_fruit_when_dot_limit_reached)
                     .with_system(update_despawn_timer)
-                    .with_system(increase_dot_counter_when_dot_was_eaten)
                     .with_system(despawn_fruit_if_timer_exceeded)
-                    .with_system(reset_fruit_dot_counter_and_despawn_timer_when_level_changed)
+                    .with_system(reset_fruit_despawn_timer_when_level_changed)
             )
         ;
     }
 }
 
-#[derive(Copy, Clone, Component)]
+#[derive(Copy, Clone, Component, Debug, Default, Eq, PartialEq)]
 pub enum Fruit {
+    #[default]
     Cherry,
     Strawberry,
     Peach,
@@ -48,19 +47,6 @@ impl FruitDespawnTimer {
     }
 }
 
-#[derive(Deref, DerefMut)]
-struct FruitDotCounter(usize);
-
-impl FruitDotCounter {
-    fn new() -> Self {
-        FruitDotCounter(0)
-    }
-
-    fn increase(&mut self) {
-        self.0 += 1
-    }
-}
-
 /// Spawn a fruit for the current level when a specific amount of dots
 /// was eaten.
 fn spawn_fruit_when_dot_limit_reached(
@@ -68,11 +54,11 @@ fn spawn_fruit_when_dot_limit_reached(
     asset_server: Res<AssetServer>,
     map: Res<Map>,
     level: Res<Level>,
-    fruit_dot_counter: Res<FruitDotCounter>,
+    eaten_dots: Res<EatenDots>,
 ) {
-    let eaten_dots = **fruit_dot_counter;
+    let num_eaten_dots = eaten_dots.get_eaten();
 
-    if eaten_dots == 70 || eaten_dots == 170 {
+    if num_eaten_dots == 70 || num_eaten_dots == 170 {
         let mut coordinates = map.coordinates_between_positions_matching(is!(Element::FruitSpawn));
         coordinates.z = FRUIT_Z;
         let dimension = Vec2::new(PACMAN_DIMENSION, PACMAN_DIMENSION);
@@ -121,16 +107,6 @@ fn get_texture_for_fruit(fruit: &Fruit, asset_server: &AssetServer) -> Handle<Im
     }))
 }
 
-/// When a dot was eaten, increase the dot counter.
-fn increase_dot_counter_when_dot_was_eaten(
-    mut event_reader: EventReader<EDotEaten>,
-    mut fruit_dot_counter: ResMut<FruitDotCounter>
-) {
-    for _ in event_reader.iter() {
-        fruit_dot_counter.increase()
-    }
-}
-
 /// Update the despawn timer with delta time.
 fn update_despawn_timer(
     time: Res<Time>,
@@ -158,13 +134,11 @@ fn despawn_fruit_if_timer_exceeded(
 }
 
 /// If the level changed, remove the timer and reset the dot counter.
-fn reset_fruit_dot_counter_and_despawn_timer_when_level_changed(
+fn reset_fruit_despawn_timer_when_level_changed(
     mut commands: Commands,
     level: Res<Level>,
-    mut fruit_dot_counter: ResMut<FruitDotCounter>,
 ) {
     if level.is_changed() {
         commands.remove_resource::<FruitDespawnTimer>();
-        **fruit_dot_counter = 0
     }
 }

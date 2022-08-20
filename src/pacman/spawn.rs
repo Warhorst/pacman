@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use crate::common::Direction::*;
 
-use crate::constants::{PACMAN_DIMENSION, PACMAN_Z};
+use crate::constants::{PACMAN_DIMENSION, PACMAN_SPEED, PACMAN_Z};
 use crate::is;
 use crate::level::Level;
 use crate::map::Element::PacManSpawn;
@@ -9,7 +9,8 @@ use crate::map::Map;
 use crate::pacman::Pacman;
 use crate::pacman::textures::create_pacman_animations;
 use crate::game_assets::handles::GameAssetHandles;
-use crate::speed::SpeedByLevel;
+use crate::specs_per_level::SpecsPerLevel;
+use crate::speed::Speed;
 use crate::sprite_sheet::SpriteSheet;
 
 /// Resource that tells at which position pacman spawns.
@@ -22,7 +23,7 @@ pub (in crate::pacman) fn spawn_pacman(
     sprite_sheets: Res<Assets<SpriteSheet>>,
     map: Res<Map>,
     level: Res<Level>,
-    speed_by_level: Res<SpeedByLevel>
+    specs_per_level: Res<SpecsPerLevel>
 ) {
     let mut spawn_coordinates = map.coordinates_between_positions_matching(is!(PacManSpawn));
     spawn_coordinates.z = PACMAN_Z;
@@ -41,7 +42,7 @@ pub (in crate::pacman) fn spawn_pacman(
             ..Default::default()
         })
         .insert(Pacman)
-        .insert(speed_by_level.for_pacman(&level).normal)
+        .insert(Speed(PACMAN_SPEED * specs_per_level.get_for(&level).pacman_normal_speed_modifier))
         .insert(Up)
         .insert(animations)
     ;
