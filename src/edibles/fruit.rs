@@ -5,9 +5,10 @@ use Fruit::*;
 use crate::constants::{FRUIT_Z, PACMAN_DIMENSION};
 use crate::edibles::dots::EatenDots;
 use crate::edibles::Edible;
-use crate::life_cycle::LifeCycle;
 use crate::is;
+use crate::life_cycle::LifeCycle::Running;
 use crate::map::{Element, Map};
+use crate::specs_per_level::SpecsPerLevel;
 
 pub struct FruitPlugin;
 
@@ -15,11 +16,14 @@ impl Plugin for FruitPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_system_set(
-                SystemSet::on_update(LifeCycle::Running)
+                SystemSet::on_update(Running)
                     .with_system(spawn_fruit_when_dot_limit_reached)
                     .with_system(update_despawn_timer)
                     .with_system(despawn_fruit_if_timer_exceeded)
                     .with_system(reset_fruit_despawn_timer_when_level_changed)
+            )
+            .add_system_set(
+                SystemSet::on_exit(Running).with_system(despawn_fruit_and_timer)
             )
         ;
     }
@@ -55,6 +59,7 @@ fn spawn_fruit_when_dot_limit_reached(
     map: Res<Map>,
     level: Res<Level>,
     eaten_dots: Res<EatenDots>,
+    specs_per_level: Res<SpecsPerLevel>
 ) {
     let num_eaten_dots = eaten_dots.get_eaten();
 
@@ -62,7 +67,7 @@ fn spawn_fruit_when_dot_limit_reached(
         let mut coordinates = map.coordinates_between_positions_matching(is!(Element::FruitSpawn));
         coordinates.z = FRUIT_Z;
         let dimension = Vec2::new(PACMAN_DIMENSION, PACMAN_DIMENSION);
-        let fruit = get_fruit_for_level(&level);
+        let fruit = specs_per_level.get_for(&level).fruit_to_spawn;
 
         commands.spawn()
             .insert_bundle(SpriteBundle {
@@ -78,19 +83,6 @@ fn spawn_fruit_when_dot_limit_reached(
             .insert(Edible)
         ;
         commands.insert_resource(FruitDespawnTimer::new());
-    }
-}
-
-fn get_fruit_for_level(level: &Level) -> Fruit {
-    match **level {
-        1 => Cherry,
-        2 => Strawberry,
-        3 | 4 => Peach,
-        5 | 6 => Apple,
-        7 | 8 => Grapes,
-        9 | 10 => Galaxian,
-        11 | 12 => Bell,
-        _ => Key
     }
 }
 
@@ -140,5 +132,16 @@ fn reset_fruit_despawn_timer_when_level_changed(
 ) {
     if level.is_changed() {
         commands.remove_resource::<FruitDespawnTimer>();
+    }
+}
+
+fn despawn_fruit_and_timer(
+    mut commands: Commands,
+    query: Query<Entity, With<Fruit>>
+) {
+    commands.remove_resource::<FruitDespawnTimer>();
+
+    for e in &query {
+        commands.entity(e).despawn()
     }
 }

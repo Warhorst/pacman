@@ -4,8 +4,7 @@ use bevy::prelude::*;
 use crate::constants::{FIELD_DIMENSION, POINTS_PER_DOT, POINTS_PER_ENERGIZER, POINTS_PER_GHOST, TEXT_Z};
 use crate::edibles::energizer::EnergizerOver;
 use crate::interactions::{EDotEaten, EEnergizerEaten, EFruitEaten, EPacmanEatsGhost};
-use crate::life_cycle::LifeCycle;
-use crate::life_cycle::LifeCycle::Start;
+use crate::life_cycle::LifeCycle::{Running, Start};
 use crate::map::board::Board;
 use crate::edibles::fruit::Fruit::*;
 use crate::game_assets::handles::GameAssetHandles;
@@ -22,7 +21,7 @@ impl Plugin for ScorePlugin {
                 SystemSet::on_enter(Start).with_system(create_scoreboard)
             )
             .add_system_set(
-                SystemSet::on_update(LifeCycle::Running)
+                SystemSet::on_update(Running)
                     .with_system(update_scoreboard)
                     .with_system(add_points_for_eaten_dot)
                     .with_system(add_points_for_eaten_energizer)
@@ -30,6 +29,9 @@ impl Plugin for ScorePlugin {
                     .with_system(reset_eaten_ghost_counter_when_energizer_is_over)
                     .with_system(add_points_for_eaten_fruit_and_display_score_text)
                     .with_system(update_score_texts)
+            )
+            .add_system_set(
+                SystemSet::on_exit(Running).with_system(despawn_score_texts)
             )
         ;
     }
@@ -208,5 +210,14 @@ fn update_score_texts(
         if timer.finished() {
             commands.entity(entity).despawn();
         }
+    }
+}
+
+fn despawn_score_texts(
+    mut commands: Commands,
+    query: Query<Entity, With<ScoreText>>
+) {
+    for e in &query {
+        commands.entity(e).despawn()
     }
 }

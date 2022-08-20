@@ -8,6 +8,7 @@ use crate::is;
 use crate::level::Level;
 use crate::map::Element::EnergizerSpawn;
 use crate::map::Map;
+use crate::specs_per_level::SpecsPerLevel;
 
 pub struct EnergizerPlugin;
 
@@ -43,17 +44,9 @@ pub struct EnergizerTimer {
 }
 
 impl EnergizerTimer {
-    /// The energizer is active for the full time at level 1.
-    /// Its time gets reduced every level until level 19, were it stops instantly.
-    ///
-    /// I use a linear function to calculate the energizer time per level. This is only speculation.
-    /// It is unclear how the time an energizer is active gets calculated.
-    pub fn start(level: &Level) -> Self {
-        let level = **level as f32 - 1.0;
-        let time = f32::max(8.0 - level * (8.0 / 18.0), 0.0);
-
+    fn start(seconds: f32) -> Self {
         EnergizerTimer {
-            timer: Timer::from_seconds(time, false)
+            timer: Timer::from_seconds(seconds, false)
         }
     }
 
@@ -101,9 +94,11 @@ fn start_energizer_timer_when_energizer_eaten(
     mut commands: Commands,
     mut event_reader: EventReader<EEnergizerEaten>,
     level: Res<Level>,
+    specs_per_level: Res<SpecsPerLevel>
 ) {
     for _ in event_reader.iter() {
-        commands.insert_resource(EnergizerTimer::start(&level));
+        let spec = specs_per_level.get_for(&level);
+        commands.insert_resource(EnergizerTimer::start(spec.frightened_time));
     }
 }
 
