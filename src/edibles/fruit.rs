@@ -63,6 +63,7 @@ fn spawn_fruit_when_dot_limit_reached(
 ) {
     let num_eaten_dots = eaten_dots.get_eaten();
 
+    // TODO: This spawns new fruits unless pacman eats another dot, bad!
     if num_eaten_dots == 70 || num_eaten_dots == 170 {
         let mut coordinates = map.coordinates_between_positions_matching(is!(Element::FruitSpawn));
         coordinates.z = FRUIT_Z;

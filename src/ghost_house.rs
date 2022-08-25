@@ -50,6 +50,9 @@ pub struct GhostHouse {
 impl GhostHouse {
     pub fn new(map: &Map) -> Self {
         let entrance_positions = map.get_positions_matching(is!(Element::GhostHouseEntrance {..})).into_iter().collect();
+        // TODO: The ghost house element is not necessarily required. The same strategy works when using the ghost house walls.
+        //  This would render the ghost house field unnecessary, and therefore positions with multiple elements.
+        // TODO: maybe even create a structure using parent-child-hierarchy
         let ghost_house_positions = map.get_positions_matching(is!(Element::GhostHouse)).into_iter().collect::<Vec<_>>();
         let top_right = ghost_house_positions
             .iter()
