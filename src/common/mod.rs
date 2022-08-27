@@ -2,6 +2,8 @@ use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::common::Direction::*;
+use crate::map::Rotation;
+use crate::map::Rotation::*;
 
 pub mod position;
 
@@ -38,6 +40,15 @@ impl Direction {
             Left => Down,
             Down => Right,
             Right => Up
+        }
+    }
+
+    pub fn rotate(&self, rotation: Rotation) -> Self {
+        match rotation {
+            D0 => *self,
+            D90 => self.rotate_right(),
+            D180 => self.opposite(),
+            D270 => self.rotate_left(),
         }
     }
 

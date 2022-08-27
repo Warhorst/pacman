@@ -8,7 +8,6 @@ use crate::ghosts::state::State;
 use crate::ghosts::target::Target;
 use crate::ghosts::textures::create_animations_for_ghost;
 use crate::level::Level;
-use crate::map::Map;
 use crate::specs_per_level::SpecsPerLevel;
 use crate::speed::Speed;
 use crate::sprite_sheet::SpriteSheet;
@@ -17,16 +16,14 @@ pub fn spawn_ghosts(
     mut commands: Commands,
     game_assets: Res<GameAssetHandles>,
     sprite_sheets: Res<Assets<SpriteSheet>>,
-    map: Res<Map>,
+    ghost_house: Res<GhostHouse>,
     level: Res<Level>,
     specs_per_level: Res<SpecsPerLevel>,
 ) {
-    let ghost_house = GhostHouse::new(&map);
     spawn_ghost(&mut commands, &ghost_house, &game_assets, &sprite_sheets, &level, &specs_per_level, Blinky, BLINKY_Z);
     spawn_ghost(&mut commands, &ghost_house, &game_assets, &sprite_sheets, &level, &specs_per_level, Pinky, PINKY_Z);
     spawn_ghost(&mut commands, &ghost_house, &game_assets, &sprite_sheets, &level, &specs_per_level, Inky, INKY_Z);
     spawn_ghost(&mut commands, &ghost_house, &game_assets, &sprite_sheets, &level, &specs_per_level, Clyde, CLYDE_Z);
-    commands.insert_resource(ghost_house);
 }
 
 fn spawn_ghost<G: GhostType + Component>(

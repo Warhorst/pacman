@@ -6,14 +6,27 @@ use crate::{is, map};
 use map::Element;
 use crate::ghosts::{Blinky, Clyde, GhostType, Inky, Pinky};
 use crate::common::Direction;
-use crate::map::{Map, WallType};
+use crate::life_cycle::LifeCycle::Start;
+use crate::map::{Map, Rotation, WallType};
+use crate::map::Rotation::*;
 
 pub struct GhostHousePlugin;
 
 impl Plugin for GhostHousePlugin {
-    fn build(&self, _app: &mut App) {
-        // TODO: Spawn the ghosthouse here
+    fn build(&self, app: &mut App) {
+        app
+            .add_system_set(
+                SystemSet::on_enter(Start).with_system(create_ghost_house)
+            )
+        ;
     }
+}
+
+fn create_ghost_house(
+    mut commands: Commands,
+    map: Res<Map>
+) {
+    commands.insert_resource(GhostHouse::new(&map));
 }
 
 /// Resource that describes the ghost house, the place where ghosts start and respawn.
@@ -48,87 +61,117 @@ pub struct GhostHouse {
 }
 
 impl GhostHouse {
-    /// TODO: Basically, the ghost house is one big rectangle. I could retrieve this rectangle from
-    ///  the map and calculate all positions from it (walls, spawns, entrance)
     pub fn new(map: &Map) -> Self {
-        let top_right = map
-            .get_positions_matching(is!(Element::Wall {wall_type: WallType::Ghost, ..}))
-            .into_iter()
-            .fold(Position::new(isize::MIN, isize::MIN), |acc, pos| Position::new(isize::max(acc.x, pos.x), isize::max(acc.y, pos.y)));
-
-        let mut spawns = HashMap::with_capacity(4);
-        spawns.insert(TypeId::of::<Blinky>(), Self::create_blinky_spawn(&top_right));
-        spawns.insert(TypeId::of::<Pinky>(), Self::create_pinky_spawn(&top_right));
-        spawns.insert(TypeId::of::<Inky>(), Self::create_inky_spawn(&top_right));
-        spawns.insert(TypeId::of::<Clyde>(), Self::create_clyde_spawn(&top_right));
+        let bottom_left = Self::get_bottom_left(map);
+        let rotation = Self::get_rotation(map);
+        let spawns = Self::create_spawns(rotation, bottom_left);
 
         GhostHouse {
-            entrance_direction: Direction::Up,
-            spawns
+            entrance_direction: Direction::Up.rotate(rotation),
+            spawns,
         }
     }
 
-    fn create_blinky_spawn(top_right: &Position) -> Spawn {
+    fn get_bottom_left(map: &Map) -> Position {
+        map
+            .get_positions_matching(is!(Element::Wall {wall_type: WallType::Ghost, ..}))
+            .into_iter()
+            .fold(
+                Position::new(isize::MAX, isize::MAX),
+                |acc, pos| Position::new(isize::min(acc.x, pos.x), isize::min(acc.y, pos.y)),
+            )
+    }
+
+    fn get_rotation(map: &Map) -> Rotation {
+        map
+            .position_element_iter()
+            .into_iter()
+            .filter_map(|(_, elem)| match elem {
+                Element::GhostHouseEntrance {rotation} => Some(*rotation),
+                _ => None
+            })
+            .next()
+            .expect("the map should at least contain one ghost house entrance")
+    }
+
+    fn create_spawns(rotation: Rotation, bottom_left: Position) -> HashMap<TypeId, Spawn> {
+        [
+            (TypeId::of::<Blinky>(), Self::create_blinky_spawn(rotation, bottom_left)),
+            (TypeId::of::<Pinky>(), Self::create_pinky_spawn(rotation, bottom_left)),
+            (TypeId::of::<Inky>(), Self::create_inky_spawn(rotation, bottom_left)),
+            (TypeId::of::<Clyde>(), Self::create_clyde_spawn(rotation, bottom_left)),
+        ]
+            .into_iter()
+            .collect()
+    }
+
+    fn create_blinky_spawn(rotation: Rotation, bottom_left: Position) -> Spawn {
+        match rotation {
+            D0 => Self::create_spawn_with_offsets(bottom_left, (3, 5), (4, 5)),
+            D90 => Self::create_spawn_with_offsets(bottom_left, (5, 3), (5, 4)),
+            D180 => Self::create_spawn_with_offsets(bottom_left, (3, -1), (4, -1)),
+            D270 => Self::create_spawn_with_offsets(bottom_left, (-1, 3), (-1, 4)),
+        }
+    }
+
+    fn create_pinky_spawn(rotation: Rotation, bottom_left: Position) -> Spawn {
+        match rotation {
+            D0 => Self::create_spawn_with_offsets(bottom_left, (3, 2), (4, 2)),
+            D90 => Self::create_spawn_with_offsets(bottom_left, (2, 3), (2, 4)),
+            D180 => Self::create_spawn_with_offsets(bottom_left, (3, 2), (4, 2)),
+            D270 => Self::create_spawn_with_offsets(bottom_left, (2, 3), (2, 4)),
+        }
+    }
+
+    fn create_inky_spawn(rotation: Rotation, bottom_left: Position) -> Spawn {
+        match rotation {
+            D0 => Self::create_spawn_with_offsets(bottom_left, (1, 2), (2, 2)),
+            D90 => Self::create_spawn_with_offsets(bottom_left, (2, 5), (2, 6)),
+            D180 => Self::create_spawn_with_offsets(bottom_left, (5, 2), (6, 2)),
+            D270 => Self::create_spawn_with_offsets(bottom_left, (2, 1), (2, 2)),
+        }
+    }
+
+    fn create_clyde_spawn(rotation: Rotation, bottom_left: Position) -> Spawn {
+        match rotation {
+            D0 => Self::create_spawn_with_offsets(bottom_left, (5, 2), (6, 2)),
+            D90 => Self::create_spawn_with_offsets(bottom_left, (2, 1), (2, 2)),
+            D180 => Self::create_spawn_with_offsets(bottom_left, (1, 2), (2, 2)),
+            D270 => Self::create_spawn_with_offsets(bottom_left, (2, 5), (2, 6)),
+        }
+    }
+
+    fn create_spawn_with_offsets(
+        bottom_left: Position,
+        offsets_0: (isize, isize),
+        offsets_1: (isize, isize),
+    ) -> Spawn {
+        let x = bottom_left.x;
+        let y = bottom_left.y;
         let positions = [
-            Position::new(top_right.x - 4, top_right.y + 1),
-            Position::new(top_right.x - 3, top_right.y + 1)
+            Position::new(x + offsets_0.0, y + offsets_0.1),
+            Position::new(x + offsets_1.0, y + offsets_1.1),
         ];
-        let coordinates = Self::centered_position_for(&positions);
-
-        Spawn {
-            positions,
-            coordinates
-        }
+        let coordinates = Self::create_centered_coordinates_for(&positions);
+        Spawn { positions, coordinates }
     }
 
-    fn create_pinky_spawn(top_right: &Position) -> Spawn {
-        let positions = [
-            Position::new(top_right.x - 4, top_right.y - 2),
-            Position::new(top_right.x - 3, top_right.y - 2)
-        ];
-        let coordinates = Self::centered_position_for(&positions);
-
-        Spawn {
-            positions,
-            coordinates
-        }
-    }
-
-    fn create_inky_spawn(top_right: &Position) -> Spawn {
-        let positions = [
-            Position::new(top_right.x - 6, top_right.y - 2),
-            Position::new(top_right.x - 5, top_right.y - 2)
-        ];
-        let coordinates = Self::centered_position_for(&positions);
-
-        Spawn {
-            positions,
-            coordinates
-        }
-    }
-
-    fn create_clyde_spawn(top_right: &Position) -> Spawn {
-        let positions = [
-            Position::new(top_right.x - 2, top_right.y - 2),
-            Position::new(top_right.x - 1, top_right.y - 2)
-        ];
-        let coordinates = Self::centered_position_for(&positions);
-
-        Spawn {
-            positions,
-            coordinates
-        }
-    }
-
-    fn centered_position_for(positions: &[Position; 2]) -> Vec3 {
+    fn create_centered_coordinates_for(positions: &[Position; 2]) -> Vec3 {
         let vec_0 = Vec3::from(&positions[0]);
         let vec_1 = Vec3::from(&positions[1]);
 
-        Vec3::new(
-            (vec_0.x + vec_1.x) / 2.0,
-            vec_0.y,
-            0.0
-        )
+        match vec_0.y == vec_1.y {
+            true => Vec3::new(
+                (vec_0.x + vec_1.x) / 2.0,
+                vec_0.y,
+                0.0,
+            ),
+            false => Vec3::new(
+                vec_0.x,
+                (vec_0.y + vec_1.y) / 2.0,
+                0.0,
+            )
+        }
     }
 
     pub fn spawn_coordinates_of<G: GhostType + 'static>(&self) -> Vec3 {
@@ -173,5 +216,5 @@ impl GhostHouse {
 
 struct Spawn {
     pub coordinates: Vec3,
-    pub positions: [Position; 2]
+    pub positions: [Position; 2],
 }
