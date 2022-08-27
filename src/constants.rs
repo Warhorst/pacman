@@ -13,6 +13,7 @@ pub const POINTS_PER_DOT: usize = 10;
 pub const POINTS_PER_ENERGIZER: usize = 50;
 pub const POINTS_PER_GHOST: usize = 200;
 
+pub const TUNNEL_Z: f32 = 300.0;
 pub const TEXT_Z: f32 = 200.0;
 pub const PACMAN_Z: f32 = 100.0;
 pub const BLINKY_Z: f32 = 90.0;

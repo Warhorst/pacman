@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use crate::common::position::Position;
-use crate::constants::PACMAN_DIMENSION;
+use crate::constants::{PACMAN_DIMENSION, TUNNEL_Z};
 use crate::is;
 use crate::map::{Element, Map};
 
@@ -62,9 +62,8 @@ fn spawn_tunnel_entrance(commands: &mut Commands, pos: &Position) {
         });
 }
 
-// TODO: This is only a bad workaround, as the board always returns z = 0.0
 fn get_transform(pos: &Position) -> Transform {
     let mut translation = Vec3::from(pos);
-    translation.z = 10.0;
+    translation.z = TUNNEL_Z;
     Transform::from_translation(translation)
 }
