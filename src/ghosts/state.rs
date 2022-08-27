@@ -9,7 +9,7 @@ use crate::ghosts::target::Target;
 use crate::ghost_house::GhostHouse;
 use crate::ghosts::{Blinky, Clyde, Ghost, GhostType, Inky, Pinky};
 use crate::ghosts::schedule::Schedule;
-use crate::interactions::{EEnergizerEaten, EPacmanEatsGhost};
+use crate::interactions::{EEnergizerEaten, EPacmanEatsGhost, LPacmanGhostHitDetection};
 use crate::state_skip_if;
 use crate::common::XYEqual;
 
@@ -30,7 +30,7 @@ impl Plugin for StatePlugin {
                 .with_system(update_eaten_state::<Inky>)
                 .with_system(update_eaten_state::<Clyde>)
                 .with_system(set_frightened_when_pacman_ate_energizer)
-                .with_system(set_eaten_when_hit_by_pacman)
+                .with_system(set_eaten_when_hit_by_pacman.after(LPacmanGhostHitDetection))
                 .label(StateSetter)
         )
         ;

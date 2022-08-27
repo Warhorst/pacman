@@ -5,6 +5,7 @@ use Fruit::*;
 use crate::constants::{FRUIT_Z, PACMAN_DIMENSION};
 use crate::edibles::dots::EatenDots;
 use crate::edibles::Edible;
+use crate::interactions::EDotEaten;
 use crate::is;
 use crate::life_cycle::LifeCycle::Running;
 use crate::map::{Element, Map};
@@ -59,31 +60,33 @@ fn spawn_fruit_when_dot_limit_reached(
     map: Res<Map>,
     level: Res<Level>,
     eaten_dots: Res<EatenDots>,
-    specs_per_level: Res<SpecsPerLevel>
+    specs_per_level: Res<SpecsPerLevel>,
+    mut event_reader: EventReader<EDotEaten>
 ) {
     let num_eaten_dots = eaten_dots.get_eaten();
 
-    // TODO: This spawns new fruits unless pacman eats another dot, bad!
-    if num_eaten_dots == 70 || num_eaten_dots == 170 {
-        let mut coordinates = map.coordinates_between_positions_matching(is!(Element::FruitSpawn));
-        coordinates.z = FRUIT_Z;
-        let dimension = Vec2::new(PACMAN_DIMENSION, PACMAN_DIMENSION);
-        let fruit = specs_per_level.get_for(&level).fruit_to_spawn;
+    for _ in event_reader.iter() {
+        if let 70 | 170 = num_eaten_dots {
+            let mut coordinates = map.coordinates_between_positions_matching(is!(Element::FruitSpawn));
+            coordinates.z = FRUIT_Z;
+            let dimension = Vec2::new(PACMAN_DIMENSION, PACMAN_DIMENSION);
+            let fruit = specs_per_level.get_for(&level).fruit_to_spawn;
 
-        commands.spawn()
-            .insert_bundle(SpriteBundle {
-                texture: get_texture_for_fruit(&fruit, &asset_server),
-                sprite: Sprite {
-                    custom_size: Some(dimension),
-                    ..default()
-                },
-                transform: Transform::from_translation(coordinates),
-                ..Default::default()
-            })
-            .insert(fruit)
-            .insert(Edible)
-        ;
-        commands.insert_resource(FruitDespawnTimer::new());
+            commands.spawn()
+                .insert_bundle(SpriteBundle {
+                    texture: get_texture_for_fruit(&fruit, &asset_server),
+                    sprite: Sprite {
+                        custom_size: Some(dimension),
+                        ..default()
+                    },
+                    transform: Transform::from_translation(coordinates),
+                    ..Default::default()
+                })
+                .insert(fruit)
+                .insert(Edible)
+            ;
+            commands.insert_resource(FruitDespawnTimer::new());
+        }
     }
 }
 

@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::common::position::ToPosition;
-use crate::edibles::dots::Dot;
+use crate::edibles::dots::{Dot, EatenDots};
 use crate::edibles::energizer::Energizer;
 use crate::edibles::fruit::{Fruit, FruitDespawnTimer};
 use crate::ghosts::Ghost;
@@ -21,7 +21,7 @@ impl Plugin for InteractionsPlugin {
             .add_event::<EFruitEaten>()
             .add_system_set(
                 SystemSet::on_update(Running)
-                    .with_system(pacman_hits_ghost)
+                    .with_system(pacman_hits_ghost.label(LPacmanGhostHitDetection))
                     .with_system(pacman_eat_dot)
                     .with_system(pacman_eat_energizer)
                     .with_system(eat_fruit_when_pacman_touches_it)
@@ -29,6 +29,11 @@ impl Plugin for InteractionsPlugin {
         ;
     }
 }
+
+/// Marks systems that check hits between pacman and ghosts
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(SystemLabel)]
+pub struct LPacmanGhostHitDetection;
 
 /// Fired when pacman was hit by a ghost.
 pub struct EPacmanHit;
@@ -70,6 +75,7 @@ fn pacman_hits_ghost(
 fn pacman_eat_dot(
     mut commands: Commands,
     mut event_writer: EventWriter<EDotEaten>,
+    mut eaten_dots: ResMut<EatenDots>,
     pacman_positions: Query<&Transform, With<Pacman>>,
     dot_positions: Query<(Entity, &Transform), With<Dot>>,
 ) {
@@ -77,6 +83,7 @@ fn pacman_eat_dot(
         for (entity, dot_tf) in &dot_positions {
             if pacman_tf.pos() == dot_tf.pos() {
                 commands.entity(entity).despawn();
+                eaten_dots.increment();
                 event_writer.send(EDotEaten)
             }
         }
