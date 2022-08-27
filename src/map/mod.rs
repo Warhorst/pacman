@@ -51,14 +51,14 @@ struct Fields(Vec<Field>);
 ///
 /// The map should only be used to spawn or respawn entities into the world.
 pub struct Map {
-    elements_map: HashMap<Position, Vec<Element>>,
+    elements_map: HashMap<Position, Element>,
 }
 
 impl Map {
     fn new(fields: &Fields) -> Self {
         Map {
             elements_map: fields.clone().0.into_iter()
-                .map(|f| (f.position, f.elements))
+                .map(|f| (f.position, f.element))
                 .collect(),
         }
     }
@@ -80,22 +80,13 @@ impl Map {
     /// Return an iterator over all positions matching the given element filter.
     pub fn get_positions_matching(&self, filter: impl Fn(&Element) -> bool) -> impl IntoIterator<Item=&Position> {
         self.elements_map.iter()
-            .filter(move |(_, elems)| Self::elements_match_filter(elems.iter(), &filter))
+            .filter(move |(_, elem)| (filter)(elem))
             .map(|(pos, _)| pos)
-    }
-
-    fn elements_match_filter<'a>(elems: impl IntoIterator<Item=&'a Element>, filter: &impl Fn(&Element) -> bool) -> bool {
-        elems.into_iter()
-            .map(filter)
-            .max()
-            .unwrap_or(false)
     }
 
     /// Return an iterator over all positions and elements.
     pub fn position_element_iter(&self) -> impl IntoIterator<Item=(&Position, &Element)> {
-        self.elements_map
-            .iter()
-            .flat_map(|(pos, elements)| elements.into_iter().map(move |elem| (pos, elem)))
+        self.elements_map.iter()
     }
 
     /// Return the coordinates between two positions matching the given filter.
@@ -131,10 +122,10 @@ impl Map {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Field {
     pub position: Position,
-    pub elements: Vec<Element>,
+    pub element: Element,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum Element {
     Wall {
         wall_type: WallType,

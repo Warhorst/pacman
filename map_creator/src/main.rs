@@ -274,12 +274,9 @@ fn main() {
             elem(6, TunnelHallway),
             empty(4),
             wall(1, D270, G),
-            elems(vec![InkySpawn]),
-            elems(vec![InkySpawn]),
-            elems(vec![PinkySpawn]),
-            elems(vec![PinkySpawn]),
-            elems(vec![ClydeSpawn]),
-            elems(vec![ClydeSpawn]),
+            elem(2, InkySpawn),
+            elem(2, PinkySpawn),
+            elem(2, ClydeSpawn),
             wall(1, D90, G),
             empty(4),
             elem(6, TunnelHallway),
@@ -569,10 +566,6 @@ fn main() {
     ];
     let mut flat_fields = fields.into_iter()
         .enumerate()
-        .inspect(|(i, vec)| {
-            println!("{i}");
-            assert!(vec.len() == 28 || vec.len() == 30 || vec.len() == 32)
-        })
         .flat_map(|(_, f)| f)
         .collect::<Vec<_>>();
     let height = flat_fields.iter()
@@ -605,71 +598,76 @@ impl QuickWall {
     }
 }
 
-fn create_field_line(start_x: isize, y: isize, elements: Vec<Vec<Vec<Element>>>) -> Vec<Field> {
+fn create_field_line(start_x: isize, y: isize, elements: Vec<Vec<Element>>) -> Vec<Field> {
     elements.into_iter()
         .flat_map(|i| i)
         .enumerate()
-        .map(|(i, elems)| Field {
+        .map(|(i, elem)| Field {
             position: Position::new(start_x + (i as isize), y),
-            elements: elems,
+            element: elem,
+        })
+        .filter(|f| match f.element {
+            Tunnel {index: 42, ..} => false,
+            _ => true
         })
         .collect()
 }
 
-fn wall(amount: usize, rotation: Rotation, wall_type: QuickWall) -> Vec<Vec<Element>> {
+fn wall(amount: usize, rotation: Rotation, wall_type: QuickWall) -> Vec<Element> {
     (0..amount).into_iter()
-        .map(move |_| vec![Wall {
+        .map(move |_| Wall {
             wall_type: wall_type.to_wall(),
             rotation,
             is_corner: false,
-        }])
+        })
         .collect()
 }
 
-fn corner(rotation: Rotation, wall_type: QuickWall) -> Vec<Vec<Element>> {
-    vec![vec![Wall {
+fn corner(rotation: Rotation, wall_type: QuickWall) -> Vec<Element> {
+    vec![Wall {
         wall_type: wall_type.to_wall(),
         is_corner: true,
         rotation,
-    }]]
+    }]
 }
 
-fn dot(amount: usize) -> Vec<Vec<Element>> {
+fn dot(amount: usize) -> Vec<Element> {
     (0..amount).into_iter()
-        .map(|_| vec![DotSpawn])
+        .map(|_| DotSpawn)
         .collect()
 }
 
-fn empty(amount: usize) -> Vec<Vec<Element>> {
+/// Bad workaround. I dont want to add an 'Empty' field, as it will be
+/// never used in the real app. So I just create a tunnel with index 42 and filter such elements later
+fn empty(amount: usize) -> Vec<Element> {
     (0..amount).into_iter()
-        .map(|_| vec![])
+        .map(|_| Tunnel {
+            index: 42,
+            opening_direction: Direction::Left,
+        })
         .collect()
 }
 
-fn energizer() -> Vec<Vec<Element>> {
-    vec![vec![EnergizerSpawn]]
+fn energizer() -> Vec<Element> {
+    vec![EnergizerSpawn]
 }
 
-fn elem(amount: usize, elem: Element) -> Vec<Vec<Element>> {
+fn elem(amount: usize, elem: Element) -> Vec<Element> {
     (0..amount).into_iter()
-        .map(|_| vec![elem.clone()])
+        .map(|_| elem)
         .collect()
 }
 
-fn elems(on_field: Vec<Element>) -> Vec<Vec<Element>> {
-    vec![on_field]
-}
-
-fn tunnel_right() -> Vec<Vec<Element>> {
-    vec![vec![Tunnel {
+fn tunnel_right() -> Vec<Element> {
+    vec![Tunnel {
         index: 0,
         opening_direction: Direction::Right,
-    }]]
+    }]
 }
 
-fn tunnel_left() -> Vec<Vec<Element>> {
-    vec![vec![Tunnel {
+fn tunnel_left() -> Vec<Element> {
+    vec![Tunnel {
         index: 0,
         opening_direction: Direction::Left,
-    }]]
+    }]
 }
