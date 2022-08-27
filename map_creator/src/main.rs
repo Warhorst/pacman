@@ -16,13 +16,15 @@ const TARGET_FILE: &'static str = "../assets/maps/default.map.json";
 /// This bullshit is only used to generate the json map until I have a better way to do this (aka a level editor)
 fn main() {
     let fields = vec![
-        create_field_line(2, 0, vec![
-            ghost_corner(PinkyCorner, D0),
+        create_field_line(1, 0, vec![
+            elem(1, PinkyCorner),
+            corner(D0, O),
             wall(12, D0, O),
             corner(D90, O),
             corner(D0, O),
             wall(12, D0, O),
-            ghost_corner(BlinkyCorner, D90),
+            corner(D90, O),
+            elem(1, BlinkyCorner)
         ]),
         create_field_line(2, 1, vec![
             wall(1, D270, O),
@@ -557,17 +559,19 @@ fn main() {
             dot(26),
             wall(1, D90, O),
         ]),
-        create_field_line(2, 30, vec![
-            ghost_corner(ClydeCorner, D270),
+        create_field_line(1, 30, vec![
+            elem(1, ClydeCorner),
+            corner(D270, O),
             wall(26, D180, O),
-            ghost_corner(InkyCorner, D180),
+            corner(D180, O),
+            elem(1, InkyCorner),
         ]),
     ];
     let mut flat_fields = fields.into_iter()
         .enumerate()
         .inspect(|(i, vec)| {
             println!("{i}");
-            assert!(vec.len() == 28 || vec.len() == 32)
+            assert!(vec.len() == 28 || vec.len() == 30 || vec.len() == 32)
         })
         .flat_map(|(_, f)| f)
         .collect::<Vec<_>>();
@@ -628,12 +632,6 @@ fn corner(rotation: Rotation, wall_type: QuickWall) -> Vec<Vec<Element>> {
         is_corner: true,
         rotation,
     }]]
-}
-
-fn ghost_corner(ghost_corner: Element, rotation: Rotation) -> Vec<Vec<Element>> {
-    let mut res = corner(rotation, O);
-    res[0].push(ghost_corner);
-    res
 }
 
 fn dot(amount: usize) -> Vec<Vec<Element>> {
