@@ -144,7 +144,6 @@ pub enum Element {
     GhostHouseEntrance {
         rotation: Rotation
     },
-    GhostHouse,
     PacManSpawn,
     DotSpawn,
     EnergizerSpawn,

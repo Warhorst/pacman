@@ -6,7 +6,7 @@ use crate::{is, map};
 use map::Element;
 use crate::ghosts::{Blinky, Clyde, GhostType, Inky, Pinky};
 use crate::common::Direction;
-use crate::map::Map;
+use crate::map::{Map, WallType};
 
 pub struct GhostHousePlugin;
 
@@ -48,19 +48,15 @@ pub struct GhostHouse {
 }
 
 impl GhostHouse {
+    /// TODO: Basically, the ghost house is one big rectangle. I could retrieve this rectangle from
+    ///  the map and calculate all positions from it (walls, spawns, entrance)
     pub fn new(map: &Map) -> Self {
-        let entrance_positions = map.get_positions_matching(is!(Element::GhostHouseEntrance {..})).into_iter().collect();
-        // TODO: The ghost house element is not necessarily required. The same strategy works when using the ghost house walls.
-        //  This would render the ghost house field unnecessary, and therefore positions with multiple elements.
-        // TODO: maybe even create a structure using parent-child-hierarchy
-        let ghost_house_positions = map.get_positions_matching(is!(Element::GhostHouse)).into_iter().collect::<Vec<_>>();
-        let top_right = ghost_house_positions
-            .iter()
+        let top_right = map
+            .get_positions_matching(is!(Element::Wall {wall_type: WallType::Ghost, ..}))
+            .into_iter()
             .fold(Position::new(isize::MIN, isize::MIN), |acc, pos| Position::new(isize::max(acc.x, pos.x), isize::max(acc.y, pos.y)));
-        Self::assert_positions_valid(&top_right, &entrance_positions, &ghost_house_positions);
 
         let mut spawns = HashMap::with_capacity(4);
-        // TODO: Either remove the <Ghost>Spawn elements or assume they are set and use the board to calculate the spawn
         spawns.insert(TypeId::of::<Blinky>(), Self::create_blinky_spawn(&top_right));
         spawns.insert(TypeId::of::<Pinky>(), Self::create_pinky_spawn(&top_right));
         spawns.insert(TypeId::of::<Inky>(), Self::create_inky_spawn(&top_right));
@@ -72,57 +68,10 @@ impl GhostHouse {
         }
     }
 
-    fn create_possible_ghost_house_positions(top_right: &Position) -> Vec<Position> {
-        let mut result = Vec::with_capacity(18);
-        let x = top_right.x;
-        let y = top_right.y;
-
-        for i in (x - 5)..=x {
-            for j in (y - 2)..=y {
-                result.push(Position::new(i, j))
-            }
-        }
-
-        result
-    }
-
-    /// Check if all GhostHouse and GhostHouseEntrance positions on the map are possible positions.
-    /// Note: It is not checked if the ghost house is surrounded by walls.
-    fn assert_positions_valid(top_right: &Position, entrance_positions: &Vec<&Position>, ghost_house_positions: &Vec<&Position>) {
-        let possible_entrance_positions = vec![Position::new(top_right.x - 3, top_right.y + 1), Position::new(top_right.x - 2, top_right.y + 1)];
-        let possible_house_positions = Self::create_possible_ghost_house_positions(&top_right);
-
-        for pos in entrance_positions {
-            if !possible_entrance_positions.contains(pos) {
-                panic!(
-                    "Not all ghost house entrance positions build a valid ghost house entrance. Top right: {}, problem: {}, possible: {}",
-                    top_right,
-                    pos,
-                    Self::print_positions(possible_entrance_positions.iter())
-                )
-            }
-        }
-
-        for pos in ghost_house_positions {
-            if !possible_house_positions.contains(pos) {
-                panic!(
-                    "Not all ghost house positions build a valid ghost house. Top right: {}, problem: {}, possible: {}",
-                    top_right,
-                    pos,
-                    Self::print_positions(possible_house_positions.iter())
-                )
-            }
-        }
-    }
-
-    fn print_positions<'a, I: IntoIterator<Item=&'a Position>>(positions: I) -> String {
-        positions.into_iter().map(Position::to_string).collect::<Vec<String>>().join(", ")
-    }
-
     fn create_blinky_spawn(top_right: &Position) -> Spawn {
         let positions = [
-            Position::new(top_right.x - 3, top_right.y + 2),
-            Position::new(top_right.x - 2, top_right.y + 2)
+            Position::new(top_right.x - 4, top_right.y + 1),
+            Position::new(top_right.x - 3, top_right.y + 1)
         ];
         let coordinates = Self::centered_position_for(&positions);
 
@@ -134,8 +83,8 @@ impl GhostHouse {
 
     fn create_pinky_spawn(top_right: &Position) -> Spawn {
         let positions = [
-            Position::new(top_right.x - 3, top_right.y - 1),
-            Position::new(top_right.x - 2, top_right.y - 1)
+            Position::new(top_right.x - 4, top_right.y - 2),
+            Position::new(top_right.x - 3, top_right.y - 2)
         ];
         let coordinates = Self::centered_position_for(&positions);
 
@@ -147,8 +96,8 @@ impl GhostHouse {
 
     fn create_inky_spawn(top_right: &Position) -> Spawn {
         let positions = [
-            Position::new(top_right.x - 5, top_right.y - 1),
-            Position::new(top_right.x - 4, top_right.y - 1)
+            Position::new(top_right.x - 6, top_right.y - 2),
+            Position::new(top_right.x - 5, top_right.y - 2)
         ];
         let coordinates = Self::centered_position_for(&positions);
 
@@ -160,8 +109,8 @@ impl GhostHouse {
 
     fn create_clyde_spawn(top_right: &Position) -> Spawn {
         let positions = [
-            Position::new(top_right.x - 1, top_right.y - 1),
-            Position::new(top_right.x, top_right.y - 1)
+            Position::new(top_right.x - 2, top_right.y - 2),
+            Position::new(top_right.x - 1, top_right.y - 2)
         ];
         let coordinates = Self::centered_position_for(&positions);
 
