@@ -1,6 +1,7 @@
 use bevy::prelude::*;
+use crate::board_dimensions::BoardDimensions;
 
-use crate::constants::{BLINKY_Z, CLYDE_Z, GHOST_DIMENSION, GHOST_SPEED, INKY_Z, PINKY_Z};
+use crate::constants::{BLINKY_Z, CLYDE_Z, GHOST_SPEED, INKY_Z, PINKY_Z};
 use crate::game_assets::handles::GameAssetHandles;
 use crate::ghost_house::GhostHouse;
 use crate::ghosts::{Blinky, Clyde, Ghost, GhostType, Inky, Pinky};
@@ -19,11 +20,12 @@ pub fn spawn_ghosts(
     ghost_house: Res<GhostHouse>,
     level: Res<Level>,
     specs_per_level: Res<SpecsPerLevel>,
+    dimensions: Res<BoardDimensions>
 ) {
-    spawn_ghost(&mut commands, &ghost_house, &game_assets, &sprite_sheets, &level, &specs_per_level, Blinky, BLINKY_Z);
-    spawn_ghost(&mut commands, &ghost_house, &game_assets, &sprite_sheets, &level, &specs_per_level, Pinky, PINKY_Z);
-    spawn_ghost(&mut commands, &ghost_house, &game_assets, &sprite_sheets, &level, &specs_per_level, Inky, INKY_Z);
-    spawn_ghost(&mut commands, &ghost_house, &game_assets, &sprite_sheets, &level, &specs_per_level, Clyde, CLYDE_Z);
+    spawn_ghost(&mut commands, &ghost_house, &game_assets, &sprite_sheets, &level, &specs_per_level, Blinky, &dimensions, BLINKY_Z);
+    spawn_ghost(&mut commands, &ghost_house, &game_assets, &sprite_sheets, &level, &specs_per_level, Pinky, &dimensions, PINKY_Z);
+    spawn_ghost(&mut commands, &ghost_house, &game_assets, &sprite_sheets, &level, &specs_per_level, Inky, &dimensions, INKY_Z);
+    spawn_ghost(&mut commands, &ghost_house, &game_assets, &sprite_sheets, &level, &specs_per_level, Clyde, &dimensions, CLYDE_Z);
 }
 
 fn spawn_ghost<G: GhostType + Component>(
@@ -34,6 +36,7 @@ fn spawn_ghost<G: GhostType + Component>(
     level: &Level,
     specs_per_level: &SpecsPerLevel,
     ghost_type: G,
+    dimensions: &BoardDimensions,
     z_value: f32
 ) {
     let spawn_direction = ghost_house.spawn_direction_of::<G>();
@@ -47,7 +50,7 @@ fn spawn_ghost<G: GhostType + Component>(
         .insert_bundle(SpriteBundle {
             texture: animations.current().texture(),
             sprite: Sprite {
-                custom_size: Some(Vec2::new(GHOST_DIMENSION, GHOST_DIMENSION)),
+                custom_size: Some(Vec2::new(dimensions.ghost(), dimensions.ghost())),
                 ..default()
             },
             transform: Transform::from_translation(spawn_coordinates),

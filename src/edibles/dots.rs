@@ -1,7 +1,10 @@
 use bevy::prelude::*;
+use crate::board_dimensions::BoardDimensions;
 
-use crate::constants::{DOT_DIMENSION, DOT_Z};
+use crate::constants::DOT_Z;
 use crate::edibles::Edible;
+use crate::game_assets::handles::GameAssetHandles;
+use crate::game_assets::keys::DOT;
 use crate::life_cycle::LifeCycle::*;
 use crate::is;
 use crate::map::{Element, Map};
@@ -27,22 +30,22 @@ impl Plugin for DotPlugin {
 
 fn spawn_dots(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
     map: Res<Map>,
+    dimensions: Res<BoardDimensions>,
+    game_asset_handles: Res<GameAssetHandles>
 ) {
-    let point_dimension = Vec2::new(DOT_DIMENSION, DOT_DIMENSION);
+    let point_dimension = Vec2::new(dimensions.dot(), dimensions.dot());
     for position in map.get_positions_matching(is!(Element::DotSpawn)) {
-        let mut coordinates = Vec3::from(position);
-        coordinates.z = DOT_Z;
+        let transform = dimensions.pos_to_trans(position, DOT_Z);
 
         commands.spawn()
             .insert_bundle(SpriteBundle {
-                texture: asset_server.load("textures/dot.png"),
+                texture: game_asset_handles.get_handle(DOT),
                 sprite: Sprite {
                     custom_size: Some(point_dimension),
                     ..default()
                 },
-                transform: Transform::from_translation(coordinates),
+                transform,
                 ..Default::default()
             })
             .insert(Dot)

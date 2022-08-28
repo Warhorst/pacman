@@ -1,9 +1,8 @@
 use bevy::prelude::*;
-use crate::constants::FIELD_DIMENSION;
+use crate::board_dimensions::BoardDimensions;
 use crate::game_assets::handles::GameAssetHandles;
 use crate::game_assets::keys::FONT;
 use crate::life_cycle::LifeCycle::{LevelTransition, Start};
-use crate::map::board::Board;
 
 pub struct LevelPlugin;
 
@@ -37,8 +36,9 @@ fn spawn_level_ui(
     mut commands: Commands,
     game_asset_handles: Res<GameAssetHandles>,
     level: Res<Level>,
-    board: Res<Board>,
+    dimensions: Res<BoardDimensions>
 ) {
+    let origin = dimensions.origin();
     commands.spawn_bundle(Text2dBundle {
         text: Text::from_section(
             format!("Level: {}", **level),
@@ -53,7 +53,7 @@ fn spawn_level_ui(
                 horizontal: HorizontalAlign::Center,
             }
         ),
-        transform: Transform::from_xyz(FIELD_DIMENSION * (board.width as f32 / 2.0), FIELD_DIMENSION * board.height as f32, 0.0),
+        transform: Transform::from_xyz(origin.x + dimensions.board_width() / 2.0, origin.y + dimensions.board_height(), 0.0),
         ..Default::default()
     })
         .insert(LevelUi);

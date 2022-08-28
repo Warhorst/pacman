@@ -1,7 +1,7 @@
 use bevy::prelude::*;
+use crate::board_dimensions::BoardDimensions;
 
 use crate::common::Direction;
-use crate::common::position::Position;
 use crate::edibles::energizer::EnergizerOver;
 use crate::life_cycle::LifeCycle::*;
 use crate::ghosts::schedule::ScheduleChanged;
@@ -71,6 +71,7 @@ fn update_spawned_state<G: GhostType + Component + 'static>(
 
 fn update_chase_and_scatter_state(
     mut event_reader: EventReader<ScheduleChanged>,
+    dimensions: Res<BoardDimensions>,
     mut query: Query<(&mut Direction, &mut Target, &mut State, &Transform), With<Ghost>>,
 ) {
     for event in event_reader.iter() {
@@ -85,8 +86,8 @@ fn update_chase_and_scatter_state(
                 transform.translation
             };
 
-            let target_position = Position::from(target_coordinates);
-            let coordinates_ghost_came_from = Vec3::from(target_position.get_neighbour_in_direction(&direction.opposite()).position);
+            let target_position = dimensions.vec_to_pos(&target_coordinates);
+            let coordinates_ghost_came_from = dimensions.pos_to_vec(&target_position.get_neighbour_in_direction(&direction.opposite()).position, 0.0);
 
             direction.reverse();
             target.set(coordinates_ghost_came_from);
@@ -123,6 +124,7 @@ fn update_eaten_state<G: Component + GhostType + 'static>(
 }
 
 fn set_frightened_when_pacman_ate_energizer(
+    dimensions: Res<BoardDimensions>,
     mut event_reader: EventReader<EEnergizerEaten>,
     mut query: Query<(&mut Direction, &mut Target, &mut State, &Transform), With<Ghost>>,
 ) {
@@ -135,8 +137,8 @@ fn set_frightened_when_pacman_ate_energizer(
             } else {
                 transform.translation
             };
-            let target_position = Position::from(target_coordinates);
-            let coordinates_ghost_came_from = Vec3::from(target_position.get_neighbour_in_direction(&direction.opposite()).position);
+            let target_position = dimensions.vec_to_pos(&target_coordinates);
+            let coordinates_ghost_came_from = dimensions.pos_to_vec(&target_position.get_neighbour_in_direction(&direction.opposite()).position, 0.0);
 
             *state = State::Frightened;
             direction.reverse();

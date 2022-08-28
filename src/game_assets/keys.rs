@@ -2,6 +2,21 @@ pub const FONT: &'static str = "fonts/FiraSans-Bold.ttf";
 
 pub const MAP: &'static str = "maps/default.map.json";
 
+pub const GHOST_HOUSE_ENTRANCE: &'static str = "textures/walls/ghost_house_entrance.png";
+
+pub const DOT: &'static str = "textures/dot.png";
+pub const ENERGIZER: &'static str = "textures/energizer.png";
+pub const CHERRY: &'static str = "textures/fruits/cherry.png";
+pub const STRAWBERRY: &'static str = "textures/fruits/strawberry.png";
+pub const PEACH: &'static str = "textures/fruits/peach.png";
+pub const APPLE: &'static str = "textures/fruits/apple.png";
+pub const GRAPES: &'static str = "textures/fruits/grapes.png";
+pub const GALAXIAN: &'static str = "textures/fruits/galaxian.png";
+pub const BELL: &'static str = "textures/fruits/bell.png";
+pub const KEY: &'static str = "textures/fruits/key.png";
+
+pub const PACMAN_LIFE: &'static str = "textures/pacman/pacman_life.png";
+
 pub const EATEN_UP: &'static str = "textures/ghost/eaten_up.png";
 pub const EATEN_DOWN: &'static str = "textures/ghost/eaten_down.png";
 pub const EATEN_LEFT: &'static str = "textures/ghost/eaten_left.png";

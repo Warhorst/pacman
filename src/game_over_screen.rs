@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use crate::board_dimensions::BoardDimensions;
 use crate::constants::TEXT_Z;
 use crate::game_assets::handles::GameAssetHandles;
 use crate::game_assets::keys::FONT;
@@ -26,10 +27,9 @@ fn spawn_screen(
     mut commands: Commands,
     game_asset_handles: Res<GameAssetHandles>,
     map: Res<Map>,
+    dimensions: Res<BoardDimensions>
 ) {
-    let mut coordinates = map.coordinates_between_positions_matching(is!(Element::FruitSpawn));
-    coordinates.z = TEXT_Z;
-
+    let transform = dimensions.positions_to_trans(map.get_positions_matching(is!(Element::FruitSpawn)), TEXT_Z);
     commands.spawn_bundle(Text2dBundle {
         text: Text::from_section(
             "GAME OVER".to_string(),
@@ -44,7 +44,7 @@ fn spawn_screen(
                 horizontal: HorizontalAlign::Center,
             }
         ),
-        transform: Transform::from_translation(coordinates),
+        transform,
         ..Default::default()
     })
         .insert(GameOverScreen);

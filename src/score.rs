@@ -1,11 +1,11 @@
 use std::time::Duration;
 use bevy::prelude::*;
+use crate::board_dimensions::BoardDimensions;
 
-use crate::constants::{FIELD_DIMENSION, POINTS_PER_DOT, POINTS_PER_ENERGIZER, POINTS_PER_GHOST, TEXT_Z};
+use crate::constants::{POINTS_PER_DOT, POINTS_PER_ENERGIZER, POINTS_PER_GHOST, TEXT_Z};
 use crate::edibles::energizer::EnergizerOver;
 use crate::interactions::{EDotEaten, EEnergizerEaten, EFruitEaten, EPacmanEatsGhost};
 use crate::life_cycle::LifeCycle::{Running, Start};
-use crate::map::board::Board;
 use crate::edibles::fruit::Fruit::*;
 use crate::game_assets::handles::GameAssetHandles;
 use crate::game_assets::keys::FONT;
@@ -62,8 +62,9 @@ struct EatenGhostCounter(usize);
 fn create_scoreboard(
     mut commands: Commands,
     game_asset_handles: Res<GameAssetHandles>,
-    board: Res<Board>,
+    dimensions: Res<BoardDimensions>
 ) {
+    let origin = dimensions.origin();
     commands.spawn_bundle(Text2dBundle {
         text: Text::from_section(
             "Score".to_string(),
@@ -78,7 +79,7 @@ fn create_scoreboard(
                 horizontal: HorizontalAlign::Center,
             }
         ),
-        transform: Transform::from_xyz(0.0, FIELD_DIMENSION * board.height as f32, 0.0),
+        transform: Transform::from_xyz(origin.x, origin.y + dimensions.board_height(), 0.0),
         ..Default::default()
     })
         .insert(Scoreboard);

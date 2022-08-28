@@ -4,6 +4,7 @@ use bevy::render::texture::ImageSettings;
 use crate::pacman::PacmanPlugin;
 use crate::animation::AnimationPlugin;
 use crate::camera::CameraPlugin;
+use crate::constants::{WINDOW_HEIGHT, WINDOW_WIDTH};
 use crate::edibles::EdiblePlugin;
 use crate::game_assets::GameAssetsPlugin;
 
@@ -51,12 +52,13 @@ mod edibles;
 mod interactions;
 mod game_assets;
 mod specs_per_level;
+mod board_dimensions;
 
 fn main() {
     App::new()
         .insert_resource(WindowDescriptor {
-            width: 1200.0,
-            height: 900.0,
+            width: WINDOW_WIDTH,
+            height: WINDOW_HEIGHT,
             title: "PacMan".to_string(),
             resizable: false,
             ..Default::default()

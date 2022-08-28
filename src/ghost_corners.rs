@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use crate::board_dimensions::BoardDimensions;
 use crate::ghosts::{Blinky, Clyde, Inky, Pinky};
 use crate::is;
 use crate::life_cycle::LifeCycle::Start;
@@ -23,17 +24,19 @@ pub struct GhostCorner;
 fn spawn_ghost_corners(
     mut commands: Commands,
     map: Res<Map>,
+    dimensions: Res<BoardDimensions>
 ) {
-    spawn_corner(&mut commands, &map, is!(Element::BlinkyCorner), Blinky);
-    spawn_corner(&mut commands, &map, is!(Element::PinkyCorner), Pinky);
-    spawn_corner(&mut commands, &map, is!(Element::InkyCorner), Inky);
-    spawn_corner(&mut commands, &map, is!(Element::ClydeCorner), Clyde);
+    spawn_corner(&mut commands, &map, is!(Element::BlinkyCorner), &dimensions, Blinky);
+    spawn_corner(&mut commands, &map, is!(Element::PinkyCorner), &dimensions, Pinky);
+    spawn_corner(&mut commands, &map, is!(Element::InkyCorner), &dimensions, Inky);
+    spawn_corner(&mut commands, &map, is!(Element::ClydeCorner), &dimensions, Clyde);
 }
 
 fn spawn_corner<C: Component + Copy>(
     commands: &mut Commands,
     map: &Map,
     filter: impl Fn(&Element) -> bool,
+    dimensions: &BoardDimensions,
     ghost: C
 ) {
     map.get_positions_matching(filter)
@@ -41,7 +44,7 @@ fn spawn_corner<C: Component + Copy>(
         .for_each(|pos| {
             commands.spawn()
                 .insert(GhostCorner)
-                .insert(Transform::from_translation(Vec3::from(pos)))
+                .insert(dimensions.pos_to_trans(pos, 0.0))
                 .insert(ghost);
         });
 }

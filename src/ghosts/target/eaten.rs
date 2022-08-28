@@ -5,8 +5,7 @@ use crate::ghosts::target::{get_nearest_neighbour, TargetComponents, TargetCompo
 use crate::common::Direction::*;
 use crate::ghosts::state::State;
 use crate::{state_skip_if, target_skip_if};
-use crate::common::position::Vec3Helper;
-use crate::common::position::ToPosition;
+use crate::board_dimensions::BoardDimensions;
 use crate::map::board::Board;
 use crate::common::XYEqual;
 
@@ -17,6 +16,7 @@ use crate::common::XYEqual;
 pub fn set_eaten_target<G: Component + GhostType + 'static>(
     board: Res<Board>,
     ghost_house: Res<GhostHouse>,
+    dimensions: Res<BoardDimensions>,
     mut query: Query<TargetComponents, With<G>>,
 ) {
     for mut components in query.iter_mut() {
@@ -25,13 +25,13 @@ pub fn set_eaten_target<G: Component + GhostType + 'static>(
 
         if is_directly_before_entrance(&components, &ghost_house) {
             move_in_house_center(&mut components, &ghost_house)
-        } else if is_before_entrance(&components, &ghost_house) {
-            move_directly_before_entrance(&mut components, &ghost_house)
+        } else if is_before_entrance(&components, &ghost_house, &dimensions) {
+            move_directly_before_entrance(&mut components, &ghost_house, &dimensions)
         } else if is_in_center(&components, &ghost_house) {
             move_to_respawn::<G>(&mut components, &ghost_house)
         } else {
             // TODO: Maybe only take this branch when not already in the ghost house, just to avoid bugs
-            move_to_nearest_position_before_entrance(&mut components, &ghost_house, &board)
+            move_to_nearest_position_before_entrance(&mut components, &ghost_house, &board, &dimensions)
         }
     }
 }
@@ -47,13 +47,13 @@ fn move_in_house_center(components: &mut TargetComponentsItem, ghost_house: &Gho
 }
 
 /// Return if the ghost is just on a position in front of the house.
-fn is_before_entrance(components: &TargetComponentsItem, ghost_house: &GhostHouse) -> bool {
-    ghost_house.positions_in_front_of_entrance().into_iter().any(|pos| pos == &components.transform.translation.pos())
+fn is_before_entrance(components: &TargetComponentsItem, ghost_house: &GhostHouse, dimensions: &BoardDimensions) -> bool {
+    ghost_house.positions_in_front_of_entrance().into_iter().any(|pos| pos == &dimensions.trans_to_pos(&components.transform))
 }
 
-fn move_directly_before_entrance(components: &mut TargetComponentsItem, ghost_house: &GhostHouse) {
+fn move_directly_before_entrance(components: &mut TargetComponentsItem, ghost_house: &GhostHouse, dimension: &BoardDimensions) {
     let in_front_of_house = ghost_house.coordinates_in_front_of_entrance();
-    let position_coordinates = components.transform.translation.pos_center();
+    let position_coordinates = dimension.pos_center(&components.transform.translation);
 
     *components.direction = match ghost_house.entrance_direction {
         Up | Down => match in_front_of_house.x < position_coordinates.x {
@@ -89,14 +89,15 @@ fn move_to_respawn<G: Component + GhostType + 'static>(components: &mut TargetCo
     components.target.set(respawn);
 }
 
-fn move_to_nearest_position_before_entrance(components: &mut TargetComponentsItem, ghost_house: &GhostHouse, board: &Board) {
-    let nearest_spawn_position = components.transform.translation.pos().get_nearest_position_from(ghost_house.positions_in_front_of_entrance());
+fn move_to_nearest_position_before_entrance(components: &mut TargetComponentsItem, ghost_house: &GhostHouse, board: &Board, dimensions: &BoardDimensions) {
+    let nearest_spawn_position = dimensions.trans_to_pos(components.transform).get_nearest_position_from(ghost_house.positions_in_front_of_entrance());
     let next_target_neighbour = get_nearest_neighbour(
         components,
         nearest_spawn_position,
+        dimensions,
         |n| !board.position_is_wall(&n.position)
     );
 
     *components.direction = next_target_neighbour.direction;
-    components.target.set(Vec3::from(&next_target_neighbour.position));
+    components.target.set(dimensions.pos_to_vec(&next_target_neighbour.position, 0.0));
 }

@@ -1,7 +1,10 @@
 use std::time::Duration;
 use bevy::prelude::*;
+use crate::board_dimensions::BoardDimensions;
 
-use crate::constants::{ENERGIZER_DIMENSION, ENERGIZER_Z};
+use crate::constants::ENERGIZER_Z;
+use crate::game_assets::handles::GameAssetHandles;
+use crate::game_assets::keys::ENERGIZER;
 use crate::interactions::EEnergizerEaten;
 use crate::life_cycle::LifeCycle::*;
 use crate::is;
@@ -66,22 +69,22 @@ impl EnergizerTimer {
 
 fn spawn_energizer(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
     map: Res<Map>,
+    game_asset_handles: Res<GameAssetHandles>,
+    dimensions: Res<BoardDimensions>
 ) {
-    let energizer_dimension = Vec2::new(ENERGIZER_DIMENSION, ENERGIZER_DIMENSION);
+    let energizer_dimension = Vec2::new(dimensions.energizer(), dimensions.energizer());
     for position in map.get_positions_matching(is!(EnergizerSpawn)) {
-        let mut coordinates = Vec3::from(position);
-        coordinates.z = ENERGIZER_Z;
+        let transform = dimensions.pos_to_trans(position, ENERGIZER_Z);
 
         commands.spawn()
             .insert_bundle(SpriteBundle {
-                texture: asset_server.load("textures/energizer.png"),
+                texture: game_asset_handles.get_handle(ENERGIZER),
                 sprite: Sprite {
                     custom_size: Some(energizer_dimension),
                     ..default()
                 },
-                transform: Transform::from_translation(coordinates),
+                transform,
                 ..Default::default()
             })
             .insert(Energizer)

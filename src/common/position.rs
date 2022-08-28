@@ -5,7 +5,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::common::Direction;
 use crate::common::Direction::*;
-use crate::constants::FIELD_DIMENSION;
 
 /// A position describes the index of a field on the map. It is used for
 /// collision checks, target settings and entity spawns.
@@ -100,72 +99,6 @@ impl From<&Position> for Position {
     }
 }
 
-impl From<Vec3> for Position {
-    fn from(vec: Vec3) -> Self {
-        let x = (vec.x + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
-        let y = (vec.y + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
-        Position::new(x as isize, y as isize)
-    }
-}
-
-impl From<&Vec3> for Position {
-    fn from(vec: &Vec3) -> Self {
-        let x = (vec.x + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
-        let y = (vec.y + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
-        Position::new(x as isize, y as isize)
-    }
-}
-
-impl From<&mut Vec3> for Position {
-    fn from(vec: &mut Vec3) -> Self {
-        let x = (vec.x + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
-        let y = (vec.y + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
-        Position::new(x as isize, y as isize)
-    }
-}
-
-impl From<Transform> for Position {
-    fn from(tf: Transform) -> Self {
-        Position::from(tf.translation)
-    }
-}
-
-impl From<&Transform> for Position {
-    fn from(tf: &Transform) -> Self {
-        Position::from(tf.translation)
-    }
-}
-
-impl From<&mut Transform> for Position {
-    fn from(tf: &mut Transform) -> Self {
-        Position::from(tf.translation)
-    }
-}
-
-impl From<Position> for Vec3 {
-    fn from(pos: Position) -> Self {
-        let x = (pos.x as f32) * FIELD_DIMENSION;
-        let y = (pos.y as f32) * FIELD_DIMENSION;
-        Vec3::new(x, y, 0.0)
-    }
-}
-
-impl From<&Position> for Vec3 {
-    fn from(pos: &Position) -> Self {
-        let x = (pos.x as f32) * FIELD_DIMENSION;
-        let y = (pos.y as f32) * FIELD_DIMENSION;
-        Vec3::new(x, y, 0.0)
-    }
-}
-
-impl From<&mut Position> for Vec3 {
-    fn from(pos: &mut Position) -> Self {
-        let x = (pos.x as f32) * FIELD_DIMENSION;
-        let y = (pos.y as f32) * FIELD_DIMENSION;
-        Vec3::new(x, y, 0.0)
-    }
-}
-
 impl std::fmt::Display for Position {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "({}, {})", self.x, self.y)
@@ -175,30 +108,12 @@ impl std::fmt::Display for Position {
 #[derive(Copy, Clone)]
 pub struct Neighbour {
     pub position: Position,
-    pub coordinates: Vec3,
     pub direction: Direction
 }
 
 impl Neighbour {
     pub fn new(position: Position, direction: Direction) -> Self {
-        Self { position, direction, coordinates: position.into()  }
-    }
-}
-
-/// Transform something into a position. This is way easier than using Into.
-pub trait ToPosition {
-    fn pos(&self) -> Position;
-}
-
-impl ToPosition for Transform {
-    fn pos(&self) -> Position {
-        Position::from(self.translation)
-    }
-}
-
-impl ToPosition for Vec3 {
-    fn pos(&self) -> Position {
-        Position::from(self)
+        Self { position, direction  }
     }
 }
 
@@ -207,17 +122,10 @@ impl ToPosition for Vec3 {
 /// The games logic widely uses positions to perform specific checks (like collisions and distance calculations).
 /// These methods aim to make this easier.
 pub trait Vec3Helper {
-    fn pos_center(&self) -> Vec3;
-
     fn set_xy(&mut self, target: &Vec3);
 }
 
 impl Vec3Helper for Vec3 {
-    /// The center coordinates of the position the coordinates belongs to.
-    fn pos_center(&self) -> Vec3 {
-        Vec3::from(Position::from(self))
-    }
-
     /// Set this coordinates x and y to the ones of the other transform.
     /// The z value defines what is rendered before or after another sprite,
     /// so this value should not be changed.

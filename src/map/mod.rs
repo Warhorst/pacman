@@ -7,9 +7,9 @@ use bevy_common_assets::json::JsonAssetPlugin;
 use serde::{Deserialize, Serialize};
 
 use Rotation::*;
+use crate::board_dimensions::BoardDimensions;
 
 use crate::common::Direction;
-use crate::common::Direction::*;
 use crate::common::position::Position;
 use crate::game_assets::handles::GameAssetHandles;
 use crate::game_assets::keys::MAP;
@@ -39,8 +39,10 @@ fn create_board_and_map(
     let fields = fields_assets.get(&game_asset_handles.get_handle(MAP)).expect("the map should be loaded at this point");
     let map = Map::new(&fields);
     let board = Board::new(&map);
+    let board_dimensions = BoardDimensions::new(&board);
     commands.insert_resource(map);
     commands.insert_resource(board);
+    commands.insert_resource(board_dimensions)
 }
 
 #[derive(Clone, Deref, Serialize, Deserialize, bevy::reflect::TypeUuid)]
@@ -87,35 +89,6 @@ impl Map {
     /// Return an iterator over all positions and elements.
     pub fn position_element_iter(&self) -> impl IntoIterator<Item=(&Position, &Element)> {
         self.elements_map.iter()
-    }
-
-    /// Return the coordinates between two positions matching the given filter.
-    ///
-    /// There must be exactly two positions matching this filter and these positions must be neighbored.
-    /// This should only fail with invalid map design.
-    pub fn coordinates_between_positions_matching(&self, filter: impl Fn(&Element) -> bool) -> Vec3 {
-        let positions_matching_filter = self.get_positions_matching(filter).into_iter().collect::<Vec<_>>();
-
-        if positions_matching_filter.len() != 2 {
-            panic!("There must be exactly two positions matching the given filter!")
-        }
-
-        let (pos_0, pos_1) = (positions_matching_filter[0], positions_matching_filter[1]);
-        let neighbour_direction = pos_0.get_neighbour_direction(&pos_1).expect("The two positions must be neighbored!");
-        let (vec_0, vec_1) = (Vec3::from(pos_0), Vec3::from(pos_1));
-
-        match neighbour_direction {
-            Up | Down => {
-                let x = vec_0.x;
-                let y = (vec_0.y + vec_1.y) / 2.0;
-                Vec3::new(x, y, 0.0)
-            }
-            Left | Right => {
-                let x = (vec_0.x + vec_1.x) / 2.0;
-                let y = vec_0.y;
-                Vec3::new(x, y, 0.0)
-            }
-        }
     }
 }
 

@@ -2,11 +2,11 @@ use std::cmp::Ordering;
 
 use bevy::prelude::*;
 use bevy::ecs::query::WorldQuery;
+use crate::board_dimensions::BoardDimensions;
 
-use crate::common::position::{Neighbour, Position, ToPosition};
+use crate::common::position::{Neighbour, Position};
 use crate::common::Direction;
 use crate::common::Direction::*;
-use crate::constants::FIELD_DIMENSION;
 use crate::life_cycle::LifeCycle::*;
 use crate::ghost_corners::GhostCorner;
 use crate::ghosts::{Blinky, Clyde, Inky, Pinky};
@@ -102,27 +102,32 @@ impl Target {
 
 fn set_scatter_target<G: Component>(
     board: Res<Board>,
+    dimensions: Res<BoardDimensions>,
     mut ghost_query: Query<TargetComponents, With<G>>,
     corner_query: Query<&Transform, (With<G>, With<GhostCorner>)>,
 ) {
     for mut components in ghost_query.iter_mut() {
         target_skip_if!(components.target set);
         state_skip_if!(components.state != State::Scatter);
-        let nearest_corner_position = components.transform.pos().get_nearest_position_from(corner_query.iter());
+        let nearest_corner_position = dimensions
+            .trans_to_pos(components.transform)
+            .get_nearest_position_from(corner_query.iter().map(|t| dimensions.trans_to_pos(t)));
 
         let next_target_neighbour = get_nearest_neighbour(
             &components,
             nearest_corner_position,
+            &dimensions,
             |n| !board.position_is_wall_or_entrance(&n.position)
         );
 
         *components.direction = next_target_neighbour.direction;
-        components.target.set(next_target_neighbour.coordinates);
+        components.target.set(dimensions.pos_to_vec(&next_target_neighbour.position, 0.0));
     }
 }
 
 fn set_blinky_chase_target(
     board: Res<Board>,
+    dimensions: Res<BoardDimensions>,
     mut blinky_query: Query<TargetComponents, With<Blinky>>,
     pacman_query: Query<&Transform, With<Pacman>>,
 ) {
@@ -132,18 +137,20 @@ fn set_blinky_chase_target(
         for pacman_transform in pacman_query.iter() {
             let next_target_neighbour = get_nearest_neighbour(
                 &components,
-                pacman_transform.pos(),
+                dimensions.trans_to_pos(pacman_transform),
+                &dimensions,
                 |n| !board.position_is_wall_or_entrance(&n.position)
             );
 
             *components.direction = next_target_neighbour.direction;
-            components.target.set(next_target_neighbour.coordinates);
+            components.target.set(dimensions.pos_to_vec(&next_target_neighbour.position, 0.0));
         }
     }
 }
 
 fn set_pinky_chase_target(
     board: Res<Board>,
+    dimensions: Res<BoardDimensions>,
     mut pinky_query: Query<TargetComponents, (With<Pinky>, Without<Pacman>)>,
     pacman_query: Query<(&Transform, &Direction), With<Pacman>>,
 ) {
@@ -151,16 +158,17 @@ fn set_pinky_chase_target(
         target_skip_if!(components.target set);
         state_skip_if!(components.state != State::Chase);
         for (pacman_transform, pacman_direction) in pacman_query.iter() {
-            let pinky_target = calculate_pinky_target(&pacman_transform.pos(), pacman_direction);
+            let pinky_target = calculate_pinky_target(&dimensions.trans_to_pos(pacman_transform), pacman_direction);
 
             let next_target_neighbour = get_nearest_neighbour(
                 &components,
                 pinky_target,
+                &dimensions,
                 |n| !board.position_is_wall_or_entrance(&n.position)
             );
 
             *components.direction = next_target_neighbour.direction;
-            components.target.set(next_target_neighbour.coordinates);
+            components.target.set(dimensions.pos_to_vec(&next_target_neighbour.position, 0.0));
         }
     }
 }
@@ -184,6 +192,7 @@ fn calculate_pinky_target(
 
 fn set_inky_chase_target(
     board: Res<Board>,
+    dimensions: Res<BoardDimensions>,
     blinky_query: Query<&Transform, With<Blinky>>,
     pacman_query: Query<(&Transform, &Direction), With<Pacman>>,
     mut inky_query: Query<TargetComponents, (With<Inky>, Without<Pacman>)>
@@ -193,15 +202,16 @@ fn set_inky_chase_target(
             for mut components in inky_query.iter_mut() {
                 target_skip_if!(components.target set);
                 state_skip_if!(components.state != State::Chase);
-                let target = calculate_inky_target(&pacman_transform.pos(), pacman_direction, &blinky_transform.pos());
+                let target = calculate_inky_target(&dimensions.trans_to_pos(pacman_transform), pacman_direction, &dimensions.trans_to_pos(blinky_transform));
                 let next_target_neighbour = get_nearest_neighbour(
                     &components,
                     target,
+                    &dimensions,
                     |n| !board.position_is_wall_or_entrance(&n.position)
                 );
 
                 *components.direction = next_target_neighbour.direction;
-                components.target.set(next_target_neighbour.coordinates);
+                components.target.set(dimensions.pos_to_vec(&next_target_neighbour.position, 0.0));
             }
         }
     }
@@ -228,6 +238,7 @@ fn calculate_inky_target(
 /// position instead.
 fn set_clyde_chase_target(
     board: Res<Board>,
+    dimensions: Res<BoardDimensions>,
     mut clyde_query: Query<TargetComponents, (With<Clyde>, Without<Pacman>)>,
     pacman_query: Query<&Transform, With<Pacman>>,
     corner_query: Query<&Transform, (With<Clyde>, With<GhostCorner>)>
@@ -236,52 +247,57 @@ fn set_clyde_chase_target(
         target_skip_if!(components.target set);
         state_skip_if!(components.state != State::Chase);
         for pacman_transform in pacman_query.iter() {
-            let target = if clyde_is_near_pacman(&components, &pacman_transform.pos()) {
-                Position::from(components.transform.translation).get_nearest_position_from(corner_query.iter())
+            let target = if clyde_is_near_pacman(&components, &dimensions.trans_to_pos(pacman_transform), &dimensions) {
+                dimensions
+                    .trans_to_pos(components.transform)
+                    .get_nearest_position_from(corner_query.iter().map(|t| dimensions.trans_to_pos(t)))
             } else {
-                pacman_transform.pos()
+                dimensions.trans_to_pos(pacman_transform)
             };
 
             let next_target_neighbour = get_nearest_neighbour(
                 &components,
                 target,
+                &dimensions,
                 |n| !board.position_is_wall_or_entrance(&n.position)
             );
 
             *components.direction = next_target_neighbour.direction;
-            components.target.set(next_target_neighbour.coordinates);
+            components.target.set(dimensions.pos_to_vec(&next_target_neighbour.position, 0.0));
         }
     }
 }
 
-fn clyde_is_near_pacman(components: &TargetComponentsItem, pacman_position: &Position) -> bool {
+fn clyde_is_near_pacman(components: &TargetComponentsItem, pacman_position: &Position, dimensions: &BoardDimensions) -> bool {
     let clyde_coordinates = components.transform.translation;
-    let pacman_coordinates = Vec3::from(pacman_position);
+    let pacman_coordinates = dimensions.pos_to_vec(pacman_position, clyde_coordinates.z);
     let distance = clyde_coordinates.distance(pacman_coordinates);
-    distance < FIELD_DIMENSION * 8.0
+    distance < dimensions.field() * 8.0
 }
 
 fn set_frightened_target(
     board: Res<Board>,
     random: Res<Random>,
+    dimensions: Res<BoardDimensions>,
     mut query: Query<TargetComponents>,
 ) {
     for mut components in query.iter_mut() {
         target_skip_if!(components.target set);
         state_skip_if!(components.state != State::Frightened);
-        let possible_neighbours = components.transform.pos().get_neighbours()
+        let possible_neighbours = dimensions.trans_to_pos(components.transform)
+            .get_neighbours()
             .into_iter()
             .filter(|n| n.direction != components.direction.opposite())
             .filter(|n| !board.position_is_wall_or_entrance(&n.position))
             .collect::<Vec<_>>();
 
         let next_target_neighbour = match possible_neighbours.len() {
-            0 => components.transform.translation.pos().neighbour_behind(&components.direction),
+            0 => dimensions.trans_to_pos(components.transform).neighbour_behind(&components.direction),
             1 => possible_neighbours.get(0).unwrap().clone(),
             len => possible_neighbours.get(random.zero_to(len)).unwrap().clone()
         };
         *components.direction = next_target_neighbour.direction;
-        components.target.set(next_target_neighbour.coordinates);
+        components.target.set(dimensions.pos_to_vec(&next_target_neighbour.position, 0.0));
     }
 }
 
@@ -291,13 +307,13 @@ fn set_frightened_target(
 /// It is generally not allowed for ghosts to turn around, so the position behind the ghost is always filtered. However,
 /// if due to some circumstances (like bad map design) a ghost has no other way to go, we allow the pour soul to
 /// turn around.
-fn get_nearest_neighbour(components: &TargetComponentsItem, target: Position, position_filter: impl Fn(&Neighbour) -> bool) -> Neighbour {
-    components.transform.pos().get_neighbours()
+fn get_nearest_neighbour(components: &TargetComponentsItem, target: Position, dimensions: &BoardDimensions, position_filter: impl Fn(&Neighbour) -> bool) -> Neighbour {
+    dimensions.trans_to_pos(components.transform).get_neighbours()
         .into_iter()
         .filter(|n| n.direction != components.direction.opposite())
         .filter(position_filter)
         .min_by(|n_a, n_b| minimal_distance_to_neighbours(&target, n_a, n_b))
-        .unwrap_or_else(|| components.transform.translation.pos().neighbour_behind(&components.direction))
+        .unwrap_or_else(|| dimensions.trans_to_pos(components.transform).neighbour_behind(&components.direction))
 }
 
 fn minimal_distance_to_neighbours(big_target: &Position, neighbour_a: &Neighbour, neighbour_b: &Neighbour) -> Ordering {

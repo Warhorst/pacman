@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy::ecs::query::WorldQuery;
 use crate::ghosts::state::State;
 use crate::{state_skip_if, target_skip_if};
-use crate::constants::FIELD_DIMENSION;
+use crate::board_dimensions::BoardDimensions;
 use crate::ghost_house::GhostHouse;
 use crate::ghosts::GhostType;
 use crate::ghosts::target::Target;
@@ -30,6 +30,7 @@ pub struct SpawnedTargetComponents<'a> {
 pub fn set_spawned_target<G: GhostType + Component + 'static>(
     ghost_house: Res<GhostHouse>,
     ghost_house_gate: Res<GhostHouseGate>,
+    dimensions: Res<BoardDimensions>,
     mut query: Query<SpawnedTargetComponents, With<G>>,
 ) {
     for mut components in query.iter_mut() {
@@ -39,17 +40,17 @@ pub fn set_spawned_target<G: GhostType + Component + 'static>(
         if ghost_house_gate.ghost_can_leave_house::<G>() {
             leave_house::<G>(&mut components, &ghost_house)
         } else {
-            bounce_around::<G>(&mut components, &ghost_house)
+            bounce_around::<G>(&mut components, &ghost_house, &dimensions)
         }
     }
 }
 
 /// If a ghost cannot leave the ghost house, he just moves around.
-fn bounce_around<G: GhostType + Component + 'static>(components: &mut SpawnedTargetComponentsItem, ghost_house: &GhostHouse) {
+fn bounce_around<G: GhostType + Component + 'static>(components: &mut SpawnedTargetComponentsItem, ghost_house: &GhostHouse, dimensions: &BoardDimensions) {
     let coordinates = components.transform.translation;
     let respawn = ghost_house.respawn_coordinates_of::<G>();
-    let above_respawn = coordinates_slightly_in_direction(respawn, ghost_house.entrance_direction);
-    let below_respawn = coordinates_slightly_in_direction(respawn, ghost_house.entrance_direction.opposite());
+    let above_respawn = coordinates_slightly_in_direction(respawn, ghost_house.entrance_direction, dimensions);
+    let below_respawn = coordinates_slightly_in_direction(respawn, ghost_house.entrance_direction.opposite(), dimensions);
 
     if coordinates.xy_equal_to(&respawn) {
         match *components.direction {
@@ -121,8 +122,8 @@ fn move_near_center<G: GhostType + Component + 'static>(components: &mut Spawned
 
 /// A ghost in the ghost house does not walk a full field in the ghost house (because he would clip into the wall).
 /// When bouncing around in the ghost house, he only moves slightly in one direction.
-fn coordinates_slightly_in_direction(v: Vec3, d: Direction) -> Vec3 {
-    let distance = FIELD_DIMENSION / 2.0;
+fn coordinates_slightly_in_direction(v: Vec3, d: Direction, dimensions: &BoardDimensions) -> Vec3 {
+    let distance = dimensions.field() / 2.0;
     match d {
         Up => Vec3::new(v.x, v.y + distance, v.z),
         Down => Vec3::new(v.x, v.y - distance, v.z),

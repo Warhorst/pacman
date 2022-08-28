@@ -1,7 +1,8 @@
 use bevy::prelude::*;
+use crate::board_dimensions::BoardDimensions;
 use crate::common::Direction::*;
 
-use crate::constants::{PACMAN_DIMENSION, PACMAN_SPEED, PACMAN_Z};
+use crate::constants::{PACMAN_SPEED, PACMAN_Z};
 use crate::is;
 use crate::level::Level;
 use crate::map::Element::PacManSpawn;
@@ -23,11 +24,12 @@ pub (in crate::pacman) fn spawn_pacman(
     sprite_sheets: Res<Assets<SpriteSheet>>,
     map: Res<Map>,
     level: Res<Level>,
-    specs_per_level: Res<SpecsPerLevel>
+    specs_per_level: Res<SpecsPerLevel>,
+    dimensions: Res<BoardDimensions>
 ) {
-    let mut spawn_coordinates = map.coordinates_between_positions_matching(is!(PacManSpawn));
-    spawn_coordinates.z = PACMAN_Z;
-    let dimension = Vec2::new(PACMAN_DIMENSION, PACMAN_DIMENSION);
+    let transform = dimensions.positions_to_trans(map.get_positions_matching(is!(PacManSpawn)), PACMAN_Z);
+    let dimension = Vec2::new(dimensions.pacman(), dimensions.pacman());
+
     let mut animations = create_pacman_animations(&game_assets, &sprite_sheets);
     animations.stop();
 
@@ -38,7 +40,7 @@ pub (in crate::pacman) fn spawn_pacman(
                 custom_size: Some(dimension),
                 ..default()
             },
-            transform: Transform::from_translation(spawn_coordinates),
+            transform,
             ..Default::default()
         })
         .insert(Pacman)

@@ -4,6 +4,7 @@ use bevy::prelude::*;
 use crate::common::position::Position;
 use crate::{is, map};
 use map::Element;
+use crate::board_dimensions::BoardDimensions;
 use crate::ghosts::{Blinky, Clyde, GhostType, Inky, Pinky};
 use crate::common::Direction;
 use crate::life_cycle::LifeCycle::Start;
@@ -24,9 +25,10 @@ impl Plugin for GhostHousePlugin {
 
 fn create_ghost_house(
     mut commands: Commands,
-    map: Res<Map>
+    map: Res<Map>,
+    dimensions: Res<BoardDimensions>
 ) {
-    commands.insert_resource(GhostHouse::new(&map));
+    commands.insert_resource(GhostHouse::new(&map, &dimensions));
 }
 
 /// Resource that describes the ghost house, the place where ghosts start and respawn.
@@ -61,10 +63,10 @@ pub struct GhostHouse {
 }
 
 impl GhostHouse {
-    pub fn new(map: &Map) -> Self {
+    pub fn new(map: &Map, dimensions: &BoardDimensions) -> Self {
         let bottom_left = Self::get_bottom_left(map);
         let rotation = Self::get_rotation(map);
-        let spawns = Self::create_spawns(rotation, bottom_left);
+        let spawns = Self::create_spawns(rotation, bottom_left, dimensions);
 
         GhostHouse {
             entrance_direction: Direction::Up.rotate(rotation),
@@ -94,50 +96,50 @@ impl GhostHouse {
             .expect("the map should at least contain one ghost house entrance")
     }
 
-    fn create_spawns(rotation: Rotation, bottom_left: Position) -> HashMap<TypeId, Spawn> {
+    fn create_spawns(rotation: Rotation, bottom_left: Position, dimensions: &BoardDimensions) -> HashMap<TypeId, Spawn> {
         [
-            (TypeId::of::<Blinky>(), Self::create_blinky_spawn(rotation, bottom_left)),
-            (TypeId::of::<Pinky>(), Self::create_pinky_spawn(rotation, bottom_left)),
-            (TypeId::of::<Inky>(), Self::create_inky_spawn(rotation, bottom_left)),
-            (TypeId::of::<Clyde>(), Self::create_clyde_spawn(rotation, bottom_left)),
+            (TypeId::of::<Blinky>(), Self::create_blinky_spawn(rotation, bottom_left, dimensions)),
+            (TypeId::of::<Pinky>(), Self::create_pinky_spawn(rotation, bottom_left, dimensions)),
+            (TypeId::of::<Inky>(), Self::create_inky_spawn(rotation, bottom_left, dimensions)),
+            (TypeId::of::<Clyde>(), Self::create_clyde_spawn(rotation, bottom_left, dimensions)),
         ]
             .into_iter()
             .collect()
     }
 
-    fn create_blinky_spawn(rotation: Rotation, bottom_left: Position) -> Spawn {
+    fn create_blinky_spawn(rotation: Rotation, bottom_left: Position, dimensions: &BoardDimensions) -> Spawn {
         match rotation {
-            D0 => Self::create_spawn_with_offsets(bottom_left, (3, 5), (4, 5)),
-            D90 => Self::create_spawn_with_offsets(bottom_left, (5, 3), (5, 4)),
-            D180 => Self::create_spawn_with_offsets(bottom_left, (3, -1), (4, -1)),
-            D270 => Self::create_spawn_with_offsets(bottom_left, (-1, 3), (-1, 4)),
+            D0 => Self::create_spawn_with_offsets(bottom_left, (3, 5), (4, 5), dimensions),
+            D90 => Self::create_spawn_with_offsets(bottom_left, (5, 3), (5, 4), dimensions),
+            D180 => Self::create_spawn_with_offsets(bottom_left, (3, -1), (4, -1), dimensions),
+            D270 => Self::create_spawn_with_offsets(bottom_left, (-1, 3), (-1, 4), dimensions),
         }
     }
 
-    fn create_pinky_spawn(rotation: Rotation, bottom_left: Position) -> Spawn {
+    fn create_pinky_spawn(rotation: Rotation, bottom_left: Position, dimensions: &BoardDimensions) -> Spawn {
         match rotation {
-            D0 => Self::create_spawn_with_offsets(bottom_left, (3, 2), (4, 2)),
-            D90 => Self::create_spawn_with_offsets(bottom_left, (2, 3), (2, 4)),
-            D180 => Self::create_spawn_with_offsets(bottom_left, (3, 2), (4, 2)),
-            D270 => Self::create_spawn_with_offsets(bottom_left, (2, 3), (2, 4)),
+            D0 => Self::create_spawn_with_offsets(bottom_left, (3, 2), (4, 2), dimensions),
+            D90 => Self::create_spawn_with_offsets(bottom_left, (2, 3), (2, 4), dimensions),
+            D180 => Self::create_spawn_with_offsets(bottom_left, (3, 2), (4, 2), dimensions),
+            D270 => Self::create_spawn_with_offsets(bottom_left, (2, 3), (2, 4), dimensions),
         }
     }
 
-    fn create_inky_spawn(rotation: Rotation, bottom_left: Position) -> Spawn {
+    fn create_inky_spawn(rotation: Rotation, bottom_left: Position, dimensions: &BoardDimensions) -> Spawn {
         match rotation {
-            D0 => Self::create_spawn_with_offsets(bottom_left, (1, 2), (2, 2)),
-            D90 => Self::create_spawn_with_offsets(bottom_left, (2, 5), (2, 6)),
-            D180 => Self::create_spawn_with_offsets(bottom_left, (5, 2), (6, 2)),
-            D270 => Self::create_spawn_with_offsets(bottom_left, (2, 1), (2, 2)),
+            D0 => Self::create_spawn_with_offsets(bottom_left, (1, 2), (2, 2), dimensions),
+            D90 => Self::create_spawn_with_offsets(bottom_left, (2, 5), (2, 6), dimensions),
+            D180 => Self::create_spawn_with_offsets(bottom_left, (5, 2), (6, 2), dimensions),
+            D270 => Self::create_spawn_with_offsets(bottom_left, (2, 1), (2, 2), dimensions),
         }
     }
 
-    fn create_clyde_spawn(rotation: Rotation, bottom_left: Position) -> Spawn {
+    fn create_clyde_spawn(rotation: Rotation, bottom_left: Position, dimensions: &BoardDimensions) -> Spawn {
         match rotation {
-            D0 => Self::create_spawn_with_offsets(bottom_left, (5, 2), (6, 2)),
-            D90 => Self::create_spawn_with_offsets(bottom_left, (2, 1), (2, 2)),
-            D180 => Self::create_spawn_with_offsets(bottom_left, (1, 2), (2, 2)),
-            D270 => Self::create_spawn_with_offsets(bottom_left, (2, 5), (2, 6)),
+            D0 => Self::create_spawn_with_offsets(bottom_left, (5, 2), (6, 2), dimensions),
+            D90 => Self::create_spawn_with_offsets(bottom_left, (2, 1), (2, 2), dimensions),
+            D180 => Self::create_spawn_with_offsets(bottom_left, (1, 2), (2, 2), dimensions),
+            D270 => Self::create_spawn_with_offsets(bottom_left, (2, 5), (2, 6), dimensions),
         }
     }
 
@@ -145,6 +147,7 @@ impl GhostHouse {
         bottom_left: Position,
         offsets_0: (isize, isize),
         offsets_1: (isize, isize),
+        dimensions: &BoardDimensions
     ) -> Spawn {
         let x = bottom_left.x;
         let y = bottom_left.y;
@@ -152,26 +155,8 @@ impl GhostHouse {
             Position::new(x + offsets_0.0, y + offsets_0.1),
             Position::new(x + offsets_1.0, y + offsets_1.1),
         ];
-        let coordinates = Self::create_centered_coordinates_for(&positions);
+        let coordinates = dimensions.positions_to_vec(positions.iter(), 0.0);
         Spawn { positions, coordinates }
-    }
-
-    fn create_centered_coordinates_for(positions: &[Position; 2]) -> Vec3 {
-        let vec_0 = Vec3::from(&positions[0]);
-        let vec_1 = Vec3::from(&positions[1]);
-
-        match vec_0.y == vec_1.y {
-            true => Vec3::new(
-                (vec_0.x + vec_1.x) / 2.0,
-                vec_0.y,
-                0.0,
-            ),
-            false => Vec3::new(
-                vec_0.x,
-                (vec_0.y + vec_1.y) / 2.0,
-                0.0,
-            )
-        }
     }
 
     pub fn spawn_coordinates_of<G: GhostType + 'static>(&self) -> Vec3 {

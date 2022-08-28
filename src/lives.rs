@@ -1,9 +1,10 @@
 use bevy::prelude::*;
-use crate::constants::{FIELD_DIMENSION, PACMAN_DIMENSION};
+use crate::board_dimensions::BoardDimensions;
+use crate::game_assets::handles::GameAssetHandles;
+use crate::game_assets::keys::PACMAN_LIFE;
 use crate::interactions::EPacmanHit;
 use crate::life_cycle::LifeCycle;
 use crate::life_cycle::LifeCycle::Start;
-use crate::map::board::Board;
 use crate::score::Score;
 
 pub struct LivesPlugin;
@@ -47,25 +48,31 @@ impl PointsRequiredForExtraLife {
 
 fn spawn_lives(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    board: Res<Board>
+    asset_handles: Res<GameAssetHandles>,
+    dimensions: Res<BoardDimensions>
 ) {
     for i in 0..LIVES {
-        spawn_life(&mut commands, &asset_server, &board, i)
+        spawn_life(&mut commands, &asset_handles, i, &dimensions)
     }
 }
 
-fn spawn_life(commands: &mut Commands, asset_server: &AssetServer, board: &Board, life_index: usize) {
-    let life_x = FIELD_DIMENSION * board.width as f32 + (life_index as f32) * (FIELD_DIMENSION) * 2.0;
+fn spawn_life(
+    commands: &mut Commands,
+    asset_handles: &GameAssetHandles,
+    life_index: usize,
+    dimensions: &BoardDimensions
+) {
+    let origin = dimensions.origin();
+    let life_x = origin.x + (life_index as f32) * (dimensions.life()) * 2.0;
 
     commands.spawn()
         .insert_bundle(SpriteBundle {
-            texture: asset_server.load("textures/pacman/pacman_life.png"),
+            texture: asset_handles.get_handle(PACMAN_LIFE),
             sprite: Sprite {
-                custom_size: Some(Vec2::new(PACMAN_DIMENSION, PACMAN_DIMENSION)),
+                custom_size: Some(Vec2::new(dimensions.life(), dimensions.life())),
                 ..default()
             },
-            transform: Transform::from_translation(Vec3::new(life_x, FIELD_DIMENSION * board.height as f32, 0.0)),
+            transform: Transform::from_translation(Vec3::new(life_x, origin.y - dimensions.life(), 0.0)),
             ..default()
         })
         .insert(Life(life_index));
@@ -88,15 +95,15 @@ fn remove_life_when_pacman_dies(
 
 fn add_life_if_player_reaches_specific_score(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
+    game_assets: Res<GameAssetHandles>,
     score: Res<Score>,
     mut points_required_for_extra_life: ResMut<PointsRequiredForExtraLife>,
-    board: Res<Board>,
+    dimensions: Res<BoardDimensions>,
     query: Query<&Life>
 ) {
     if **score >= **points_required_for_extra_life {
         let index = query.iter().count();
-        spawn_life(&mut commands, &asset_server, &board, index);
+        spawn_life(&mut commands, &game_assets, index, &dimensions);
         points_required_for_extra_life.increase_limit();
     }
 }

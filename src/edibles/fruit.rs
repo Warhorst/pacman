@@ -2,9 +2,11 @@ use std::time::Duration;
 use bevy::prelude::*;
 use crate::level::Level;
 use Fruit::*;
-use crate::constants::{FRUIT_Z, PACMAN_DIMENSION};
+use crate::board_dimensions::BoardDimensions;
+use crate::constants::FRUIT_Z;
 use crate::edibles::dots::EatenDots;
 use crate::edibles::Edible;
+use crate::game_assets::handles::GameAssetHandles;
 use crate::interactions::EDotEaten;
 use crate::is;
 use crate::life_cycle::LifeCycle::Running;
@@ -56,30 +58,30 @@ impl FruitDespawnTimer {
 /// was eaten.
 fn spawn_fruit_when_dot_limit_reached(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
+    game_asset_handles: Res<GameAssetHandles>,
     map: Res<Map>,
     level: Res<Level>,
     eaten_dots: Res<EatenDots>,
     specs_per_level: Res<SpecsPerLevel>,
+    dimensions: Res<BoardDimensions>,
     mut event_reader: EventReader<EDotEaten>
 ) {
     let num_eaten_dots = eaten_dots.get_eaten();
 
     for _ in event_reader.iter() {
         if let 70 | 170 = num_eaten_dots {
-            let mut coordinates = map.coordinates_between_positions_matching(is!(Element::FruitSpawn));
-            coordinates.z = FRUIT_Z;
-            let dimension = Vec2::new(PACMAN_DIMENSION, PACMAN_DIMENSION);
+            let transform = dimensions.positions_to_trans(map.get_positions_matching(is!(Element::FruitSpawn)), FRUIT_Z);
+            let dimension = Vec2::new(dimensions.fruit(), dimensions.fruit());
             let fruit = specs_per_level.get_for(&level).fruit_to_spawn;
 
             commands.spawn()
                 .insert_bundle(SpriteBundle {
-                    texture: get_texture_for_fruit(&fruit, &asset_server),
+                    texture: get_texture_for_fruit(&fruit, &game_asset_handles),
                     sprite: Sprite {
                         custom_size: Some(dimension),
                         ..default()
                     },
-                    transform: Transform::from_translation(coordinates),
+                    transform,
                     ..Default::default()
                 })
                 .insert(fruit)
@@ -90,12 +92,12 @@ fn spawn_fruit_when_dot_limit_reached(
     }
 }
 
-fn get_texture_for_fruit(fruit: &Fruit, asset_server: &AssetServer) -> Handle<Image> {
-    asset_server.load(&format!("textures/fruits/{}.png", match fruit {
+fn get_texture_for_fruit(fruit: &Fruit, asset_handles: &GameAssetHandles) -> Handle<Image> {
+    asset_handles.get_handle(&format!("textures/fruits/{}.png", match fruit {
         Cherry => "cherry",
         Strawberry => "strawberry",
         Peach => "peach",
-        Apple => "cherry",
+        Apple => "apple",
         Grapes => "grapes",
         Galaxian => "galaxian",
         Bell => "bell",

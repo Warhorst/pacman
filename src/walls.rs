@@ -1,9 +1,10 @@
 use bevy::prelude::*;
 use bevy::utils::HashMap;
 use crate::animation::{Animation, Animations};
+use crate::board_dimensions::BoardDimensions;
 use crate::common::position::Position;
-use crate::constants::WALL_DIMENSION;
 use crate::game_assets::handles::GameAssetHandles;
+use crate::game_assets::keys::GHOST_HOUSE_ENTRANCE;
 use crate::game_assets::keys::sprite_sheets::*;
 use crate::is;
 use crate::life_cycle::LifeCycle::{LevelTransition, Start};
@@ -35,17 +36,18 @@ pub struct Wall;
 fn spawn_walls(
     mut commands: Commands,
     map: Res<Map>,
+    board_dimensions: Res<BoardDimensions>,
     game_asset_handles: Res<GameAssetHandles>,
     sprite_sheets: Res<Assets<SpriteSheet>>,
-    asset_server: Res<AssetServer>,
 ) {
-    spawn_labyrinth_walls(&mut commands, &map, &game_asset_handles, &sprite_sheets);
-    spawn_ghost_house_entrance(&mut commands, &map, &asset_server);
+    spawn_labyrinth_walls(&mut commands, &map, &board_dimensions, &game_asset_handles, &sprite_sheets);
+    spawn_ghost_house_entrance(&mut commands, &map, &board_dimensions, &game_asset_handles);
 }
 
 fn spawn_labyrinth_walls(
     commands: &mut Commands,
     map: &Map,
+    dimensions: &BoardDimensions,
     game_assets: &GameAssetHandles,
     sprite_sheets: &Assets<SpriteSheet>,
 ) {
@@ -53,9 +55,9 @@ fn spawn_labyrinth_walls(
 
     for (position, element) in map.position_element_iter() {
         if let Element::Wall { is_corner, rotation, wall_type } = element {
-            let transform = create_transform(position, rotation);
+            let transform = create_transform(position, dimensions, rotation);
             let animations = wall_animations_map.get(&(*wall_type, *is_corner)).unwrap().clone();
-            let custom_size = Some(Vec2::new(WALL_DIMENSION, WALL_DIMENSION));
+            let custom_size = Some(Vec2::new(dimensions.wall(), dimensions.wall()));
 
             commands.spawn()
                 .insert_bundle(SpriteBundle {
@@ -74,8 +76,8 @@ fn spawn_labyrinth_walls(
     }
 }
 
-fn create_transform(position: &Position, rotation: &Rotation) -> Transform {
-    let mut transform = Transform::from_translation(Vec3::from(position));
+fn create_transform(position: &Position, dimensions: &BoardDimensions, rotation: &Rotation) -> Transform {
+    let mut transform = dimensions.pos_to_trans(position, 0.0);
     transform.rotation = rotation.quat_z();
     transform
 }
@@ -104,16 +106,16 @@ fn create_wall_animations(sheet: &SpriteSheet) -> Animations {
     )
 }
 
-fn spawn_ghost_house_entrance(commands: &mut Commands, map: &Map, asset_server: &AssetServer) {
+fn spawn_ghost_house_entrance(commands: &mut Commands, map: &Map, dimensions: &BoardDimensions, game_assets: &GameAssetHandles) {
     for position in map.get_positions_matching(is!(Element::GhostHouseEntrance {..})) {
         commands.spawn()
             .insert_bundle(SpriteBundle {
-                texture: asset_server.load("textures/walls/ghost_house_entrance.png"),
+                texture: game_assets.get_handle(GHOST_HOUSE_ENTRANCE),
                 sprite: Sprite {
-                    custom_size: Some(Vec2::new(WALL_DIMENSION, WALL_DIMENSION)),
+                    custom_size: Some(Vec2::new(dimensions.field(), dimensions.field())),
                     ..default()
                 },
-                transform: Transform::from_translation(Vec3::from(position)),
+                transform: dimensions.pos_to_trans(position, 0.0),
                 ..Default::default()
             });
     }
