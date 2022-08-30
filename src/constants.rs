@@ -1,10 +1,5 @@
-const SCALE: f32 = 1.75;
-
 pub const WINDOW_WIDTH: f32 = 1280.0;
 pub const WINDOW_HEIGHT: f32 = 720.0;
-
-pub const PACMAN_SPEED: f32 = 125.0 * SCALE;
-pub const GHOST_SPEED: f32 = PACMAN_SPEED;
 
 pub const POINTS_PER_DOT: usize = 10;
 pub const POINTS_PER_ENERGIZER: usize = 50;

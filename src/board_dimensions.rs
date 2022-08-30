@@ -62,6 +62,14 @@ impl BoardDimensions {
         self.pacman()
     }
 
+    pub fn pacman_base_speed(&self) -> f32 {
+        self.field_dimension * 9.0
+    }
+
+    pub fn ghost_base_speed(&self) -> f32 {
+        self.pacman_base_speed()
+    }
+
     pub fn pos_to_vec(&self, pos: &Position, z: f32) -> Vec3 {
         Vec3::new(
             self.board_origin.x + self.field_dimension * pos.x as f32,

@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use crate::board_dimensions::BoardDimensions;
 use crate::common::Direction::*;
 
-use crate::constants::{PACMAN_SPEED, PACMAN_Z};
+use crate::constants::PACMAN_Z;
 use crate::is;
 use crate::level::Level;
 use crate::map::Element::PacManSpawn;
@@ -44,7 +44,7 @@ pub (in crate::pacman) fn spawn_pacman(
             ..Default::default()
         })
         .insert(Pacman)
-        .insert(Speed(PACMAN_SPEED * specs_per_level.get_for(&level).pacman_normal_speed_modifier))
+        .insert(Speed(dimensions.pacman_base_speed() * specs_per_level.get_for(&level).pacman_normal_speed_modifier))
         .insert(Up)
         .insert(animations)
     ;

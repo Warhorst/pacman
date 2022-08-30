@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use crate::board_dimensions::BoardDimensions;
 
-use crate::constants::{BLINKY_Z, CLYDE_Z, GHOST_SPEED, INKY_Z, PINKY_Z};
+use crate::constants::{BLINKY_Z, CLYDE_Z, INKY_Z, PINKY_Z};
 use crate::game_assets::handles::GameAssetHandles;
 use crate::ghost_house::GhostHouse;
 use crate::ghosts::{Blinky, Clyde, Ghost, GhostType, Inky, Pinky};
@@ -59,7 +59,7 @@ fn spawn_ghost<G: GhostType + Component>(
         .insert(Ghost)
         .insert(ghost_type)
         .insert(spawn_direction)
-        .insert(Speed(GHOST_SPEED * specs_per_level.get_for(level).ghost_normal_speed_modifier))
+        .insert(Speed(dimensions.ghost_base_speed() * specs_per_level.get_for(level).ghost_normal_speed_modifier))
         .insert(Target::new())
         .insert(State::Spawned)
         .insert(animations)
