@@ -88,8 +88,8 @@ fn create_animations(game_assets: &GameAssetHandles, sprite_sheets: &Assets<Spri
         (WallType::Outer, false, game_assets.get_handle(OUTER_WALL)),
         (WallType::Inner, true, game_assets.get_handle(INNER_WALL_CORNER)),
         (WallType::Inner, false, game_assets.get_handle(INNER_WALL)),
-        (WallType::Ghost, true, game_assets.get_handle(OUTER_WALL_CORNER)),
-        (WallType::Ghost, false, game_assets.get_handle(OUTER_WALL)),
+        (WallType::Ghost, true, game_assets.get_handle(GHOST_WALL_CORNER)),
+        (WallType::Ghost, false, game_assets.get_handle(GHOST_WALL)),
     ]
         .into_iter()
         .map(|(tp, is_corner, sheet_handle)| ((tp, is_corner), create_wall_animations(sprite_sheets.get(&sheet_handle).expect("sheet should be present"))))
