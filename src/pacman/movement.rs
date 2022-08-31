@@ -32,7 +32,7 @@ pub(in crate::pacman) fn move_pacman(
         let mut new_coordinates = calculate_new_coordinates(&mut move_components, delta_seconds);
         let new_position = dimensions.vec_to_pos(&new_coordinates);
 
-        if is_going_to_collide_with_obstacle(&board, &move_components.direction, &new_position, &new_coordinates, &dimensions) {
+        if is_going_to_collide_with_obstacle(&board, &move_components.direction, move_components.transform.translation, &dimensions) {
             process_collision(&move_components.direction, &new_position, &mut new_coordinates, &dimensions)
         } else {
             center_position(&move_components.direction, &new_position, &mut new_coordinates, &dimensions)
@@ -61,37 +61,9 @@ fn get_modifiers_for_direction(direction: &Direction) -> (f32, f32) {
 }
 
 /// Determine if pacman will collide with an obstacle if he is going further in his current direction.
-fn is_going_to_collide_with_obstacle(board: &Board, direction: &Direction, new_position: &Position, new_coordinates: &Vec3, dimensions: &BoardDimensions) -> bool {
-    let pos_in_direction = new_position.neighbour_position(direction);
-
-    if position_is_obstacle(board, &pos_in_direction) {
-        true
-    } else {
-        !are_coordinates_in_field_center(direction, &pos_in_direction, new_coordinates, dimensions)
-    }
-}
-
-/// Determines if pacmans current coordinates are in the center of his current position.
-///
-/// Pacman can only walk to new fields if he is centered enough to not collide with walls while doing so.
-/// Based on pacmans current direction (horizontally or vertically), his x/y coordinates must be in a specific range.
-/// This range is is target field coordinates x/y plus/minus a deadzone. The deadzone allows the player
-/// to be slightly off when changing directions. It is currently set to 90% FIELD_DIMENSION.
-pub fn are_coordinates_in_field_center(direction: &Direction, position: &Position, coordinates: &Vec3, dimensions: &BoardDimensions) -> bool {
-    let position_coordinates = dimensions.pos_to_vec(&position, PACMAN_Z);
-    let deadzone = dimensions.field() * 9.0/10.0;
-    match direction {
-        Left | Right => {
-            let y_start = position_coordinates.y - deadzone;
-            let y_end = position_coordinates.y + deadzone;
-            coordinates.y >= y_start && coordinates.y <= y_end
-        }
-        Up | Down => {
-            let x_start = position_coordinates.x - deadzone;
-            let x_end = position_coordinates.x + deadzone;
-            coordinates.x >= x_start && coordinates.x <= x_end
-        }
-    }
+fn is_going_to_collide_with_obstacle(board: &Board, direction: &Direction, coordinates: Vec3, dimensions: &BoardDimensions) -> bool {
+    let pos_in_direction = dimensions.vec_to_pos(&coordinates).neighbour_position(&direction);
+    position_is_obstacle(board, &pos_in_direction)
 }
 
 /// Tells if the given position is an obstacle for pacman.
