@@ -1,15 +1,11 @@
 use bevy::prelude::*;
 use crate::animation::Animations;
-use crate::board_dimensions::BoardDimensions;
 
-use crate::common::Direction;
-use crate::common::Direction::*;
 use crate::life_cycle::LifeCycle::*;
-use crate::map::board::Board;
 use crate::pacman::edible_eaten::EdibleEatenPlugin;
 use crate::pacman::ghost_eaten::GhostEatenPlugin;
 use crate::pacman::spawn::spawn_pacman;
-use crate::pacman::movement::move_pacman;
+use crate::pacman::movement::{InputBuffer, move_pacman, set_direction_based_on_keyboard_input};
 use crate::pacman::textures::{start_animation, update_pacman_appearance};
 
 mod movement;
@@ -68,51 +64,6 @@ impl Plugin for PacmanPlugin {
     }
 }
 
-fn set_direction_based_on_keyboard_input(
-    board: Res<Board>,
-    dimensions: Res<BoardDimensions>,
-    keyboard_input: Res<Input<KeyCode>>,
-    mut input_buffer: ResMut<InputBuffer>,
-    mut query: Query<(&Transform, &mut Direction), With<Pacman>>,
-) {
-    for (transform, mut direction) in query.iter_mut() {
-        let position = dimensions.vec_to_pos(&transform.translation);
-        let wished_direction = get_wished_direction(&keyboard_input, &input_buffer);
-
-        if let Some(dir) = wished_direction {
-            let position_in_direction = position.neighbour_position(&dir);
-
-            if board.position_is_wall_or_entrance(&position_in_direction) {
-                input_buffer.0 = Some(dir)
-            } else {
-                *direction = dir;
-                input_buffer.0 = None;
-            }
-        }
-    }
-}
-
-/// Return the direction pacman should move to next. If no matching keyboard key was pressed, return the last buffered input.
-fn get_wished_direction(keyboard_input: &Input<KeyCode>, input_buffer: &InputBuffer) -> Option<Direction> {
-    if keyboard_input.pressed(KeyCode::Left) || keyboard_input.pressed(KeyCode::A) {
-        return Some(Left)
-    }
-
-    if keyboard_input.pressed(KeyCode::Right) || keyboard_input.pressed(KeyCode::D) {
-        return Some(Right)
-    }
-
-    if keyboard_input.pressed(KeyCode::Up) || keyboard_input.pressed(KeyCode::W) {
-        return Some(Up)
-    }
-
-    if keyboard_input.pressed(KeyCode::Down) || keyboard_input.pressed(KeyCode::S) {
-        return Some(Down)
-    }
-
-    **input_buffer
-}
-
 fn stop_animation(
     mut query: Query<&mut Animations, With<Pacman>>
 ) {
@@ -149,7 +100,3 @@ fn despawn_pacman(
         commands.entity(entity).despawn()
     }
 }
-
-/// Saves the wished direction pacman should move to next.
-#[derive(Deref, DerefMut)]
-struct InputBuffer(Option<Direction>);

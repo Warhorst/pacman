@@ -98,3 +98,63 @@ fn center_position(direction: &Direction, new_position: &Position, new_coordinat
         Left | Right => new_coordinates.y = position_coordinates.y
     }
 }
+
+pub (in crate::pacman) fn set_direction_based_on_keyboard_input(
+    board: Res<Board>,
+    dimensions: Res<BoardDimensions>,
+    keyboard_input: Res<Input<KeyCode>>,
+    mut input_buffer: ResMut<InputBuffer>,
+    mut query: Query<(&Transform, &mut Direction), With<Pacman>>,
+) {
+    for (transform, mut direction) in query.iter_mut() {
+        let position = dimensions.vec_to_pos(&transform.translation);
+        let wished_direction = get_wished_direction(&keyboard_input, &input_buffer);
+
+        if let Some(dir) = wished_direction {
+            let position_in_direction = position.neighbour_position(&dir);
+
+            if board.position_is_wall_or_entrance(&position_in_direction) || !is_centered_enough(transform.translation, dir, dimensions.pos_center(&transform.translation), &dimensions) {
+                input_buffer.0 = Some(dir)
+            } else {
+                *direction = dir;
+                input_buffer.0 = None;
+            }
+        }
+    }
+}
+
+/// Return the direction pacman should move to next. If no matching keyboard key was pressed, return the last buffered input.
+fn get_wished_direction(keyboard_input: &Input<KeyCode>, input_buffer: &InputBuffer) -> Option<Direction> {
+    if keyboard_input.pressed(KeyCode::Left) || keyboard_input.pressed(KeyCode::A) {
+        return Some(Left)
+    }
+
+    if keyboard_input.pressed(KeyCode::Right) || keyboard_input.pressed(KeyCode::D) {
+        return Some(Right)
+    }
+
+    if keyboard_input.pressed(KeyCode::Up) || keyboard_input.pressed(KeyCode::W) {
+        return Some(Up)
+    }
+
+    if keyboard_input.pressed(KeyCode::Down) || keyboard_input.pressed(KeyCode::S) {
+        return Some(Down)
+    }
+
+    **input_buffer
+}
+
+fn is_centered_enough(coordinates: Vec3, direction: Direction, position_coordinates: Vec3, dimensions: &BoardDimensions) -> bool {
+    let (x,y) = (coordinates.x, coordinates.y);
+    let (posx, posy) = (position_coordinates.x, position_coordinates.y);
+    let max_distance = dimensions.field() * 0.25;
+
+    match direction {
+        Up | Down => x >= posx - max_distance && x <= posx + max_distance,
+        Left | Right => y >= posy - max_distance && y <= posy + max_distance,
+    }
+}
+
+/// Saves the wished direction pacman should move to next.
+#[derive(Deref, DerefMut)]
+pub struct InputBuffer(pub Option<Direction>);
