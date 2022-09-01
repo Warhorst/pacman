@@ -5,6 +5,7 @@ use crate::pacman::PacmanPlugin;
 use crate::animation::AnimationPlugin;
 use crate::camera::CameraPlugin;
 use crate::constants::{WINDOW_HEIGHT, WINDOW_WIDTH};
+use crate::debug::DebugPlugin;
 use crate::edibles::EdiblePlugin;
 use crate::game_assets::GameAssetsPlugin;
 
@@ -53,6 +54,7 @@ mod interactions;
 mod game_assets;
 mod specs_per_level;
 mod board_dimensions;
+mod debug;
 
 fn main() {
     App::new()
@@ -89,5 +91,6 @@ fn main() {
         .add_plugin(ReadyScreenPlugin)
         .add_plugin(GameOverScreenPlugin)
         .add_plugin(SpecsPerLevelPlugin)
+        .add_plugin(DebugPlugin)
         .run()
 }

@@ -24,3 +24,4 @@ mod interactions;
 mod game_assets;
 mod specs_per_level;
 mod board_dimensions;
+mod debug;
