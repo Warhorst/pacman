@@ -1,3 +1,4 @@
+use std::fmt::Formatter;
 use bevy::prelude::*;
 use crate::board_dimensions::BoardDimensions;
 
@@ -41,7 +42,7 @@ impl Plugin for StatePlugin {
 #[derive(SystemLabel)]
 pub struct StateSetter;
 
-#[derive(Component, Copy, Clone, Eq, PartialEq)]
+#[derive(Component, Copy, Clone, Debug, Eq, PartialEq)]
 pub enum State {
     Scatter,
     Chase,
@@ -160,6 +161,12 @@ fn set_eaten_when_hit_by_pacman(
             state_skip_if!(state != State::Frightened);
             *state = State::Eaten;
         }
+    }
+}
+
+impl std::fmt::Display for State {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
     }
 }
 

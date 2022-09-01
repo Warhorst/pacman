@@ -1,3 +1,4 @@
+use std::fmt::Formatter;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -57,14 +58,14 @@ impl Direction {
     }
 }
 
-impl ToString for Direction {
-    fn to_string(&self) -> String {
-        match self {
+impl std::fmt::Display for Direction {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", match self {
             Up => "up",
             Down => "down",
             Left => "left",
             Right => "right"
-        }.to_string()
+        }.to_string())
     }
 }
 

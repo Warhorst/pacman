@@ -76,7 +76,7 @@ fn create_scoreboard(
         ).with_alignment(
             TextAlignment {
                 vertical: VerticalAlign::Center,
-                horizontal: HorizontalAlign::Center,
+                horizontal: HorizontalAlign::Left,
             }
         ),
         transform: Transform::from_xyz(origin.x, origin.y + dimensions.board_height(), 0.0),

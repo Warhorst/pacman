@@ -96,6 +96,10 @@ impl EatenDots {
         self.max - self.eaten
     }
 
+    pub fn get_max(&self) -> usize {
+        self.max
+    }
+
     fn reset(&mut self) {
         self.eaten = 0
     }
