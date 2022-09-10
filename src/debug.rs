@@ -5,7 +5,7 @@ use bevy::text::Text2dBounds;
 use crate::board_dimensions::BoardDimensions;
 use crate::constants::{WINDOW_HEIGHT, WINDOW_WIDTH};
 use crate::edibles::dots::EatenDots;
-use crate::game_assets::handles::GameAssetHandles;
+use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game_assets::keys::FONT;
 use crate::level::Level;
 use crate::life_cycle::LifeCycle::Loading;
@@ -56,7 +56,7 @@ impl Plugin for DebugPlugin {
 
 fn spawn_debug_uis(
     mut commands: Commands,
-    game_asset_handles: Res<GameAssetHandles>,
+    game_asset_handles: Res<LoadedAssets>,
 ) {
     spawn_uis(
         [
@@ -75,7 +75,7 @@ fn spawn_debug_uis(
 fn spawn_uis(
     names_colors: impl IntoIterator<Item=(&'static str, Color)>,
     commands: &mut Commands,
-    game_asset_handles: &GameAssetHandles,
+    game_asset_handles: &LoadedAssets,
 ) {
     let font = game_asset_handles.get_handle(FONT);
     names_colors

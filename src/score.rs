@@ -7,7 +7,7 @@ use crate::edibles::energizer::EnergizerOver;
 use crate::interactions::{EDotEaten, EEnergizerEaten, EFruitEaten, EPacmanEatsGhost};
 use crate::life_cycle::LifeCycle::{Running, Start};
 use crate::edibles::fruit::Fruit::*;
-use crate::game_assets::handles::GameAssetHandles;
+use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game_assets::keys::FONT;
 
 pub struct ScorePlugin;
@@ -61,7 +61,7 @@ struct EatenGhostCounter(usize);
 
 fn create_scoreboard(
     mut commands: Commands,
-    game_asset_handles: Res<GameAssetHandles>,
+    game_asset_handles: Res<LoadedAssets>,
     dimensions: Res<BoardDimensions>
 ) {
     let origin = dimensions.origin();
@@ -118,7 +118,7 @@ fn add_points_for_eaten_energizer(
 
 fn add_points_for_eaten_ghost_and_display_score_text(
     mut commands: Commands,
-    game_asset_handles: Res<GameAssetHandles>,
+    game_asset_handles: Res<LoadedAssets>,
     mut score: ResMut<Score>,
     mut eaten_ghost_counter: ResMut<EatenGhostCounter>,
     mut event_reader: EventReader<EPacmanEatsGhost>,
@@ -145,7 +145,7 @@ fn reset_eaten_ghost_counter_when_energizer_is_over(
 
 fn add_points_for_eaten_fruit_and_display_score_text(
     mut commands: Commands,
-    game_asset_handles: Res<GameAssetHandles>,
+    game_asset_handles: Res<LoadedAssets>,
     mut score: ResMut<Score>,
     mut event_reader: EventReader<EFruitEaten>,
 ) {
@@ -173,7 +173,7 @@ fn add_points_for_eaten_fruit_and_display_score_text(
 
 fn spawn_score_text(
     commands: &mut Commands,
-    game_asset_handles: &GameAssetHandles,
+    game_asset_handles: &LoadedAssets,
     color: Color,
     points: usize,
     coordinates: Vec3

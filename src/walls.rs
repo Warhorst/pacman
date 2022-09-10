@@ -3,7 +3,7 @@ use bevy::utils::HashMap;
 use crate::animation::{Animation, Animations};
 use crate::board_dimensions::BoardDimensions;
 use crate::common::position::Position;
-use crate::game_assets::handles::GameAssetHandles;
+use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game_assets::keys::GHOST_HOUSE_ENTRANCE;
 use crate::game_assets::keys::sprite_sheets::*;
 use crate::is;
@@ -37,7 +37,7 @@ fn spawn_walls(
     mut commands: Commands,
     map: Res<Map>,
     board_dimensions: Res<BoardDimensions>,
-    game_asset_handles: Res<GameAssetHandles>,
+    game_asset_handles: Res<LoadedAssets>,
     sprite_sheets: Res<Assets<SpriteSheet>>,
 ) {
     spawn_labyrinth_walls(&mut commands, &map, &board_dimensions, &game_asset_handles, &sprite_sheets);
@@ -48,7 +48,7 @@ fn spawn_labyrinth_walls(
     commands: &mut Commands,
     map: &Map,
     dimensions: &BoardDimensions,
-    game_assets: &GameAssetHandles,
+    game_assets: &LoadedAssets,
     sprite_sheets: &Assets<SpriteSheet>,
 ) {
     let wall_animations_map = create_animations(game_assets, sprite_sheets);
@@ -82,7 +82,7 @@ fn create_transform(position: &Position, dimensions: &BoardDimensions, rotation:
     transform
 }
 
-fn create_animations(game_assets: &GameAssetHandles, sprite_sheets: &Assets<SpriteSheet>) -> HashMap<(WallType, bool), Animations> {
+fn create_animations(game_assets: &LoadedAssets, sprite_sheets: &Assets<SpriteSheet>) -> HashMap<(WallType, bool), Animations> {
     [
         (WallType::Outer, true, game_assets.get_handle(OUTER_WALL_CORNER)),
         (WallType::Outer, false, game_assets.get_handle(OUTER_WALL)),
@@ -106,7 +106,7 @@ fn create_wall_animations(sheet: &SpriteSheet) -> Animations {
     )
 }
 
-fn spawn_ghost_house_entrance(commands: &mut Commands, map: &Map, dimensions: &BoardDimensions, game_assets: &GameAssetHandles) {
+fn spawn_ghost_house_entrance(commands: &mut Commands, map: &Map, dimensions: &BoardDimensions, game_assets: &LoadedAssets) {
     for position in map.get_positions_matching(is!(Element::GhostHouseEntrance {..})) {
         commands.spawn()
             .insert_bundle(SpriteBundle {

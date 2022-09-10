@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use crate::board_dimensions::BoardDimensions;
-use crate::game_assets::handles::GameAssetHandles;
+use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game_assets::keys::FONT;
 use crate::life_cycle::LifeCycle::{LevelTransition, Start};
 
@@ -34,7 +34,7 @@ pub struct LevelUi;
 
 fn spawn_level_ui(
     mut commands: Commands,
-    game_asset_handles: Res<GameAssetHandles>,
+    game_asset_handles: Res<LoadedAssets>,
     level: Res<Level>,
     dimensions: Res<BoardDimensions>
 ) {

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use crate::board_dimensions::BoardDimensions;
-use crate::game_assets::handles::GameAssetHandles;
+use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game_assets::keys::PACMAN_LIFE;
 use crate::interactions::EPacmanHit;
 use crate::life_cycle::LifeCycle;
@@ -48,7 +48,7 @@ impl PointsRequiredForExtraLife {
 
 fn spawn_lives(
     mut commands: Commands,
-    asset_handles: Res<GameAssetHandles>,
+    asset_handles: Res<LoadedAssets>,
     dimensions: Res<BoardDimensions>
 ) {
     for i in 0..LIVES {
@@ -58,7 +58,7 @@ fn spawn_lives(
 
 fn spawn_life(
     commands: &mut Commands,
-    asset_handles: &GameAssetHandles,
+    asset_handles: &LoadedAssets,
     life_index: usize,
     dimensions: &BoardDimensions
 ) {
@@ -95,7 +95,7 @@ fn remove_life_when_pacman_dies(
 
 fn add_life_if_player_reaches_specific_score(
     mut commands: Commands,
-    game_assets: Res<GameAssetHandles>,
+    game_assets: Res<LoadedAssets>,
     score: Res<Score>,
     mut points_required_for_extra_life: ResMut<PointsRequiredForExtraLife>,
     dimensions: Res<BoardDimensions>,

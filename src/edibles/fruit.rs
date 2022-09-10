@@ -6,7 +6,7 @@ use crate::board_dimensions::BoardDimensions;
 use crate::constants::FRUIT_Z;
 use crate::edibles::dots::EatenDots;
 use crate::edibles::Edible;
-use crate::game_assets::handles::GameAssetHandles;
+use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::interactions::EDotEaten;
 use crate::is;
 use crate::life_cycle::LifeCycle::Running;
@@ -58,7 +58,7 @@ impl FruitDespawnTimer {
 /// was eaten.
 fn spawn_fruit_when_dot_limit_reached(
     mut commands: Commands,
-    game_asset_handles: Res<GameAssetHandles>,
+    game_asset_handles: Res<LoadedAssets>,
     map: Res<Map>,
     level: Res<Level>,
     eaten_dots: Res<EatenDots>,
@@ -92,7 +92,7 @@ fn spawn_fruit_when_dot_limit_reached(
     }
 }
 
-fn get_texture_for_fruit(fruit: &Fruit, asset_handles: &GameAssetHandles) -> Handle<Image> {
+fn get_texture_for_fruit(fruit: &Fruit, asset_handles: &LoadedAssets) -> Handle<Image> {
     asset_handles.get_handle(&format!("textures/fruits/{}.png", match fruit {
         Cherry => "cherry",
         Strawberry => "strawberry",

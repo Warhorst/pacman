@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use crate::board_dimensions::BoardDimensions;
 
 use crate::constants::{BLINKY_Z, CLYDE_Z, INKY_Z, PINKY_Z};
-use crate::game_assets::handles::GameAssetHandles;
+use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::ghost_house::GhostHouse;
 use crate::ghosts::{Blinky, Clyde, Ghost, GhostType, Inky, Pinky};
 use crate::ghosts::state::State;
@@ -15,7 +15,7 @@ use crate::sprite_sheet::SpriteSheet;
 
 pub fn spawn_ghosts(
     mut commands: Commands,
-    game_assets: Res<GameAssetHandles>,
+    game_assets: Res<LoadedAssets>,
     sprite_sheets: Res<Assets<SpriteSheet>>,
     ghost_house: Res<GhostHouse>,
     level: Res<Level>,
@@ -31,7 +31,7 @@ pub fn spawn_ghosts(
 fn spawn_ghost<G: GhostType + Component>(
     commands: &mut Commands,
     ghost_house: &GhostHouse,
-    game_assets: &GameAssetHandles,
+    game_assets: &LoadedAssets,
     sprite_sheets: &Assets<SpriteSheet>,
     level: &Level,
     specs_per_level: &SpecsPerLevel,

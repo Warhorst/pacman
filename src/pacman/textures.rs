@@ -4,7 +4,7 @@ use crate::animation::{Animation, Animations};
 use crate::pacman::Pacman;
 use crate::common::Direction;
 use crate::common::Direction::*;
-use crate::game_assets::handles::GameAssetHandles;
+use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game_assets::keys::sprite_sheets::*;
 use crate::sprite_sheet::SpriteSheet;
 
@@ -22,7 +22,7 @@ pub(in crate::pacman) fn update_pacman_appearance(
 }
 
 pub(in crate::pacman) fn create_pacman_animations(
-    game_assets: &GameAssetHandles,
+    game_assets: &LoadedAssets,
     sprite_sheets: &Assets<SpriteSheet>
 ) -> Animations {
     Animations::new(

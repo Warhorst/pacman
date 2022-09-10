@@ -11,7 +11,7 @@ use crate::board_dimensions::BoardDimensions;
 
 use crate::common::Direction;
 use crate::common::position::Position;
-use crate::game_assets::handles::GameAssetHandles;
+use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game_assets::keys::MAP;
 use crate::life_cycle::LifeCycle::Loading;
 use crate::map::board::Board;
@@ -33,7 +33,7 @@ impl Plugin for MapPlugin {
 
 fn create_board_and_map(
     mut commands: Commands,
-    game_asset_handles: Res<GameAssetHandles>,
+    game_asset_handles: Res<LoadedAssets>,
     fields_assets: Res<Assets<Fields>>,
 ) {
     let fields = fields_assets.get(&game_asset_handles.get_handle(MAP)).expect("the map should be loaded at this point");

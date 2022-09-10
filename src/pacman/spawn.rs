@@ -9,7 +9,7 @@ use crate::map::Element::PacManSpawn;
 use crate::map::Map;
 use crate::pacman::Pacman;
 use crate::pacman::textures::create_pacman_animations;
-use crate::game_assets::handles::GameAssetHandles;
+use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::specs_per_level::SpecsPerLevel;
 use crate::speed::Speed;
 use crate::sprite_sheet::SpriteSheet;
@@ -20,7 +20,7 @@ pub struct PacmanSpawn(Vec3);
 
 pub (in crate::pacman) fn spawn_pacman(
     mut commands: Commands,
-    game_assets: Res<GameAssetHandles>,
+    game_assets: Res<LoadedAssets>,
     sprite_sheets: Res<Assets<SpriteSheet>>,
     map: Res<Map>,
     level: Res<Level>,

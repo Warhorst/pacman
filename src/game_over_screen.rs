@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use crate::board_dimensions::BoardDimensions;
 use crate::constants::TEXT_Z;
-use crate::game_assets::handles::GameAssetHandles;
+use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game_assets::keys::FONT;
 use crate::is;
 use crate::life_cycle::LifeCycle::GameOver;
@@ -25,7 +25,7 @@ struct GameOverScreen;
 
 fn spawn_screen(
     mut commands: Commands,
-    game_asset_handles: Res<GameAssetHandles>,
+    game_asset_handles: Res<LoadedAssets>,
     map: Res<Map>,
     dimensions: Res<BoardDimensions>
 ) {

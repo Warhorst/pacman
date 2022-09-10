@@ -3,7 +3,7 @@ use crate::board_dimensions::BoardDimensions;
 
 use crate::constants::DOT_Z;
 use crate::edibles::Edible;
-use crate::game_assets::handles::GameAssetHandles;
+use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game_assets::keys::DOT;
 use crate::life_cycle::LifeCycle::*;
 use crate::is;
@@ -32,7 +32,7 @@ fn spawn_dots(
     mut commands: Commands,
     map: Res<Map>,
     dimensions: Res<BoardDimensions>,
-    game_asset_handles: Res<GameAssetHandles>
+    game_asset_handles: Res<LoadedAssets>
 ) {
     let point_dimension = Vec2::new(dimensions.dot(), dimensions.dot());
     for position in map.get_positions_matching(is!(Element::DotSpawn)) {

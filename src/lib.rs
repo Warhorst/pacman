@@ -1,3 +1,5 @@
+extern crate core;
+
 mod camera;
 mod constants;
 pub mod common;

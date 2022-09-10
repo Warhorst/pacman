@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::board_dimensions::BoardDimensions;
 
 use crate::constants::ENERGIZER_Z;
-use crate::game_assets::handles::GameAssetHandles;
+use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game_assets::keys::ENERGIZER;
 use crate::interactions::EEnergizerEaten;
 use crate::life_cycle::LifeCycle::*;
@@ -70,7 +70,7 @@ impl EnergizerTimer {
 fn spawn_energizer(
     mut commands: Commands,
     map: Res<Map>,
-    game_asset_handles: Res<GameAssetHandles>,
+    game_asset_handles: Res<LoadedAssets>,
     dimensions: Res<BoardDimensions>
 ) {
     let energizer_dimension = Vec2::new(dimensions.energizer(), dimensions.energizer());
