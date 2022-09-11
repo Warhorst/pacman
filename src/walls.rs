@@ -4,8 +4,6 @@ use crate::animation::{Animation, Animations};
 use crate::board_dimensions::BoardDimensions;
 use crate::common::position::Position;
 use crate::game_assets::loaded_assets::LoadedAssets;
-use crate::game_assets::keys::GHOST_HOUSE_ENTRANCE;
-use crate::game_assets::keys::sprite_sheets::*;
 use crate::is;
 use crate::life_cycle::LifeCycle::{LevelTransition, Start};
 use crate::map::{Element, Map, Rotation, WallType};
@@ -84,12 +82,12 @@ fn create_transform(position: &Position, dimensions: &BoardDimensions, rotation:
 
 fn create_animations(game_assets: &LoadedAssets, sprite_sheets: &Assets<SpriteSheet>) -> HashMap<(WallType, bool), Animations> {
     [
-        (WallType::Outer, true, game_assets.get_handle(OUTER_WALL_CORNER)),
-        (WallType::Outer, false, game_assets.get_handle(OUTER_WALL)),
-        (WallType::Inner, true, game_assets.get_handle(INNER_WALL_CORNER)),
-        (WallType::Inner, false, game_assets.get_handle(INNER_WALL)),
-        (WallType::Ghost, true, game_assets.get_handle(GHOST_WALL_CORNER)),
-        (WallType::Ghost, false, game_assets.get_handle(GHOST_WALL)),
+        (WallType::Outer, true, game_assets.get_handle("textures/walls/outer_wall_corner")),
+        (WallType::Outer, false, game_assets.get_handle("textures/walls/outer_wall")),
+        (WallType::Inner, true, game_assets.get_handle("textures/walls/inner_wall_corner")),
+        (WallType::Inner, false, game_assets.get_handle("textures/walls/inner_wall")),
+        (WallType::Ghost, true, game_assets.get_handle("textures/walls/ghost_house_wall_corner")),
+        (WallType::Ghost, false, game_assets.get_handle("textures/walls/ghost_house_wall")),
     ]
         .into_iter()
         .map(|(tp, is_corner, sheet_handle)| ((tp, is_corner), create_wall_animations(sprite_sheets.get(&sheet_handle).expect("sheet should be present"))))
@@ -110,7 +108,7 @@ fn spawn_ghost_house_entrance(commands: &mut Commands, map: &Map, dimensions: &B
     for position in map.get_positions_matching(is!(Element::GhostHouseEntrance {..})) {
         commands.spawn()
             .insert_bundle(SpriteBundle {
-                texture: game_assets.get_handle(GHOST_HOUSE_ENTRANCE),
+                texture: game_assets.get_handle("textures/walls/ghost_house_entrance.png"),
                 sprite: Sprite {
                     custom_size: Some(Vec2::new(dimensions.field(), dimensions.field())),
                     ..default()

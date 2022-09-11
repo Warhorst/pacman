@@ -4,7 +4,6 @@ use crate::board_dimensions::BoardDimensions;
 
 use crate::constants::ENERGIZER_Z;
 use crate::game_assets::loaded_assets::LoadedAssets;
-use crate::game_assets::keys::ENERGIZER;
 use crate::interactions::EEnergizerEaten;
 use crate::life_cycle::LifeCycle::*;
 use crate::is;
@@ -79,7 +78,7 @@ fn spawn_energizer(
 
         commands.spawn()
             .insert_bundle(SpriteBundle {
-                texture: game_asset_handles.get_handle(ENERGIZER),
+                texture: game_asset_handles.get_handle("textures/energizer.png"),
                 sprite: Sprite {
                     custom_size: Some(energizer_dimension),
                     ..default()

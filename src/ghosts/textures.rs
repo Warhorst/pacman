@@ -4,8 +4,6 @@ use crate::animation::{Animation, Animations};
 use crate::common::Direction;
 use crate::edibles::energizer::EnergizerTimer;
 use crate::game_assets::loaded_assets::LoadedAssets;
-use crate::game_assets::keys::*;
-use crate::game_assets::keys::sprite_sheets::*;
 use crate::ghosts::{Blinky, Ghost, GhostType, Inky, Pinky};
 use crate::ghosts::state::State;
 use crate::sprite_sheet::SpriteSheet;
@@ -31,10 +29,10 @@ pub(in crate::ghosts) fn update_ghost_appearance<G: 'static + Component + GhostT
 
 pub(in crate::ghosts) fn create_animations_for_ghost<G: GhostType + 'static>(game_assets: &LoadedAssets, sprite_sheets: &Assets<SpriteSheet>) -> Animations {
     match TypeId::of::<G>() {
-        id if id == TypeId::of::<Blinky>() => create_animations_for(game_assets, sprite_sheets, [BLINKY_UP, BLINKY_DOWN, BLINKY_LEFT, BLINKY_RIGHT]),
-        id if id == TypeId::of::<Pinky>() => create_animations_for(game_assets, sprite_sheets, [PINKY_UP, PINKY_DOWN, PINKY_LEFT, PINKY_RIGHT]),
-        id if id == TypeId::of::<Inky>() => create_animations_for(game_assets, sprite_sheets, [INKY_UP, INKY_DOWN, INKY_LEFT, INKY_RIGHT]),
-        _ => create_animations_for(game_assets, sprite_sheets, [CLYDE_UP, CLYDE_DOWN, CLYDE_LEFT, CLYDE_RIGHT]),
+        id if id == TypeId::of::<Blinky>() => create_animations_for(game_assets, sprite_sheets, ["textures/ghost/blinky_up", "textures/ghost/blinky_down", "textures/ghost/blinky_left", "textures/ghost/blinky_right"]),
+        id if id == TypeId::of::<Pinky>() => create_animations_for(game_assets, sprite_sheets, ["textures/ghost/pinky_up", "textures/ghost/pinky_down", "textures/ghost/pinky_left", "textures/ghost/pinky_right"]),
+        id if id == TypeId::of::<Inky>() => create_animations_for(game_assets, sprite_sheets, ["textures/ghost/inky_up", "textures/ghost/inky_down", "textures/ghost/inky_left", "textures/ghost/inky_right"]),
+        _ => create_animations_for(game_assets, sprite_sheets, ["textures/ghost/clyde_up", "textures/ghost/clyde_down", "textures/ghost/clyde_left", "textures/ghost/clyde_right"]),
     }
 }
 
@@ -45,12 +43,12 @@ fn create_animations_for(game_assets: &LoadedAssets, sprite_sheets: &Assets<Spri
             ("normal_down", create_normal_animation(game_assets.get_asset(normal_animation_keys[1], sprite_sheets))),
             ("normal_left", create_normal_animation(game_assets.get_asset(normal_animation_keys[2], sprite_sheets))),
             ("normal_right", create_normal_animation(game_assets.get_asset(normal_animation_keys[3], sprite_sheets))),
-            ("eaten_up", create_eaten_animation(game_assets, EATEN_UP)),
-            ("eaten_down", create_eaten_animation(game_assets, EATEN_DOWN)),
-            ("eaten_left", create_eaten_animation(game_assets, EATEN_LEFT)),
-            ("eaten_right", create_eaten_animation(game_assets, EATEN_RIGHT)),
-            ("frightened", create_frightened_animation(game_assets.get_asset(FRIGHTENED, sprite_sheets))),
-            ("frightened_blinking", create_frightened_blinking_animation(game_assets.get_asset(FRIGHTENED_BLINKING, sprite_sheets))),
+            ("eaten_up", create_eaten_animation(game_assets, "textures/ghost/eaten_up.png")),
+            ("eaten_down", create_eaten_animation(game_assets, "textures/ghost/eaten_down.png")),
+            ("eaten_left", create_eaten_animation(game_assets, "textures/ghost/eaten_left.png")),
+            ("eaten_right", create_eaten_animation(game_assets, "textures/ghost/eaten_right.png")),
+            ("frightened", create_frightened_animation(game_assets.get_asset("textures/ghost/frightened", sprite_sheets))),
+            ("frightened_blinking", create_frightened_blinking_animation(game_assets.get_asset("textures/ghost/frightened_blinking", sprite_sheets))),
         ],
         "normal_left")
 }

@@ -12,7 +12,6 @@ use crate::board_dimensions::BoardDimensions;
 use crate::common::Direction;
 use crate::common::position::Position;
 use crate::game_assets::loaded_assets::LoadedAssets;
-use crate::game_assets::keys::MAP;
 use crate::life_cycle::LifeCycle::Loading;
 use crate::map::board::Board;
 
@@ -36,7 +35,7 @@ fn create_board_and_map(
     game_asset_handles: Res<LoadedAssets>,
     fields_assets: Res<Assets<Fields>>,
 ) {
-    let fields = fields_assets.get(&game_asset_handles.get_handle(MAP)).expect("the map should be loaded at this point");
+    let fields = fields_assets.get(&game_asset_handles.get_handle("maps/default.map.json")).expect("the map should be loaded at this point");
     let map = Map::new(&fields);
     let board = Board::new(&map);
     let board_dimensions = BoardDimensions::new(&board);

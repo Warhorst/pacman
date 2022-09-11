@@ -4,8 +4,11 @@ use bevy::utils::HashMap;
 use crate::sprite_sheet::aseprite_data::AsepriteData;
 use crate::sprite_sheet::{split_image_by_rectangles, SpriteSheet};
 
+type ImagePath = String;
+type JSONPath = String;
+
 /// Container for assets that are already loaded. Used to load all assets at the app start
-/// and use the instantly. Primarily reduces pop-ins of assets.
+/// and use them instantly. Primarily reduces pop-ins of assets.
 pub struct LoadedAssets {
     path_handle_map: HashMap<String, HandleUntyped>,
 }
@@ -63,47 +66,67 @@ impl LoadedAssets {
         self.path_handle_map.values().map(|handle| handle.id)
     }
 
-    pub fn add_sprite_sheets(&mut self, sheets: &mut Assets<SpriteSheet>, images: &mut Assets<Image>, aseprite_data: &Assets<AsepriteData>) {
-        let sheet_json_paths = self.path_handle_map
+    pub fn add_sprite_sheets(&mut self, sheets: &mut Assets<SpriteSheet>, images: &mut Assets<Image>, aseprite_data: &mut Assets<AsepriteData>) {
+        let images_and_jsons = self.get_image_json_paths();
+
+        for (image_path, json_path) in images_and_jsons {
+            self.add_sprite_sheet(image_path, json_path, sheets, images, aseprite_data)
+        }
+    }
+
+    /// Collect all json paths and related images
+    fn get_image_json_paths(&self) -> Vec<(ImagePath, JSONPath)> {
+        self.path_handle_map
             .keys()
             .filter(|path| path.ends_with(".aseprite.json"))
             .map(Clone::clone)
-            .collect::<Vec<_>>();
-
-        let images_and_jsons = sheet_json_paths
-            .into_iter()
             .map(|json_path| {
-                let ident = json_path.replace(".aseprite.json", "");
-                let image_path = self.path_handle_map
-                    .keys()
-                    .filter(|path| !path.ends_with(".aseprite.json"))
-                    .filter(|path| path.split(".").collect::<Vec<_>>()[0] == ident)
-                    .next()
-                    .unwrap()
-                    .clone();
+                let image_path = self.get_matching_image_path_for_json_path(&json_path);
                 (image_path, json_path)
             })
-            .collect::<Vec<_>>();
+            .collect()
+    }
 
-        for (image_path, json_path) in images_and_jsons {
-            let ident = json_path.replace(".aseprite.json", "");
-            let (image_handle, data_handle) = (
-                self.path_handle_map.remove(&image_path).unwrap().typed::<Image>(),
-                self.path_handle_map.remove(&json_path).unwrap().typed::<AsepriteData>(),
-            );
+    fn get_matching_image_path_for_json_path(&self, json_path: &JSONPath) -> String {
+        let ident = json_path.replace(".aseprite.json", "");
+        self.path_handle_map
+            .keys()
+            .filter(|path| !path.ends_with(".aseprite.json"))
+            .filter(|path| path.split(".").collect::<Vec<_>>()[0] == ident)
+            .next()
+            .unwrap()
+            .clone()
+    }
 
-            let (image, data) = (
-                images.remove(&image_handle).unwrap(),
-                aseprite_data.get(&data_handle).unwrap()
-            );
+    /// Create a sprite sheet by retrieving the image and data for the given paths. When the sheet was created, it will be stored in the sprite sheets assets
+    /// and its handle will be moved to the path handle map
+    fn add_sprite_sheet(&mut self, image_path: ImagePath, json_path: JSONPath, sheets: &mut Assets<SpriteSheet>, images: &mut Assets<Image>, aseprite_data: &mut Assets<AsepriteData>) {
+        let ident = json_path.replace(".aseprite.json", "");
+        let (image_handle, data_handle) = self.remove_image_and_json_handles(image_path, json_path);
+        let (image, data) = self.remove_image_and_json_from_assets(image_handle, data_handle, images, aseprite_data);
 
-            let sheet = SpriteSheet::new(
-                split_image_by_rectangles(&image, data.rect_iter())
-                    .into_iter()
-                    .map(|image| images.add(image))
-            );
+        let sheet = SpriteSheet::new(
+            split_image_by_rectangles(&image, data.rect_iter())
+                .into_iter()
+                .map(|image| images.add(image))
+        );
 
-            self.path_handle_map.insert(ident, sheets.add(sheet).clone_untyped());
-        }
+        self.path_handle_map.insert(ident, sheets.add(sheet).clone_untyped());
+    }
+
+    /// Remove the handles for the provided image and json from the map.
+    fn remove_image_and_json_handles(&mut self, image_path: ImagePath, json_path: JSONPath) -> (Handle<Image>, Handle<AsepriteData>) {
+        (
+            self.path_handle_map.remove(&image_path).unwrap().typed::<Image>(),
+            self.path_handle_map.remove(&json_path).unwrap().typed::<AsepriteData>(),
+        )
+    }
+
+    /// Remove and return the image and JSON asset from the assets resources, as they are no longer needed.
+    fn remove_image_and_json_from_assets(&self, image_handle: Handle<Image>, data_handle: Handle<AsepriteData>, images: &mut Assets<Image>, aseprite_data: &mut Assets<AsepriteData>) -> (Image, AsepriteData) {
+        (
+            images.remove(&image_handle).unwrap(),
+            aseprite_data.remove(&data_handle).unwrap()
+        )
     }
 }

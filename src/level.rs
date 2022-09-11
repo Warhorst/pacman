@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 use crate::board_dimensions::BoardDimensions;
 use crate::game_assets::loaded_assets::LoadedAssets;
-use crate::game_assets::keys::FONT;
 use crate::life_cycle::LifeCycle::{LevelTransition, Start};
 
 pub struct LevelPlugin;
@@ -43,7 +42,7 @@ fn spawn_level_ui(
         text: Text::from_section(
             format!("Level: {}", **level),
             TextStyle {
-                font: game_asset_handles.get_handle(FONT),
+                font: game_asset_handles.get_handle("fonts/FiraSans-Bold.ttf"),
                 font_size: 40.0,
                 color: Color::rgb(1.0, 1.0, 1.0),
             },

@@ -4,7 +4,6 @@ use crate::life_cycle::LifeCycle::Loading;
 use crate::sprite_sheet::aseprite_data::AsepriteData;
 use crate::sprite_sheet::SpriteSheet;
 
-pub mod keys;
 pub mod loaded_assets;
 
 pub struct GameAssetsPlugin;
@@ -34,12 +33,12 @@ fn create_sprite_sheets_and_send_event_when_all_loaded(
     asset_server: Res<AssetServer>,
     mut loaded_assets: ResMut<LoadedAssets>,
     mut images: ResMut<Assets<Image>>,
-    sheet_data: Res<Assets<AsepriteData>>,
+    mut sheet_data: ResMut<Assets<AsepriteData>>,
     mut sprite_sheets: ResMut<Assets<SpriteSheet>>,
     mut event_writer: EventWriter<EAllAssetsLoaded>,
 ) {
     if loaded_assets.all_loaded(&asset_server) {
-        loaded_assets.add_sprite_sheets(&mut sprite_sheets, &mut images, &sheet_data);
+        loaded_assets.add_sprite_sheets(&mut sprite_sheets, &mut images, &mut sheet_data);
         event_writer.send(EAllAssetsLoaded)
     }
 }

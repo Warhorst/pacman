@@ -5,7 +5,6 @@ use crate::pacman::Pacman;
 use crate::common::Direction;
 use crate::common::Direction::*;
 use crate::game_assets::loaded_assets::LoadedAssets;
-use crate::game_assets::keys::sprite_sheets::*;
 use crate::sprite_sheet::SpriteSheet;
 
 pub(in crate::pacman) fn update_pacman_appearance(
@@ -27,11 +26,11 @@ pub(in crate::pacman) fn create_pacman_animations(
 ) -> Animations {
     Animations::new(
         [
-            ("eating_left", create_eating_animation(game_assets.get_asset(PACMAN_WALKING_LEFT, sprite_sheets))),
-            ("eating_right", create_eating_animation(game_assets.get_asset(PACMAN_WALKING_RIGHT, sprite_sheets))),
-            ("eating_up", create_eating_animation(game_assets.get_asset(PACMAN_WALKING_UP, sprite_sheets))),
-            ("eating_down", create_eating_animation(game_assets.get_asset(PACMAN_WALKING_DOWN, sprite_sheets))),
-            ("dying", create_dying_animation(game_assets.get_asset(PACMAN_DYING, sprite_sheets)))
+            ("eating_left", create_eating_animation(game_assets.get_asset("textures/pacman/pacman_walking_left", sprite_sheets))),
+            ("eating_right", create_eating_animation(game_assets.get_asset("textures/pacman/pacman_walking_right", sprite_sheets))),
+            ("eating_up", create_eating_animation(game_assets.get_asset("textures/pacman/pacman_walking_up", sprite_sheets))),
+            ("eating_down", create_eating_animation(game_assets.get_asset("textures/pacman/pacman_walking_down", sprite_sheets))),
+            ("dying", create_dying_animation(game_assets.get_asset("textures/pacman/pacman_dying", sprite_sheets)))
         ],
         "eating_up",
     )

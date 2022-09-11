@@ -4,7 +4,6 @@ use crate::board_dimensions::BoardDimensions;
 use crate::constants::DOT_Z;
 use crate::edibles::Edible;
 use crate::game_assets::loaded_assets::LoadedAssets;
-use crate::game_assets::keys::DOT;
 use crate::life_cycle::LifeCycle::*;
 use crate::is;
 use crate::map::{Element, Map};
@@ -40,7 +39,7 @@ fn spawn_dots(
 
         commands.spawn()
             .insert_bundle(SpriteBundle {
-                texture: game_asset_handles.get_handle(DOT),
+                texture: game_asset_handles.get_handle("textures/dot.png"),
                 sprite: Sprite {
                     custom_size: Some(point_dimension),
                     ..default()

@@ -8,7 +8,6 @@ use crate::interactions::{EDotEaten, EEnergizerEaten, EFruitEaten, EPacmanEatsGh
 use crate::life_cycle::LifeCycle::{Running, Start};
 use crate::edibles::fruit::Fruit::*;
 use crate::game_assets::loaded_assets::LoadedAssets;
-use crate::game_assets::keys::FONT;
 
 pub struct ScorePlugin;
 
@@ -69,7 +68,7 @@ fn create_scoreboard(
         text: Text::from_section(
             "Score".to_string(),
             TextStyle {
-                font: game_asset_handles.get_handle(FONT),
+                font: game_asset_handles.get_handle("fonts/FiraSans-Bold.ttf"),
                 font_size: 40.0,
                 color: Color::rgb(1.0, 1.0, 1.0),
             },
@@ -182,7 +181,7 @@ fn spawn_score_text(
         text: Text::from_section(
             points.to_string(),
             TextStyle {
-                font: game_asset_handles.get_handle(FONT),
+                font: game_asset_handles.get_handle("fonts/FiraSans-Bold.ttf"),
                 font_size: 20.0,
                 color,
             },

@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 use crate::board_dimensions::BoardDimensions;
 use crate::game_assets::loaded_assets::LoadedAssets;
-use crate::game_assets::keys::PACMAN_LIFE;
 use crate::interactions::EPacmanHit;
 use crate::life_cycle::LifeCycle;
 use crate::life_cycle::LifeCycle::Start;
@@ -67,7 +66,7 @@ fn spawn_life(
 
     commands.spawn()
         .insert_bundle(SpriteBundle {
-            texture: asset_handles.get_handle(PACMAN_LIFE),
+            texture: asset_handles.get_handle("textures/pacman/pacman_life.png"),
             sprite: Sprite {
                 custom_size: Some(Vec2::new(dimensions.life(), dimensions.life())),
                 ..default()
