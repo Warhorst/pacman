@@ -4,6 +4,7 @@ use crate::board_dimensions::BoardDimensions;
 use crate::constants::DOT_Z;
 use crate::edibles::Edible;
 use crate::game_assets::loaded_assets::LoadedAssets;
+use crate::interactions::EDotEaten;
 use crate::life_cycle::LifeCycle::*;
 use crate::is;
 use crate::map::{Element, Map};
@@ -17,6 +18,9 @@ impl Plugin for DotPlugin {
                 SystemSet::on_enter(Start)
                     .with_system(spawn_dots)
                     .with_system(spawn_eaten_dots)
+            )
+            .add_system_set(
+                SystemSet::on_update(Running).with_system(play_waka_when_dot_was_eaten)
             )
             .add_system_set(
                 SystemSet::on_exit(LevelTransition)
@@ -65,6 +69,18 @@ fn reset_eaten_dots(
     mut eaten_dots: ResMut<EatenDots>
 ) {
     eaten_dots.reset()
+}
+
+fn play_waka_when_dot_was_eaten(
+    loaded_assets: Res<LoadedAssets>,
+    audio: Res<Audio>,
+    mut event_reader: EventReader<EDotEaten>
+) {
+    for _ in event_reader.iter() {
+        // TODO: This sounds terrible. The game must wait for the first sound to finish before playing the next one
+        let waka = loaded_assets.get_handle("sounds/waka.ogg");
+        audio.play(waka);
+    }
 }
 
 #[derive(Component)]
