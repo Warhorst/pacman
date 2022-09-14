@@ -1,3 +1,4 @@
+use std::time::Duration;
 use bevy::prelude::*;
 use crate::board_dimensions::BoardDimensions;
 
@@ -35,7 +36,7 @@ fn spawn_dots(
     mut commands: Commands,
     map: Res<Map>,
     dimensions: Res<BoardDimensions>,
-    game_asset_handles: Res<LoadedAssets>
+    game_asset_handles: Res<LoadedAssets>,
 ) {
     let point_dimension = Vec2::new(dimensions.dot(), dimensions.dot());
     for position in map.get_positions_matching(is!(Element::DotSpawn)) {
@@ -59,7 +60,7 @@ fn spawn_dots(
 
 fn spawn_eaten_dots(
     mut commands: Commands,
-    map: Res<Map>
+    map: Res<Map>,
 ) {
     let num_dots = map.get_positions_matching(is!(Element::DotSpawn)).into_iter().count();
     commands.insert_resource(EatenDots::new(num_dots))
@@ -71,15 +72,46 @@ fn reset_eaten_dots(
     eaten_dots.reset()
 }
 
+/// Play the famous waka waka when a dot was eaten.
+///
+/// This code sucks, but I have no other way to do it. The problem is: If I would
+/// just play the waka every time a dot was eaten, the sound would overlap. I have no
+/// information if the sound finished playing, so I use a custom timer, which is set
+/// to the time of the track (0.3 seconds). Another waka can play when the timer finished.
+///
+/// But this leads to another problem: The waka makes a pause, if another dot was eaten while
+/// the timer is still active. So I cache a waka if the dot was eaten while the timer is active.
+/// When the timer finishes and a waka is cached, it is instantly played and the timer gets reset.
 fn play_waka_when_dot_was_eaten(
+    time: Res<Time>,
+    mut waka_timer: Local<Option<Timer>>,
+    mut cached: Local<bool>,
     loaded_assets: Res<LoadedAssets>,
     audio: Res<Audio>,
-    mut event_reader: EventReader<EDotEaten>
+    mut event_reader: EventReader<EDotEaten>,
 ) {
+    if let Some(ref mut timer) = *waka_timer {
+        timer.tick(time.delta());
+
+        if timer.finished() {
+            if *cached {
+                timer.reset();
+                audio.play(loaded_assets.get_handle("sounds/waka.ogg"));
+                *cached = false;
+            } else {
+                *waka_timer = None
+            }
+        }
+    }
+
     for _ in event_reader.iter() {
-        // TODO: This sounds terrible. The game must wait for the first sound to finish before playing the next one
-        let waka = loaded_assets.get_handle("sounds/waka.ogg");
-        audio.play(waka);
+        match *waka_timer {
+            Some(_) => *cached = true,
+            None => {
+                *waka_timer = Some(Timer::new(Duration::from_secs_f32(0.3), false));
+                audio.play(loaded_assets.get_handle("sounds/waka.ogg"));
+            }
+        };
     }
 }
 
@@ -88,14 +120,14 @@ pub struct Dot;
 
 pub struct EatenDots {
     max: usize,
-    eaten: usize
+    eaten: usize,
 }
 
 impl EatenDots {
     fn new(num_dots: usize) -> Self {
         EatenDots {
             max: num_dots,
-            eaten: 0
+            eaten: 0,
         }
     }
 
