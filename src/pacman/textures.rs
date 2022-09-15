@@ -50,7 +50,7 @@ fn create_dying_animation(
     sheet: &SpriteSheet,
 ) -> Animation {
     Animation::from_textures(
-        2.0,
+        1.5,
         false,
         sheet.images_at(0..12),
     )

@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use crate::animation::Animations;
+use crate::game_assets::loaded_assets::LoadedAssets;
 
 use crate::life_cycle::LifeCycle::*;
 use crate::pacman::edible_eaten::EdibleEatenPlugin;
@@ -46,7 +47,9 @@ impl Plugin for PacmanPlugin {
                 SystemSet::on_enter(PacmanHit).with_system(stop_animation)
             )
             .add_system_set(
-                SystemSet::on_enter(PacmanDying).with_system(play_the_dying_animation)
+                SystemSet::on_enter(PacmanDying)
+                    .with_system(play_the_dying_animation)
+                    .with_system(play_the_dying_sound)
             )
             .add_system_set(
                 SystemSet::on_update(PacmanDying).with_system(check_if_pacman_finished_dying)
@@ -79,6 +82,13 @@ fn play_the_dying_animation(
         animations.resume();
         animations.change_animation_to("dying")
     }
+}
+
+fn play_the_dying_sound(
+    audio: Res<Audio>,
+    loaded_assets: Res<LoadedAssets>
+) {
+    audio.play(loaded_assets.get_handle("sounds/dying.ogg"));
 }
 
 fn check_if_pacman_finished_dying(

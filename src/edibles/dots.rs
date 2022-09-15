@@ -79,9 +79,10 @@ fn reset_eaten_dots(
 /// information if the sound finished playing, so I use a custom timer, which is set
 /// to the time of the track (0.3 seconds). Another waka can play when the timer finished.
 ///
-/// But this leads to another problem: The waka makes a pause, if another dot was eaten while
+/// But this leads to another problem: The waka makes a pause if another dot was eaten while
 /// the timer is still active. So I cache a waka if the dot was eaten while the timer is active.
 /// When the timer finishes and a waka is cached, it is instantly played and the timer gets reset.
+/// (This might lead to an additional waka playing, but more waka waka = more fun)
 fn play_waka_when_dot_was_eaten(
     time: Res<Time>,
     mut waka_timer: Local<Option<Timer>>,
