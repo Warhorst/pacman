@@ -28,7 +28,7 @@ Thanks to all these nice people for providing the sound effects:
 
 Downloaded with [yt-dlp](https://github.com/yt-dlp/yt-dlp)
 
-Did some cutting with [LosslessCut](https://github.com/mifi/lossless-cut)
+Did some cutting with [LosslessCut](https://github.com/mifi/lossless-cut) and https://mp3cut.net
 
 (Tip: Don't even try to download the sounds from other sides than YouTube. The quality is trash and the tracks are incomplete)
 

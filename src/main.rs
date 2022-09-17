@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_kira_audio::prelude::*;
 use bevy::render::texture::ImageSettings;
 
 use crate::pacman::PacmanPlugin;
@@ -72,6 +73,7 @@ fn main() {
         .add_plugin(AnimationPlugin)
         .add_plugin(CameraPlugin)
         .add_plugins(DefaultPlugins)
+        .add_plugin(AudioPlugin)
         .add_plugin(MapPlugin)
         .add_plugin(WallsPlugin)
         .add_plugin(EdiblePlugin)

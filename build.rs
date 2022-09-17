@@ -6,6 +6,9 @@ use std::path::{Path, PathBuf};
 use std::fs::{read_dir, read_to_string, write};
 
 fn main() {
+    #[cfg(not(target_family = "wasm"))]
+    println!("cargo:rerun-if-changed=src/");
+
     #[cfg(target_family = "wasm")]
     create_asset_paths()
 }

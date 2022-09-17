@@ -1,4 +1,6 @@
+use std::time::Duration;
 use bevy::prelude::*;
+use bevy_kira_audio::prelude::*;
 use crate::animation::Animations;
 use crate::game_assets::loaded_assets::LoadedAssets;
 
@@ -32,10 +34,13 @@ impl Plugin for PacmanPlugin {
             .add_plugin(GhostEatenPlugin)
             .insert_resource(InputBuffer(None))
             .add_system_set(
-                SystemSet::on_enter(Ready).with_system(spawn_pacman)
+                SystemSet::on_enter(Ready)
+                    .with_system(spawn_pacman)
+                    .with_system(siren)
             )
             .add_system_set(
-                SystemSet::on_enter(Running).with_system(start_animation)
+                SystemSet::on_enter(Running)
+                    .with_system(start_animation)
             )
             .add_system_set(
                 SystemSet::on_update(Running)
@@ -86,14 +91,27 @@ fn play_the_dying_animation(
 
 fn play_the_dying_sound(
     audio: Res<Audio>,
-    loaded_assets: Res<LoadedAssets>
+    loaded_assets: Res<LoadedAssets>,
 ) {
     audio.play(loaded_assets.get_handle("sounds/dying.ogg"));
 }
 
+/// A simple siren. Uses cross fading to avoid popping sounds when the loop restarts.
+///
+/// Not as close to the original as I hoped, but the best I can do without recreating the whole sample.
+fn siren(
+    audio: Res<Audio>,
+    loaded_assets: Res<LoadedAssets>,
+) {
+    audio
+        .play(loaded_assets.get_handle("sounds/siren_1.ogg"))
+        .looped()
+    ;
+}
+
 fn check_if_pacman_finished_dying(
     mut event_writer: EventWriter<EPacmanDead>,
-    query: Query<&Animations, With<Pacman>>
+    query: Query<&Animations, With<Pacman>>,
 ) {
     for animations in query.iter() {
         if animations.current().is_completely_finished() {
@@ -104,7 +122,7 @@ fn check_if_pacman_finished_dying(
 
 fn despawn_pacman(
     mut commands: Commands,
-    query: Query<Entity, With<Pacman>>
+    query: Query<Entity, With<Pacman>>,
 ) {
     for entity in query.iter() {
         commands.entity(entity).despawn()

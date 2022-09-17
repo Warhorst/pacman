@@ -1,5 +1,6 @@
 use std::time::Duration;
 use bevy::prelude::*;
+use bevy_kira_audio::prelude::*;
 use crate::board_dimensions::BoardDimensions;
 
 use crate::constants::DOT_Z;
