@@ -1,6 +1,4 @@
-use std::time::Duration;
 use bevy::prelude::*;
-use bevy_kira_audio::prelude::*;
 use crate::animation::Animations;
 use crate::game_assets::loaded_assets::LoadedAssets;
 
@@ -103,10 +101,7 @@ fn siren(
     audio: Res<Audio>,
     loaded_assets: Res<LoadedAssets>,
 ) {
-    audio
-        .play(loaded_assets.get_handle("sounds/siren_1.ogg"))
-        .looped()
-    ;
+    audio.play_with_settings(loaded_assets.get_handle("sounds/siren_1.ogg"), PlaybackSettings::LOOP);
 }
 
 fn check_if_pacman_finished_dying(
