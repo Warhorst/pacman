@@ -3,6 +3,7 @@ use bevy::render::texture::ImageSettings;
 
 use crate::pacman::PacmanPlugin;
 use crate::animation::AnimationPlugin;
+use crate::background_noise::BackgroundNoisePlugin;
 use crate::camera::CameraPlugin;
 use crate::constants::{WINDOW_HEIGHT, WINDOW_WIDTH};
 use crate::debug::DebugPlugin;
@@ -54,6 +55,7 @@ mod interactions;
 mod game_assets;
 mod specs_per_level;
 mod board_dimensions;
+mod background_noise;
 mod debug;
 
 fn main() {
@@ -92,5 +94,6 @@ fn main() {
         .add_plugin(GameOverScreenPlugin)
         .add_plugin(SpecsPerLevelPlugin)
         .add_plugin(DebugPlugin)
+        .add_plugin(BackgroundNoisePlugin)
         .run()
 }

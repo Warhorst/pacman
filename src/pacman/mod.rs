@@ -34,7 +34,6 @@ impl Plugin for PacmanPlugin {
             .add_system_set(
                 SystemSet::on_enter(Ready)
                     .with_system(spawn_pacman)
-                    .with_system(siren)
             )
             .add_system_set(
                 SystemSet::on_enter(Running)
@@ -92,16 +91,6 @@ fn play_the_dying_sound(
     loaded_assets: Res<LoadedAssets>,
 ) {
     audio.play(loaded_assets.get_handle("sounds/dying.ogg"));
-}
-
-/// A simple siren. Uses cross fading to avoid popping sounds when the loop restarts.
-///
-/// Not as close to the original as I hoped, but the best I can do without recreating the whole sample.
-fn siren(
-    audio: Res<Audio>,
-    loaded_assets: Res<LoadedAssets>,
-) {
-    audio.play_with_settings(loaded_assets.get_handle("sounds/siren_1.ogg"), PlaybackSettings::LOOP);
 }
 
 fn check_if_pacman_finished_dying(
