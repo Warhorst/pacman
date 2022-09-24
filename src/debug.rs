@@ -10,9 +10,11 @@ use crate::level::Level;
 use crate::life_cycle::LifeCycle::Loading;
 use crate::common::Direction;
 use crate::edibles::Edible;
+use crate::edibles::energizer::EnergizerTimer;
 use crate::ghosts::{Blinky, Clyde, Inky, Pinky};
 use crate::pacman::Pacman;
 use crate::ghosts::state::State;
+use crate::life_cycle::LifeCycle;
 
 const WHITE: Color = Color::rgb(1.0, 1.0, 1.0);
 const PACMAN_COLOR: Color = Color::rgb(1.0, 1.0, 0.0);
@@ -23,6 +25,7 @@ const CLYDE_COLOR: Color = Color::rgb(1.0, 206.0 / 255.0, 49.0 / 255.0);
 
 const UI_HEIGHT: f32 = 15.0;
 const FPS_COUNTER: &'static str = "fps_counter";
+const LIFE_CYCLE: &'static str = "life_cycle";
 const DOTS_EATEN: &'static str = "dots_eaten";
 const LEVEL: &'static str = "level";
 const PACMAN: &'static str = "pacman";
@@ -30,6 +33,7 @@ const BLINKY: &'static str = "blinky";
 const PINKY: &'static str = "pinky";
 const INKY: &'static str = "inky";
 const CLYDE: &'static str = "clyde";
+const ENERGIZER_TIMER: &'static str = "energizer_timer";
 
 pub struct DebugPlugin;
 
@@ -42,6 +46,7 @@ impl Plugin for DebugPlugin {
                 SystemSet::on_exit(Loading).with_system(spawn_debug_uis)
             )
             .add_system(update_fps_counter)
+            .add_system(update_lifecycle_ui)
             .add_system(update_dots_eaten_remaining)
             .add_system(update_level_ui)
             .add_system(update_pacman_ui)
@@ -49,6 +54,7 @@ impl Plugin for DebugPlugin {
             .add_system(update_pinky_ui)
             .add_system(update_inky_ui)
             .add_system(update_clyde_ui)
+            .add_system(update_energizer_timer_ui)
             .add_system(toggle_debug_ui_visibility)
             .add_system(despawn_all_edibles_on_key_press)
         ;
@@ -62,6 +68,7 @@ fn spawn_debug_uis(
     spawn_uis(
         [
             (FPS_COUNTER, WHITE),
+            (LIFE_CYCLE, WHITE),
             (DOTS_EATEN, WHITE),
             (LEVEL, WHITE),
             (PACMAN, PACMAN_COLOR),
@@ -69,6 +76,7 @@ fn spawn_debug_uis(
             (PINKY, PINKY_COLOR),
             (INKY, INKY_COLOR),
             (CLYDE, CLYDE_COLOR),
+            (ENERGIZER_TIMER, WHITE)
         ],
     &mut commands, &game_asset_handles)
 }
@@ -124,8 +132,23 @@ fn update_fps_counter(
 
         for (mut text, ui) in &mut query {
             if **ui == FPS_COUNTER {
-                text.sections[0].value = format!("{:.0}", frame_count)
+                text.sections[0].value = format!("FPS: {:.0}", frame_count)
             }
+        }
+    }
+}
+
+fn update_lifecycle_ui(
+    life_cycle: Res<bevy::prelude::State<LifeCycle>>,
+    mut query: Query<(&mut Text, &DebugUI)>,
+) {
+    if !life_cycle.is_changed() {
+        return;
+    }
+
+    for (mut text, ui) in &mut query {
+        if **ui == LIFE_CYCLE {
+            text.sections[0].value = format!("LifeCycle: {:?}", life_cycle.current())
         }
     }
 }
@@ -181,7 +204,7 @@ fn update_pacman_ui(
                     let position = dimensions.vec_to_pos(&coordinates);
                     format!("{}, {}, {}", format_coordinates(coordinates), position , direction)
                 },
-                _ => format!("/, /, /")
+                _ => format!("-")
             };
         }
     }
@@ -266,12 +289,26 @@ fn create_ghost_debug_text(comps: &Result<ROQueryItem<'_, (&Transform, &Directio
             let position = dimensions.vec_to_pos(&coordinates);
             format!("{}, {}, {}, {}", format_coordinates(coordinates), position , direction, state)
         },
-        _ => format!("/, /, /, /")
+        _ => format!("-")
     }
 }
 
 fn format_coordinates(coordinates: Vec3) -> String {
     format!("({:.2}, {:.2}, {:.2})", coordinates.x, coordinates.y, coordinates.z)
+}
+
+fn update_energizer_timer_ui(
+    energizer_timer: Option<Res<EnergizerTimer>>,
+    mut ui_query: Query<(&mut Text, &DebugUI)>,
+) {
+    for (mut text, ui) in &mut ui_query {
+        if **ui == ENERGIZER_TIMER {
+            text.sections[0].value = format!("EnergizerTimer: {}", match energizer_timer {
+                Some(ref timer) => timer.remaining().to_string(),
+                None => "-".to_string()
+            })
+        }
+    }
 }
 
 fn toggle_debug_ui_visibility(
