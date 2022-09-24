@@ -9,7 +9,7 @@ use crate::edibles::Edible;
 use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::interactions::EDotEaten;
 use crate::is;
-use crate::life_cycle::LifeCycle::Running;
+use crate::life_cycle::LifeCycle::{LevelTransition, Ready, Running};
 use crate::map::{Element, Map};
 use crate::specs_per_level::SpecsPerLevel;
 
@@ -27,6 +27,12 @@ impl Plugin for FruitPlugin {
             )
             .add_system_set(
                 SystemSet::on_exit(Running).with_system(despawn_fruit_and_timer)
+            )
+            .add_system_set(
+                SystemSet::on_enter(Ready).with_system(spawn_fruits_to_display)
+            )
+            .add_system_set(
+                SystemSet::on_exit(LevelTransition).with_system(despawn_displayed_fruits)
             )
         ;
     }
@@ -54,11 +60,14 @@ impl FruitDespawnTimer {
     }
 }
 
+#[derive(Component)]
+struct DisplayedFruit;
+
 /// Spawn a fruit for the current level when a specific amount of dots
 /// was eaten.
 fn spawn_fruit_when_dot_limit_reached(
     mut commands: Commands,
-    game_asset_handles: Res<LoadedAssets>,
+    loaded_assets: Res<LoadedAssets>,
     map: Res<Map>,
     level: Res<Level>,
     eaten_dots: Res<EatenDots>,
@@ -76,7 +85,7 @@ fn spawn_fruit_when_dot_limit_reached(
 
             commands.spawn()
                 .insert_bundle(SpriteBundle {
-                    texture: get_texture_for_fruit(&fruit, &game_asset_handles),
+                    texture: get_texture_for_fruit(&fruit, &loaded_assets),
                     sprite: Sprite {
                         custom_size: Some(dimension),
                         ..default()
@@ -90,19 +99,6 @@ fn spawn_fruit_when_dot_limit_reached(
             commands.insert_resource(FruitDespawnTimer::new());
         }
     }
-}
-
-fn get_texture_for_fruit(fruit: &Fruit, asset_handles: &LoadedAssets) -> Handle<Image> {
-    asset_handles.get_handle(&format!("textures/fruits/{}.png", match fruit {
-        Cherry => "cherry",
-        Strawberry => "strawberry",
-        Peach => "peach",
-        Apple => "apple",
-        Grapes => "grapes",
-        Galaxian => "galaxian",
-        Bell => "bell",
-        Key => "key"
-    }))
 }
 
 /// Update the despawn timer with delta time.
@@ -150,4 +146,68 @@ fn despawn_fruit_and_timer(
     for e in &query {
         commands.entity(e).despawn()
     }
+}
+
+fn spawn_fruits_to_display(
+    mut commands: Commands,
+    level: Res<Level>,
+    specs_per_level: Res<SpecsPerLevel>,
+    dimensions: Res<BoardDimensions>,
+    loaded_assets: Res<LoadedAssets>,
+) {
+    let fruits_to_display = get_fruits_to_display(&level, &specs_per_level);
+    let len = fruits_to_display.len();
+    let dimension = Vec2::new(dimensions.fruit(), dimensions.fruit());
+
+    for (i, fruit) in fruits_to_display.into_iter().enumerate() {
+        let transform = Transform::from_translation(Vec3::new(
+            dimensions.origin().x + dimensions.board_width() - (len - i) as f32 * dimensions.fruit(),
+            dimensions.origin().y - dimensions.fruit(),
+            0.0
+        ));
+
+        commands.spawn().insert_bundle(SpriteBundle {
+            texture: get_texture_for_fruit(&fruit, &loaded_assets),
+            sprite: Sprite {
+                custom_size: Some(dimension),
+                ..default()
+            },
+            transform,
+            ..Default::default()
+        }).insert(DisplayedFruit);
+    }
+}
+
+fn get_fruits_to_display(
+    level: &Level,
+    specs_per_level: &SpecsPerLevel,
+) -> Vec<Fruit> {
+    let border = level.checked_sub(7).unwrap_or(1);
+
+    (border..=**level).rev()
+        .into_iter()
+        .map(|i| specs_per_level.get_for(&Level(i)).fruit_to_spawn)
+        .collect()
+}
+
+fn despawn_displayed_fruits(
+    mut commands: Commands,
+    query: Query<Entity, With<DisplayedFruit>>
+) {
+    for e in &query {
+        commands.entity(e).despawn();
+    }
+}
+
+fn get_texture_for_fruit(fruit: &Fruit, asset_handles: &LoadedAssets) -> Handle<Image> {
+    asset_handles.get_handle(&format!("textures/fruits/{}.png", match fruit {
+        Cherry => "cherry",
+        Strawberry => "strawberry",
+        Peach => "peach",
+        Apple => "apple",
+        Grapes => "grapes",
+        Galaxian => "galaxian",
+        Bell => "bell",
+        Key => "key"
+    }))
 }
