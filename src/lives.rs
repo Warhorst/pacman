@@ -62,7 +62,7 @@ fn spawn_life(
     dimensions: &BoardDimensions
 ) {
     let origin = dimensions.origin();
-    let life_x = origin.x + (life_index as f32) * (dimensions.life()) * 2.0;
+    let life_x = origin.x + (life_index as f32) * (dimensions.life());
 
     commands.spawn()
         .insert_bundle(SpriteBundle {

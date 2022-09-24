@@ -17,7 +17,7 @@ impl Plugin for ScorePlugin {
             .insert_resource(Score(0))
             .insert_resource(EatenGhostCounter(0))
             .add_system_set(
-                SystemSet::on_enter(Start).with_system(create_scoreboard)
+                SystemSet::on_enter(Start).with_system(create_score_boards)
             )
             .add_system_set(
                 SystemSet::on_update(Running)
@@ -47,7 +47,7 @@ impl Score {
 }
 
 #[derive(Component)]
-pub struct Scoreboard;
+pub struct ScoreBoard;
 
 #[derive(Component)]
 pub struct ScoreText;
@@ -58,18 +58,19 @@ pub struct ScoreTextTimer(Timer);
 #[derive(Deref, DerefMut)]
 struct EatenGhostCounter(usize);
 
-fn create_scoreboard(
+fn create_score_boards(
     mut commands: Commands,
     game_asset_handles: Res<LoadedAssets>,
     dimensions: Res<BoardDimensions>
 ) {
     let origin = dimensions.origin();
+
     commands.spawn_bundle(Text2dBundle {
         text: Text::from_section(
-            "Score".to_string(),
+            "0".to_string(),
             TextStyle {
                 font: game_asset_handles.get_handle("fonts/FiraSans-Bold.ttf"),
-                font_size: 40.0,
+                font_size: 30.0,
                 color: Color::rgb(1.0, 1.0, 1.0),
             },
         ).with_alignment(
@@ -81,19 +82,56 @@ fn create_scoreboard(
         transform: Transform::from_xyz(origin.x, origin.y + dimensions.board_height(), 0.0),
         ..Default::default()
     })
-        .insert(Scoreboard);
+        .insert(ScoreBoard);
+
+    commands.spawn_bundle(Text2dBundle {
+        text: Text::from_section(
+            "0".to_string(),
+            TextStyle {
+                font: game_asset_handles.get_handle("fonts/FiraSans-Bold.ttf"),
+                font_size: 30.0,
+                color: Color::rgb(1.0, 1.0, 1.0),
+            },
+        ).with_alignment(
+            TextAlignment {
+                vertical: VerticalAlign::Center,
+                horizontal: HorizontalAlign::Center,
+            }
+        ),
+        transform: Transform::from_xyz(origin.x + dimensions.board_width() / 2.0, origin.y + dimensions.board_height(), 0.0),
+        ..Default::default()
+    })
+        .insert(ScoreBoard);
+
+    commands.spawn_bundle(Text2dBundle {
+        text: Text::from_section(
+            "HIGH SCORE".to_string(),
+            TextStyle {
+                font: game_asset_handles.get_handle("fonts/FiraSans-Bold.ttf"),
+                font_size: 30.0,
+                color: Color::rgb(1.0, 1.0, 1.0),
+            },
+        ).with_alignment(
+            TextAlignment {
+                vertical: VerticalAlign::Center,
+                horizontal: HorizontalAlign::Center,
+            }
+        ),
+        transform: Transform::from_xyz(origin.x + dimensions.board_width() / 2.0, origin.y + dimensions.board_height() + dimensions.field(), 0.0),
+        ..Default::default()
+    });
 }
 
 fn update_scoreboard(
     score: Res<Score>,
-    mut query: Query<&mut Text, With<Scoreboard>>,
+    mut query: Query<&mut Text, With<ScoreBoard>>,
 ) {
     if !score.is_changed() {
         return;
     }
 
     for mut text in query.iter_mut() {
-        text.sections[0].value = format!("Score: {}", **score)
+        text.sections[0].value = format!("{}", **score)
     }
 }
 
