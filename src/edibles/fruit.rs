@@ -182,7 +182,7 @@ fn get_fruits_to_display(
     level: &Level,
     specs_per_level: &SpecsPerLevel,
 ) -> Vec<Fruit> {
-    let border = level.checked_sub(7).unwrap_or(1);
+    let border = level.checked_sub(7).unwrap_or(1).max(1);
 
     (border..=**level).rev()
         .into_iter()

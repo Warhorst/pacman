@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use crate::board_dimensions::BoardDimensions;
 
 use crate::constants::ENERGIZER_Z;
+use crate::edibles::Edible;
 use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::interactions::EEnergizerEaten;
 use crate::life_cycle::LifeCycle::*;
@@ -87,7 +88,7 @@ fn spawn_energizer(
                 ..Default::default()
             })
             .insert(Energizer)
-            .insert(Energizer)
+            .insert(Edible)
         ;
     }
 }

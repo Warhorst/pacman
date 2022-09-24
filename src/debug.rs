@@ -9,6 +9,7 @@ use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::level::Level;
 use crate::life_cycle::LifeCycle::Loading;
 use crate::common::Direction;
+use crate::edibles::Edible;
 use crate::ghosts::{Blinky, Clyde, Inky, Pinky};
 use crate::pacman::Pacman;
 use crate::ghosts::state::State;
@@ -49,6 +50,7 @@ impl Plugin for DebugPlugin {
             .add_system(update_inky_ui)
             .add_system(update_clyde_ui)
             .add_system(toggle_debug_ui_visibility)
+            .add_system(despawn_all_edibles_on_key_press)
         ;
     }
 }
@@ -282,6 +284,21 @@ fn toggle_debug_ui_visibility(
 
     for mut vis in &mut query {
         vis.is_visible = !vis.is_visible
+    }
+}
+
+/// Despawn all dots when '1' was pressed.
+fn despawn_all_edibles_on_key_press(
+    mut commands: Commands,
+    keyboard_input: Res<Input<KeyCode>>,
+    query: Query<Entity, With<Edible>>
+) {
+    if !keyboard_input.just_pressed(KeyCode::Key1) {
+        return;
+    }
+
+    for e in &query {
+        commands.entity(e).despawn();
     }
 }
 
