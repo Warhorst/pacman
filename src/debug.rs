@@ -11,6 +11,7 @@ use crate::life_cycle::LifeCycle::Loading;
 use crate::common::Direction;
 use crate::edibles::Edible;
 use crate::edibles::energizer::EnergizerTimer;
+use crate::edibles::fruit::FruitDespawnTimer;
 use crate::ghosts::{Blinky, Clyde, Inky, Pinky};
 use crate::pacman::Pacman;
 use crate::ghosts::state::State;
@@ -34,6 +35,7 @@ const PINKY: &'static str = "pinky";
 const INKY: &'static str = "inky";
 const CLYDE: &'static str = "clyde";
 const ENERGIZER_TIMER: &'static str = "energizer_timer";
+const FRUIT_DESPAWN_TIMER: &'static str = "fruit_despawn_timer";
 
 pub struct DebugPlugin;
 
@@ -55,6 +57,7 @@ impl Plugin for DebugPlugin {
             .add_system(update_inky_ui)
             .add_system(update_clyde_ui)
             .add_system(update_energizer_timer_ui)
+            .add_system(update_fruit_despawn_timer_ui)
             .add_system(toggle_debug_ui_visibility)
             .add_system(despawn_all_edibles_on_key_press)
         ;
@@ -76,7 +79,8 @@ fn spawn_debug_uis(
             (PINKY, PINKY_COLOR),
             (INKY, INKY_COLOR),
             (CLYDE, CLYDE_COLOR),
-            (ENERGIZER_TIMER, WHITE)
+            (ENERGIZER_TIMER, WHITE),
+            (FRUIT_DESPAWN_TIMER, WHITE)
         ],
     &mut commands, &game_asset_handles)
 }
@@ -305,6 +309,20 @@ fn update_energizer_timer_ui(
         if **ui == ENERGIZER_TIMER {
             text.sections[0].value = format!("EnergizerTimer: {}", match energizer_timer {
                 Some(ref timer) => timer.remaining().to_string(),
+                None => "-".to_string()
+            })
+        }
+    }
+}
+
+fn update_fruit_despawn_timer_ui(
+    fruit_despawn_timer: Option<Res<FruitDespawnTimer>>,
+    mut ui_query: Query<(&mut Text, &DebugUI)>,
+) {
+    for (mut text, ui) in &mut ui_query {
+        if **ui == FRUIT_DESPAWN_TIMER {
+            text.sections[0].value = format!("FruitTimer: {}", match fruit_despawn_timer {
+                Some(ref timer) => (timer.duration().as_secs_f32() - timer.elapsed_secs()).to_string(),
                 None => "-".to_string()
             })
         }
