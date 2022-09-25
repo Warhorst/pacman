@@ -8,7 +8,6 @@ use crate::common::position::Position;
 use crate::constants::PACMAN_Z;
 use crate::map::board::Board;
 use crate::pacman::edible_eaten::EdibleEatenStop;
-use crate::pacman::ghost_eaten::GhostEatenStop;
 use crate::pacman::Pacman;
 use crate::speed::Speed;
 
@@ -24,7 +23,7 @@ pub(in crate::pacman) fn move_pacman(
     board: Res<Board>,
     time: Res<Time>,
     dimensions: Res<BoardDimensions>,
-    mut query: Query<MoveComponents, (With<Pacman>, Without<EdibleEatenStop>, Without<GhostEatenStop>)>,
+    mut query: Query<MoveComponents, (With<Pacman>, Without<EdibleEatenStop>)>,
 ) {
     let delta_seconds = time.delta_seconds();
 

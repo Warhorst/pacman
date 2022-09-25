@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use crate::ghosts::ghost_eaten::GhostEatenPlugin;
 
 use crate::ghosts::movement::MovePlugin;
 use crate::ghosts::schedule::SchedulePlugin;
@@ -16,7 +15,6 @@ pub mod state;
 pub mod target;
 mod schedule;
 mod textures;
-mod ghost_eaten;
 
 pub struct GhostPlugin;
 
@@ -27,7 +25,6 @@ impl Plugin for GhostPlugin {
             .add_plugin(TargetPlugin)
             .add_plugin(StatePlugin)
             .add_plugin(SchedulePlugin)
-            .add_plugin(GhostEatenPlugin)
             .add_system_set(
                 SystemSet::on_enter(Ready).with_system(spawn_ghosts)
             )
@@ -47,6 +44,14 @@ impl Plugin for GhostPlugin {
             )
             .add_system_set(
                 SystemSet::on_enter(LevelTransition).with_system(despawn_ghosts)
+            )
+            .add_system_set(
+                SystemSet::on_enter(GhostEatenPause).with_system(set_currently_eaten_ghost_invisible)
+            )
+            .add_system_set(
+                SystemSet::on_exit(GhostEatenPause)
+                    .with_system(remove_currently_eaten_ghost)
+                    .with_system(set_currently_eaten_ghost_visible)
             )
         ;
     }
@@ -71,6 +76,34 @@ fn despawn_ghosts(
 ) {
     for entity in query.iter() {
         commands.entity(entity).despawn();
+    }
+}
+
+fn remove_currently_eaten_ghost(
+    mut commands: Commands
+) {
+    commands.remove_resource::<CurrentlyEatenGhost>()
+}
+
+fn set_currently_eaten_ghost_invisible(
+    currently_eaten_ghost: Res<CurrentlyEatenGhost>,
+    mut query: Query<(Entity, &mut Visibility), With<Ghost>>
+) {
+    for (entity, mut vis) in &mut query {
+        if **currently_eaten_ghost == entity {
+            vis.is_visible = false
+        }
+    }
+}
+
+fn set_currently_eaten_ghost_visible(
+    currently_eaten_ghost: Res<CurrentlyEatenGhost>,
+    mut query: Query<(Entity, &mut Visibility), With<Ghost>>
+) {
+    for (entity, mut vis) in &mut query {
+        if **currently_eaten_ghost == entity {
+            vis.is_visible = true
+        }
     }
 }
 
@@ -100,3 +133,7 @@ impl GhostType for Pinky {}
 impl GhostType for Inky {}
 
 impl GhostType for Clyde {}
+
+/// Resource that holds the entity id of the ghost that is currently eaten by pacman
+#[derive(Deref)]
+pub struct CurrentlyEatenGhost(pub Entity);

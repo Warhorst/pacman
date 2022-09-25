@@ -3,9 +3,10 @@ use crate::pacman::{EPacmanDead};
 use LifeCycle::*;
 use crate::edibles::EAllEdiblesEaten;
 use crate::game_assets::EAllAssetsLoaded;
-use crate::interactions::EPacmanHit;
+use crate::interactions::{EPacmanEatsGhost, EPacmanHit};
 use crate::lives::Life;
 
+/// All lifecycle states of the app. See ./resources/lifecycle.png for a visualization.
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub enum LifeCycle {
     Loading,
@@ -16,7 +17,8 @@ pub enum LifeCycle {
     PacmanDying,
     PacmanDead,
     GameOver,
-    LevelTransition
+    LevelTransition,
+    GhostEatenPause
 }
 
 pub struct GameStatePlugin;
@@ -44,6 +46,7 @@ impl Plugin for GameStatePlugin {
                 SystemSet::on_update(Running)
                     .with_system(switch_to_dying_when_pacman_was_hit)
                     .with_system(switch_to_level_transition_when_all_edibles_eaten)
+                    .with_system(switch_to_ghost_eaten_pause_when_ghost_was_eaten)
             )
             .add_system_set(
                 SystemSet::on_enter(PacmanHit).with_system(start_state_timer)
@@ -65,6 +68,12 @@ impl Plugin for GameStatePlugin {
             )
             .add_system_set(
                 SystemSet::on_update(LevelTransition).with_system(switch_state_when_state_timer_finished)
+            )
+            .add_system_set(
+                SystemSet::on_enter(GhostEatenPause).with_system(start_state_timer)
+            )
+            .add_system_set(
+                SystemSet::on_update(GhostEatenPause).with_system(switch_state_when_state_timer_finished)
             )
         ;
     }
@@ -94,6 +103,7 @@ fn start_state_timer(
         PacmanHit => 1.0,
         PacmanDead => 1.0,
         LevelTransition => 3.0,
+        GhostEatenPause => 1.0,
         _ => return
     };
 
@@ -116,6 +126,7 @@ fn switch_state_when_state_timer_finished(
             Ready => Running,
             PacmanHit => PacmanDying,
             LevelTransition => Ready,
+            GhostEatenPause => Running,
             _ => return
         };
 
@@ -167,5 +178,14 @@ fn switch_to_level_transition_when_all_edibles_eaten(
 ) {
     for _ in event_reader.iter() {
         life_cycle.set(LevelTransition).unwrap()
+    }
+}
+
+fn switch_to_ghost_eaten_pause_when_ghost_was_eaten(
+    mut event_reader: EventReader<EPacmanEatsGhost>,
+    mut life_cycle: ResMut<State<LifeCycle>>
+) {
+    for _ in event_reader.iter() {
+        life_cycle.set(GhostEatenPause).unwrap()
     }
 }

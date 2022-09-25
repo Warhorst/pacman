@@ -4,7 +4,7 @@ use crate::board_dimensions::BoardDimensions;
 use crate::edibles::dots::{Dot, EatenDots};
 use crate::edibles::energizer::Energizer;
 use crate::edibles::fruit::{Fruit, FruitDespawnTimer};
-use crate::ghosts::Ghost;
+use crate::ghosts::{CurrentlyEatenGhost, Ghost};
 use crate::ghosts::state::State;
 use crate::life_cycle::LifeCycle::Running;
 use crate::pacman::Pacman;
@@ -52,6 +52,7 @@ pub struct EEnergizerEaten;
 pub struct EFruitEaten(pub Fruit, pub Transform);
 
 fn pacman_hits_ghost(
+    mut commands: Commands,
     mut killed_event_writer: EventWriter<EPacmanHit>,
     mut eat_event_writer: EventWriter<EPacmanEatsGhost>,
     dimensions: Res<BoardDimensions>,
@@ -66,7 +67,8 @@ fn pacman_hits_ghost(
                 }
 
                 if let State::Frightened = state {
-                    eat_event_writer.send(EPacmanEatsGhost(entity, *ghost_transform))
+                    eat_event_writer.send(EPacmanEatsGhost(entity, *ghost_transform));
+                    commands.insert_resource(CurrentlyEatenGhost(entity))
                 }
             }
         }

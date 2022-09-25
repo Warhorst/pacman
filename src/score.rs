@@ -5,7 +5,7 @@ use crate::board_dimensions::BoardDimensions;
 use crate::constants::{POINTS_PER_DOT, POINTS_PER_ENERGIZER, POINTS_PER_GHOST, TEXT_Z};
 use crate::edibles::energizer::EnergizerOver;
 use crate::interactions::{EDotEaten, EEnergizerEaten, EFruitEaten, EPacmanEatsGhost};
-use crate::life_cycle::LifeCycle::{Running, Start};
+use crate::life_cycle::LifeCycle::{PacmanHit, Running, Start};
 use crate::edibles::fruit::Fruit::*;
 use crate::game_assets::loaded_assets::LoadedAssets;
 
@@ -30,7 +30,7 @@ impl Plugin for ScorePlugin {
                     .with_system(update_score_texts)
             )
             .add_system_set(
-                SystemSet::on_exit(Running).with_system(despawn_score_texts)
+                SystemSet::on_enter(PacmanHit).with_system(despawn_score_texts)
             )
         ;
     }

@@ -49,6 +49,19 @@ impl Plugin for TargetPlugin {
                     .label(TargetSetter)
                     .after(StateSetter)
             )
+            .add_system_set(
+                SystemSet::on_update(GhostEatenPause)
+                    .with_system(set_spawned_target::<Blinky>)
+                    .with_system(set_spawned_target::<Pinky>)
+                    .with_system(set_spawned_target::<Inky>)
+                    .with_system(set_spawned_target::<Clyde>)
+                    .with_system(set_eaten_target::<Blinky>)
+                    .with_system(set_eaten_target::<Pinky>)
+                    .with_system(set_eaten_target::<Inky>)
+                    .with_system(set_eaten_target::<Clyde>)
+                    .label(TargetSetter)
+                    .after(StateSetter)
+            )
         ;
     }
 }

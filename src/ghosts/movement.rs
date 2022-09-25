@@ -2,42 +2,44 @@ use bevy::prelude::*;
 
 use crate::common::Direction;
 use crate::common::Direction::*;
-use crate::ghosts::ghost_eaten::{OtherEatenStop, SelfEatenStop};
+use crate::ghosts::CurrentlyEatenGhost;
 use crate::life_cycle::LifeCycle::*;
 use crate::ghosts::target::{Target, TargetSetter};
 use crate::speed::Speed;
 use crate::ghosts::state::State;
+use crate::ghosts::state::State::Eaten;
 
 pub struct MovePlugin;
 
 impl Plugin for MovePlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(
-            SystemSet::on_update(Running)
-                .with_system(move_ghosts.after(TargetSetter))
-                .with_system(move_stopped_ghosts_when_they_are_eaten.after(TargetSetter))
-        );
+        app
+            .add_system_set(
+                SystemSet::on_update(Running).with_system(move_ghosts.after(TargetSetter))
+            )
+            .add_system_set(
+                SystemSet::on_update(GhostEatenPause).with_system(move_only_not_currently_eaten_ghosts.after(TargetSetter))
+            )
+        ;
     }
 }
 
 fn move_ghosts(
     time: Res<Time>,
-    mut query: Query<(&Direction, &mut Target, &mut Transform, &Speed), (Without<SelfEatenStop>, Without<OtherEatenStop>)>,
+    mut query: Query<(&Direction, &mut Target, &mut Transform, &Speed)>,
 ) {
     for (direction, mut target, mut transform, speed) in query.iter_mut() {
         move_ghost(&time, direction, &mut target, &mut transform, speed)
     }
 }
 
-fn move_stopped_ghosts_when_they_are_eaten(
+fn move_only_not_currently_eaten_ghosts(
     time: Res<Time>,
-    mut query: Query<(&Direction, &State, &mut Target, &mut Transform, &Speed), With<OtherEatenStop>>,
+    currently_eaten_ghost: Res<CurrentlyEatenGhost>,
+    mut query: Query<(Entity, &Direction, &State, &mut Target, &mut Transform, &Speed)>,
 ) {
-    for (direction, state, mut target, mut transform, speed) in query.iter_mut() {
-        if state != &State::Eaten {
-            continue
-        }
-
+    for (entity, direction, state, mut target, mut transform, speed) in query.iter_mut() {
+        if entity == **currently_eaten_ghost || *state != Eaten { continue; }
         move_ghost(&time, direction, &mut target, &mut transform, speed)
     }
 }

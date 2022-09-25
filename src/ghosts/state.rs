@@ -17,22 +17,35 @@ pub struct StatePlugin;
 
 impl Plugin for StatePlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(
-            SystemSet::on_update(Running)
-                .with_system(update_frightened_state)
-                .with_system(update_spawned_state::<Blinky>)
-                .with_system(update_spawned_state::<Pinky>)
-                .with_system(update_spawned_state::<Inky>)
-                .with_system(update_spawned_state::<Clyde>)
-                .with_system(update_chase_and_scatter_state)
-                .with_system(update_eaten_state::<Blinky>)
-                .with_system(update_eaten_state::<Pinky>)
-                .with_system(update_eaten_state::<Inky>)
-                .with_system(update_eaten_state::<Clyde>)
-                .with_system(set_frightened_when_pacman_ate_energizer)
-                .with_system(set_eaten_when_hit_by_pacman.after(LPacmanGhostHitDetection))
-                .label(StateSetter)
-        )
+        app
+            .add_system_set(
+                SystemSet::on_update(Running)
+                    .with_system(update_frightened_state)
+                    .with_system(update_spawned_state::<Blinky>)
+                    .with_system(update_spawned_state::<Pinky>)
+                    .with_system(update_spawned_state::<Inky>)
+                    .with_system(update_spawned_state::<Clyde>)
+                    .with_system(update_chase_and_scatter_state)
+                    .with_system(update_eaten_state::<Blinky>)
+                    .with_system(update_eaten_state::<Pinky>)
+                    .with_system(update_eaten_state::<Inky>)
+                    .with_system(update_eaten_state::<Clyde>)
+                    .with_system(set_frightened_when_pacman_ate_energizer)
+                    .with_system(set_eaten_when_hit_by_pacman.after(LPacmanGhostHitDetection))
+                    .label(StateSetter)
+            )
+            .add_system_set(
+                SystemSet::on_update(GhostEatenPause)
+                    .with_system(update_eaten_state::<Blinky>)
+                    .with_system(update_eaten_state::<Pinky>)
+                    .with_system(update_eaten_state::<Inky>)
+                    .with_system(update_eaten_state::<Clyde>)
+                    .with_system(update_spawned_state::<Blinky>)
+                    .with_system(update_spawned_state::<Pinky>)
+                    .with_system(update_spawned_state::<Inky>)
+                    .with_system(update_spawned_state::<Clyde>)
+                    .label(StateSetter)
+            )
         ;
     }
 }

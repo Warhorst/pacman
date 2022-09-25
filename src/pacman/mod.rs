@@ -4,7 +4,6 @@ use crate::game_assets::loaded_assets::LoadedAssets;
 
 use crate::life_cycle::LifeCycle::*;
 use crate::pacman::edible_eaten::EdibleEatenPlugin;
-use crate::pacman::ghost_eaten::GhostEatenPlugin;
 use crate::pacman::spawn::spawn_pacman;
 use crate::pacman::movement::{InputBuffer, move_pacman, set_direction_based_on_keyboard_input};
 use crate::pacman::textures::{start_animation, update_pacman_appearance};
@@ -13,7 +12,6 @@ mod movement;
 mod spawn;
 mod textures;
 mod edible_eaten;
-mod ghost_eaten;
 
 /// Marker component for a pacman entity.
 #[derive(Component)]
@@ -29,7 +27,6 @@ impl Plugin for PacmanPlugin {
         app
             .add_event::<EPacmanDead>()
             .add_plugin(EdibleEatenPlugin)
-            .add_plugin(GhostEatenPlugin)
             .insert_resource(InputBuffer(None))
             .add_system_set(
                 SystemSet::on_enter(Ready)
@@ -64,6 +61,12 @@ impl Plugin for PacmanPlugin {
             )
             .add_system_set(
                 SystemSet::on_exit(LevelTransition).with_system(despawn_pacman)
+            )
+            .add_system_set(
+                SystemSet::on_enter(GhostEatenPause).with_system(set_invisible)
+            )
+            .add_system_set(
+                SystemSet::on_exit(GhostEatenPause).with_system(set_visible)
             )
         ;
     }
@@ -110,5 +113,21 @@ fn despawn_pacman(
 ) {
     for entity in query.iter() {
         commands.entity(entity).despawn()
+    }
+}
+
+fn set_invisible(
+    mut query: Query<&mut Visibility, With<Pacman>>
+) {
+    for mut vis in &mut query {
+        vis.is_visible = false
+    }
+}
+
+fn set_visible(
+    mut query: Query<&mut Visibility, With<Pacman>>
+) {
+    for mut vis in &mut query {
+        vis.is_visible = true
     }
 }
