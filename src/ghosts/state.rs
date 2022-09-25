@@ -5,7 +5,6 @@ use crate::board_dimensions::BoardDimensions;
 use crate::common::Direction;
 use crate::edibles::energizer::EnergizerOver;
 use crate::life_cycle::LifeCycle::*;
-use crate::ghosts::schedule::ScheduleChanged;
 use crate::ghosts::target::Target;
 use crate::ghost_house::GhostHouse;
 use crate::ghosts::{Blinky, Clyde, Ghost, GhostType, Inky, Pinky};
@@ -70,16 +69,23 @@ fn update_spawned_state<G: GhostType + Component + 'static>(
     }
 }
 
+/// Update the state for a chase or scatter ghost.
+///
+/// Lets say chase and scatter are opposites. If the schedule currently returns the opposite
+/// state compared to the current ghost, its state is set to the current schedule state and its
+/// direction will be reversed.
 fn update_chase_and_scatter_state(
-    mut event_reader: EventReader<ScheduleChanged>,
+    schedule: Res<Schedule>,
     dimensions: Res<BoardDimensions>,
     mut query: Query<(&mut Direction, &mut Target, &mut State, &Transform), With<Ghost>>,
 ) {
-    for event in event_reader.iter() {
-        for (mut direction, mut target, mut state, transform) in query.iter_mut() {
-            state_skip_if!(state != State::Scatter | State::Chase);
+    for (mut direction, mut target, mut state, transform) in query.iter_mut() {
+        state_skip_if!(state != State::Scatter | State::Chase);
 
-            *state = **event;
+        let schedule_state = schedule.current_state();
+
+        if let (State::Chase, State::Scatter) | (State::Scatter, State::Chase) = (*state, schedule_state) {
+            *state = schedule_state;
 
             let target_coordinates = if target.is_set() {
                 target.get()

@@ -1,6 +1,5 @@
-use std::ops::RangeInclusive;
 use bevy::prelude::*;
-use bevy::utils::Duration;
+use bevy::utils::{Duration, HashMap};
 use crate::edibles::energizer::EnergizerTimer;
 use crate::life_cycle::LifeCycle::*;
 use crate::level::Level;
@@ -13,26 +12,17 @@ pub(super) struct SchedulePlugin;
 impl Plugin for SchedulePlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_event::<ScheduleChanged>()
-            .insert_resource(create_schedules())
+            .insert_resource(ScheduleByLevel::new())
             .add_system_set(
                 SystemSet::on_enter(Start).with_system(register_start_schedule)
             )
             .add_system_set(
                 SystemSet::on_update(Running)
-                    .with_system(update_schedule_when_level_changed)
+                    .with_system(switch_schedule_when_level_changed)
                     .with_system(update_schedule)
             )
         ;
     }
-}
-
-fn create_schedules() -> ScheduleByLevel {
-    ScheduleByLevel::new(vec![
-        LevelScheduleRange::new(Level(1)..=Level(1), level_one_schedule),
-        LevelScheduleRange::new(Level(2)..=Level(4), level_two_to_four_schedule),
-        LevelScheduleRange::new(Level(5)..=Level(usize::MAX), level_five_plus_schedule),
-    ])
 }
 
 fn register_start_schedule(
@@ -43,7 +33,7 @@ fn register_start_schedule(
     commands.insert_resource(schedule_by_level.get_schedule_for_level(&level));
 }
 
-fn update_schedule_when_level_changed(
+fn switch_schedule_when_level_changed(
     mut schedule: ResMut<Schedule>,
     level: Res<Level>,
     schedule_by_level: Res<ScheduleByLevel>,
@@ -53,176 +43,143 @@ fn update_schedule_when_level_changed(
     *schedule = schedule_by_level.get_schedule_for_level(&level);
 }
 
-/// Update the currently active schedule and send an event when the active state changed.
+/// Update the currently active schedule.
 ///
 /// The schedule does not proceed while an energizer is active.
 fn update_schedule(
     time: Res<Time>,
     energizer_timer: Option<Res<EnergizerTimer>>,
     mut schedule: ResMut<Schedule>,
-    mut event_writer: EventWriter<ScheduleChanged>,
 ) {
-    if energizer_timer.is_some() { return; }
-
-    let old_state = schedule.current_state();
-    let new_state = schedule.state_after_tick(time.delta());
-
-    if old_state != new_state {
-        event_writer.send(ScheduleChanged(new_state))
+    if energizer_timer.is_none() {
+        schedule.update(time.delta());
     }
 }
 
-fn level_one_schedule() -> Schedule {
-    let mut phases = Vec::new();
-    phases.push(Phase::for_duration(Scatter, 7.0));
-    phases.push(Phase::for_duration(Chase, 20.0));
-    phases.push(Phase::for_duration(Scatter, 7.0));
-    phases.push(Phase::for_duration(Chase, 20.0));
-    phases.push(Phase::for_duration(Scatter, 5.0));
-    phases.push(Phase::for_duration(Chase, 1033.0));
-    phases.push(Phase::for_duration(Scatter, 1.0 / 60.0));
-    phases.push(Phase::infinite(Chase));
-    Schedule::new(phases)
-}
-
-fn level_two_to_four_schedule() -> Schedule {
-    let mut phases = Vec::new();
-    phases.push(Phase::for_duration(Scatter, 5.0));
-    phases.push(Phase::for_duration(Chase, 20.0));
-    phases.push(Phase::for_duration(Scatter, 5.0));
-    phases.push(Phase::for_duration(Chase, 20.0));
-    phases.push(Phase::for_duration(Scatter, 5.0));
-    phases.push(Phase::for_duration(Chase, 1037.0));
-    phases.push(Phase::for_duration(Scatter, 1.0 / 60.0));
-    phases.push(Phase::infinite(Chase));
-    Schedule::new(phases)
-}
-
-fn level_five_plus_schedule() -> Schedule {
-    let mut phases = Vec::new();
-    phases.push(Phase::for_duration(Scatter, 7.0));
-    phases.push(Phase::for_duration(Chase, 20.0));
-    phases.push(Phase::for_duration(Scatter, 7.0));
-    phases.push(Phase::for_duration(Chase, 20.0));
-    phases.push(Phase::for_duration(Scatter, 5.0));
-    phases.push(Phase::for_duration(Chase, 20.0));
-    phases.push(Phase::for_duration(Scatter, 5.0));
-    phases.push(Phase::infinite(Chase));
-    Schedule::new(phases)
-}
-
-/// Indicates that a new state is active
-#[derive(Deref, DerefMut)]
-pub struct ScheduleChanged(State);
-
 pub struct ScheduleByLevel {
-    ranges: Vec<LevelScheduleRange>,
+    level_schedule_map: HashMap<Level, Schedule>,
+    default_schedule: Schedule,
 }
 
 impl ScheduleByLevel {
-    pub fn new(ranges: Vec<LevelScheduleRange>) -> Self {
-        ScheduleByLevel { ranges }
-    }
-
-    pub fn get_schedule_for_level(&self, level: &Level) -> Schedule {
-        self.ranges.iter()
-            .find_map(|r| match r.contains_level(level) {
-                true => Some((r.schedule_producer)()),
-                false => None
-            })
-            .expect("No schedule was registered for the current level")
-    }
-}
-
-pub struct LevelScheduleRange {
-    range: RangeInclusive<Level>,
-    schedule_producer: Box<dyn Fn() -> Schedule + Send + Sync>,
-}
-
-impl LevelScheduleRange {
-    pub fn new(range: RangeInclusive<Level>, schedule_producer: impl Fn() -> Schedule + 'static + Send + Sync) -> Self {
-        LevelScheduleRange {
-            range,
-            schedule_producer: Box::new(schedule_producer),
+    fn new() -> Self {
+        ScheduleByLevel {
+            level_schedule_map: [
+                (Level(1), Self::level_one()),
+                (Level(2), Self::level_two_to_four()),
+                (Level(3), Self::level_two_to_four()),
+                (Level(4), Self::level_two_to_four()),
+            ].into_iter().collect(),
+            default_schedule: Self::level_five_and_beyond(),
         }
     }
 
-    pub fn contains_level(&self, level: &Level) -> bool {
-        self.range.contains(level)
+    fn level_one() -> Schedule {
+        Schedule::new([
+            Phase::for_seconds(Scatter, 7.0),
+            Phase::for_seconds(Chase, 20.0),
+            Phase::for_seconds(Scatter, 7.0),
+            Phase::for_seconds(Chase, 20.0),
+            Phase::for_seconds(Scatter, 5.0),
+            Phase::for_seconds(Chase, 1033.0),
+            Phase::for_seconds(Scatter, 1.0 / 60.0),
+            Phase::infinite(Chase)
+        ])
+    }
+
+    fn level_two_to_four() -> Schedule {
+        Schedule::new([
+            Phase::for_seconds(Scatter, 5.0),
+            Phase::for_seconds(Chase, 20.0),
+            Phase::for_seconds(Scatter, 5.0),
+            Phase::for_seconds(Chase, 20.0),
+            Phase::for_seconds(Scatter, 5.0),
+            Phase::for_seconds(Chase, 1037.0),
+            Phase::for_seconds(Scatter, 1.0 / 60.0),
+            Phase::infinite(Chase)
+        ])
+    }
+
+    fn level_five_and_beyond() -> Schedule {
+        Schedule::new([
+            Phase::for_seconds(Scatter, 7.0),
+            Phase::for_seconds(Chase, 20.0),
+            Phase::for_seconds(Scatter, 7.0),
+            Phase::for_seconds(Chase, 20.0),
+            Phase::for_seconds(Scatter, 5.0),
+            Phase::for_seconds(Chase, 20.0),
+            Phase::for_seconds(Scatter, 5.0),
+            Phase::infinite(Chase),
+        ])
+    }
+
+    pub fn get_schedule_for_level(&self, level: &Level) -> Schedule {
+        self.level_schedule_map.get(level).unwrap_or(&self.default_schedule).clone()
     }
 }
 
-/// The schedule of a ghost determines the state the ghost has after a certain time passed
-/// on a certain level.
-/// The last phase of a schedule will be active until the level ends, even if its timer is finished.
+#[derive(Clone)]
 pub struct Schedule {
+    current_phase_index: usize,
+    current_phase_timer: Option<Timer>,
     phases: Vec<Phase>,
 }
 
 impl Schedule {
-    pub fn new(phases: Vec<Phase>) -> Self {
-        Schedule { phases }
-    }
+    fn new(phases: impl IntoIterator<Item=Phase>) -> Self {
+        let phases = phases.into_iter().collect::<Vec<_>>();
 
-    pub fn state_after_tick(&mut self, elapsed_time: Duration) -> State {
-        self.current_phase_mut().progress(elapsed_time);
-        if self.current_phase().is_finished() {
-            self.start_next_phase()
+        Schedule {
+            current_phase_index: 0,
+            current_phase_timer: phases.get(0).expect("at least one phase must be provided").phase_timer(),
+            phases,
         }
-        self.current_phase().active_state()
     }
 
     pub fn current_state(&self) -> State {
-        self.current_phase().active_state()
+        self.phases[self.current_phase_index].state
     }
 
-    fn current_phase(&self) -> &Phase {
-        &self.phases[0]
+    pub fn update(&mut self, delta: Duration) {
+        if let Some(ref mut timer) = self.current_phase_timer {
+            timer.tick(delta);
+
+            if timer.finished() {
+                self.switch_to_next_phase()
+            }
+        }
     }
 
-    fn current_phase_mut(&mut self) -> &mut Phase {
-        &mut self.phases[0]
-    }
-
-    fn start_next_phase(&mut self) {
-        if self.phases.len() > 1 {
-            self.phases.remove(0);
+    fn switch_to_next_phase(&mut self) {
+        if self.current_phase_index < self.phases.len() - 1 {
+            self.current_phase_index += 1;
+            self.current_phase_timer = self.phases[self.current_phase_index].phase_timer()
         }
     }
 }
 
-/// A Phase is a time range where a specific state for a specific ghost is active.
-pub enum Phase {
-    Finite(State, Timer),
-    Infinite(State),
+#[derive(Clone)]
+pub struct Phase {
+    state: State,
+    time: Option<f32>,
 }
 
 impl Phase {
-    pub fn for_duration(active_state: State, duration: f32) -> Self {
-        Phase::Finite(active_state, Timer::from_seconds(duration, false))
-    }
-
-    pub fn infinite(active_state: State) -> Self {
-        Phase::Infinite(active_state)
-    }
-
-    pub fn active_state(&self) -> State {
-        match self {
-            Phase::Finite(s, _) => *s,
-            Phase::Infinite(s) => *s
+    fn for_seconds(state: State, seconds: f32) -> Self {
+        Phase {
+            state,
+            time: Some(seconds),
         }
     }
 
-    pub fn progress(&mut self, elapsed_time: Duration) {
-        if let Phase::Finite(_, ref mut timer) = self {
-            timer.tick(elapsed_time);
+    fn infinite(state: State) -> Self {
+        Phase {
+            state,
+            time: None,
         }
     }
 
-    pub fn is_finished(&self) -> bool {
-        match self {
-            Phase::Finite(_, timer) => timer.finished(),
-            Phase::Infinite(_) => false
-        }
+    fn phase_timer(&self) -> Option<Timer> {
+        Some(Timer::from_seconds(self.time?, false))
     }
 }
