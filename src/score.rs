@@ -2,9 +2,9 @@ use std::time::Duration;
 use bevy::prelude::*;
 use crate::board_dimensions::BoardDimensions;
 
-use crate::constants::{POINTS_PER_DOT, POINTS_PER_ENERGIZER, POINTS_PER_GHOST, TEXT_Z};
+use crate::constants::{FONT, POINTS_PER_DOT, POINTS_PER_ENERGIZER, POINTS_PER_GHOST, TEXT_Z};
 use crate::edibles::energizer::EnergizerOver;
-use crate::interactions::{EDotEaten, EEnergizerEaten, EFruitEaten, EPacmanEatsGhost};
+use crate::interactions::{EDotEaten, EEnergizerEaten, EFruitEaten, EGhostEaten};
 use crate::life_cycle::LifeCycle::{PacmanHit, Running, Start};
 use crate::edibles::fruit::Fruit::*;
 use crate::game_assets::loaded_assets::LoadedAssets;
@@ -69,8 +69,8 @@ fn create_score_boards(
         text: Text::from_section(
             "0".to_string(),
             TextStyle {
-                font: game_asset_handles.get_handle("fonts/FiraSans-Bold.ttf"),
-                font_size: 30.0,
+                font: game_asset_handles.get_handle(FONT),
+                font_size: 20.0,
                 color: Color::rgb(1.0, 1.0, 1.0),
             },
         ).with_alignment(
@@ -88,8 +88,8 @@ fn create_score_boards(
         text: Text::from_section(
             "0".to_string(),
             TextStyle {
-                font: game_asset_handles.get_handle("fonts/FiraSans-Bold.ttf"),
-                font_size: 30.0,
+                font: game_asset_handles.get_handle(FONT),
+                font_size: 20.0,
                 color: Color::rgb(1.0, 1.0, 1.0),
             },
         ).with_alignment(
@@ -107,8 +107,8 @@ fn create_score_boards(
         text: Text::from_section(
             "HIGH SCORE".to_string(),
             TextStyle {
-                font: game_asset_handles.get_handle("fonts/FiraSans-Bold.ttf"),
-                font_size: 30.0,
+                font: game_asset_handles.get_handle(FONT),
+                font_size: 20.0,
                 color: Color::rgb(1.0, 1.0, 1.0),
             },
         ).with_alignment(
@@ -158,7 +158,7 @@ fn add_points_for_eaten_ghost_and_display_score_text(
     game_asset_handles: Res<LoadedAssets>,
     mut score: ResMut<Score>,
     mut eaten_ghost_counter: ResMut<EatenGhostCounter>,
-    mut event_reader: EventReader<EPacmanEatsGhost>,
+    mut event_reader: EventReader<EGhostEaten>,
 ) {
     for event in event_reader.iter() {
         let points = POINTS_PER_GHOST * 2usize.pow(**eaten_ghost_counter as u32);
@@ -219,8 +219,8 @@ fn spawn_score_text(
         text: Text::from_section(
             points.to_string(),
             TextStyle {
-                font: game_asset_handles.get_handle("fonts/FiraSans-Bold.ttf"),
-                font_size: 20.0,
+                font: game_asset_handles.get_handle(FONT),
+                font_size: 10.0,
                 color,
             },
         ).with_alignment(

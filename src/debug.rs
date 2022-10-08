@@ -3,7 +3,7 @@ use bevy::ecs::query::{QuerySingleError, ROQueryItem};
 use bevy::prelude::*;
 use bevy::text::Text2dBounds;
 use crate::board_dimensions::BoardDimensions;
-use crate::constants::{WINDOW_HEIGHT, WINDOW_WIDTH};
+use crate::constants::{FONT, WINDOW_HEIGHT, WINDOW_WIDTH};
 use crate::edibles::dots::EatenDots;
 use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::level::Level;
@@ -90,7 +90,7 @@ fn spawn_uis(
     commands: &mut Commands,
     game_asset_handles: &LoadedAssets,
 ) {
-    let font = game_asset_handles.get_handle("fonts/FiraSans-Bold.ttf");
+    let font = game_asset_handles.get_handle(FONT);
     names_colors
         .into_iter()
         .enumerate()
@@ -105,7 +105,7 @@ fn spawn_ui(commands: &mut Commands, font: Handle<Font>, name: &'static str, y: 
             String::new(),
             TextStyle {
                 font,
-                font_size: 20.0,
+                font_size: 7.0,
                 color,
             },
         ).with_alignment(

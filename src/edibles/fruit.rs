@@ -7,7 +7,7 @@ use crate::constants::FRUIT_Z;
 use crate::edibles::dots::EatenDots;
 use crate::edibles::Edible;
 use crate::game_assets::loaded_assets::LoadedAssets;
-use crate::interactions::EDotEaten;
+use crate::interactions::{EDotEaten, EFruitEaten};
 use crate::is;
 use crate::life_cycle::LifeCycle::{LevelTransition, Ready, Running};
 use crate::map::{Element, Map};
@@ -23,6 +23,7 @@ impl Plugin for FruitPlugin {
                     .with_system(spawn_fruit_when_dot_limit_reached)
                     .with_system(update_despawn_timer)
                     .with_system(despawn_fruit_if_timer_exceeded)
+                    .with_system(play_fruit_eaten_sound_when_fruit_was_eaten)
                     .with_system(reset_fruit_despawn_timer_when_level_changed)
             )
             .add_system_set(
@@ -145,6 +146,16 @@ fn despawn_fruit_and_timer(
 
     for e in &query {
         commands.entity(e).despawn()
+    }
+}
+
+fn play_fruit_eaten_sound_when_fruit_was_eaten(
+    loaded_assets: Res<LoadedAssets>,
+    audio: Res<Audio>,
+    mut event_reader: EventReader<EFruitEaten>
+) {
+    for _ in event_reader.iter() {
+        audio.play(loaded_assets.get_handle("sounds/fruit_eaten.ogg"));
     }
 }
 

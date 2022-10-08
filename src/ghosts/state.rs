@@ -9,7 +9,7 @@ use crate::ghosts::target::Target;
 use crate::ghost_house::GhostHouse;
 use crate::ghosts::{Blinky, Clyde, Ghost, GhostType, Inky, Pinky};
 use crate::ghosts::schedule::Schedule;
-use crate::interactions::{EEnergizerEaten, EPacmanEatsGhost, LPacmanGhostHitDetection};
+use crate::interactions::{EEnergizerEaten, EGhostEaten, LPacmanGhostHitDetection};
 use crate::state_skip_if;
 use crate::common::XYEqual;
 
@@ -168,7 +168,7 @@ fn set_frightened_when_pacman_ate_energizer(
 }
 
 fn set_eaten_when_hit_by_pacman(
-    mut event_reader: EventReader<EPacmanEatsGhost>,
+    mut event_reader: EventReader<EGhostEaten>,
     mut ghost_query: Query<(Entity, &mut State), With<Ghost>>,
 ) {
     for event in event_reader.iter() {

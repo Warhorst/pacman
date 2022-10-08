@@ -15,3 +15,5 @@ pub const CLYDE_Z: f32 = 60.0;
 pub const ENERGIZER_Z: f32 = 50.0;
 pub const DOT_Z: f32 = 40.0;
 pub const FRUIT_Z: f32 = 30.0;
+
+pub const FONT: &'static str = "fonts/PressStart2P-Regular.ttf";

@@ -15,7 +15,7 @@ impl Plugin for InteractionsPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<EPacmanHit>()
-            .add_event::<EPacmanEatsGhost>()
+            .add_event::<EGhostEaten>()
             .add_event::<EDotEaten>()
             .add_event::<EEnergizerEaten>()
             .add_event::<EFruitEaten>()
@@ -40,7 +40,7 @@ pub struct EPacmanHit;
 
 /// Fired when Pacman ate a ghost in frightened state.
 /// Contains the eaten ghost entity and transform.
-pub struct EPacmanEatsGhost(pub Entity, pub Transform);
+pub struct EGhostEaten(pub Entity, pub Transform);
 
 /// Fired when pacman eats a dot.
 pub struct EDotEaten;
@@ -54,7 +54,7 @@ pub struct EFruitEaten(pub Fruit, pub Transform);
 fn pacman_hits_ghost(
     mut commands: Commands,
     mut killed_event_writer: EventWriter<EPacmanHit>,
-    mut eat_event_writer: EventWriter<EPacmanEatsGhost>,
+    mut eat_event_writer: EventWriter<EGhostEaten>,
     dimensions: Res<BoardDimensions>,
     pacman_query: Query<&Transform, With<Pacman>>,
     ghost_query: Query<(Entity, &Transform, &State), With<Ghost>>,
@@ -67,7 +67,7 @@ fn pacman_hits_ghost(
                 }
 
                 if let State::Frightened = state {
-                    eat_event_writer.send(EPacmanEatsGhost(entity, *ghost_transform));
+                    eat_event_writer.send(EGhostEaten(entity, *ghost_transform));
                     commands.insert_resource(CurrentlyEatenGhost(entity))
                 }
             }

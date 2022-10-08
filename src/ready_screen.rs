@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use LifeCycle::Ready;
 use crate::board_dimensions::BoardDimensions;
-use crate::constants::TEXT_Z;
+use crate::constants::{FONT, TEXT_Z};
 use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::is;
 use crate::life_cycle::LifeCycle;
@@ -37,8 +37,8 @@ fn spawn_screen(
         text: Text::from_section(
             "Ready!".to_string(),
             TextStyle {
-                font: game_asset_handles.get_handle("fonts/FiraSans-Bold.ttf"),
-                font_size: 40.0,
+                font: game_asset_handles.get_handle(FONT),
+                font_size: 20.0,
                 color: Color::rgb(1.0, 1.0, 0.0),
             },
         ).with_alignment(

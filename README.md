@@ -12,6 +12,9 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 - the game in action: https://www.youtube.com/watch?v=-CbyAk3Sn9I
 - longplay until the game glitches out: https://www.youtube.com/watch?v=AuoH0vz3Mqk
 
+### Font
+- Press Start 2P Font: https://fonts.google.com/specimen/Press+Start+2P
+
 ### Sound
 Thanks to all these nice people for providing the sound effects:
 - all in one: https://www.youtube.com/watch?v=SPjEhbRFTUk (contains cutscene in good quality)

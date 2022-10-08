@@ -16,7 +16,9 @@ impl Plugin for BackgroundNoisePlugin {
         app
             .insert_resource(CurrentBackground::Siren1)
             .add_system_set(
-                SystemSet::on_enter(Start).with_system(init_noises)
+                SystemSet::on_enter(Start)
+                    .with_system(play_start_sound)
+                    .with_system(init_noises)
             )
             .add_system_set(
                 SystemSet::on_update(Running)
@@ -28,6 +30,13 @@ impl Plugin for BackgroundNoisePlugin {
             )
         ;
     }
+}
+
+fn play_start_sound(
+    loaded_assets: Res<LoadedAssets>,
+    audio: Res<Audio>
+) {
+    audio.play(loaded_assets.get_handle("sounds/start.ogg"));
 }
 
 fn init_noises(

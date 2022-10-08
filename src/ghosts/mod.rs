@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use crate::game_assets::loaded_assets::LoadedAssets;
 
 use crate::ghosts::movement::MovePlugin;
 use crate::ghosts::schedule::SchedulePlugin;
@@ -6,6 +7,7 @@ use crate::ghosts::spawn::spawn_ghosts;
 use crate::ghosts::state::StatePlugin;
 use crate::ghosts::target::{Target, TargetPlugin};
 use crate::ghosts::textures::{start_animation, update_ghost_appearance};
+use crate::interactions::EGhostEaten;
 use crate::tunnels::GhostPassedTunnel;
 use crate::life_cycle::LifeCycle::*;
 
@@ -38,6 +40,7 @@ impl Plugin for GhostPlugin {
                     .with_system(update_ghost_appearance::<Pinky>)
                     .with_system(update_ghost_appearance::<Inky>)
                     .with_system(update_ghost_appearance::<Clyde>)
+                    .with_system(play_ghost_eaten_sound_when_ghost_was_eaten)
             )
             .add_system_set(
                 SystemSet::on_enter(PacmanDying).with_system(despawn_ghosts)
@@ -104,6 +107,16 @@ fn set_currently_eaten_ghost_visible(
         if **currently_eaten_ghost == entity {
             vis.is_visible = true
         }
+    }
+}
+
+fn play_ghost_eaten_sound_when_ghost_was_eaten(
+    loaded_assets: Res<LoadedAssets>,
+    audio: Res<Audio>,
+    mut event_reader: EventReader<EGhostEaten>
+) {
+    for _ in event_reader.iter() {
+        audio.play(loaded_assets.get_handle("sounds/ghost_eaten.ogg"));
     }
 }
 

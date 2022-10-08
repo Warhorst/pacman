@@ -3,7 +3,7 @@ use crate::pacman::{EPacmanDead};
 use LifeCycle::*;
 use crate::edibles::EAllEdiblesEaten;
 use crate::game_assets::EAllAssetsLoaded;
-use crate::interactions::{EPacmanEatsGhost, EPacmanHit};
+use crate::interactions::{EGhostEaten, EPacmanHit};
 use crate::lives::Life;
 
 /// All lifecycle states of the app. See ./resources/lifecycle.png for a visualization.
@@ -98,8 +98,8 @@ fn start_state_timer(
     life_cycle: Res<State<LifeCycle>>
 ) {
     let state_time = match life_cycle.current() {
-        Start => 1.0,
-        Ready => 1.0,
+        Start => 2.0,
+        Ready => 2.5,
         PacmanHit => 1.0,
         PacmanDead => 1.0,
         LevelTransition => 3.0,
@@ -182,7 +182,7 @@ fn switch_to_level_transition_when_all_edibles_eaten(
 }
 
 fn switch_to_ghost_eaten_pause_when_ghost_was_eaten(
-    mut event_reader: EventReader<EPacmanEatsGhost>,
+    mut event_reader: EventReader<EGhostEaten>,
     mut life_cycle: ResMut<State<LifeCycle>>
 ) {
     for _ in event_reader.iter() {
