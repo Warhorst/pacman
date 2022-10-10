@@ -1,19 +1,12 @@
-#[cfg(target_family = "wasm")]
 use std::env;
-#[cfg(target_family = "wasm")]
 use std::path::{Path, PathBuf};
-#[cfg(target_family = "wasm")]
 use std::fs::{read_dir, read_to_string, write};
 
 fn main() {
-    #[cfg(not(target_family = "wasm"))]
     println!("cargo:rerun-if-changed=src/");
-
-    #[cfg(target_family = "wasm")]
     create_asset_paths()
 }
 
-#[cfg(target_family = "wasm")]
 fn create_asset_paths() {
     let out_dir = env::var_os("OUT_DIR").unwrap();
     let dest_path = Path::new(&out_dir).join("asset_paths.rs");
@@ -27,7 +20,6 @@ fn create_asset_paths() {
     ).unwrap();
 }
 
-#[cfg(target_family = "wasm")]
 fn get_asset_paths<P: AsRef<Path>>(path: P) -> Vec<PathBuf> {
     let mut paths = vec![];
 
@@ -44,7 +36,6 @@ fn get_asset_paths<P: AsRef<Path>>(path: P) -> Vec<PathBuf> {
     paths
 }
 
-#[cfg(target_family = "wasm")]
 fn paths_to_string(paths: Vec<PathBuf>) -> String {
     let joined_paths = paths.into_iter()
         .map(|p| p.to_str().unwrap().to_string())
