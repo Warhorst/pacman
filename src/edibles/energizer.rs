@@ -40,6 +40,7 @@ impl Plugin for EnergizerPlugin {
 pub struct Energizer;
 
 /// Fired when an energizer is no longer active
+#[derive(Copy, Clone)]
 pub struct EnergizerOver;
 
 pub struct EnergizerTimer {

@@ -25,6 +25,7 @@ impl Plugin for InteractionsPlugin {
                     .with_system(pacman_eat_dot)
                     .with_system(pacman_eat_energizer)
                     .with_system(eat_fruit_when_pacman_touches_it)
+                    .label(LPacmanEnergizerHitDetection)
             )
         ;
     }
@@ -35,17 +36,23 @@ impl Plugin for InteractionsPlugin {
 #[derive(SystemLabel)]
 pub struct LPacmanGhostHitDetection;
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(SystemLabel)]
+pub struct LPacmanEnergizerHitDetection;
+
 /// Fired when pacman was hit by a ghost.
 pub struct EPacmanHit;
 
 /// Fired when Pacman ate a ghost in frightened state.
 /// Contains the eaten ghost entity and transform.
+#[derive(Copy, Clone)]
 pub struct EGhostEaten(pub Entity, pub Transform);
 
 /// Fired when pacman eats a dot.
 pub struct EDotEaten;
 
 /// Fired when pacman eats an energizer.
+#[derive(Copy, Clone)]
 pub struct EEnergizerEaten;
 
 /// Event that gets fired when pacman ate a fruit.

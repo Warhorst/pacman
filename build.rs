@@ -1,6 +1,6 @@
 use std::env;
 use std::path::{Path, PathBuf};
-use std::fs::{read_dir, read_to_string, write};
+use std::fs::{read_dir, write};
 
 fn main() {
     println!("cargo:rerun-if-changed=src/");
