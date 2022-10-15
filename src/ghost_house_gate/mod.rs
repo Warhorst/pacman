@@ -1,10 +1,10 @@
 use bevy::prelude::*;
-use std::any::TypeId;
 use std::collections::HashSet;
 use std::time::Duration;
 
 use crate::life_cycle::LifeCycle::*;
-use crate::ghosts::{Blinky, Clyde, GhostType, Inky, Pinky};
+use crate::ghosts::Ghost;
+use crate::ghosts::Ghost::*;
 use crate::level::Level;
 use crate::ghost_house_gate::counter::Counter;
 use crate::interactions::{EDotEaten, EPacmanHit};
@@ -84,9 +84,9 @@ fn switch_to_global_counter_when_pacman_got_killed(
 /// There is also a timer active. If the timer reaches zero, the waiting ghost can return immediately.
 /// The timer gets reset when pacman eats a dot.
 pub struct GhostHouseGate {
-    released_ghosts: HashSet<TypeId>,
+    released_ghosts: HashSet<Ghost>,
     ghost_preference_iterator: GhostPreferenceIterator,
-    current_waiting_ghost_id: TypeId,
+    current_waiting_ghost: Ghost,
     counter: Counter,
     release_timer: Timer,
 }
@@ -94,12 +94,12 @@ pub struct GhostHouseGate {
 impl GhostHouseGate {
     fn new(level: &Level) -> Self {
         let mut iterator = GhostPreferenceIterator::new();
-        let current_waiting_ghost_id = iterator.next().unwrap();
+        let current_waiting_ghost = iterator.next().unwrap();
 
         GhostHouseGate {
             released_ghosts: HashSet::with_capacity(NUM_GHOST_TYPES),
             ghost_preference_iterator: iterator,
-            current_waiting_ghost_id,
+            current_waiting_ghost,
             counter: Counter::new(level),
             release_timer: Self::create_release_timer_for_level(level),
         }
@@ -113,15 +113,15 @@ impl GhostHouseGate {
     }
 
     /// Ask the gate if the given ghost type can be released.
-    pub fn ghost_can_leave_house<G: GhostType + 'static>(&self) -> bool {
-        self.released_ghosts.contains(&TypeId::of::<G>())
+    pub fn ghost_can_leave_house(&self, ghost: &Ghost) -> bool {
+        self.released_ghosts.contains(ghost)
     }
 
     /// Increment the current counter. Typically when a dot was eaten.
     /// Also resets the release timer.
     fn increment_counter(&mut self) {
         self.release_timer.reset();
-        self.counter.increment(&self.current_waiting_ghost_id)
+        self.counter.increment(&self.current_waiting_ghost)
     }
 
     /// Switch to the global counter. Typically called when pacman died.
@@ -130,7 +130,7 @@ impl GhostHouseGate {
         self.release_timer.reset();
         self.released_ghosts.clear();
         self.ghost_preference_iterator = GhostPreferenceIterator::new();
-        self.current_waiting_ghost_id = self.ghost_preference_iterator.next().expect("first item should exists");
+        self.current_waiting_ghost = self.ghost_preference_iterator.next().expect("first item should exists");
     }
 
     /// Proceed the release timer and check if the current waiting ghost can be released.
@@ -142,7 +142,7 @@ impl GhostHouseGate {
         if self.release_timer.finished() {
             self.release_timer.reset();
             self.release_current_waiting_ghost();
-        } else if self.counter.limit_reached(&self.current_waiting_ghost_id) {
+        } else if self.counter.limit_reached(&self.current_waiting_ghost) {
             self.release_current_waiting_ghost()
         }
     }
@@ -152,30 +152,30 @@ impl GhostHouseGate {
     }
 
     fn release_current_waiting_ghost(&mut self) {
-        self.released_ghosts.insert(self.current_waiting_ghost_id);
+        self.released_ghosts.insert(self.current_waiting_ghost);
 
         if let Some(id) = self.ghost_preference_iterator.next() {
-            self.current_waiting_ghost_id = id
+            self.current_waiting_ghost = id
         }
     }
 }
 
 struct GhostPreferenceIterator {
-    ghost_preferences: [TypeId; NUM_GHOST_TYPES],
+    ghost_preferences: [Ghost; NUM_GHOST_TYPES],
     current: usize,
 }
 
 impl GhostPreferenceIterator {
     fn new() -> Self {
         GhostPreferenceIterator {
-            ghost_preferences: [TypeId::of::<Blinky>(), TypeId::of::<Pinky>(), TypeId::of::<Inky>(), TypeId::of::<Clyde>()],
+            ghost_preferences: [Blinky, Pinky, Inky, Clyde],
             current: 0,
         }
     }
 }
 
 impl Iterator for GhostPreferenceIterator {
-    type Item = TypeId;
+    type Item = Ghost;
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.current {

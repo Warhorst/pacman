@@ -2,7 +2,8 @@ use bevy::prelude::*;
 use crate::board_dimensions::BoardDimensions;
 
 use crate::edibles::energizer::EnergizerTimer;
-use crate::ghosts::{Blinky, Clyde, GhostType, Inky, Pinky};
+use crate::ghosts::Ghost;
+use crate::ghosts::Ghost::*;
 use crate::ghosts::state::State;
 use crate::level::Level;
 use crate::pacman::Pacman;
@@ -20,9 +21,7 @@ impl Plugin for SpeedPlugin {
                 SystemSet::on_update(LifeCycle::Running)
                     .with_system(update_pacman_speed)
                     .with_system(update_blinky_speed)
-                    .with_system(update_ghost_speed::<Pinky>)
-                    .with_system(update_ghost_speed::<Inky>)
-                    .with_system(update_ghost_speed::<Clyde>)
+                    .with_system(update_ghost_speed)
             )
         ;
     }
@@ -32,16 +31,20 @@ impl Plugin for SpeedPlugin {
 #[derive(Copy, Clone, Component, Deref, DerefMut)]
 pub struct Speed(pub f32);
 
-fn update_ghost_speed<G: GhostType + Component>(
+fn update_ghost_speed(
     board: Res<Board>,
     level: Res<Level>,
     specs_per_level: Res<SpecsPerLevel>,
     dimensions: Res<BoardDimensions>,
-    mut query: Query<(&Transform, &mut Speed, &State), With<G>>
+    mut query: Query<(&Ghost, &Transform, &mut Speed, &State)>
 ) {
     let ghost_speed = dimensions.ghost_base_speed();
 
-    for (transform, mut speed, state) in query.iter_mut() {
+    for (ghost, transform, mut speed, state) in query.iter_mut() {
+        if ghost == &Blinky {
+            continue
+        }
+
         let spec = specs_per_level.get_for(&level);
 
         if *state == State::Eaten {
@@ -65,11 +68,15 @@ fn update_blinky_speed(
     eaten_dots: Res<EatenDots>,
     specs_per_level: Res<SpecsPerLevel>,
     dimensions: Res<BoardDimensions>,
-    mut query: Query<(&Transform, &mut Speed, &State), With<Blinky>>
+    mut query: Query<(&Ghost, &Transform, &mut Speed, &State)>
 ) {
     let ghost_speed = dimensions.ghost_base_speed();
 
-    for (transform, mut speed, state) in query.iter_mut() {
+    for (ghost, transform, mut speed, state) in query.iter_mut() {
+        if ghost != &Blinky {
+            continue
+        }
+
         let spec = specs_per_level.get_for(&level);
         let remaining_dots = eaten_dots.get_remaining();
 

@@ -1,5 +1,4 @@
 use bevy::diagnostic::{Diagnostics, DiagnosticsPlugin, FrameTimeDiagnosticsPlugin};
-use bevy::ecs::query::{QuerySingleError, ROQueryItem};
 use bevy::prelude::*;
 use bevy::text::Text2dBounds;
 use crate::board_dimensions::BoardDimensions;
@@ -12,7 +11,8 @@ use crate::common::Direction;
 use crate::edibles::Edible;
 use crate::edibles::energizer::EnergizerTimer;
 use crate::edibles::fruit::FruitDespawnTimer;
-use crate::ghosts::{Blinky, Clyde, Inky, Pinky};
+use crate::ghosts::Ghost;
+use crate::ghosts::Ghost::*;
 use crate::pacman::Pacman;
 use crate::ghosts::state::State;
 use crate::life_cycle::LifeCycle;
@@ -82,7 +82,7 @@ fn spawn_debug_uis(
             (ENERGIZER_TIMER, WHITE),
             (FRUIT_DESPAWN_TIMER, WHITE)
         ],
-    &mut commands, &game_asset_handles)
+        &mut commands, &game_asset_handles)
 }
 
 fn spawn_uis(
@@ -206,8 +206,8 @@ fn update_pacman_ui(
                 Ok((transform, direction)) => {
                     let coordinates = transform.translation;
                     let position = dimensions.vec_to_pos(&coordinates);
-                    format!("{}, {}, {}", format_coordinates(coordinates), position , direction)
-                },
+                    format!("{}, {}, {}", format_coordinates(coordinates), position, direction)
+                }
                 _ => format!("-")
             };
         }
@@ -216,85 +216,98 @@ fn update_pacman_ui(
 
 fn update_blinky_ui(
     dimensions: Option<Res<BoardDimensions>>,
-    blinky_query: Query<(&Transform, &Direction, &State), With<Blinky>>,
+    blinky_query: Query<(&Ghost, &Transform, &Direction, &State)>,
     mut ui_query: Query<(&mut Text, &DebugUI)>,
 ) {
     let dimensions = match dimensions {
         Some(d) => d,
         None => return
     };
-    let comps = blinky_query.get_single();
 
-    for (mut text, ui) in &mut ui_query {
-        if **ui == BLINKY {
-            text.sections[0].value = create_ghost_debug_text(&comps, &dimensions);
+    for (ghost, transform, dir, state) in &blinky_query {
+        if ghost != &Blinky {
+            continue;
+        }
+
+        for (mut text, ui) in &mut ui_query {
+            if **ui == BLINKY {
+                text.sections[0].value = create_ghost_debug_text((transform, dir, state), &dimensions);
+            }
         }
     }
 }
 
 fn update_pinky_ui(
     dimensions: Option<Res<BoardDimensions>>,
-    pinky_query: Query<(&Transform, &Direction, &State), With<Pinky>>,
+    pinky_query: Query<(&Ghost, &Transform, &Direction, &State)>,
     mut ui_query: Query<(&mut Text, &DebugUI)>,
 ) {
     let dimensions = match dimensions {
         Some(d) => d,
         None => return
     };
-    let comps = pinky_query.get_single();
+    for (ghost, transform, dir, state) in &pinky_query {
+        if ghost != &Pinky {
+            continue;
+        }
 
-    for (mut text, ui) in &mut ui_query {
-        if **ui == PINKY {
-            text.sections[0].value = create_ghost_debug_text(&comps, &dimensions);
+        for (mut text, ui) in &mut ui_query {
+            if **ui == PINKY {
+                text.sections[0].value = create_ghost_debug_text((transform, dir, state), &dimensions);
+            }
         }
     }
 }
 
 fn update_inky_ui(
     dimensions: Option<Res<BoardDimensions>>,
-    inky_query: Query<(&Transform, &Direction, &State), With<Inky>>,
+    inky_query: Query<(&Ghost, &Transform, &Direction, &State)>,
     mut ui_query: Query<(&mut Text, &DebugUI)>,
 ) {
     let dimensions = match dimensions {
         Some(d) => d,
         None => return
     };
-    let comps = inky_query.get_single();
+    for (ghost, transform, dir, state) in &inky_query {
+        if ghost != &Inky {
+            continue;
+        }
 
-    for (mut text, ui) in &mut ui_query {
-        if **ui == INKY {
-            text.sections[0].value = create_ghost_debug_text(&comps, &dimensions);
+        for (mut text, ui) in &mut ui_query {
+            if **ui == INKY {
+                text.sections[0].value = create_ghost_debug_text((transform, dir, state), &dimensions);
+            }
         }
     }
 }
 
 fn update_clyde_ui(
     dimensions: Option<Res<BoardDimensions>>,
-    clyde_query: Query<(&Transform, &Direction, &State), With<Clyde>>,
+    clyde_query: Query<(&Ghost, &Transform, &Direction, &State)>,
     mut ui_query: Query<(&mut Text, &DebugUI)>,
 ) {
     let dimensions = match dimensions {
         Some(d) => d,
         None => return
     };
-    let comps = clyde_query.get_single();
+    for (ghost, transform, dir, state) in &clyde_query {
+        if ghost != &Clyde {
+            continue;
+        }
 
-    for (mut text, ui) in &mut ui_query {
-        if **ui == CLYDE {
-            text.sections[0].value = create_ghost_debug_text(&comps, &dimensions);
+        for (mut text, ui) in &mut ui_query {
+            if **ui == CLYDE {
+                text.sections[0].value = create_ghost_debug_text((transform, dir, state), &dimensions);
+            }
         }
     }
 }
 
-fn create_ghost_debug_text(comps: &Result<ROQueryItem<'_, (&Transform, &Direction, &State)>, QuerySingleError>, dimensions: &BoardDimensions) -> String {
-    match comps {
-        Ok((transform, direction, state)) => {
-            let coordinates = transform.translation;
-            let position = dimensions.vec_to_pos(&coordinates);
-            format!("{}, {}, {}, {}", format_coordinates(coordinates), position , direction, state)
-        },
-        _ => format!("-")
-    }
+fn create_ghost_debug_text(comps: (&Transform, &Direction, &State), dimensions: &BoardDimensions) -> String {
+    let (transform, direction, state) = comps;
+    let coordinates = transform.translation;
+    let position = dimensions.vec_to_pos(&coordinates);
+    format!("{}, {}, {}, {}", format_coordinates(coordinates), position, direction, state)
 }
 
 fn format_coordinates(coordinates: Vec3) -> String {
@@ -346,7 +359,7 @@ fn toggle_debug_ui_visibility(
 fn despawn_all_edibles_on_key_press(
     mut commands: Commands,
     keyboard_input: Res<Input<KeyCode>>,
-    query: Query<Entity, With<Edible>>
+    query: Query<Entity, With<Edible>>,
 ) {
     if !keyboard_input.just_pressed(KeyCode::Key1) {
         return;

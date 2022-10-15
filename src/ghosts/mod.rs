@@ -36,10 +36,7 @@ impl Plugin for GhostPlugin {
             .add_system_set(
                 SystemSet::on_update(Running)
                     .with_system(ghost_passed_tunnel)
-                    .with_system(update_ghost_appearance::<Blinky>)
-                    .with_system(update_ghost_appearance::<Pinky>)
-                    .with_system(update_ghost_appearance::<Inky>)
-                    .with_system(update_ghost_appearance::<Clyde>)
+                    .with_system(update_ghost_appearance)
                     .with_system(play_ghost_eaten_sound_when_ghost_was_eaten)
             )
             .add_system_set(
@@ -120,32 +117,13 @@ fn play_ghost_eaten_sound_when_ghost_was_eaten(
     }
 }
 
-/// Used to mark every ghost.
-#[derive(Component, Eq, PartialEq)]
-pub struct Ghost;
-
-/// Marks every ghost.
-pub trait GhostType {}
-
-#[derive(Copy, Clone, Component)]
-pub struct Blinky;
-
-#[derive(Copy, Clone, Component)]
-pub struct Pinky;
-
-#[derive(Copy, Clone, Component)]
-pub struct Inky;
-
-#[derive(Copy, Clone, Component)]
-pub struct Clyde;
-
-impl GhostType for Blinky {}
-
-impl GhostType for Pinky {}
-
-impl GhostType for Inky {}
-
-impl GhostType for Clyde {}
+#[derive(Copy, Clone, Component, Eq, PartialEq, Hash)]
+pub enum Ghost {
+    Blinky,
+    Pinky,
+    Inky,
+    Clyde
+}
 
 /// Resource that holds the entity id of the ghost that is currently eaten by pacman
 #[derive(Deref)]

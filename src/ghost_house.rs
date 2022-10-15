@@ -1,11 +1,11 @@
-use std::any::TypeId;
 use std::collections::HashMap;
 use bevy::prelude::*;
 use crate::common::position::Position;
 use crate::{is, map};
 use map::Element;
 use crate::board_dimensions::BoardDimensions;
-use crate::ghosts::{Blinky, Clyde, GhostType, Inky, Pinky};
+use crate::ghosts::Ghost;
+use crate::ghosts::Ghost::*;
 use crate::common::Direction;
 use crate::life_cycle::LifeCycle::Start;
 use crate::map::{Map, Rotation, WallType};
@@ -59,7 +59,7 @@ fn create_ghost_house(
 //  future to rotate it. Therefore, everyone accessing the house acts relative to the house (like respecting the entrance direction).
 pub struct GhostHouse {
     pub entrance_direction: Direction,
-    spawns: HashMap<TypeId, Spawn>,
+    spawns: HashMap<Ghost, Spawn>,
 }
 
 impl GhostHouse {
@@ -96,12 +96,12 @@ impl GhostHouse {
             .expect("the map should at least contain one ghost house entrance")
     }
 
-    fn create_spawns(rotation: Rotation, bottom_left: Position, dimensions: &BoardDimensions) -> HashMap<TypeId, Spawn> {
+    fn create_spawns(rotation: Rotation, bottom_left: Position, dimensions: &BoardDimensions) -> HashMap<Ghost, Spawn> {
         [
-            (TypeId::of::<Blinky>(), Self::create_blinky_spawn(rotation, bottom_left, dimensions)),
-            (TypeId::of::<Pinky>(), Self::create_pinky_spawn(rotation, bottom_left, dimensions)),
-            (TypeId::of::<Inky>(), Self::create_inky_spawn(rotation, bottom_left, dimensions)),
-            (TypeId::of::<Clyde>(), Self::create_clyde_spawn(rotation, bottom_left, dimensions)),
+            (Blinky, Self::create_blinky_spawn(rotation, bottom_left, dimensions)),
+            (Pinky, Self::create_pinky_spawn(rotation, bottom_left, dimensions)),
+            (Inky, Self::create_inky_spawn(rotation, bottom_left, dimensions)),
+            (Clyde, Self::create_clyde_spawn(rotation, bottom_left, dimensions)),
         ]
             .into_iter()
             .collect()
@@ -159,43 +159,44 @@ impl GhostHouse {
         Spawn { positions, coordinates }
     }
 
-    pub fn spawn_coordinates_of<G: GhostType + 'static>(&self) -> Vec3 {
-        self.spawn_of::<G>().coordinates
+    pub fn spawn_coordinates_of(&self, ghost: &Ghost) -> Vec3 {
+        self.spawn_of(ghost).coordinates
     }
 
-    pub fn respawn_coordinates_of<G: GhostType + 'static>(&self) -> Vec3 {
-        if TypeId::of::<G>() == TypeId::of::<Blinky>() {
-            self.spawn_coordinates_of::<Pinky>()
+    /// Blinky respawns on Pinkys spawn coordinates
+    pub fn respawn_coordinates_of(&self, ghost: &Ghost) -> Vec3 {
+        if ghost == &Blinky {
+            self.spawn_coordinates_of(&Pinky)
         } else {
-            self.spawn_coordinates_of::<G>()
+            self.spawn_coordinates_of(ghost)
         }
     }
 
-    pub fn spawn_direction_of<G: GhostType + 'static>(&self) -> Direction {
-        match TypeId::of::<G>() {
-            t_id if t_id == TypeId::of::<Blinky>() => self.entrance_direction.rotate_left(),
-            t_id if t_id == TypeId::of::<Pinky>() => self.entrance_direction,
+    pub fn spawn_direction_of(&self, ghost: &Ghost) -> Direction {
+        match *ghost {
+            Blinky => self.entrance_direction.rotate_left(),
+            Pinky => self.entrance_direction,
             _ => self.entrance_direction.opposite()
         }
     }
 
     /// Blinky always spawns in front of the ghost house.
     pub fn positions_in_front_of_entrance(&self) -> impl IntoIterator<Item=&Position> {
-        self.spawn_of::<Blinky>().positions.iter()
+        self.spawn_of(&Blinky).positions.iter()
     }
 
     /// Blinky always spawns in front of the ghost house.
     pub fn coordinates_in_front_of_entrance(&self) -> Vec3 {
-        self.spawn_of::<Blinky>().coordinates
+        self.spawn_of(&Blinky).coordinates
     }
 
     /// Return the coordinates of the ghost house center. Every ghost moves to the center when leaving the house or entering for respawn.
     pub fn center_coordinates(&self) -> Vec3 {
-        self.spawn_of::<Pinky>().coordinates
+        self.spawn_of(&Pinky).coordinates
     }
 
-    fn spawn_of<G: GhostType + 'static>(&self) -> &Spawn {
-        self.spawns.get(&TypeId::of::<G>()).expect("every ghost should have a registered spawn")
+    fn spawn_of(&self, ghost: &Ghost) -> &Spawn {
+        self.spawns.get(ghost).expect("every ghost should have a registered spawn")
     }
 }
 

@@ -9,7 +9,7 @@ use crate::edibles::energizer::EnergizerOver;
 use crate::life_cycle::LifeCycle::*;
 use crate::ghosts::target::Target;
 use crate::ghost_house::GhostHouse;
-use crate::ghosts::{Blinky, Clyde, Ghost, GhostType, Inky, Pinky};
+use crate::ghosts::Ghost;
 use crate::ghosts::schedule::Schedule;
 use crate::interactions::{EEnergizerEaten, EGhostEaten, LPacmanEnergizerHitDetection, LPacmanGhostHitDetection};
 use crate::common::XYEqual;
@@ -22,20 +22,14 @@ impl Plugin for StatePlugin {
         app
             .add_system_set(
                 SystemSet::on_update(Running)
-                    .with_system(update_state::<Blinky>)
-                    .with_system(update_state::<Pinky>)
-                    .with_system(update_state::<Inky>)
-                    .with_system(update_state::<Clyde>)
+                    .with_system(update_state)
                     .after(LPacmanGhostHitDetection)
                     .after(LPacmanEnergizerHitDetection)
                     .label(StateSetter)
             )
             .add_system_set(
                 SystemSet::on_update(GhostEatenPause)
-                    .with_system(update_state_on_eaten_pause::<Blinky>)
-                    .with_system(update_state_on_eaten_pause::<Pinky>)
-                    .with_system(update_state_on_eaten_pause::<Inky>)
-                    .with_system(update_state_on_eaten_pause::<Clyde>)
+                    .with_system(update_state_on_eaten_pause)
             )
         ;
     }
@@ -58,20 +52,21 @@ pub enum State {
 #[world_query(mutable)]
 struct StateUpdateComponents<'a> {
     entity: Entity,
+    ghost: &'a Ghost,
     state: &'a mut State,
     target: &'a mut Target,
     direction: &'a mut Direction,
     transform: &'a Transform,
 }
 
-fn update_state<G: Component + GhostType + 'static>(
+fn update_state(
     schedule: Res<Schedule>,
     ghost_house: Res<GhostHouse>,
     dimensions: Res<BoardDimensions>,
     energizer_over_events: EventReader<EnergizerOver>,
     energizer_eaten_events: EventReader<EEnergizerEaten>,
     ghost_eaten_events: EventReader<EGhostEaten>,
-    mut query: Query<StateUpdateComponents, (With<Ghost>, With<G>)>,
+    mut query: Query<StateUpdateComponents, With<Ghost>>,
 ) {
     let energizer_eaten = energizer_eaten(energizer_eaten_events);
     let energizer_over = energizer_over(energizer_over_events);
@@ -92,20 +87,20 @@ fn update_state<G: Component + GhostType + 'static>(
             Spawned => process_spawned(&schedule, &ghost_house, &mut components),
             Scatter | Chase => process_scatter_chase(&schedule, &dimensions, &mut components),
             Frightened => process_frightened(&schedule, energizer_over, &mut components),
-            Eaten => process_eaten::<G>(&ghost_house, &mut components),
+            Eaten => process_eaten(&ghost_house, &mut components),
         }
     }
 }
 
-fn update_state_on_eaten_pause<G: Component + GhostType + 'static>(
+fn update_state_on_eaten_pause(
     schedule: Res<Schedule>,
     ghost_house: Res<GhostHouse>,
-    mut query: Query<StateUpdateComponents, (With<Ghost>, With<G>)>,
+    mut query: Query<StateUpdateComponents, With<Ghost>>,
 ) {
     for mut components in &mut query {
         match *components.state {
             Spawned => process_spawned(&schedule, &ghost_house, &mut components),
-            Eaten => process_eaten::<G>(&ghost_house, &mut components),
+            Eaten => process_eaten(&ghost_house, &mut components),
             _ => continue
         }
     }
@@ -195,13 +190,13 @@ fn process_frightened(
     }
 }
 
-fn process_eaten<G: Component + GhostType + 'static>(
+fn process_eaten(
     ghost_house: &GhostHouse,
     components: &mut StateUpdateComponentsItem,
 ) {
     let coordinates = components.transform.translation;
 
-    if coordinates.xy_equal_to(&ghost_house.respawn_coordinates_of::<G>()) {
+    if coordinates.xy_equal_to(&ghost_house.respawn_coordinates_of(components.ghost)) {
         *components.state = Spawned
     }
 }

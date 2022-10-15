@@ -1,8 +1,8 @@
 use crate::level::Level;
 use ActiveCounter::*;
-use std::any::TypeId;
 use std::collections::HashMap;
-use crate::ghosts::{Blinky, Clyde, Inky, Pinky};
+use crate::ghosts::Ghost;
+use crate::ghosts::Ghost::*;
 
 pub (in crate::ghost_house_gate) struct Counter {
     active_counter: ActiveCounter,
@@ -19,9 +19,9 @@ impl Counter {
         }
     }
 
-    pub fn increment(&mut self, current_ghost_id: &TypeId) {
+    pub fn increment(&mut self, current_ghost: &Ghost) {
         match self.active_counter {
-            PerGhost => self.per_ghost_counter.increment(current_ghost_id),
+            PerGhost => self.per_ghost_counter.increment(current_ghost),
             Global => self.global_counter.as_mut().unwrap().increment()
         }
     }
@@ -34,12 +34,12 @@ impl Counter {
     /// Check if the limit for the current ghost is reached.
     ///
     /// Also switches from the global counter to the per ghost counter if the global counter is finished.
-    pub fn limit_reached(&mut self, current_ghost_id: &TypeId) -> bool {
+    pub fn limit_reached(&mut self, current_ghost: &Ghost) -> bool {
         match self.active_counter {
-            PerGhost => self.per_ghost_counter.limit_reached_for_ghost(current_ghost_id),
+            PerGhost => self.per_ghost_counter.limit_reached_for_ghost(current_ghost),
             Global => {
                 let global_counter = self.global_counter.as_ref().unwrap();
-                let result = global_counter.limit_reached_for_ghost(current_ghost_id);
+                let result = global_counter.limit_reached_for_ghost(current_ghost);
                 if global_counter.is_finished() {
                     self.active_counter = PerGhost;
                 }
@@ -55,8 +55,8 @@ enum ActiveCounter {
 }
 
 struct PerGhostCounter {
-    ghost_counter_map: HashMap<TypeId, usize>,
-    ghost_limit_map: HashMap<TypeId, usize>,
+    ghost_counter_map: HashMap<Ghost, usize>,
+    ghost_limit_map: HashMap<Ghost, usize>,
 }
 
 impl PerGhostCounter {
@@ -79,18 +79,18 @@ impl PerGhostCounter {
         }
     }
 
-    fn increment(&mut self, current_ghost_id: &TypeId) {
-        *self.ghost_counter_map.get_mut(current_ghost_id).unwrap() += 1
+    fn increment(&mut self, current_ghost: &Ghost) {
+        *self.ghost_counter_map.get_mut(current_ghost).unwrap() += 1
     }
 
-    fn limit_reached_for_ghost(&self, current_ghost_id: &TypeId) -> bool {
-        self.ghost_counter_map.get(current_ghost_id).unwrap() == self.ghost_limit_map.get(current_ghost_id).unwrap()
+    fn limit_reached_for_ghost(&self, current_ghost: &Ghost) -> bool {
+        self.ghost_counter_map.get(current_ghost).unwrap() == self.ghost_limit_map.get(current_ghost).unwrap()
     }
 }
 
 struct GlobalCounter {
     value: usize,
-    ghost_limit_map: HashMap<TypeId, usize>,
+    ghost_limit_map: HashMap<Ghost, usize>,
 }
 
 impl GlobalCounter {
@@ -105,20 +105,20 @@ impl GlobalCounter {
         self.value += 1
     }
 
-    fn limit_reached_for_ghost(&self, current_ghost_id: &TypeId) -> bool {
-        *self.ghost_limit_map.get(current_ghost_id).unwrap() == self.value
+    fn limit_reached_for_ghost(&self, current_ghost: &Ghost) -> bool {
+        *self.ghost_limit_map.get(current_ghost).unwrap() == self.value
     }
 
     fn is_finished(&self) -> bool {
-        *self.ghost_limit_map.get(&TypeId::of::<Clyde>()).unwrap() == self.value
+        *self.ghost_limit_map.get(&Clyde).unwrap() == self.value
     }
 }
 
-fn create_ghost_value_map(blinky_val: usize, pinky_val: usize, inky_val: usize, clyde_val: usize) -> HashMap<TypeId, usize> {
+fn create_ghost_value_map(blinky_val: usize, pinky_val: usize, inky_val: usize, clyde_val: usize) -> HashMap<Ghost, usize> {
     let mut map = HashMap::with_capacity(4);
-    map.insert(TypeId::of::<Blinky>(), blinky_val);
-    map.insert(TypeId::of::<Pinky>(), pinky_val);
-    map.insert(TypeId::of::<Inky>(), inky_val);
-    map.insert(TypeId::of::<Clyde>(), clyde_val);
+    map.insert(Blinky, blinky_val);
+    map.insert(Pinky, pinky_val);
+    map.insert(Inky, inky_val);
+    map.insert(Clyde, clyde_val);
     map
 }

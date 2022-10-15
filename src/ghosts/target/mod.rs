@@ -9,7 +9,8 @@ use crate::common::Direction;
 use crate::common::Direction::*;
 use crate::life_cycle::LifeCycle::*;
 use crate::ghost_corners::GhostCorner;
-use crate::ghosts::{Blinky, Clyde, Inky, Pinky};
+use crate::ghosts::Ghost;
+use crate::ghosts::Ghost::*;
 use crate::ghosts::state::{State, StateSetter};
 use crate::ghosts::target::eaten::set_eaten_target;
 use crate::ghosts::target::spawned::set_spawned_target;
@@ -29,36 +30,21 @@ impl Plugin for TargetPlugin {
         app
             .add_system_set(
                 SystemSet::on_update(Running)
-                    .with_system(set_spawned_target::<Blinky>)
-                    .with_system(set_spawned_target::<Pinky>)
-                    .with_system(set_spawned_target::<Inky>)
-                    .with_system(set_spawned_target::<Clyde>)
-                    .with_system(set_scatter_target::<Blinky>)
-                    .with_system(set_scatter_target::<Pinky>)
-                    .with_system(set_scatter_target::<Inky>)
-                    .with_system(set_scatter_target::<Clyde>)
+                    .with_system(set_spawned_target)
+                    .with_system(set_scatter_target)
                     .with_system(set_blinky_chase_target)
                     .with_system(set_pinky_chase_target)
                     .with_system(set_inky_chase_target)
                     .with_system(set_clyde_chase_target)
                     .with_system(set_frightened_target)
-                    .with_system(set_eaten_target::<Blinky>)
-                    .with_system(set_eaten_target::<Pinky>)
-                    .with_system(set_eaten_target::<Inky>)
-                    .with_system(set_eaten_target::<Clyde>)
+                    .with_system(set_eaten_target)
                     .label(TargetSetter)
                     .after(StateSetter)
             )
             .add_system_set(
                 SystemSet::on_update(GhostEatenPause)
-                    .with_system(set_spawned_target::<Blinky>)
-                    .with_system(set_spawned_target::<Pinky>)
-                    .with_system(set_spawned_target::<Inky>)
-                    .with_system(set_spawned_target::<Clyde>)
-                    .with_system(set_eaten_target::<Blinky>)
-                    .with_system(set_eaten_target::<Pinky>)
-                    .with_system(set_eaten_target::<Inky>)
-                    .with_system(set_eaten_target::<Clyde>)
+                    .with_system(set_spawned_target)
+                    .with_system(set_eaten_target)
                     .label(TargetSetter)
                     .after(StateSetter)
             )
@@ -74,6 +60,7 @@ pub struct TargetSetter;
 #[derive(WorldQuery)]
 #[world_query(mutable)]
 pub struct TargetComponents<'a> {
+    ghost: &'a Ghost,
     target: &'a mut Target,
     direction: &'a mut Direction,
     transform: &'a Transform,
@@ -113,18 +100,18 @@ impl Target {
     }
 }
 
-fn set_scatter_target<G: Component>(
+fn set_scatter_target(
     board: Res<Board>,
     dimensions: Res<BoardDimensions>,
-    mut ghost_query: Query<TargetComponents, With<G>>,
-    corner_query: Query<&Transform, (With<G>, With<GhostCorner>)>,
+    mut ghost_query: Query<TargetComponents>,
+    corner_query: Query<(&GhostCorner, &Transform)>,
 ) {
     for mut components in ghost_query.iter_mut() {
         target_skip_if!(components.target set);
         state_skip_if!(components.state != State::Scatter);
         let nearest_corner_position = dimensions
             .trans_to_pos(components.transform)
-            .get_nearest_position_from(corner_query.iter().map(|t| dimensions.trans_to_pos(t)));
+            .get_nearest_position_from(corner_query.iter().filter(|(c, _)| &c.0 == components.ghost).map(|(_, t)| dimensions.trans_to_pos(t)));
 
         let next_target_neighbour = get_nearest_neighbour(
             &components,
@@ -141,10 +128,14 @@ fn set_scatter_target<G: Component>(
 fn set_blinky_chase_target(
     board: Res<Board>,
     dimensions: Res<BoardDimensions>,
-    mut blinky_query: Query<TargetComponents, With<Blinky>>,
+    mut blinky_query: Query<TargetComponents>,
     pacman_query: Query<&Transform, With<Pacman>>,
 ) {
     for mut components in blinky_query.iter_mut() {
+        if components.ghost != &Blinky {
+            continue
+        }
+
         target_skip_if!(components.target set);
         state_skip_if!(components.state != State::Chase);
         for pacman_transform in pacman_query.iter() {
@@ -164,10 +155,14 @@ fn set_blinky_chase_target(
 fn set_pinky_chase_target(
     board: Res<Board>,
     dimensions: Res<BoardDimensions>,
-    mut pinky_query: Query<TargetComponents, (With<Pinky>, Without<Pacman>)>,
+    mut pinky_query: Query<TargetComponents, Without<Pacman>>,
     pacman_query: Query<(&Transform, &Direction), With<Pacman>>,
 ) {
     for mut components in pinky_query.iter_mut() {
+        if components.ghost != &Pinky {
+            continue
+        }
+
         target_skip_if!(components.target set);
         state_skip_if!(components.state != State::Chase);
         for (pacman_transform, pacman_direction) in pacman_query.iter() {
@@ -206,13 +201,21 @@ fn calculate_pinky_target(
 fn set_inky_chase_target(
     board: Res<Board>,
     dimensions: Res<BoardDimensions>,
-    blinky_query: Query<&Transform, With<Blinky>>,
+    blinky_query: Query<(&Ghost, &Transform)>,
     pacman_query: Query<(&Transform, &Direction), With<Pacman>>,
-    mut inky_query: Query<TargetComponents, (With<Inky>, Without<Pacman>)>
+    mut inky_query: Query<TargetComponents, Without<Pacman>>
 ) {
     for (pacman_transform, pacman_direction) in pacman_query.iter() {
-        for blinky_transform in blinky_query.iter() {
+        for (ghost, blinky_transform) in blinky_query.iter() {
+            if ghost != &Blinky {
+                continue
+            }
+
             for mut components in inky_query.iter_mut() {
+                if components.ghost != &Inky {
+                    continue
+                }
+
                 target_skip_if!(components.target set);
                 state_skip_if!(components.state != State::Chase);
                 let target = calculate_inky_target(&dimensions.trans_to_pos(pacman_transform), pacman_direction, &dimensions.trans_to_pos(blinky_transform));
@@ -252,11 +255,15 @@ fn calculate_inky_target(
 fn set_clyde_chase_target(
     board: Res<Board>,
     dimensions: Res<BoardDimensions>,
-    mut clyde_query: Query<TargetComponents, (With<Clyde>, Without<Pacman>)>,
+    mut clyde_query: Query<TargetComponents, Without<Pacman>>,
     pacman_query: Query<&Transform, With<Pacman>>,
-    corner_query: Query<&Transform, (With<Clyde>, With<GhostCorner>)>
+    corner_query: Query<&Transform, With<GhostCorner>>
 ) {
     for mut components in clyde_query.iter_mut() {
+        if components.ghost != &Clyde {
+            continue
+        }
+
         target_skip_if!(components.target set);
         state_skip_if!(components.state != State::Chase);
         for pacman_transform in pacman_query.iter() {

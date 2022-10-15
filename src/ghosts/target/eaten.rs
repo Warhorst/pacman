@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 use crate::ghost_house::GhostHouse;
-use crate::ghosts::GhostType;
 use crate::ghosts::target::{get_nearest_neighbour, TargetComponents, TargetComponentsItem};
 use crate::common::Direction::*;
 use crate::ghosts::state::State;
@@ -13,11 +12,11 @@ use crate::common::XYEqual;
 ///
 /// When eaten, a ghost walks to the ghost house and enters it. When at the ghost house, he aligns perfectly
 /// before the entrance, moves than to the house center and finally to his spawn coordinates, which depend on the ghost type.
-pub fn set_eaten_target<G: Component + GhostType + 'static>(
+pub fn set_eaten_target(
     board: Res<Board>,
     ghost_house: Res<GhostHouse>,
     dimensions: Res<BoardDimensions>,
-    mut query: Query<TargetComponents, With<G>>,
+    mut query: Query<TargetComponents>,
 ) {
     for mut components in query.iter_mut() {
         target_skip_if!(components.target set);
@@ -28,7 +27,7 @@ pub fn set_eaten_target<G: Component + GhostType + 'static>(
         } else if is_before_entrance(&components, &ghost_house, &dimensions) {
             move_directly_before_entrance(&mut components, &ghost_house, &dimensions)
         } else if is_in_center(&components, &ghost_house) {
-            move_to_respawn::<G>(&mut components, &ghost_house)
+            move_to_respawn(&mut components, &ghost_house)
         } else {
             // TODO: Maybe only take this branch when not already in the ghost house, just to avoid bugs
             move_to_nearest_position_before_entrance(&mut components, &ghost_house, &board, &dimensions)
@@ -72,9 +71,9 @@ fn is_in_center(components: &TargetComponentsItem, ghost_house: &GhostHouse) -> 
     components.transform.translation.xy_equal_to(&ghost_house.center_coordinates())
 }
 
-fn move_to_respawn<G: Component + GhostType + 'static>(components: &mut TargetComponentsItem, ghost_house: &GhostHouse) {
+fn move_to_respawn(components: &mut TargetComponentsItem, ghost_house: &GhostHouse) {
     let center = ghost_house.center_coordinates();
-    let respawn = ghost_house.respawn_coordinates_of::<G>();
+    let respawn = ghost_house.respawn_coordinates_of(components.ghost);
 
     *components.direction = match ghost_house.entrance_direction {
         Up | Down => match respawn.x < center.x {

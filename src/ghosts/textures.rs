@@ -1,16 +1,16 @@
-use std::any::TypeId;
 use bevy::prelude::*;
 use crate::animation::{Animation, Animations};
 use crate::common::Direction;
 use crate::edibles::energizer::EnergizerTimer;
 use crate::game_assets::loaded_assets::LoadedAssets;
-use crate::ghosts::{Blinky, Ghost, GhostType, Inky, Pinky};
+use crate::ghosts::Ghost;
+use crate::ghosts::Ghost::*;
 use crate::ghosts::state::State;
 use crate::sprite_sheet::SpriteSheet;
 
-pub(in crate::ghosts) fn update_ghost_appearance<G: 'static + Component + GhostType>(
+pub(in crate::ghosts) fn update_ghost_appearance(
     energizer_timer: Option<Res<EnergizerTimer>>,
-    mut query: Query<(&Direction, &State, &mut Animations), With<G>>,
+    mut query: Query<(&Direction, &State, &mut Animations)>,
 ) {
     for (direction, state, mut animations) in query.iter_mut() {
         match state {
@@ -27,12 +27,12 @@ pub(in crate::ghosts) fn update_ghost_appearance<G: 'static + Component + GhostT
     }
 }
 
-pub(in crate::ghosts) fn create_animations_for_ghost<G: GhostType + 'static>(game_assets: &LoadedAssets, sprite_sheets: &Assets<SpriteSheet>) -> Animations {
-    match TypeId::of::<G>() {
-        id if id == TypeId::of::<Blinky>() => create_animations_for(game_assets, sprite_sheets, ["textures/ghost/blinky_up", "textures/ghost/blinky_down", "textures/ghost/blinky_left", "textures/ghost/blinky_right"]),
-        id if id == TypeId::of::<Pinky>() => create_animations_for(game_assets, sprite_sheets, ["textures/ghost/pinky_up", "textures/ghost/pinky_down", "textures/ghost/pinky_left", "textures/ghost/pinky_right"]),
-        id if id == TypeId::of::<Inky>() => create_animations_for(game_assets, sprite_sheets, ["textures/ghost/inky_up", "textures/ghost/inky_down", "textures/ghost/inky_left", "textures/ghost/inky_right"]),
-        _ => create_animations_for(game_assets, sprite_sheets, ["textures/ghost/clyde_up", "textures/ghost/clyde_down", "textures/ghost/clyde_left", "textures/ghost/clyde_right"]),
+pub(in crate::ghosts) fn create_animations_for_ghost(ghost: &Ghost, game_assets: &LoadedAssets, sprite_sheets: &Assets<SpriteSheet>) -> Animations {
+    match *ghost {
+        Blinky => create_animations_for(game_assets, sprite_sheets, ["textures/ghost/blinky_up", "textures/ghost/blinky_down", "textures/ghost/blinky_left", "textures/ghost/blinky_right"]),
+        Pinky => create_animations_for(game_assets, sprite_sheets, ["textures/ghost/pinky_up", "textures/ghost/pinky_down", "textures/ghost/pinky_left", "textures/ghost/pinky_right"]),
+        Inky => create_animations_for(game_assets, sprite_sheets, ["textures/ghost/inky_up", "textures/ghost/inky_down", "textures/ghost/inky_left", "textures/ghost/inky_right"]),
+        Clyde => create_animations_for(game_assets, sprite_sheets, ["textures/ghost/clyde_up", "textures/ghost/clyde_down", "textures/ghost/clyde_left", "textures/ghost/clyde_right"]),
     }
 }
 

@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use crate::board_dimensions::BoardDimensions;
-use crate::ghosts::{Blinky, Clyde, Inky, Pinky};
+use crate::ghosts::Ghost;
+use crate::ghosts::Ghost::*;
 use crate::is;
 use crate::life_cycle::LifeCycle::Start;
 use crate::map::{Element, Map};
@@ -19,7 +20,7 @@ impl Plugin for GhostCornersPlugin {
 
 // TODO: As the amount of corners does not change during the game, a resource might fit better
 #[derive(Component)]
-pub struct GhostCorner;
+pub struct GhostCorner(pub Ghost);
 
 fn spawn_ghost_corners(
     mut commands: Commands,
@@ -32,19 +33,18 @@ fn spawn_ghost_corners(
     spawn_corner(&mut commands, &map, is!(Element::ClydeCorner), &dimensions, Clyde);
 }
 
-fn spawn_corner<C: Component + Copy>(
+fn spawn_corner(
     commands: &mut Commands,
     map: &Map,
     filter: impl Fn(&Element) -> bool,
     dimensions: &BoardDimensions,
-    ghost: C
+    ghost: Ghost
 ) {
     map.get_positions_matching(filter)
         .into_iter()
         .for_each(|pos| {
             commands.spawn()
-                .insert(GhostCorner)
-                .insert(dimensions.pos_to_trans(pos, 0.0))
-                .insert(ghost);
+                .insert(GhostCorner(ghost))
+                .insert(dimensions.pos_to_trans(pos, 0.0));
         });
 }
