@@ -1,10 +1,12 @@
 use bevy::prelude::*;
-use crate::board_dimensions::BoardDimensions;
+use bevy::utils::HashMap;
+use crate::common::position::Position;
 use crate::ghosts::Ghost;
 use crate::ghosts::Ghost::*;
 use crate::is;
 use crate::life_cycle::LifeCycle::Start;
 use crate::map::{Element, Map};
+use crate::map::Element::{BlinkyCorner, ClydeCorner, InkyCorner, PinkyCorner};
 
 pub struct GhostCornersPlugin;
 
@@ -18,33 +20,34 @@ impl Plugin for GhostCornersPlugin {
     }
 }
 
-// TODO: As the amount of corners does not change during the game, a resource might fit better
-#[derive(Component)]
-pub struct GhostCorner(pub Ghost);
+pub struct GhostCorners {
+    corners: HashMap<Ghost, Position>,
+}
+
+impl GhostCorners {
+    fn new(map: &Map) -> Self {
+        GhostCorners {
+            corners: [
+                (Blinky, Self::get_corner_position(map, is!(BlinkyCorner))),
+                (Pinky, Self::get_corner_position(map, is!(PinkyCorner))),
+                (Inky, Self::get_corner_position(map, is!(InkyCorner))),
+                (Clyde, Self::get_corner_position(map, is!(ClydeCorner))),
+            ].into_iter().collect()
+        }
+    }
+
+    fn get_corner_position(map: &Map, filter: impl Fn(&Element) -> bool) -> Position {
+        *map.get_positions_matching(filter).into_iter().next().expect("every ghost should have a corner")
+    }
+
+    pub fn get_corner(&self, ghost: &Ghost) -> Position {
+        *self.corners.get(ghost).expect("every ghost should have a corner")
+    }
+}
 
 fn spawn_ghost_corners(
     mut commands: Commands,
     map: Res<Map>,
-    dimensions: Res<BoardDimensions>
 ) {
-    spawn_corner(&mut commands, &map, is!(Element::BlinkyCorner), &dimensions, Blinky);
-    spawn_corner(&mut commands, &map, is!(Element::PinkyCorner), &dimensions, Pinky);
-    spawn_corner(&mut commands, &map, is!(Element::InkyCorner), &dimensions, Inky);
-    spawn_corner(&mut commands, &map, is!(Element::ClydeCorner), &dimensions, Clyde);
-}
-
-fn spawn_corner(
-    commands: &mut Commands,
-    map: &Map,
-    filter: impl Fn(&Element) -> bool,
-    dimensions: &BoardDimensions,
-    ghost: Ghost
-) {
-    map.get_positions_matching(filter)
-        .into_iter()
-        .for_each(|pos| {
-            commands.spawn()
-                .insert(GhostCorner(ghost))
-                .insert(dimensions.pos_to_trans(pos, 0.0));
-        });
+    commands.insert_resource(GhostCorners::new(&map));
 }

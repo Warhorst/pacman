@@ -7,8 +7,8 @@ use crate::board_dimensions::BoardDimensions;
 use crate::common::position::{Neighbour, Position};
 use crate::common::Direction;
 use crate::common::Direction::*;
+use crate::ghost_corners::GhostCorners;
 use crate::life_cycle::LifeCycle::*;
-use crate::ghost_corners::GhostCorner;
 use crate::ghosts::Ghost;
 use crate::ghosts::Ghost::*;
 use crate::ghosts::state::{State, StateSetter};
@@ -103,19 +103,17 @@ impl Target {
 fn set_scatter_target(
     board: Res<Board>,
     dimensions: Res<BoardDimensions>,
+    ghost_corners: Res<GhostCorners>,
     mut ghost_query: Query<TargetComponents>,
-    corner_query: Query<(&GhostCorner, &Transform)>,
 ) {
     for mut components in ghost_query.iter_mut() {
         target_skip_if!(components.target set);
         state_skip_if!(components.state != State::Scatter);
-        let nearest_corner_position = dimensions
-            .trans_to_pos(components.transform)
-            .get_nearest_position_from(corner_query.iter().filter(|(c, _)| &c.0 == components.ghost).map(|(_, t)| dimensions.trans_to_pos(t)));
+        let corner_position = ghost_corners.get_corner(components.ghost);
 
         let next_target_neighbour = get_nearest_neighbour(
             &components,
-            nearest_corner_position,
+            corner_position,
             &dimensions,
             |n| !board.position_is_wall_or_entrance(&n.position)
         );
@@ -255,9 +253,9 @@ fn calculate_inky_target(
 fn set_clyde_chase_target(
     board: Res<Board>,
     dimensions: Res<BoardDimensions>,
+    ghost_corners: Res<GhostCorners>,
     mut clyde_query: Query<TargetComponents, Without<Pacman>>,
     pacman_query: Query<&Transform, With<Pacman>>,
-    corner_query: Query<&Transform, With<GhostCorner>>
 ) {
     for mut components in clyde_query.iter_mut() {
         if components.ghost != &Clyde {
@@ -268,9 +266,7 @@ fn set_clyde_chase_target(
         state_skip_if!(components.state != State::Chase);
         for pacman_transform in pacman_query.iter() {
             let target = if clyde_is_near_pacman(&components, &dimensions.trans_to_pos(pacman_transform), &dimensions) {
-                dimensions
-                    .trans_to_pos(components.transform)
-                    .get_nearest_position_from(corner_query.iter().map(|t| dimensions.trans_to_pos(t)))
+                ghost_corners.get_corner(components.ghost)
             } else {
                 dimensions.trans_to_pos(pacman_transform)
             };
