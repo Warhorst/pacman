@@ -4,7 +4,7 @@ use crate::common::Direction;
 use crate::common::Direction::*;
 use crate::ghosts::CurrentlyEatenGhost;
 use crate::life_cycle::LifeCycle::*;
-use crate::ghosts::target::{Target, TargetSetter};
+use crate::ghosts::target::{Target, LTargetSetter};
 use crate::speed::Speed;
 use crate::ghosts::state::State;
 use crate::ghosts::state::State::Eaten;
@@ -15,10 +15,10 @@ impl Plugin for MovePlugin {
     fn build(&self, app: &mut App) {
         app
             .add_system_set(
-                SystemSet::on_update(Running).with_system(move_ghosts.after(TargetSetter))
+                SystemSet::on_update(Running).with_system(move_ghosts.after(LTargetSetter))
             )
             .add_system_set(
-                SystemSet::on_update(GhostEatenPause).with_system(move_only_not_currently_eaten_ghosts.after(TargetSetter))
+                SystemSet::on_update(GhostEatenPause).with_system(move_only_not_currently_eaten_ghosts.after(LTargetSetter))
             )
         ;
     }
