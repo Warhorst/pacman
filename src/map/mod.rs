@@ -22,7 +22,7 @@ pub struct MapPlugin;
 impl Plugin for MapPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_plugin(JsonAssetPlugin::<Fields>::new(&["map.json"]))
+            .add_plugin(JsonAssetPlugin::<RawMap>::new(&["map.json"]))
             .add_system_set(
                 SystemSet::on_exit(Loading).with_system(create_board_and_map)
             )
@@ -33,7 +33,7 @@ impl Plugin for MapPlugin {
 fn create_board_and_map(
     mut commands: Commands,
     game_asset_handles: Res<LoadedAssets>,
-    fields_assets: Res<Assets<Fields>>,
+    fields_assets: Res<Assets<RawMap>>,
 ) {
     let fields = fields_assets.get(&game_asset_handles.get_handle("maps/default.map.json")).expect("the map should be loaded at this point");
     let map = Map::new(&fields);
@@ -44,21 +44,35 @@ fn create_board_and_map(
     commands.insert_resource(board_dimensions)
 }
 
-#[derive(Clone, Deref, Serialize, Deserialize, bevy::reflect::TypeUuid)]
+#[derive(Clone, Serialize, Deserialize, bevy::reflect::TypeUuid)]
 #[uuid = "a09992c9-9567-42d9-a0ac-c998756e4073"]
-struct Fields(Vec<Field>);
+pub struct RawMap {
+    pub blinky_corner: Position,
+    pub pinky_corner: Position,
+    pub inky_corner: Position,
+    pub clyde_corner: Position,
+    pub fields: Vec<Field>
+}
 
 /// Resource that knows the spawn locations of every entity, based on an external map file.
 ///
 /// The map should only be used to spawn or respawn entities into the world.
 pub struct Map {
+    pub blinky_corner: Position,
+    pub pinky_corner: Position,
+    pub inky_corner: Position,
+    pub clyde_corner: Position,
     elements_map: HashMap<Position, Element>,
 }
 
 impl Map {
-    fn new(fields: &Fields) -> Self {
+    fn new(raw_map: &RawMap) -> Self {
         Map {
-            elements_map: fields.clone().0.into_iter()
+            blinky_corner: raw_map.blinky_corner,
+            pinky_corner: raw_map.pinky_corner,
+            inky_corner: raw_map.inky_corner,
+            clyde_corner: raw_map.clyde_corner,
+            elements_map: raw_map.fields.clone().into_iter()
                 .map(|f| (f.position, f.element))
                 .collect(),
         }
@@ -111,10 +125,6 @@ pub enum Element {
     DotSpawn,
     EnergizerSpawn,
     FruitSpawn,
-    BlinkyCorner,
-    PinkyCorner,
-    InkyCorner,
-    ClydeCorner,
     Tunnel {
         index: usize,
         opening_direction: Direction,

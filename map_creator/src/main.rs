@@ -1,5 +1,5 @@
 use std::collections::HashSet;
-use pacman::map::WallType;
+use pacman::map::{RawMap, WallType};
 use pacman::common::position::Position;
 use pacman::common::Direction;
 use pacman::map::Element;
@@ -16,15 +16,13 @@ const TARGET_FILE: &'static str = "../assets/maps/default.map.json";
 /// This bullshit is only used to generate the json map until I have a better way to do this (aka a level editor)
 fn main() {
     let fields = vec![
-        create_field_line(1, 0, vec![
-            elem(1, PinkyCorner),
+        create_field_line(2, 0, vec![
             corner(D0, O),
             wall(12, D0, O),
             corner(D90, O),
             corner(D0, O),
             wall(12, D0, O),
             corner(D90, O),
-            elem(1, BlinkyCorner)
         ]),
         create_field_line(2, 1, vec![
             wall(1, D270, O),
@@ -552,12 +550,10 @@ fn main() {
             dot(26),
             wall(1, D90, O),
         ]),
-        create_field_line(1, 30, vec![
-            elem(1, ClydeCorner),
+        create_field_line(2, 30, vec![
             corner(D270, O),
             wall(26, D180, O),
             corner(D180, O),
-            elem(1, InkyCorner),
         ]),
     ];
     let mut flat_fields = fields.into_iter()
@@ -572,7 +568,16 @@ fn main() {
         .for_each(|f| {
             f.position.y = (height as isize) - 2 - f.position.y
         });
-    let json = serde_json::to_string(&flat_fields).unwrap();
+
+    let raw_map = RawMap {
+        blinky_corner: Position::new(28, 30),
+        pinky_corner: Position::new(0, 30),
+        inky_corner: Position::new(28, 0),
+        clyde_corner: Position::new(0, 0),
+        fields: flat_fields
+    };
+
+    let json = serde_json::to_string(&raw_map).unwrap();
     let mut file = OpenOptions::new().truncate(true).write(true).open(TARGET_FILE).unwrap();
     file.write(json.as_bytes()).unwrap();
 }
