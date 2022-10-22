@@ -129,9 +129,7 @@ pub enum Element {
         index: usize,
         opening_direction: Direction,
     },
-    TunnelEntrance,
     TunnelHallway,
-    InvisibleWall,
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Serialize, Deserialize, Hash)]

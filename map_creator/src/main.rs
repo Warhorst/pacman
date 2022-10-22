@@ -1,4 +1,3 @@
-use std::collections::HashSet;
 use pacman::map::{RawMap, WallType};
 use pacman::common::position::Position;
 use pacman::common::Direction;
@@ -16,7 +15,7 @@ const TARGET_FILE: &'static str = "../assets/maps/default.map.json";
 /// This bullshit is only used to generate the json map until I have a better way to do this (aka a level editor)
 fn main() {
     let fields = vec![
-        create_field_line(2, 0, vec![
+        create_field_line(0, vec![
             corner(D0, O),
             wall(12, D0, O),
             corner(D90, O),
@@ -24,7 +23,7 @@ fn main() {
             wall(12, D0, O),
             corner(D90, O),
         ]),
-        create_field_line(2, 1, vec![
+        create_field_line(1, vec![
             wall(1, D270, O),
             dot(12),
             wall(1, D90, O),
@@ -32,7 +31,7 @@ fn main() {
             dot(12),
             wall(1, D90, O),
         ]),
-        create_field_line(2, 2, vec![
+        create_field_line(2, vec![
             wall(1, D270, O),
             dot(1),
             corner(D0, I),
@@ -56,7 +55,7 @@ fn main() {
             dot(1),
             wall(1, D90, O),
         ]),
-        create_field_line(2, 3, vec![
+        create_field_line(3, vec![
             wall(1, D270, O),
             energizer(),
             wall(1, D270, I),
@@ -80,7 +79,7 @@ fn main() {
             energizer(),
             wall(1, D90, O),
         ]),
-        create_field_line(2, 4, vec![
+        create_field_line(4, vec![
             wall(1, D270, O),
             dot(1),
             corner(D270, I),
@@ -104,12 +103,12 @@ fn main() {
             dot(1),
             wall(1, D90, O),
         ]),
-        create_field_line(2, 5, vec![
+        create_field_line(5, vec![
             wall(1, D270, O),
             dot(26),
             wall(1, D90, O),
         ]),
-        create_field_line(2, 6, vec![
+        create_field_line(6, vec![
             wall(1, D270, O),
             dot(1),
             corner(D0, I),
@@ -132,7 +131,7 @@ fn main() {
             dot(1),
             wall(1, D90, O),
         ]),
-        create_field_line(2, 7, vec![
+        create_field_line(7, vec![
             wall(1, D270, O),
             dot(1),
             corner(D270, I),
@@ -158,7 +157,7 @@ fn main() {
             dot(1),
             wall(1, D90, O),
         ]),
-        create_field_line(2, 8, vec![
+        create_field_line(8, vec![
             wall(1, D270, O),
             dot(6),
             wall(1, D270, I),
@@ -172,7 +171,7 @@ fn main() {
             dot(6),
             wall(1, D90, O),
         ]),
-        create_field_line(2, 9, vec![
+        create_field_line(9, vec![
             corner(D270, O),
             wall(4, D180, O),
             corner(D90, O),
@@ -193,7 +192,7 @@ fn main() {
             wall(4, D180, O),
             corner(D180, O),
         ]),
-        create_field_line(2, 10, vec![
+        create_field_line(10, vec![
             empty(5),
             wall(1, D270, O),
             dot(1),
@@ -213,7 +212,7 @@ fn main() {
             wall(1, D90, O),
             empty(5),
         ]),
-        create_field_line(2, 11, vec![
+        create_field_line(11, vec![
             empty(5),
             wall(1, D270, O),
             dot(1),
@@ -226,7 +225,7 @@ fn main() {
             wall(1, D90, O),
             empty(5),
         ]),
-        create_field_line(2, 12, vec![
+        create_field_line(12, vec![
             empty(5),
             wall(1, D270, O),
             dot(1),
@@ -245,8 +244,7 @@ fn main() {
             wall(1, D90, O),
             empty(5),
         ]),
-        create_field_line(0, 13, vec![
-            elem(2, InvisibleWall),
+        create_field_line(13, vec![
             wall(5, D180, O),
             corner(D180, O),
             dot(1),
@@ -262,23 +260,19 @@ fn main() {
             dot(1),
             corner(D270, O),
             wall(5, D180, O),
-            elem(2, InvisibleWall),
         ]),
-        create_field_line(0, 14, vec![
+        create_field_line(14, vec![
             tunnel_left(),
-            elem(1, TunnelEntrance),
-            elem(6, TunnelHallway),
+            elem(5, TunnelHallway),
             empty(4),
             wall(1, D270, G),
             empty(6),
             wall(1, D90, G),
             empty(4),
-            elem(6, TunnelHallway),
-            elem(1, TunnelEntrance),
+            elem(5, TunnelHallway),
             tunnel_right(),
         ]),
-        create_field_line(0, 15, vec![
-            elem(2, InvisibleWall),
+        create_field_line(15, vec![
             wall(5, D0, O),
             corner(D90, O),
             dot(1),
@@ -294,9 +288,8 @@ fn main() {
             dot(1),
             corner(D0, O),
             wall(5, D0, O),
-            elem(2, InvisibleWall),
         ]),
-        create_field_line(2, 16, vec![
+        create_field_line(16, vec![
             empty(5),
             wall(1, D270, O),
             dot(1),
@@ -313,7 +306,7 @@ fn main() {
             wall(1, D90, O),
             empty(5),
         ]),
-        create_field_line(2, 17, vec![
+        create_field_line(17, vec![
             empty(5),
             wall(1, D270, O),
             dot(1),
@@ -328,7 +321,7 @@ fn main() {
             wall(1, D90, O),
             empty(5),
         ]),
-        create_field_line(2, 18, vec![
+        create_field_line(18, vec![
             empty(5),
             wall(1, D270, O),
             dot(1),
@@ -345,7 +338,7 @@ fn main() {
             wall(1, D90, O),
             empty(5),
         ]),
-        create_field_line(2, 19, vec![
+        create_field_line(19, vec![
             corner(D0, O),
             wall(4, D180, O),
             corner(D180, O),
@@ -367,7 +360,7 @@ fn main() {
             wall(4, D180, O),
             corner(D90, O),
         ]),
-        create_field_line(2, 20, vec![
+        create_field_line(20, vec![
             wall(1, D270, O),
             dot(12),
             wall(1, D270, I),
@@ -375,7 +368,7 @@ fn main() {
             dot(12),
             wall(1, D90, O),
         ]),
-        create_field_line(2, 21, vec![
+        create_field_line(21, vec![
             wall(1, D270, O),
             dot(1),
             corner(D0, I),
@@ -399,7 +392,7 @@ fn main() {
             dot(1),
             wall(1, D90, O),
         ]),
-        create_field_line(2, 22, vec![
+        create_field_line(22, vec![
             wall(1, D270, O),
             dot(1),
             corner(D270, I),
@@ -425,7 +418,7 @@ fn main() {
             dot(1),
             wall(1, D90, O),
         ]),
-        create_field_line(2, 23, vec![
+        create_field_line(23, vec![
             wall(1, D270, O),
             energizer(),
             dot(2),
@@ -440,7 +433,7 @@ fn main() {
             energizer(),
             wall(1, D90, O),
         ]),
-        create_field_line(2, 24, vec![
+        create_field_line(24, vec![
             corner(D270, O),
             wall(1, D0, O),
             corner(D90, O),
@@ -465,7 +458,7 @@ fn main() {
             wall(1, D0, O),
             corner(D180, O),
         ]),
-        create_field_line(2, 25, vec![
+        create_field_line(25, vec![
             corner(D0, O),
             wall(1, D180, O),
             corner(D180, O),
@@ -493,7 +486,7 @@ fn main() {
             wall(1, D180, O),
             corner(D90, O),
         ]),
-        create_field_line(2, 26, vec![
+        create_field_line(26, vec![
             wall(1, D270, O),
             dot(6),
             wall(1, D270, I),
@@ -507,7 +500,7 @@ fn main() {
             dot(6),
             wall(1, D90, O),
         ]),
-        create_field_line(2, 27, vec![
+        create_field_line(27, vec![
             wall(1, D270, O),
             dot(1),
             corner(D0, I),
@@ -529,7 +522,7 @@ fn main() {
             dot(1),
             wall(1, D90, O),
         ]),
-        create_field_line(2, 28, vec![
+        create_field_line(28, vec![
             wall(1, D270, O),
             dot(1),
             corner(D270, I),
@@ -545,28 +538,25 @@ fn main() {
             dot(1),
             wall(1, D90, O),
         ]),
-        create_field_line(2, 29, vec![
+        create_field_line(29, vec![
             wall(1, D270, O),
             dot(26),
             wall(1, D90, O),
         ]),
-        create_field_line(2, 30, vec![
+        create_field_line(30, vec![
             corner(D270, O),
             wall(26, D180, O),
             corner(D180, O),
         ]),
     ];
+    let height = fields.len();
     let mut flat_fields = fields.into_iter()
         .enumerate()
         .flat_map(|(_, f)| f)
         .collect::<Vec<_>>();
-    let height = flat_fields.iter()
-        .map(|f| f.position.x)
-        .collect::<HashSet<_>>()
-        .len();
     flat_fields.iter_mut()
         .for_each(|f| {
-            f.position.y = (height as isize) - 2 - f.position.y
+            f.position.y = (height as isize) - (f.position.y + 1)
         });
 
     let raw_map = RawMap {
@@ -599,12 +589,12 @@ impl QuickWall {
     }
 }
 
-fn create_field_line(start_x: isize, y: isize, elements: Vec<Vec<Element>>) -> Vec<Field> {
+fn create_field_line(y: isize, elements: Vec<Vec<Element>>) -> Vec<Field> {
     elements.into_iter()
         .flat_map(|i| i)
         .enumerate()
         .map(|(i, elem)| Field {
-            position: Position::new(start_x + (i as isize), y),
+            position: Position::new(i as isize, y),
             element: elem,
         })
         .filter(|f| match f.element {

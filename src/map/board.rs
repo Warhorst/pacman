@@ -22,9 +22,9 @@ impl Board {
     pub fn new(map: &Map) -> Self {
         let width = map.get_width();
         let height = map.get_height();
-        let wall_positions = Self::positions_matching_filter(&map, is!(Wall {..} | InvisibleWall));
+        let wall_positions = Self::positions_matching_filter(&map, is!(Wall {..}));
         let ghost_house_entrance_positions = Self::positions_matching_filter(&map, is!(GhostHouseEntrance {..}));
-        let tunnel_positions = Self::positions_matching_filter(&map, is!(Tunnel {..} | TunnelEntrance | TunnelHallway));
+        let tunnel_positions = Self::positions_matching_filter(&map, is!(Tunnel {..} | TunnelHallway));
 
         Board {
             wall_positions,
