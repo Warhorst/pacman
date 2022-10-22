@@ -36,21 +36,21 @@ Did some cutting with [LosslessCut](https://github.com/mifi/lossless-cut) and ht
 (Tip: Don't even try to download the sounds from other sides than YouTube. The quality is trash and the tracks are incomplete)
 
 
-## TODOs
-(This is a WIP list of things to implement. Will be updated frequently)
+## Road to 1.0
+As the core game is almost complete, I want to publish a 1.0 soon (I did not care incrementing the version until now). This version will provide the typical pacman experience.
 
-### Pacman
-- sound when eating dots
+### TODOS
+Things that are required for 1.0
+- crop the background sounds
+- add a possibility to restart the game after game over
+- save a highscore for the current session and play a sound when beaten
+- add some blinking like in the real game (energizers, score, etc)
+- general bugfixing
 
-### Graphics
-- return the correct z coordinate from the board (or only x and y)
-
-### Appearance
-- sound (this one might be split later)
-
-### UI
-- main menu to start the game (and later access the high score)
-- pause menu to quit the game
-
-### Other
-- the memory consumption keeps rising when doing nothing (from 90MB initial to up to 500MB after an hour) -> the app might create some resources infinitely
+### Ideas
+Some ideas for future development
+- a real map editor
+- main menu with persistent highscores and intro sequence
+- cutscenes
+- savegames
+- adding the other pacman games
