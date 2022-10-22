@@ -31,6 +31,12 @@ impl Plugin for EnergizerPlugin {
             .add_system_set(
                 SystemSet::on_exit(LevelTransition).with_system(spawn_energizer)
             )
+            .add_system_set(
+                SystemSet::on_enter(PacmanHit).with_system(despawn_energizer_timer)
+            )
+            .add_system_set(
+                SystemSet::on_enter(LevelTransition).with_system(despawn_energizer_timer)
+            )
         ;
     }
 }
@@ -120,4 +126,10 @@ fn update_energizer_timer(
             event_writer.send(EnergizerOver);
         }
     }
+}
+
+fn despawn_energizer_timer(
+    mut commands: Commands,
+) {
+   commands.remove_resource::<EnergizerTimer>();
 }
