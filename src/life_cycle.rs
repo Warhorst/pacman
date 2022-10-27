@@ -138,7 +138,7 @@ fn switch_to_dying_when_pacman_was_hit(
     mut event_reader: EventReader<EPacmanHit>,
     mut game_state: ResMut<State<LifeCycle>>,
 ) {
-    for _ in event_reader.iter() {
+    if event_reader.iter().count() > 0 {
         game_state.set(PacmanHit).unwrap()
     }
 }
