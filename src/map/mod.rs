@@ -9,13 +9,24 @@ use serde::{Deserialize, Serialize};
 use Rotation::*;
 use crate::board_dimensions::BoardDimensions;
 
-use crate::common::Direction;
+use crate::common::{Direction, FromPositions};
 use crate::common::position::Position;
+use crate::constants::{DOT_Z, ENERGIZER_Z, FRUIT_Z, PACMAN_Z};
 use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::life_cycle::LifeCycle::Loading;
 use crate::map::board::Board;
+use crate::sprite_sheet::SpriteSheet;
+use crate::map::walls::WallsPlugin;
 
+use crate::is;
+use crate::map::ghost_house::spawn_ghost_house;
+use crate::map::walls::spawn_walls;
+
+pub mod walls;
 pub mod board;
+#[cfg(test)]
+mod map_creator;
+pub mod ghost_house;
 
 pub struct MapPlugin;
 
@@ -23,25 +34,141 @@ impl Plugin for MapPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_plugin(JsonAssetPlugin::<RawMap>::new(&["map.json"]))
+            .add_plugin(WallsPlugin)
             .add_system_set(
-                SystemSet::on_exit(Loading).with_system(create_board_and_map)
+                SystemSet::on_exit(Loading).with_system(spawn_map)
             )
         ;
     }
 }
 
-fn create_board_and_map(
+/// Component for the parent map entity
+/// TODO: Maybe add map dimensions here
+#[derive(Component)]
+pub struct Map;
+
+#[derive(Component, Deref)]
+pub struct PacmanSpawn(pub Vec3);
+
+/// Parent component for all dot spawns (for organization only)
+#[derive(Component)]
+pub struct DotSpawns;
+
+/// Coordinates where a dot can spawn
+#[derive(Component, Deref)]
+pub struct DotSpawn(pub Vec3);
+
+/// Parent component for all energizer spawns (for organization only)
+#[derive(Component)]
+pub struct EnergizerSpawns;
+
+#[derive(Component, Deref)]
+pub struct EnergizerSpawn(pub Vec3);
+
+#[derive(Component, Deref)]
+pub struct FruitSpawn(pub Vec3);
+
+fn spawn_map(
     mut commands: Commands,
-    game_asset_handles: Res<LoadedAssets>,
+    loaded_assets: Res<LoadedAssets>,
+    sprite_sheets: Res<Assets<SpriteSheet>>,
     fields_assets: Res<Assets<RawMap>>,
 ) {
-    let fields = fields_assets.get(&game_asset_handles.get_handle("maps/default.map.json")).expect("the map should be loaded at this point");
-    let map = Map::new(&fields);
-    let board = Board::new(&map);
+    let fields = fields_assets.get(&loaded_assets.get_handle("maps/default.map.json")).expect("the map should be loaded at this point");
+    let tile_map = TileMap::new(&fields);
+    let board = Board::new(&tile_map);
     let board_dimensions = BoardDimensions::new(&board);
-    commands.insert_resource(map);
+
+    let map = commands
+        .spawn()
+        .insert_bundle(SpatialBundle::default())
+        .insert(Map)
+        .insert(Name::new("Map"))
+        .id();
+
+    let children = spawn_walls(&mut commands, &tile_map, &loaded_assets, &sprite_sheets)
+        .into_iter()
+        .chain([spawn_dot_spawns(&mut commands, &tile_map)])
+        .chain([spawn_energizer_spawns(&mut commands, &tile_map)])
+        .chain([spawn_pacman_spawn(&mut commands, &tile_map)])
+        .chain([spawn_fruit_spawns(&mut commands, &tile_map)])
+        .chain([spawn_ghost_house(&mut commands, &tile_map, &loaded_assets, &sprite_sheets)])
+        .collect::<Vec<_>>();
+    commands.entity(map).push_children(&children);
+
+    // TODO: Remove
+    commands.insert_resource(tile_map);
     commands.insert_resource(board);
     commands.insert_resource(board_dimensions)
+}
+
+fn spawn_pacman_spawn(
+    commands: &mut Commands,
+    tile_map: &TileMap,
+) -> Entity {
+    let coordinates = Vec3::from_positions(tile_map.get_positions_matching(is!(Element::PacManSpawn)), PACMAN_Z);
+    commands.spawn()
+        .insert(Name::new("PacmanSpawn"))
+        .insert(PacmanSpawn(coordinates)).id()
+}
+
+fn spawn_dot_spawns(
+    commands: &mut Commands,
+    tile_map: &TileMap,
+) -> Entity {
+    let dot_spawns = commands.spawn()
+        .insert(Name::new("DotSpawns"))
+        .insert(DotSpawns)
+        .id();
+
+    tile_map.get_positions_matching(is!(Element::DotSpawn))
+        .into_iter()
+        .for_each(|pos| {
+            commands
+                .entity(dot_spawns)
+                .with_children(|parent| {
+                    parent.spawn()
+                        .insert(Name::new("DotSpawn"))
+                        .insert(DotSpawn(pos.to_vec(DOT_Z)));
+                });
+        });
+
+    dot_spawns
+}
+
+fn spawn_energizer_spawns(
+    commands: &mut Commands,
+    tile_map: &TileMap,
+) -> Entity {
+    let energizer_spawns = commands.spawn()
+        .insert(Name::new("EnergizerSpawns"))
+        .insert(EnergizerSpawns)
+        .id();
+
+    tile_map.get_positions_matching(is!(Element::EnergizerSpawn))
+        .into_iter()
+        .for_each(|pos| {
+            commands.entity(energizer_spawns)
+                .with_children(|parent| {
+                    parent.spawn()
+                        .insert(Name::new("EnergizerSpawn"))
+                        .insert(EnergizerSpawn(pos.to_vec(ENERGIZER_Z)));
+                });
+        });
+
+    energizer_spawns
+}
+
+fn spawn_fruit_spawns(
+    commands: &mut Commands,
+    tile_map: &TileMap,
+) -> Entity {
+    let coordinates = Vec3::from_positions(tile_map.get_positions_matching(is!(Element::FruitSpawn)), FRUIT_Z);
+
+    commands.spawn()
+        .insert(Name::new("FruitSpawn"))
+        .insert(FruitSpawn(coordinates))
+        .id()
 }
 
 #[derive(Clone, Serialize, Deserialize, bevy::reflect::TypeUuid)]
@@ -51,13 +178,13 @@ pub struct RawMap {
     pub pinky_corner: Position,
     pub inky_corner: Position,
     pub clyde_corner: Position,
-    pub fields: Vec<Field>
+    pub fields: Vec<Field>,
 }
 
 /// Resource that knows the spawn locations of every entity, based on an external map file.
 ///
 /// The map should only be used to spawn or respawn entities into the world.
-pub struct Map {
+pub struct TileMap {
     pub blinky_corner: Position,
     pub pinky_corner: Position,
     pub inky_corner: Position,
@@ -65,9 +192,9 @@ pub struct Map {
     elements_map: HashMap<Position, Element>,
 }
 
-impl Map {
+impl TileMap {
     fn new(raw_map: &RawMap) -> Self {
-        Map {
+        TileMap {
             blinky_corner: raw_map.blinky_corner,
             pinky_corner: raw_map.pinky_corner,
             inky_corner: raw_map.inky_corner,
@@ -121,6 +248,9 @@ pub enum Element {
     GhostHouseEntrance {
         rotation: Rotation
     },
+    GhostHouse {
+        rotation: Rotation
+    },
     PacManSpawn,
     DotSpawn,
     EnergizerSpawn,
@@ -136,7 +266,6 @@ pub enum Element {
 pub enum WallType {
     Outer,
     Inner,
-    Ghost,
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]

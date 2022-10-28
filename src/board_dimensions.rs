@@ -30,24 +30,8 @@ impl BoardDimensions {
         self.field_dimension
     }
 
-    pub fn wall(&self) -> f32 {
-        self.field_dimension
-    }
-
     pub fn pacman(&self) -> f32 {
         self.field_dimension + self.field_dimension * 0.6
-    }
-
-    pub fn ghost(&self) -> f32 {
-        self.pacman()
-    }
-
-    pub fn dot(&self) -> f32 {
-        self.pacman()
-    }
-
-    pub fn energizer(&self) -> f32 {
-        self.pacman()
     }
 
     pub fn fruit(&self) -> f32 {

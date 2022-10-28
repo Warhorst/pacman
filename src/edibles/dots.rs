@@ -1,14 +1,13 @@
 use std::time::Duration;
 use bevy::prelude::*;
-use crate::board_dimensions::BoardDimensions;
 
-use crate::constants::DOT_Z;
+use crate::constants::DOT_DIMENSION;
 use crate::edibles::Edible;
 use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::interactions::EDotEaten;
 use crate::life_cycle::LifeCycle::*;
 use crate::is;
-use crate::map::{Element, Map};
+use crate::map::{DotSpawn, Element, TileMap};
 
 pub struct DotPlugin;
 
@@ -34,33 +33,37 @@ impl Plugin for DotPlugin {
 
 fn spawn_dots(
     mut commands: Commands,
-    map: Res<Map>,
-    dimensions: Res<BoardDimensions>,
-    game_asset_handles: Res<LoadedAssets>,
+    loaded_assets: Res<LoadedAssets>,
+    spawn_query: Query<&DotSpawn>
 ) {
-    let point_dimension = Vec2::new(dimensions.dot(), dimensions.dot());
-    for position in map.get_positions_matching(is!(Element::DotSpawn)) {
-        let transform = dimensions.pos_to_trans(position, DOT_Z);
+    let dots = commands.spawn()
+        .insert(Name::new("Dots"))
+        .insert(Dots)
+        .insert_bundle(SpatialBundle::default())
+        .id();
 
-        commands.spawn()
-            .insert_bundle(SpriteBundle {
-                texture: game_asset_handles.get_handle("textures/dot.png"),
-                sprite: Sprite {
-                    custom_size: Some(point_dimension),
-                    ..default()
-                },
-                transform,
-                ..Default::default()
-            })
-            .insert(Dot)
-            .insert(Edible)
-        ;
+    for spawn in &spawn_query {
+        commands.entity(dots).with_children(|parent| {
+            parent.spawn()
+                .insert_bundle(SpriteBundle {
+                    texture: loaded_assets.get_handle("textures/dot.png"),
+                    sprite: Sprite {
+                        custom_size: Some(Vec2::splat(DOT_DIMENSION)),
+                        ..default()
+                    },
+                    transform: Transform::from_translation(**spawn),
+                    ..Default::default()
+                })
+                .insert(Dot)
+                .insert(Edible)
+                .insert(Name::new("Dot"));
+        });
     }
 }
 
 fn spawn_eaten_dots(
     mut commands: Commands,
-    map: Res<Map>,
+    map: Res<TileMap>,
 ) {
     let num_dots = map.get_positions_matching(is!(Element::DotSpawn)).into_iter().count();
     commands.insert_resource(EatenDots::new(num_dots))
@@ -115,6 +118,10 @@ fn play_waka_when_dot_was_eaten(
         };
     }
 }
+
+/// Parent component for all dots (for organization only)
+#[derive(Component)]
+pub struct Dots;
 
 #[derive(Component)]
 pub struct Dot;

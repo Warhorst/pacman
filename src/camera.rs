@@ -1,6 +1,7 @@
 use bevy::prelude::*;
-use crate::constants::{WINDOW_HEIGHT, WINDOW_WIDTH};
+use crate::constants::FIELD_DIMENSION;
 use crate::life_cycle::LifeCycle::Start;
+use crate::map::board::Board;
 
 pub struct CameraPlugin;
 
@@ -16,13 +17,14 @@ impl Plugin for CameraPlugin {
 
 fn spawn_camera(
     mut commands: Commands,
+    board: Res<Board>
 ) {
     let mut bundle = Camera2dBundle::default();
-    modify_camera_x_y(&mut bundle.transform.translation);
+    modify_camera_x_y(&mut bundle.transform.translation, &board);
     commands.spawn().insert_bundle(bundle);
 }
 
-fn modify_camera_x_y(translation: &mut Vec3) {
-    translation.x = WINDOW_WIDTH / 2.0;
-    translation.y = WINDOW_HEIGHT / 2.0;
+fn modify_camera_x_y(translation: &mut Vec3, board: &Board) {
+    translation.x = (board.width as f32 / 2.0) * FIELD_DIMENSION;
+    translation.y = (board.height as f32 / 2.0) * FIELD_DIMENSION
 }

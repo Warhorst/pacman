@@ -27,7 +27,6 @@ use crate::specs_per_level::SpecsPerLevelPlugin;
 use crate::speed::SpeedPlugin;
 use crate::sprite_sheet::SpriteSheetPlugin;
 use crate::tunnels::TunnelPlugin;
-use crate::walls::WallsPlugin;
 
 mod camera;
 mod constants;
@@ -41,7 +40,6 @@ mod lives;
 mod level;
 mod speed;
 mod map;
-mod walls;
 mod ghost_house;
 mod ghost_corners;
 mod ghost_house_gate;
@@ -75,7 +73,6 @@ fn main() {
         .add_plugin(CameraPlugin)
         .add_plugins(DefaultPlugins)
         .add_plugin(MapPlugin)
-        .add_plugin(WallsPlugin)
         .add_plugin(EdiblePlugin)
         .add_plugin(GhostHousePlugin)
         .add_plugin(GhostCornersPlugin)
@@ -94,6 +91,6 @@ fn main() {
         .add_plugin(GameOverScreenPlugin)
         .add_plugin(SpecsPerLevelPlugin)
         .add_plugin(DebugPlugin)
-        .add_plugin(BackgroundNoisePlugin)
+        // .add_plugin(BackgroundNoisePlugin)
         .run()
 }

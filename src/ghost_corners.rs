@@ -4,7 +4,7 @@ use crate::common::position::Position;
 use crate::ghosts::Ghost;
 use crate::ghosts::Ghost::*;
 use crate::life_cycle::LifeCycle::Start;
-use crate::map::Map;
+use crate::map::TileMap;
 
 pub struct GhostCornersPlugin;
 
@@ -23,7 +23,7 @@ pub struct GhostCorners {
 }
 
 impl GhostCorners {
-    fn new(map: &Map) -> Self {
+    fn new(map: &TileMap) -> Self {
         GhostCorners {
             corners: [
                 (Blinky, map.blinky_corner),
@@ -41,7 +41,7 @@ impl GhostCorners {
 
 fn create_ghost_corners(
     mut commands: Commands,
-    map: Res<Map>,
+    map: Res<TileMap>,
 ) {
     commands.insert_resource(GhostCorners::new(&map));
 }

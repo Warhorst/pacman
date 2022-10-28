@@ -1,7 +1,7 @@
 use bevy::utils::HashSet;
 
 use crate::common::position::Position;
-use crate::map::{Element, Map};
+use crate::map::{Element, TileMap};
 use crate::map::Element::*;
 use crate::is;
 
@@ -19,7 +19,7 @@ pub struct Board {
 }
 
 impl Board {
-    pub fn new(map: &Map) -> Self {
+    pub fn new(map: &TileMap) -> Self {
         let width = map.get_width();
         let height = map.get_height();
         let wall_positions = Self::positions_matching_filter(&map, is!(Wall {..}));
@@ -35,7 +35,7 @@ impl Board {
         }
     }
 
-    fn positions_matching_filter(map: &Map, filter: impl Fn(&Element) -> bool) -> HashSet<Position> {
+    fn positions_matching_filter(map: &TileMap, filter: impl Fn(&Element) -> bool) -> HashSet<Position> {
         map.get_positions_matching(filter)
             .into_iter()
             .map(ToOwned::to_owned)

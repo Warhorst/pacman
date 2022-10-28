@@ -2,14 +2,14 @@ use bevy::prelude::*;
 use crate::board_dimensions::BoardDimensions;
 use crate::common::position::Position;
 use crate::constants::TUNNEL_Z;
-use crate::map::{Element, Map};
+use crate::map::{Element, TileMap};
 
 use crate::tunnels::Tunnel;
 use crate::common::Direction;
 
 pub(in crate::tunnels) fn spawn_tunnels(
     mut commands: Commands,
-    map: Res<Map>,
+    map: Res<TileMap>,
     dimensions: Res<BoardDimensions>
 ) {
     map.position_element_iter()

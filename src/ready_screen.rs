@@ -5,7 +5,7 @@ use crate::constants::{FONT, TEXT_Z};
 use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::is;
 use crate::life_cycle::LifeCycle;
-use crate::map::Map;
+use crate::map::TileMap;
 use crate::map::Element;
 
 pub struct ReadyScreenPlugin;
@@ -30,7 +30,7 @@ fn spawn_screen(
     mut commands: Commands,
     game_asset_handles: Res<LoadedAssets>,
     dimensions: Res<BoardDimensions>,
-    map: Res<Map>,
+    map: Res<TileMap>,
 ) {
     let transform = dimensions.positions_to_trans(map.get_positions_matching(is!(Element::FruitSpawn)), TEXT_Z);
     commands.spawn_bundle(Text2dBundle {

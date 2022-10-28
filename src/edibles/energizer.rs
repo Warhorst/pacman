@@ -1,16 +1,13 @@
 use std::time::Duration;
 use bevy::prelude::*;
-use crate::board_dimensions::BoardDimensions;
 
-use crate::constants::ENERGIZER_Z;
+use crate::constants::ENERGIZER_DIMENSION;
 use crate::edibles::Edible;
 use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::interactions::EEnergizerEaten;
 use crate::life_cycle::LifeCycle::*;
-use crate::is;
 use crate::level::Level;
-use crate::map::Element::EnergizerSpawn;
-use crate::map::Map;
+use crate::map::EnergizerSpawn;
 use crate::specs_per_level::SpecsPerLevel;
 
 pub struct EnergizerPlugin;
@@ -40,6 +37,10 @@ impl Plugin for EnergizerPlugin {
         ;
     }
 }
+
+/// Parent component for all energizer (for organization only)
+#[derive(Component)]
+pub struct Energizers;
 
 /// An energizer that allows pacman to eat ghosts.
 #[derive(Component)]
@@ -76,27 +77,31 @@ impl EnergizerTimer {
 
 fn spawn_energizer(
     mut commands: Commands,
-    map: Res<Map>,
-    game_asset_handles: Res<LoadedAssets>,
-    dimensions: Res<BoardDimensions>
+    loaded_assets: Res<LoadedAssets>,
+    spawn_query: Query<&EnergizerSpawn>
 ) {
-    let energizer_dimension = Vec2::new(dimensions.energizer(), dimensions.energizer());
-    for position in map.get_positions_matching(is!(EnergizerSpawn)) {
-        let transform = dimensions.pos_to_trans(position, ENERGIZER_Z);
+    let energizers = commands.spawn()
+        .insert(Name::new("Energizers"))
+        .insert(Energizers)
+        .insert_bundle(SpatialBundle::default())
+        .id();
 
-        commands.spawn()
-            .insert_bundle(SpriteBundle {
-                texture: game_asset_handles.get_handle("textures/energizer.png"),
-                sprite: Sprite {
-                    custom_size: Some(energizer_dimension),
-                    ..default()
-                },
-                transform,
-                ..Default::default()
-            })
-            .insert(Energizer)
-            .insert(Edible)
-        ;
+    for spawn in &spawn_query {
+        commands.entity(energizers).with_children(|parent| {
+            parent.spawn()
+                .insert_bundle(SpriteBundle {
+                    texture: loaded_assets.get_handle("textures/energizer.png"),
+                    sprite: Sprite {
+                        custom_size: Some(Vec2::splat(ENERGIZER_DIMENSION)),
+                        ..default()
+                    },
+                    transform: Transform::from_translation(**spawn),
+                    ..Default::default()
+                })
+                .insert(Energizer)
+                .insert(Edible)
+                .insert(Name::new("Energizer"));
+        });
     }
 }
 

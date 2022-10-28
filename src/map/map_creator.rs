@@ -1,19 +1,20 @@
-use pacman::map::{RawMap, WallType};
-use pacman::common::position::Position;
-use pacman::common::Direction;
-use pacman::map::Element;
-use pacman::map::Element::*;
-use pacman::map::Field;
-use pacman::map::Rotation;
-use pacman::map::Rotation::*;
+use crate::map::{RawMap, WallType};
+use crate::common::position::Position;
+use crate::common::Direction;
+use crate::map::Element;
+use crate::map::Element::*;
+use crate::map::Field;
+use crate::map::Rotation;
+use crate::map::Rotation::*;
 use QuickWall::*;
 use std::fs::OpenOptions;
 use std::io::Write;
 
-const TARGET_FILE: &'static str = "../assets/maps/default.map.json";
+const TARGET_FILE: &'static str = "./assets/maps/default.map.json";
 
 /// This bullshit is only used to generate the json map until I have a better way to do this (aka a level editor)
-fn main() {
+#[test]
+fn run() {
     let fields = vec![
         create_field_line(0, vec![
             corner(D0, O),
@@ -232,11 +233,7 @@ fn main() {
             wall(1, D270, I),
             wall(1, D90, I),
             empty(1),
-            corner(D0, G),
-            wall(2, D0, G),
-            elem(2, GhostHouseEntrance { rotation: D0 }),
-            wall(2, D0, G),
-            corner(D90, G),
+            elem(8, GhostHouse {rotation: D0}),
             empty(1),
             wall(1, D270, I),
             wall(1, D90, I),
@@ -251,9 +248,7 @@ fn main() {
             corner(D270, I),
             corner(D180, I),
             empty(1),
-            wall(1, D90, G),
-            empty(6),
-            wall(1, D90, G),
+            elem(8, GhostHouse {rotation: D0}),
             empty(1),
             corner(D270, I),
             corner(D180, I),
@@ -265,9 +260,7 @@ fn main() {
             tunnel_left(),
             elem(5, TunnelHallway),
             empty(4),
-            wall(1, D270, G),
-            empty(6),
-            wall(1, D90, G),
+            elem(8, GhostHouse {rotation: D0}),
             empty(4),
             elem(5, TunnelHallway),
             tunnel_right(),
@@ -279,9 +272,7 @@ fn main() {
             corner(D0, I),
             corner(D90, I),
             empty(1),
-            wall(1, D270, G),
-            empty(6),
-            wall(1, D90, G),
+            elem(8, GhostHouse {rotation: D0}),
             empty(1),
             corner(D0, I),
             corner(D90, I),
@@ -296,9 +287,7 @@ fn main() {
             wall(1, D270, I),
             wall(1, D90, I),
             empty(1),
-            corner(D270, G),
-            wall(6, D180, G),
-            corner(D180, G),
+            elem(8, GhostHouse {rotation: D0}),
             empty(1),
             wall(1, D270, I),
             wall(1, D90, I),
@@ -576,7 +565,6 @@ fn main() {
 enum QuickWall {
     I,
     O,
-    G,
 }
 
 impl QuickWall {
@@ -584,7 +572,6 @@ impl QuickWall {
         match self {
             I => WallType::Inner,
             O => WallType::Outer,
-            G => WallType::Ghost,
         }
     }
 }

@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::common::Direction;
 use crate::common::Direction::*;
+use crate::constants::FIELD_DIMENSION;
 
 /// A position describes the index of a field on the map. It is used for
 /// collision checks, target settings and entity spawns.
@@ -90,6 +91,24 @@ impl Position {
             Left => Position::new(self.x - (offset as isize), self.y),
             Right => Position::new(self.x + (offset as isize), self.y)
         }
+    }
+
+    pub fn from_vec(vec: &Vec3) -> Self {
+        let x = (vec.x + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
+        let y = (vec.y + FIELD_DIMENSION / 2.0) / FIELD_DIMENSION;
+
+        Position::new(
+            x as isize,
+            y as isize
+        )
+    }
+
+    pub fn to_vec(&self, z: f32) -> Vec3 {
+        Vec3::new(
+            self.x as f32 * FIELD_DIMENSION,
+            self.y as f32 * FIELD_DIMENSION,
+            z
+        )
     }
 }
 

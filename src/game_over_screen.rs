@@ -4,7 +4,7 @@ use crate::constants::{FONT, TEXT_Z};
 use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::is;
 use crate::life_cycle::LifeCycle::GameOver;
-use crate::map::Map;
+use crate::map::TileMap;
 use crate::map::Element;
 
 pub struct GameOverScreenPlugin;
@@ -25,7 +25,7 @@ struct GameOverScreen;
 fn spawn_screen(
     mut commands: Commands,
     game_asset_handles: Res<LoadedAssets>,
-    map: Res<Map>,
+    map: Res<TileMap>,
     dimensions: Res<BoardDimensions>
 ) {
     let transform = dimensions.positions_to_trans(map.get_positions_matching(is!(Element::FruitSpawn)), TEXT_Z);

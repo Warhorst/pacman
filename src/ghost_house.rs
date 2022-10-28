@@ -8,7 +8,7 @@ use crate::ghosts::Ghost;
 use crate::ghosts::Ghost::*;
 use crate::common::Direction;
 use crate::life_cycle::LifeCycle::Start;
-use crate::map::{Map, Rotation, WallType};
+use crate::map::{TileMap, Rotation};
 use crate::map::Rotation::*;
 
 pub struct GhostHousePlugin;
@@ -23,10 +23,27 @@ impl Plugin for GhostHousePlugin {
     }
 }
 
+// #[derive(Component)]
+// pub struct GhostHouseC;
+//
+// #[derive(Component)]
+// pub struct GhostSpawn {
+//     ghost: Ghost,
+//     spawn_direction: Direction
+// }
+//
+// pub fn spawn_ghost_house(
+//     commands: &mut Commands,
+//     tile_map: Res<TileMap>,
+// ) -> Entity {
+//
+//     unimplemented!()
+// }
+
 fn create_ghost_house(
     mut commands: Commands,
-    map: Res<Map>,
-    dimensions: Res<BoardDimensions>
+    map: Res<TileMap>,
+    dimensions: Res<BoardDimensions>,
 ) {
     commands.insert_resource(GhostHouse::new(&map, &dimensions));
 }
@@ -63,7 +80,7 @@ pub struct GhostHouse {
 }
 
 impl GhostHouse {
-    pub fn new(map: &Map, dimensions: &BoardDimensions) -> Self {
+    pub fn new(map: &TileMap, dimensions: &BoardDimensions) -> Self {
         let bottom_left = Self::get_bottom_left(map);
         let rotation = Self::get_rotation(map);
         let spawns = Self::create_spawns(rotation, bottom_left, dimensions);
@@ -74,9 +91,9 @@ impl GhostHouse {
         }
     }
 
-    fn get_bottom_left(map: &Map) -> Position {
+    fn get_bottom_left(map: &TileMap) -> Position {
         map
-            .get_positions_matching(is!(Element::Wall {wall_type: WallType::Ghost, ..}))
+            .get_positions_matching(is!(Element::GhostHouse {..}))
             .into_iter()
             .fold(
                 Position::new(isize::MAX, isize::MAX),
@@ -84,12 +101,12 @@ impl GhostHouse {
             )
     }
 
-    fn get_rotation(map: &Map) -> Rotation {
+    fn get_rotation(map: &TileMap) -> Rotation {
         map
             .position_element_iter()
             .into_iter()
             .filter_map(|(_, elem)| match elem {
-                Element::GhostHouseEntrance {rotation} => Some(*rotation),
+                Element::GhostHouse { rotation } => Some(*rotation),
                 _ => None
             })
             .next()
@@ -147,7 +164,7 @@ impl GhostHouse {
         bottom_left: Position,
         offsets_0: (isize, isize),
         offsets_1: (isize, isize),
-        dimensions: &BoardDimensions
+        dimensions: &BoardDimensions,
     ) -> Spawn {
         let x = bottom_left.x;
         let y = bottom_left.y;
@@ -169,14 +186,6 @@ impl GhostHouse {
             self.spawn_coordinates_of(&Pinky)
         } else {
             self.spawn_coordinates_of(ghost)
-        }
-    }
-
-    pub fn spawn_direction_of(&self, ghost: &Ghost) -> Direction {
-        match *ghost {
-            Blinky => self.entrance_direction.rotate_left(),
-            Pinky => self.entrance_direction,
-            _ => self.entrance_direction.opposite()
         }
     }
 
