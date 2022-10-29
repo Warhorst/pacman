@@ -81,6 +81,6 @@ fn main() {
         .add_plugin(GameOverScreenPlugin)
         .add_plugin(SpecsPerLevelPlugin)
         .add_plugin(DebugPlugin)
-        // .add_plugin(BackgroundNoisePlugin)
+        .add_plugin(BackgroundNoisePlugin)
         .run()
 }
