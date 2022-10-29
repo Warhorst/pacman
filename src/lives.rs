@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::board_dimensions::BoardDimensions;
+use crate::constants::LIFE_DIMENSION;
 use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::interactions::EPacmanHit;
 use crate::life_cycle::LifeCycle;
@@ -48,10 +48,9 @@ impl PointsRequiredForExtraLife {
 fn spawn_lives(
     mut commands: Commands,
     asset_handles: Res<LoadedAssets>,
-    dimensions: Res<BoardDimensions>
 ) {
     for i in 0..LIVES {
-        spawn_life(&mut commands, &asset_handles, i, &dimensions)
+        spawn_life(&mut commands, &asset_handles, i)
     }
 }
 
@@ -59,19 +58,18 @@ fn spawn_life(
     commands: &mut Commands,
     asset_handles: &LoadedAssets,
     life_index: usize,
-    dimensions: &BoardDimensions
 ) {
-    let origin = dimensions.origin();
-    let life_x = origin.x + (life_index as f32) * (dimensions.life());
+    let life_x = life_index as f32 * LIFE_DIMENSION;
 
     commands.spawn()
+        .insert(Name::new("Life"))
         .insert_bundle(SpriteBundle {
             texture: asset_handles.get_handle("textures/pacman/pacman_life.png"),
             sprite: Sprite {
-                custom_size: Some(Vec2::new(dimensions.life(), dimensions.life())),
+                custom_size: Some(Vec2::splat(LIFE_DIMENSION)),
                 ..default()
             },
-            transform: Transform::from_translation(Vec3::new(life_x, origin.y - dimensions.life(), 0.0)),
+            transform: Transform::from_translation(Vec3::new(life_x, - LIFE_DIMENSION, 0.0)),
             ..default()
         })
         .insert(Life(life_index));
@@ -97,12 +95,11 @@ fn add_life_if_player_reaches_specific_score(
     game_assets: Res<LoadedAssets>,
     score: Res<Score>,
     mut points_required_for_extra_life: ResMut<PointsRequiredForExtraLife>,
-    dimensions: Res<BoardDimensions>,
     query: Query<&Life>
 ) {
     if **score >= **points_required_for_extra_life {
         let index = query.iter().count();
-        spawn_life(&mut commands, &game_assets, index, &dimensions);
+        spawn_life(&mut commands, &game_assets, index);
         points_required_for_extra_life.increase_limit();
     }
 }

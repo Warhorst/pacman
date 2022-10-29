@@ -1,12 +1,9 @@
 use bevy::prelude::*;
 use LifeCycle::Ready;
-use crate::board_dimensions::BoardDimensions;
-use crate::constants::{FONT, TEXT_Z};
+use crate::constants::FONT;
 use crate::game_assets::loaded_assets::LoadedAssets;
-use crate::is;
 use crate::life_cycle::LifeCycle;
-use crate::map::TileMap;
-use crate::map::Element;
+use crate::map::FruitSpawn;
 
 pub struct ReadyScreenPlugin;
 
@@ -29,27 +26,28 @@ struct ReadyScreen;
 fn spawn_screen(
     mut commands: Commands,
     game_asset_handles: Res<LoadedAssets>,
-    dimensions: Res<BoardDimensions>,
-    map: Res<TileMap>,
+    fruit_spawn_query: Query<&FruitSpawn>,
 ) {
-    let transform = dimensions.positions_to_trans(map.get_positions_matching(is!(Element::FruitSpawn)), TEXT_Z);
-    commands.spawn_bundle(Text2dBundle {
-        text: Text::from_section(
-            "Ready!".to_string(),
-            TextStyle {
-                font: game_asset_handles.get_handle(FONT),
-                font_size: 20.0,
-                color: Color::rgb(1.0, 1.0, 0.0),
-            },
-        ).with_alignment(
-            TextAlignment {
-                vertical: VerticalAlign::Center,
-                horizontal: HorizontalAlign::Center,
-            }
-        ),
-        transform,
-        ..Default::default()
-    })
+    let transform = Transform::from_translation(fruit_spawn_query.single().0);
+    commands.spawn()
+        .insert(Name::new("ReadyScreen"))
+        .insert_bundle(Text2dBundle {
+            text: Text::from_section(
+                "Ready!".to_string(),
+                TextStyle {
+                    font: game_asset_handles.get_handle(FONT),
+                    font_size: 20.0,
+                    color: Color::rgb(1.0, 1.0, 0.0),
+                },
+            ).with_alignment(
+                TextAlignment {
+                    vertical: VerticalAlign::Center,
+                    horizontal: HorizontalAlign::Center,
+                }
+            ),
+            transform,
+            ..Default::default()
+        })
         .insert(ReadyScreen);
 }
 

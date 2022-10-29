@@ -9,16 +9,15 @@ use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::ghosts::Ghost;
 use crate::ghosts::Ghost::*;
 use crate::is;
-use crate::map::{Element, Rotation, TileMap};
+use crate::map::{Element, Rotation, TileMap, Wall};
 use crate::map::Rotation::{D0, D180, D270, D90};
-use crate::map::walls::Wall;
 use crate::sprite_sheet::SpriteSheet;
 
 /// Parent component for everything related to the ghost house
 #[derive(Component)]
 pub struct GhostHouse;
 
-#[derive(Component)]
+#[derive(Copy, Clone, Component)]
 pub struct GhostSpawn {
     pub ghost: Ghost,
     pub coordinates: Vec3,
@@ -77,6 +76,7 @@ fn get_rotation(tile_map: &TileMap) -> Rotation {
         .expect("the map should at least contain one ghost house entrance")
 }
 
+/// TODO: wrong. Pinky spawns looking down, Inky and Clyde looking up
 fn create_spawns(rotation: Rotation, bottom_left: Position) -> [GhostSpawn; 4] {
     [
         create_blinky_spawn(rotation, bottom_left),

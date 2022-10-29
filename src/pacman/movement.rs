@@ -6,7 +6,7 @@ use crate::common::Direction;
 use crate::common::Direction::*;
 use crate::common::position::Position;
 use crate::constants::{FIELD_DIMENSION, PACMAN_Z, WALL_DIMENSION};
-use crate::map::walls::Wall;
+use crate::map::Wall;
 use crate::pacman::edible_eaten::EdibleEatenStop;
 use crate::pacman::Pacman;
 use crate::speed::Speed;

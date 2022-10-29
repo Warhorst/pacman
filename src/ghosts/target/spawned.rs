@@ -3,6 +3,8 @@ use crate::ghosts::target::TargetSetter;
 use crate::common::Direction;
 use crate::common::Direction::*;
 use crate::common::XYEqual;
+use crate::constants::FIELD_DIMENSION;
+use crate::ghosts::Ghost::{Blinky, Pinky};
 
 impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
     /// Determine the next target coordinates for a ghost when in "Spawned" state.
@@ -23,21 +25,21 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
     /// If a ghost cannot leave the ghost house, he just moves around.
     fn bounce_around(&mut self) {
         let coordinates = self.components.transform.translation;
-        let respawn = self.ghost_house.respawn_coordinates_of(self.components.ghost);
-        let above_respawn = self.coordinates_slightly_in_direction(respawn, self.ghost_house.entrance_direction);
-        let below_respawn = self.coordinates_slightly_in_direction(respawn, self.ghost_house.entrance_direction.opposite());
+        let respawn = self.get_spawn(*self.components.ghost).coordinates;
+        let above_respawn = self.coordinates_slightly_in_direction(respawn, self.get_spawn(Pinky).spawn_direction);
+        let below_respawn = self.coordinates_slightly_in_direction(respawn, self.get_spawn(Pinky).spawn_direction.opposite());
 
         if coordinates.xy_equal_to(&respawn) {
             match *self.components.direction {
-                dir if dir == self.ghost_house.entrance_direction => self.components.target.set(above_respawn),
+                dir if dir == self.get_spawn(Pinky).spawn_direction => self.components.target.set(above_respawn),
                 _ => self.components.target.set(below_respawn)
             };
         } else if coordinates.xy_equal_to(&above_respawn) {
             self.components.target.set(below_respawn);
-            *self.components.direction = self.ghost_house.entrance_direction.opposite();
+            *self.components.direction = self.get_spawn(Pinky).spawn_direction.opposite();
         } else if coordinates.xy_equal_to(&below_respawn) {
             self.components.target.set(above_respawn);
-            *self.components.direction = self.ghost_house.entrance_direction;
+            *self.components.direction = self.get_spawn(Pinky).spawn_direction;
         }
     }
 
@@ -51,23 +53,28 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
 
     fn is_near_center(&self) -> bool {
         let coordinates = self.components.transform.translation;
-        let center = self.ghost_house.center_coordinates();
+        let center = self.get_spawn(Pinky).coordinates;
 
-        match self.ghost_house.entrance_direction {
+        match self.get_spawn(Pinky).spawn_direction {
             Up | Down => coordinates.x == center.x,
             Left | Right => coordinates.y == center.y,
         }
     }
 
     fn move_to_entrance(&mut self) {
-        *self.components.direction = self.ghost_house.entrance_direction;
-        self.components.target.set(self.ghost_house.coordinates_in_front_of_entrance());
+        *self.components.direction = self.get_spawn(Pinky).spawn_direction;
+        let entrance_coordinates = self.get_spawn(Blinky).coordinates;
+        self.components.target.set(entrance_coordinates);
     }
 
     fn is_near_spawn(&self) -> bool {
         let coordinates = self.components.transform.translation;
-        let respawn = self.ghost_house.respawn_coordinates_of(self.components.ghost);
-        match self.ghost_house.entrance_direction {
+        let respawn = match *self.components.ghost {
+            Blinky => self.get_spawn(Pinky).coordinates,
+            _ => self.get_spawn(*self.components.ghost).coordinates,
+        };
+
+        match self.get_spawn(Pinky).spawn_direction {
             Up | Down => coordinates.x == respawn.x,
             Left | Right => coordinates.y == respawn.y
         }
@@ -75,10 +82,10 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
 
     fn move_near_center(&mut self) {
         let coordinates = self.components.transform.translation;
-        let center = self.ghost_house.center_coordinates();
-        let respawn = self.ghost_house.respawn_coordinates_of(self.components.ghost);
+        let center = self.get_spawn(Pinky).coordinates;
+        let respawn = self.get_spawn(*self.components.ghost).coordinates;
 
-        *self.components.direction = match self.ghost_house.entrance_direction {
+        *self.components.direction = match self.get_spawn(Pinky).spawn_direction {
             Up | Down => match respawn.x < center.x {
                 true => Right,
                 false => Left
@@ -89,7 +96,7 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
             }
         };
 
-        match self.ghost_house.entrance_direction {
+        match self.get_spawn(Pinky).spawn_direction {
             Up | Down => self.components.target.set(Vec3::new(center.x, coordinates.y, 0.0)),
             Left | Right => self.components.target.set(Vec3::new(coordinates.x, center.y, 0.0)),
         }
@@ -98,7 +105,7 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
     /// A ghost in the ghost house does not walk a full field in the ghost house (because he would clip into the wall).
     /// When bouncing around in the ghost house, he only moves slightly in one direction.
     fn coordinates_slightly_in_direction(&self, v: Vec3, d: Direction) -> Vec3 {
-        let distance = self.dimensions.field() / 2.0;
+        let distance = FIELD_DIMENSION / 2.0;
         match d {
             Up => Vec3::new(v.x, v.y + distance, v.z),
             Down => Vec3::new(v.x, v.y - distance, v.z),

@@ -12,8 +12,6 @@ use crate::game_assets::GameAssetsPlugin;
 
 use crate::game_over_screen::GameOverScreenPlugin;
 use crate::life_cycle::GameStatePlugin;
-use crate::ghost_corners::GhostCornersPlugin;
-use crate::ghost_house::GhostHousePlugin;
 use crate::ghost_house_gate::GhostHouseGatePlugin;
 use crate::ghosts::GhostPlugin;
 use crate::interactions::InteractionsPlugin;
@@ -26,7 +24,6 @@ use crate::score::ScorePlugin;
 use crate::specs_per_level::SpecsPerLevelPlugin;
 use crate::speed::SpeedPlugin;
 use crate::sprite_sheet::SpriteSheetPlugin;
-use crate::tunnels::TunnelPlugin;
 
 mod camera;
 mod constants;
@@ -34,14 +31,11 @@ mod common;
 mod pacman;
 mod score;
 mod ghosts;
-mod tunnels;
 mod random;
 mod lives;
 mod level;
 mod speed;
 mod map;
-mod ghost_house;
-mod ghost_corners;
 mod ghost_house_gate;
 mod animation;
 mod sprite_sheet;
@@ -52,7 +46,6 @@ mod edibles;
 mod interactions;
 mod game_assets;
 mod specs_per_level;
-mod board_dimensions;
 mod background_noise;
 mod debug;
 
@@ -74,12 +67,9 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(MapPlugin)
         .add_plugin(EdiblePlugin)
-        .add_plugin(GhostHousePlugin)
-        .add_plugin(GhostCornersPlugin)
         .add_plugin(PacmanPlugin)
         .add_plugin(ScorePlugin)
         .add_plugin(GhostPlugin)
-        .add_plugin(TunnelPlugin)
         .add_plugin(RandomPlugin)
         .add_plugin(LivesPlugin)
         .add_plugin(LevelPlugin)

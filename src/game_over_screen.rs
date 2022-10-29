@@ -1,11 +1,8 @@
 use bevy::prelude::*;
-use crate::board_dimensions::BoardDimensions;
-use crate::constants::{FONT, TEXT_Z};
+use crate::constants::FONT;
 use crate::game_assets::loaded_assets::LoadedAssets;
-use crate::is;
 use crate::life_cycle::LifeCycle::GameOver;
-use crate::map::TileMap;
-use crate::map::Element;
+use crate::map::FruitSpawn;
 
 pub struct GameOverScreenPlugin;
 
@@ -25,10 +22,9 @@ struct GameOverScreen;
 fn spawn_screen(
     mut commands: Commands,
     game_asset_handles: Res<LoadedAssets>,
-    map: Res<TileMap>,
-    dimensions: Res<BoardDimensions>
+    fruit_spawn_query: Query<&FruitSpawn>
 ) {
-    let transform = dimensions.positions_to_trans(map.get_positions_matching(is!(Element::FruitSpawn)), TEXT_Z);
+    let transform = Transform::from_translation(fruit_spawn_query.single().0);
     commands.spawn_bundle(Text2dBundle {
         text: Text::from_section(
             "GAME OVER".to_string(),

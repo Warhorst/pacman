@@ -1,13 +1,13 @@
 use std::time::Duration;
 use bevy::prelude::*;
-use crate::board_dimensions::BoardDimensions;
 
-use crate::constants::{FONT, POINTS_PER_DOT, POINTS_PER_ENERGIZER, POINTS_PER_GHOST, TEXT_Z};
+use crate::constants::{FIELD_DIMENSION, FONT, POINTS_PER_DOT, POINTS_PER_ENERGIZER, POINTS_PER_GHOST, TEXT_Z};
 use crate::edibles::energizer::EnergizerOver;
 use crate::interactions::{EDotEaten, EEnergizerEaten, EFruitEaten, EGhostEaten};
 use crate::life_cycle::LifeCycle::{PacmanHit, Running, Start};
 use crate::edibles::fruit::Fruit::*;
 use crate::game_assets::loaded_assets::LoadedAssets;
+use crate::map::Map;
 
 pub struct ScorePlugin;
 
@@ -61,65 +61,71 @@ struct EatenGhostCounter(usize);
 fn create_score_boards(
     mut commands: Commands,
     game_asset_handles: Res<LoadedAssets>,
-    dimensions: Res<BoardDimensions>
+    map_query: Query<&Map>,
 ) {
-    let origin = dimensions.origin();
+    let map = map_query.single();
 
-    commands.spawn_bundle(Text2dBundle {
-        text: Text::from_section(
-            "0".to_string(),
-            TextStyle {
-                font: game_asset_handles.get_handle(FONT),
-                font_size: 20.0,
-                color: Color::rgb(1.0, 1.0, 1.0),
-            },
-        ).with_alignment(
-            TextAlignment {
-                vertical: VerticalAlign::Center,
-                horizontal: HorizontalAlign::Left,
-            }
-        ),
-        transform: Transform::from_xyz(origin.x, origin.y + dimensions.board_height(), 0.0),
-        ..Default::default()
-    })
+    commands.spawn()
+        .insert(Name::new("ScoreBoard"))
+        .insert_bundle(Text2dBundle {
+            text: Text::from_section(
+                "0".to_string(),
+                TextStyle {
+                    font: game_asset_handles.get_handle(FONT),
+                    font_size: 20.0,
+                    color: Color::rgb(1.0, 1.0, 1.0),
+                },
+            ).with_alignment(
+                TextAlignment {
+                    vertical: VerticalAlign::Center,
+                    horizontal: HorizontalAlign::Left,
+                }
+            ),
+            transform: Transform::from_xyz(0.0, map.height as f32 * FIELD_DIMENSION, 0.0),
+            ..Default::default()
+        })
         .insert(ScoreBoard);
 
-    commands.spawn_bundle(Text2dBundle {
-        text: Text::from_section(
-            "0".to_string(),
-            TextStyle {
-                font: game_asset_handles.get_handle(FONT),
-                font_size: 20.0,
-                color: Color::rgb(1.0, 1.0, 1.0),
-            },
-        ).with_alignment(
-            TextAlignment {
-                vertical: VerticalAlign::Center,
-                horizontal: HorizontalAlign::Center,
-            }
-        ),
-        transform: Transform::from_xyz(origin.x + dimensions.board_width() / 2.0, origin.y + dimensions.board_height(), 0.0),
-        ..Default::default()
-    })
+    commands.spawn()
+        .insert(Name::new("HighScoreBoard"))
+        .insert_bundle(Text2dBundle {
+            text: Text::from_section(
+                "0".to_string(),
+                TextStyle {
+                    font: game_asset_handles.get_handle(FONT),
+                    font_size: 20.0,
+                    color: Color::rgb(1.0, 1.0, 1.0),
+                },
+            ).with_alignment(
+                TextAlignment {
+                    vertical: VerticalAlign::Center,
+                    horizontal: HorizontalAlign::Center,
+                }
+            ),
+            transform: Transform::from_xyz((map.width as f32 * FIELD_DIMENSION) / 2.0, map.height as f32 * FIELD_DIMENSION, 0.0),
+            ..Default::default()
+        })
         .insert(ScoreBoard);
 
-    commands.spawn_bundle(Text2dBundle {
-        text: Text::from_section(
-            "HIGH SCORE".to_string(),
-            TextStyle {
-                font: game_asset_handles.get_handle(FONT),
-                font_size: 20.0,
-                color: Color::rgb(1.0, 1.0, 1.0),
-            },
-        ).with_alignment(
-            TextAlignment {
-                vertical: VerticalAlign::Center,
-                horizontal: HorizontalAlign::Center,
-            }
-        ),
-        transform: Transform::from_xyz(origin.x + dimensions.board_width() / 2.0, origin.y + dimensions.board_height() + dimensions.field(), 0.0),
-        ..Default::default()
-    });
+    commands.spawn()
+        .insert(Name::new("HighScoreLabel"))
+        .insert_bundle(Text2dBundle {
+            text: Text::from_section(
+                "HIGH SCORE".to_string(),
+                TextStyle {
+                    font: game_asset_handles.get_handle(FONT),
+                    font_size: 20.0,
+                    color: Color::rgb(1.0, 1.0, 1.0),
+                },
+            ).with_alignment(
+                TextAlignment {
+                    vertical: VerticalAlign::Center,
+                    horizontal: HorizontalAlign::Center,
+                }
+            ),
+            transform: Transform::from_xyz((map.width as f32 * FIELD_DIMENSION) / 2.0, map.height as f32 * FIELD_DIMENSION + FIELD_DIMENSION, 0.0),
+            ..Default::default()
+        });
 }
 
 fn update_scoreboard(
@@ -213,7 +219,7 @@ fn spawn_score_text(
     game_asset_handles: &LoadedAssets,
     color: Color,
     points: usize,
-    coordinates: Vec3
+    coordinates: Vec3,
 ) {
     commands.spawn_bundle(Text2dBundle {
         text: Text::from_section(
@@ -240,7 +246,7 @@ fn spawn_score_text(
 fn update_score_texts(
     mut commands: Commands,
     time: Res<Time>,
-    mut query: Query<(Entity, &mut ScoreTextTimer), With<ScoreText>>
+    mut query: Query<(Entity, &mut ScoreTextTimer), With<ScoreText>>,
 ) {
     for (entity, mut timer) in &mut query {
         timer.tick(time.delta());
@@ -253,7 +259,7 @@ fn update_score_texts(
 
 fn despawn_score_texts(
     mut commands: Commands,
-    query: Query<Entity, With<ScoreText>>
+    query: Query<Entity, With<ScoreText>>,
 ) {
     for e in &query {
         commands.entity(e).despawn()

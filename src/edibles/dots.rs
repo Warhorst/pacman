@@ -6,8 +6,7 @@ use crate::edibles::Edible;
 use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::interactions::EDotEaten;
 use crate::life_cycle::LifeCycle::*;
-use crate::is;
-use crate::map::{DotSpawn, Element, TileMap};
+use crate::map::DotSpawn;
 
 pub struct DotPlugin;
 
@@ -17,7 +16,7 @@ impl Plugin for DotPlugin {
             .add_system_set(
                 SystemSet::on_enter(Start)
                     .with_system(spawn_dots)
-                    .with_system(spawn_eaten_dots)
+                    .with_system(create_eaten_dots)
             )
             .add_system_set(
                 SystemSet::on_update(Running).with_system(play_waka_when_dot_was_eaten)
@@ -61,11 +60,11 @@ fn spawn_dots(
     }
 }
 
-fn spawn_eaten_dots(
+fn create_eaten_dots(
     mut commands: Commands,
-    map: Res<TileMap>,
+    dot_spawn_query: Query<&DotSpawn>
 ) {
-    let num_dots = map.get_positions_matching(is!(Element::DotSpawn)).into_iter().count();
+    let num_dots = dot_spawn_query.iter().count();
     commands.insert_resource(EatenDots::new(num_dots))
 }
 

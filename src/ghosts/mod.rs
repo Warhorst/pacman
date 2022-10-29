@@ -8,8 +8,8 @@ use crate::ghosts::state::StatePlugin;
 use crate::ghosts::target::{Target, TargetPlugin};
 use crate::ghosts::textures::{start_animation, update_ghost_appearance};
 use crate::interactions::EGhostEaten;
-use crate::tunnels::GhostPassedTunnel;
 use crate::life_cycle::LifeCycle::*;
+use crate::map::tunnel::GhostPassedTunnel;
 
 pub mod movement;
 pub mod spawn;

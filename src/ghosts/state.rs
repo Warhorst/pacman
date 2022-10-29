@@ -2,18 +2,19 @@ use std::fmt::Formatter;
 use bevy::ecs::event::Event;
 use bevy::ecs::query::WorldQuery;
 use bevy::prelude::*;
-use crate::board_dimensions::BoardDimensions;
 
 use crate::common::Direction;
+use crate::common::position::Position;
 use crate::edibles::energizer::EnergizerOver;
 use crate::life_cycle::LifeCycle::*;
 use crate::ghosts::target::Target;
-use crate::ghost_house::GhostHouse;
 use crate::ghosts::Ghost;
 use crate::ghosts::schedule::Schedule;
 use crate::interactions::{EEnergizerEaten, EGhostEaten, LPacmanEnergizerHitDetection, LPacmanGhostHitDetection};
 use crate::common::XYEqual;
+use crate::ghosts::Ghost::{Blinky, Pinky};
 use crate::ghosts::state::State::*;
+use crate::map::ghost_house::GhostSpawn;
 
 pub struct StatePlugin;
 
@@ -61,11 +62,10 @@ struct StateUpdateComponents<'a> {
 
 fn update_state(
     schedule: Res<Schedule>,
-    ghost_house: Res<GhostHouse>,
-    dimensions: Res<BoardDimensions>,
     energizer_over_events: EventReader<EnergizerOver>,
     energizer_eaten_events: EventReader<EEnergizerEaten>,
     ghost_eaten_events: EventReader<EGhostEaten>,
+    spawns_query: Query<&GhostSpawn>,
     mut query: Query<StateUpdateComponents, With<Ghost>>,
 ) {
     let energizer_eaten = energizer_eaten(energizer_eaten_events);
@@ -79,28 +79,28 @@ fn update_state(
         }
 
         if energizer_eaten && matches!(*components.state, Chase | Scatter) {
-            process_energizer_eaten(&dimensions, &mut components);
+            process_energizer_eaten(&mut components);
             continue;
         }
 
         match *components.state {
-            Spawned => process_spawned(&schedule, &ghost_house, &mut components),
-            Scatter | Chase => process_scatter_chase(&schedule, &dimensions, &mut components),
+            Spawned => process_spawned(&schedule, &mut components, &spawns_query),
+            Scatter | Chase => process_scatter_chase(&schedule, &mut components),
             Frightened => process_frightened(&schedule, energizer_over, &mut components),
-            Eaten => process_eaten(&ghost_house, &mut components),
+            Eaten => process_eaten(&mut components, &spawns_query),
         }
     }
 }
 
 fn update_state_on_eaten_pause(
     schedule: Res<Schedule>,
-    ghost_house: Res<GhostHouse>,
+    spawns_query: Query<&GhostSpawn>,
     mut query: Query<StateUpdateComponents, With<Ghost>>,
 ) {
     for mut components in &mut query {
         match *components.state {
-            Spawned => process_spawned(&schedule, &ghost_house, &mut components),
-            Eaten => process_eaten(&ghost_house, &mut components),
+            Spawned => process_spawned(&schedule, &mut components, &spawns_query),
+            Eaten => process_eaten(&mut components, &spawns_query),
             _ => continue
         }
     }
@@ -126,7 +126,6 @@ fn ghost_eaten(entity: Entity, eaten_events: &Vec<EGhostEaten>) -> bool {
 }
 
 fn process_energizer_eaten(
-    dimensions: &BoardDimensions,
     components: &mut StateUpdateComponentsItem
 ) {
     let target_coordinates = if components.target.is_set() {
@@ -134,23 +133,25 @@ fn process_energizer_eaten(
     } else {
         components.transform.translation
     };
-    let target_position = dimensions.vec_to_pos(&target_coordinates);
-    let coordinates_ghost_came_from = dimensions.pos_to_vec(&target_position.get_neighbour_in_direction(&components.direction.opposite()).position, 0.0);
+    let target_position = Position::from_vec(&target_coordinates);
+    let coordinates_ghost_came_from = target_position.get_neighbour_in_direction(&components.direction.opposite()).position.to_vec(0.0);
 
-    *components.state = State::Frightened;
+    *components.state = Frightened;
     components.direction.reverse();
     components.target.set(coordinates_ghost_came_from);
 }
 
 fn process_spawned(
     schedule: &Schedule,
-    ghost_house: &GhostHouse,
     components: &mut StateUpdateComponentsItem,
+    spawns_query: &Query<&GhostSpawn>
 ) {
+    let blinky_spawn = spawns_query.iter().filter(|spawn| spawn.ghost == Blinky).next().expect("blinky should have a spawn");
+
     let coordinates = components.transform.translation;
-    if coordinates.xy_equal_to(&ghost_house.coordinates_in_front_of_entrance()) {
+    if coordinates.xy_equal_to(&blinky_spawn.coordinates) {
         *components.state = schedule.current_state();
-        *components.direction = ghost_house.entrance_direction.rotate_left();
+        *components.direction = blinky_spawn.spawn_direction;
     }
 }
 
@@ -158,7 +159,6 @@ fn process_spawned(
 /// the ghost reverses his location.
 fn process_scatter_chase(
     schedule: &Schedule,
-    dimensions: &BoardDimensions,
     components: &mut StateUpdateComponentsItem,
 ) {
     let schedule_state = schedule.current_state();
@@ -172,8 +172,8 @@ fn process_scatter_chase(
             components.transform.translation
         };
 
-        let target_position = dimensions.vec_to_pos(&target_coordinates);
-        let coordinates_ghost_came_from = dimensions.pos_to_vec(&target_position.get_neighbour_in_direction(&components.direction.opposite()).position, 0.0);
+        let target_position = Position::from_vec(&target_coordinates);
+        let coordinates_ghost_came_from = target_position.get_neighbour_in_direction(&components.direction.opposite()).position.to_vec(0.0);
 
         components.direction.reverse();
         components.target.set(coordinates_ghost_came_from);
@@ -191,12 +191,20 @@ fn process_frightened(
 }
 
 fn process_eaten(
-    ghost_house: &GhostHouse,
     components: &mut StateUpdateComponentsItem,
+    spawns_query: &Query<&GhostSpawn>
 ) {
+    let respawn = spawns_query
+        .iter()
+        .filter(|spawn| match *components.ghost {
+            Blinky => spawn.ghost == Pinky,
+            _ => spawn.ghost == *components.ghost
+        })
+        .next()
+        .expect("every ghost should have a spawn");
     let coordinates = components.transform.translation;
 
-    if coordinates.xy_equal_to(&ghost_house.respawn_coordinates_of(components.ghost)) {
+    if coordinates.xy_equal_to(&respawn.coordinates) {
         *components.state = Spawned
     }
 }

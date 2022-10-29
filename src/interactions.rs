@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::board_dimensions::BoardDimensions;
+use crate::common::position::Position;
 
 use crate::edibles::dots::{Dot, EatenDots};
 use crate::edibles::energizer::Energizer;
@@ -62,13 +62,12 @@ fn pacman_hits_ghost(
     mut commands: Commands,
     mut killed_event_writer: EventWriter<EPacmanHit>,
     mut eat_event_writer: EventWriter<EGhostEaten>,
-    dimensions: Res<BoardDimensions>,
     pacman_query: Query<&Transform, With<Pacman>>,
     ghost_query: Query<(Entity, &Transform, &State), With<Ghost>>,
 ) {
     for pacman_transform in &pacman_query {
         for (entity, ghost_transform, state) in &ghost_query {
-            if dimensions.trans_to_pos(pacman_transform) == dimensions.trans_to_pos(ghost_transform) {
+            if Position::from_vec(&pacman_transform.translation) == Position::from_vec(&ghost_transform.translation) {
                 if let State::Scatter | State::Chase = state {
                     killed_event_writer.send(EPacmanHit)
                 }
@@ -86,13 +85,12 @@ fn pacman_eat_dot(
     mut commands: Commands,
     mut event_writer: EventWriter<EDotEaten>,
     mut eaten_dots: ResMut<EatenDots>,
-    dimensions: Res<BoardDimensions>,
     pacman_positions: Query<&Transform, With<Pacman>>,
     dot_positions: Query<(Entity, &Transform), With<Dot>>,
 ) {
     for pacman_tf in &pacman_positions {
         for (entity, dot_tf) in &dot_positions {
-            if dimensions.trans_to_pos(pacman_tf) == dimensions.trans_to_pos(dot_tf) {
+            if Position::from_vec(&pacman_tf.translation) == Position::from_vec(&dot_tf.translation) {
                 commands.entity(entity).despawn();
                 eaten_dots.increment();
                 event_writer.send(EDotEaten)
@@ -104,13 +102,12 @@ fn pacman_eat_dot(
 fn pacman_eat_energizer(
     mut commands: Commands,
     mut event_writer: EventWriter<EEnergizerEaten>,
-    dimensions: Res<BoardDimensions>,
     pacman_positions: Query<&Transform, With<Pacman>>,
     energizer_positions: Query<(Entity, &Transform), With<Energizer>>,
 ) {
     for pacman_transform in &pacman_positions {
         for (energizer_entity, energizer_transform) in &energizer_positions {
-            if dimensions.trans_to_pos(energizer_transform) == dimensions.trans_to_pos(pacman_transform) {
+            if Position::from_vec(&energizer_transform.translation) == Position::from_vec(&pacman_transform.translation) {
                 commands.entity(energizer_entity).despawn();
                 event_writer.send(EEnergizerEaten)
             }
@@ -122,13 +119,12 @@ fn pacman_eat_energizer(
 fn eat_fruit_when_pacman_touches_it(
     mut commands: Commands,
     mut event_writer: EventWriter<EFruitEaten>,
-    dimensions: Res<BoardDimensions>,
     pacman_query: Query<&Transform, With<Pacman>>,
     fruit_query: Query<(Entity, &Fruit, &Transform)>
 ) {
     for pacman_tf in &pacman_query {
         for (entity, fruit, fruit_tf) in &fruit_query {
-            if dimensions.trans_to_pos(pacman_tf) == dimensions.trans_to_pos(fruit_tf) {
+            if Position::from_vec(&pacman_tf.translation) == Position::from_vec(&fruit_tf.translation) {
                 commands.entity(entity).despawn();
                 commands.remove_resource::<FruitDespawnTimer>();
                 event_writer.send(EFruitEaten(*fruit, *fruit_tf))

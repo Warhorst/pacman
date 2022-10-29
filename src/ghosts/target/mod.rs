@@ -2,20 +2,20 @@ use std::cmp::Ordering;
 
 use bevy::prelude::*;
 use bevy::ecs::query::WorldQuery;
-use crate::board_dimensions::BoardDimensions;
+use bevy::utils::{HashMap, HashSet};
 
 use crate::common::position::{Neighbour, Position};
 use crate::common::Direction;
 use crate::common::Direction::*;
-use crate::ghost_corners::GhostCorners;
-use crate::ghost_house::GhostHouse;
+use crate::constants::FIELD_DIMENSION;
 use crate::ghost_house_gate::GhostHouseGate;
 use crate::life_cycle::LifeCycle::*;
 use crate::ghosts::Ghost;
 use crate::ghosts::Ghost::*;
 use crate::ghosts::state::{State, StateSetter};
 use crate::ghosts::state::State::*;
-use crate::map::board::Board;
+use crate::map::ghost_house::GhostSpawn;
+use crate::map::{GhostCorner, Wall};
 use crate::pacman::Pacman;
 use crate::random::Random;
 
@@ -59,12 +59,11 @@ pub struct TargetComponents<'a> {
 }
 
 fn set_target(
-    board: Res<Board>,
-    dimensions: Res<BoardDimensions>,
     random: Res<Random>,
-    ghost_corners: Res<GhostCorners>,
-    ghost_house: Res<GhostHouse>,
     ghost_house_gate: Res<GhostHouseGate>,
+    corner_query: Query<&GhostCorner>,
+    wall_query: Query<&Transform, With<Wall>>,
+    ghost_spawn_query: Query<&GhostSpawn>,
     pacman_query: Query<(&Transform, &Direction), With<Pacman>>,
     mut ghost_query: Query<TargetComponents, Without<Pacman>>,
 ) {
@@ -78,15 +77,14 @@ fn set_target(
 
         let (state, ghost) = (*components.state, *components.ghost);
         let mut setter = TargetSetter::new(
-            &board,
-            &dimensions,
             &random,
-            &ghost_corners,
-            &ghost_house,
             &ghost_house_gate,
             *pm_transform,
             *pm_dir,
             blinky_transform,
+            &corner_query,
+            &wall_query,
+            &ghost_spawn_query,
             &mut components,
         );
 
@@ -109,12 +107,11 @@ fn set_target(
 ///
 /// TODO: I provide more resources than necessary, but I want to reuse the TargetSetter. Not ideal, but the best solution for now.
 fn set_target_on_ghost_pause(
-    board: Res<Board>,
-    dimensions: Res<BoardDimensions>,
     random: Res<Random>,
-    ghost_corners: Res<GhostCorners>,
-    ghost_house: Res<GhostHouse>,
     ghost_house_gate: Res<GhostHouseGate>,
+    corner_query: Query<&GhostCorner>,
+    wall_query: Query<&Transform, With<Wall>>,
+    ghost_spawn_query: Query<&GhostSpawn>,
     pacman_query: Query<(&Transform, &Direction), With<Pacman>>,
     mut ghost_query: Query<TargetComponents, Without<Pacman>>,
 ) {
@@ -128,15 +125,14 @@ fn set_target_on_ghost_pause(
 
         let state = *components.state;
         let mut setter = TargetSetter::new(
-            &board,
-            &dimensions,
             &random,
-            &ghost_corners,
-            &ghost_house,
             &ghost_house_gate,
             *pm_transform,
             *pm_dir,
             blinky_transform,
+            &corner_query,
+            &wall_query,
+            &ghost_spawn_query,
             &mut components,
         );
 
@@ -149,25 +145,37 @@ fn set_target_on_ghost_pause(
 }
 
 struct TargetSetter<'a, 'b, 'c> {
-    board: &'a Board,
-    dimensions: &'a BoardDimensions,
     random: &'a Random,
-    ghost_corners: &'a GhostCorners,
-    ghost_house: &'a GhostHouse,
     ghost_house_gate: &'a GhostHouseGate,
     pacman_transform: Transform,
     pacman_direction: Direction,
     blinky_transform: Transform,
+    corner_positions: HashMap<Ghost, Position>,
+    wall_positions: HashSet<Position>,
+    ghost_spawns: HashMap<Ghost, GhostSpawn>,
     components: &'a mut TargetComponentsItem<'b, 'c>,
 }
 
 impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
-    pub fn new(board: &'a Board, dimensions: &'a BoardDimensions, random: &'a Random, ghost_corners: &'a GhostCorners, ghost_house: &'a GhostHouse, ghost_house_gate: &'a GhostHouseGate, pacman_transform: Transform, pacman_direction: Direction, blinky_transform: Transform, components: &'a mut TargetComponentsItem<'b, 'c>) -> Self {
-        Self { board, dimensions, random, ghost_corners, ghost_house, ghost_house_gate, pacman_transform, pacman_direction, blinky_transform, components }
+    pub fn new(
+        random: &'a Random,
+        ghost_house_gate: &'a GhostHouseGate,
+        pacman_transform: Transform,
+        pacman_direction: Direction,
+        blinky_transform: Transform,
+        corner_query: &Query<&GhostCorner>,
+        wall_query: &Query<&Transform, With<Wall>>,
+        ghost_spawn_query: &Query<&GhostSpawn>,
+        components: &'a mut TargetComponentsItem<'b, 'c>
+    ) -> Self {
+        let corner_positions = corner_query.iter().map(|corner| (corner.ghost, corner.position)).collect();
+        let wall_positions = wall_query.iter().map(|transform| Position::from_vec(&transform.translation)).collect();
+        let ghost_spawns = ghost_spawn_query.iter().map(|spawn| (spawn.ghost, *spawn)).collect();
+        Self { random, ghost_spawns, ghost_house_gate, pacman_transform, pacman_direction, blinky_transform, corner_positions, wall_positions, components }
     }
 
     fn set_blinky_chase_target(&mut self) {
-        let pacman_position = self.dimensions.trans_to_pos(&self.pacman_transform);
+        let pacman_position = Position::from_vec(&self.pacman_transform.translation);
         let next_target_neighbour = self.get_nearest_neighbour_to(pacman_position);
         self.set_target_to_neighbour(next_target_neighbour)
     }
@@ -181,7 +189,7 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
     /// Return the pinky target position 4 fields in pacmans direction.
     /// If pacman is idle, the field to its right is choosen.
     fn calculate_pinky_target(&self) -> Position {
-        let pacman_position = &self.dimensions.trans_to_pos(&self.pacman_transform);
+        let pacman_position = Position::from_vec(&self.pacman_transform.translation);
         let x = pacman_position.x;
         let y = pacman_position.y;
 
@@ -205,8 +213,8 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
     /// 2. You shoot a line from blinkys position trough this field
     /// 3. You double this distance. The field this line is ending on is inkys target.
     fn calculate_inky_target(&self) -> Position {
-        let pacman_position = self.dimensions.trans_to_pos(&self.pacman_transform);
-        let blinky_position = self.dimensions.trans_to_pos(&self.blinky_transform);
+        let pacman_position = Position::from_vec(&self.pacman_transform.translation);
+        let blinky_position = Position::from_vec(&self.blinky_transform.translation);
         let position_pacman_is_facing = pacman_position.get_position_in_direction_with_offset(&self.pacman_direction, 2);
         let x_diff = position_pacman_is_facing.x - blinky_position.x;
         let y_diff = position_pacman_is_facing.y - blinky_position.y;
@@ -215,9 +223,9 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
 
     fn set_clyde_chase_target(&mut self) {
         let target = if self.clyde_is_near_pacman() {
-            self.ghost_corners.get_corner(self.components.ghost)
+            *self.corner_positions.get(&self.components.ghost).unwrap()
         } else {
-            self.dimensions.trans_to_pos(&self.pacman_transform)
+            Position::from_vec(&self.pacman_transform.translation)
         };
 
         let next_target_neighbour = self.get_nearest_neighbour_to(target);
@@ -225,28 +233,28 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
     }
 
     fn clyde_is_near_pacman(&self) -> bool {
-        let pacman_position = self.dimensions.trans_to_pos(&self.pacman_transform);
+        let pacman_position = Position::from_vec(&self.pacman_transform.translation);
         let clyde_coordinates = self.components.transform.translation;
-        let pacman_coordinates = self.dimensions.pos_to_vec(&pacman_position, clyde_coordinates.z);
+        let pacman_coordinates = pacman_position.to_vec(clyde_coordinates.z);
         let distance = clyde_coordinates.distance(pacman_coordinates);
-        distance < self.dimensions.field() * 8.0
+        distance < FIELD_DIMENSION * 8.0
     }
 
     fn set_scatter_target(&mut self) {
-        let corner_pos = self.ghost_corners.get_corner(self.components.ghost);
+        let corner_pos = *self.corner_positions.get(&self.components.ghost).unwrap();
         let next_target_neighbour = self.get_nearest_neighbour_to(corner_pos);
         self.set_target_to_neighbour(next_target_neighbour)
     }
 
     fn set_frightened_target(&mut self) {
-        let possible_neighbours = self.dimensions.trans_to_pos(self.components.transform)
+        let possible_neighbours = Position::from_vec(&self.components.transform.translation)
             .get_neighbours()
             .into_iter()
             .filter(|n| n.direction != self.components.direction.opposite())
-            .filter(|n| !self.board.position_is_wall_or_entrance(&n.position))
+            .filter(|n| !self.wall_positions.contains(&n.position))
             .collect::<Vec<_>>();
         let next_target_neighbour = match possible_neighbours.len() {
-            0 => self.dimensions.trans_to_pos(self.components.transform).neighbour_behind(&self.components.direction),
+            0 => Position::from_vec(&self.components.transform.translation).neighbour_behind(&self.components.direction),
             1 => possible_neighbours.get(0).unwrap().clone(),
             len => possible_neighbours.get(self.random.zero_to(len)).unwrap().clone()
         };
@@ -260,17 +268,21 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
     /// if due to some circumstances (like bad map design) a ghost has no other way to go, we allow the pour soul to
     /// turn around.
     fn get_nearest_neighbour_to(&self, target: Position) -> Neighbour {
-        self.dimensions.trans_to_pos(self.components.transform).get_neighbours()
+        Position::from_vec(&self.components.transform.translation).get_neighbours()
             .into_iter()
             .filter(|n| n.direction != self.components.direction.opposite())
-            .filter(|n| !self.board.position_is_wall_or_entrance(&n.position))
+            .filter(|n| !self.wall_positions.contains(&n.position))
             .min_by(|n_a, n_b| minimal_distance_to_neighbours(&target, n_a, n_b))
-            .unwrap_or_else(|| self.dimensions.trans_to_pos(self.components.transform).neighbour_behind(&self.components.direction))
+            .unwrap_or_else(|| Position::from_vec(&self.components.transform.translation).neighbour_behind(&self.components.direction))
     }
 
     fn set_target_to_neighbour(&mut self, neighbour: Neighbour) {
         *self.components.direction = neighbour.direction;
-        self.components.target.set(self.dimensions.pos_to_vec(&neighbour.position, 0.0));
+        self.components.target.set(neighbour.position.to_vec(0.0));
+    }
+
+    fn get_spawn(&self, ghost: Ghost) -> &GhostSpawn {
+        self.ghost_spawns.get(&ghost).unwrap()
     }
 }
 

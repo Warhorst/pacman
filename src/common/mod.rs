@@ -4,8 +4,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::common::Direction::*;
 use crate::common::position::Position;
-use crate::map::Rotation;
-use crate::map::Rotation::*;
 
 pub mod position;
 
@@ -24,33 +22,6 @@ impl Direction {
             Down => Up,
             Right => Left,
             Left => Right
-        }
-    }
-
-    pub fn rotate_right(&self) -> Direction {
-        match self {
-            Up => Right,
-            Right => Down,
-            Down => Left,
-            Left => Up
-        }
-    }
-
-    pub fn rotate_left(&self) -> Direction {
-        match self {
-            Up => Left,
-            Left => Down,
-            Down => Right,
-            Right => Up
-        }
-    }
-
-    pub fn rotate(&self, rotation: Rotation) -> Self {
-        match rotation {
-            D0 => *self,
-            D90 => self.rotate_right(),
-            D180 => self.opposite(),
-            D270 => self.rotate_left(),
         }
     }
 

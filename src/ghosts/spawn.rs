@@ -10,6 +10,7 @@ use crate::map::ghost_house::GhostSpawn;
 use crate::specs_per_level::SpecsPerLevel;
 use crate::speed::Speed;
 use crate::sprite_sheet::SpriteSheet;
+use crate::common::Direction::*;
 
 pub fn spawn_ghosts(
     mut commands: Commands,
@@ -35,6 +36,12 @@ fn spawn_ghost(
     let spawn_direction = spawn.spawn_direction;
     let spawn_coordinates = spawn.coordinates;
     let mut animations = create_animations_for_ghost(&spawn.ghost, game_assets, sprite_sheets);
+    animations.change_animation_to(match spawn.spawn_direction {
+        Up => "normal_up",
+        Down => "normal_down",
+        Left => "normal_left",
+        Right => "normal_right",
+    });
     animations.stop();
 
     commands

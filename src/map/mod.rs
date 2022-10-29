@@ -7,45 +7,57 @@ use bevy_common_assets::json::JsonAssetPlugin;
 use serde::{Deserialize, Serialize};
 
 use Rotation::*;
-use crate::board_dimensions::BoardDimensions;
 
+use crate::animation::Animations;
 use crate::common::{Direction, FromPositions};
 use crate::common::position::Position;
 use crate::constants::{DOT_Z, ENERGIZER_Z, FRUIT_Z, PACMAN_Z};
 use crate::game_assets::loaded_assets::LoadedAssets;
-use crate::life_cycle::LifeCycle::Loading;
-use crate::map::board::Board;
-use crate::sprite_sheet::SpriteSheet;
-use crate::map::walls::WallsPlugin;
-
+use crate::ghosts::Ghost;
+use crate::ghosts::Ghost::{Blinky, Clyde, Inky, Pinky};
 use crate::is;
+use crate::life_cycle::LifeCycle::{LevelTransition, Loading};
 use crate::map::ghost_house::spawn_ghost_house;
-use crate::map::walls::spawn_walls;
+use crate::map::labyrinth::spawn_labyrinth;
+use crate::map::tunnel::{spawn_tunnel_hallways, spawn_tunnels, TunnelPlugin};
+use crate::sprite_sheet::SpriteSheet;
 
-pub mod walls;
-pub mod board;
+pub mod labyrinth;
 #[cfg(test)]
 mod map_creator;
 pub mod ghost_house;
+pub mod tunnel;
 
 pub struct MapPlugin;
 
 impl Plugin for MapPlugin {
     fn build(&self, app: &mut App) {
         app
+            .add_plugin(TunnelPlugin)
             .add_plugin(JsonAssetPlugin::<RawMap>::new(&["map.json"]))
-            .add_plugin(WallsPlugin)
             .add_system_set(
                 SystemSet::on_exit(Loading).with_system(spawn_map)
+            )
+            .add_system_set(
+                SystemSet::on_enter(LevelTransition).with_system(set_animation_to_blinking)
+            )
+            .add_system_set(
+                SystemSet::on_exit(LevelTransition).with_system(set_animation_to_idle)
             )
         ;
     }
 }
 
 /// Component for the parent map entity
-/// TODO: Maybe add map dimensions here
 #[derive(Component)]
-pub struct Map;
+pub struct Map {
+    pub width: usize,
+    pub height: usize
+}
+
+/// Component to identify a wall
+#[derive(Component)]
+pub struct Wall;
 
 #[derive(Component, Deref)]
 pub struct PacmanSpawn(pub Vec3);
@@ -68,6 +80,12 @@ pub struct EnergizerSpawn(pub Vec3);
 #[derive(Component, Deref)]
 pub struct FruitSpawn(pub Vec3);
 
+#[derive(Component)]
+pub struct GhostCorner {
+    pub ghost: Ghost,
+    pub position: Position
+}
+
 fn spawn_map(
     mut commands: Commands,
     loaded_assets: Res<LoadedAssets>,
@@ -76,30 +94,29 @@ fn spawn_map(
 ) {
     let fields = fields_assets.get(&loaded_assets.get_handle("maps/default.map.json")).expect("the map should be loaded at this point");
     let tile_map = TileMap::new(&fields);
-    let board = Board::new(&tile_map);
-    let board_dimensions = BoardDimensions::new(&board);
 
     let map = commands
         .spawn()
         .insert_bundle(SpatialBundle::default())
-        .insert(Map)
+        .insert(Map {
+            width: tile_map.get_width(),
+            height: tile_map.get_height()
+        })
         .insert(Name::new("Map"))
         .id();
 
-    let children = spawn_walls(&mut commands, &tile_map, &loaded_assets, &sprite_sheets)
+    let children = [spawn_labyrinth(&mut commands, &tile_map, &loaded_assets, &sprite_sheets)]
         .into_iter()
         .chain([spawn_dot_spawns(&mut commands, &tile_map)])
         .chain([spawn_energizer_spawns(&mut commands, &tile_map)])
         .chain([spawn_pacman_spawn(&mut commands, &tile_map)])
         .chain([spawn_fruit_spawns(&mut commands, &tile_map)])
         .chain([spawn_ghost_house(&mut commands, &tile_map, &loaded_assets, &sprite_sheets)])
+        .chain(spawn_tunnels(&mut commands, &tile_map))
+        .chain(spawn_tunnel_hallways(&mut commands, &tile_map))
+        .chain(spawn_ghost_corners(&mut commands, &tile_map))
         .collect::<Vec<_>>();
     commands.entity(map).push_children(&children);
-
-    // TODO: Remove
-    commands.insert_resource(tile_map);
-    commands.insert_resource(board);
-    commands.insert_resource(board_dimensions)
 }
 
 fn spawn_pacman_spawn(
@@ -169,6 +186,39 @@ fn spawn_fruit_spawns(
         .insert(Name::new("FruitSpawn"))
         .insert(FruitSpawn(coordinates))
         .id()
+}
+
+fn spawn_ghost_corners(
+    commands: &mut Commands,
+    tile_map: &TileMap
+) -> [Entity; 4] {
+    let mut spawn_corner = |ghost, position| commands.spawn()
+        .insert(Name::new("GhostCorner"))
+        .insert(GhostCorner {ghost, position})
+        .id();
+
+    [
+        (spawn_corner)(Blinky, tile_map.blinky_corner),
+        (spawn_corner)(Pinky, tile_map.pinky_corner),
+        (spawn_corner)(Inky, tile_map.inky_corner),
+        (spawn_corner)(Clyde, tile_map.clyde_corner),
+    ]
+}
+
+fn set_animation_to_blinking(
+    mut query: Query<&mut Animations, With<Wall>>
+) {
+    for mut animations in &mut query {
+        animations.change_animation_to("blinking")
+    }
+}
+
+fn set_animation_to_idle(
+    mut query: Query<&mut Animations, With<Wall>>
+) {
+    for mut animations in &mut query {
+        animations.change_animation_to("idle")
+    }
 }
 
 #[derive(Clone, Serialize, Deserialize, bevy::reflect::TypeUuid)]

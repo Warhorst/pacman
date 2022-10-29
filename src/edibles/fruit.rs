@@ -2,14 +2,13 @@ use std::time::Duration;
 use bevy::prelude::*;
 use crate::level::Level;
 use Fruit::*;
-use crate::board_dimensions::BoardDimensions;
-use crate::constants::FRUIT_DIMENSION;
+use crate::constants::{FIELD_DIMENSION, FRUIT_DIMENSION, FRUIT_Z};
 use crate::edibles::dots::EatenDots;
 use crate::edibles::Edible;
 use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::interactions::{EDotEaten, EFruitEaten};
 use crate::life_cycle::LifeCycle::{LevelTransition, PacmanHit, Ready, Running};
-use crate::map::FruitSpawn;
+use crate::map::{FruitSpawn, Map};
 use crate::specs_per_level::SpecsPerLevel;
 
 pub struct FruitPlugin;
@@ -163,24 +162,24 @@ fn spawn_fruits_to_display(
     mut commands: Commands,
     level: Res<Level>,
     specs_per_level: Res<SpecsPerLevel>,
-    dimensions: Res<BoardDimensions>,
     loaded_assets: Res<LoadedAssets>,
+    map_query: Query<&Map>
 ) {
+    let map = map_query.single();
     let fruits_to_display = get_fruits_to_display(&level, &specs_per_level);
     let len = fruits_to_display.len();
-    let dimension = Vec2::new(dimensions.fruit(), dimensions.fruit());
 
     for (i, fruit) in fruits_to_display.into_iter().enumerate() {
         let transform = Transform::from_translation(Vec3::new(
-            dimensions.origin().x + dimensions.board_width() - (len - i) as f32 * dimensions.fruit(),
-            dimensions.origin().y - dimensions.fruit(),
-            0.0,
+            map.width as f32 * FIELD_DIMENSION - (len - i) as f32 * FRUIT_DIMENSION,
+            -FRUIT_DIMENSION,
+            FRUIT_Z,
         ));
 
         commands.spawn().insert_bundle(SpriteBundle {
             texture: get_texture_for_fruit(&fruit, &loaded_assets),
             sprite: Sprite {
-                custom_size: Some(dimension),
+                custom_size: Some(Vec2::splat(FRUIT_DIMENSION)),
                 ..default()
             },
             transform,
