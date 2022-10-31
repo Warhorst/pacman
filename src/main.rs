@@ -24,6 +24,7 @@ use crate::score::ScorePlugin;
 use crate::specs_per_level::SpecsPerLevelPlugin;
 use crate::speed::SpeedPlugin;
 use crate::sprite_sheet::SpriteSheetPlugin;
+use crate::ui::UIPlugin;
 
 mod camera;
 mod constants;
@@ -48,6 +49,7 @@ mod game_assets;
 mod specs_per_level;
 mod background_noise;
 mod debug;
+mod ui;
 
 fn main() {
     App::new()
@@ -81,6 +83,7 @@ fn main() {
         .add_plugin(GameOverScreenPlugin)
         .add_plugin(SpecsPerLevelPlugin)
         .add_plugin(DebugPlugin)
+        .add_plugin(UIPlugin)
         .add_plugin(BackgroundNoisePlugin)
         .run()
 }

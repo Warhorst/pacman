@@ -17,15 +17,15 @@ impl Plugin for CameraPlugin {
 
 fn spawn_camera(
     mut commands: Commands,
-    map_query: Query<&Map>
+    map_query: Query<&Map>,
 ) {
     let map = map_query.single();
-    let mut bundle = Camera2dBundle::default();
-    modify_camera_x_y(&mut bundle.transform.translation, map);
-    commands.spawn().insert_bundle(bundle);
-}
 
-fn modify_camera_x_y(translation: &mut Vec3, map: &Map) {
-    translation.x = (map.width as f32 * FIELD_DIMENSION) / 2.0;
-    translation.y = (map.height as f32 * FIELD_DIMENSION) / 2.0
+    commands.spawn()
+        .insert(Name::new("GameCamera"))
+        .insert_bundle(Camera2dBundle {
+            transform: Transform::from_translation(Vec3::new((map.width as f32 * FIELD_DIMENSION) / 2.0, (map.height as f32 * FIELD_DIMENSION) / 2.0, 1000.0)),
+            ..default()
+        })
+        .insert(UiCameraConfig { show_ui: true });
 }
