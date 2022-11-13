@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_inspector_egui::{Inspectable, InspectorPlugin};
 use crate::life_cycle::LifeCycle::LevelTransition;
 
 pub struct LevelPlugin;
@@ -6,6 +7,7 @@ pub struct LevelPlugin;
 impl Plugin for LevelPlugin {
     fn build(&self, app: &mut App) {
         app
+            .add_plugin(InspectorPlugin::<Level>::new())
             .insert_resource(Level(1))
             .add_system_set(
                 SystemSet::on_exit(LevelTransition).with_system(increase_level)
@@ -14,7 +16,7 @@ impl Plugin for LevelPlugin {
     }
 }
 
-#[derive(Deref, DerefMut, Ord, PartialOrd, Eq, PartialEq, Hash)]
+#[derive(Deref, DerefMut, Ord, PartialOrd, Eq, PartialEq, Hash, Inspectable, Default)]
 pub struct Level(pub usize);
 
 impl Level {

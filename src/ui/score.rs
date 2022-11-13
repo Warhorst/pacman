@@ -24,7 +24,7 @@ impl Plugin for ScoreUIPlugin {
 }
 
 #[derive(Component)]
-struct Scores;
+struct ScoresUI;
 
 #[derive(Component)]
 struct ScoreBoard;
@@ -42,8 +42,8 @@ fn spawn_score_ui(
     let font = loaded_assets.get_handle(FONT);
 
     commands.spawn()
-        .insert(Name::new("Scores"))
-        .insert(Scores)
+        .insert(Name::new("ScoreUI"))
+        .insert(ScoresUI)
         .insert_bundle(NodeBundle {
             style: Style {
                 size: Size::new(Percent(40.0), Percent(10.0)),
@@ -53,6 +53,7 @@ fn spawn_score_ui(
                     bottom: Percent(90.0),
                     ..default()
                 },
+                position_type: PositionType::Absolute,
                 ..default()
             },
             color: UiColor(Color::NONE),

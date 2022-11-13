@@ -4,7 +4,7 @@ use LifeCycle::*;
 use crate::edibles::EAllEdiblesEaten;
 use crate::game_assets::EAllAssetsLoaded;
 use crate::interactions::{EGhostEaten, EPacmanHit};
-use crate::lives::Life;
+use crate::lives::Lives;
 
 /// All lifecycle states of the app. See ./resources/lifecycle.png for a visualization.
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
@@ -155,16 +155,16 @@ fn switch_to_dead_when_pacman_is_dead(
 fn switch_dead_state_when_timer_finished(
     mut commands: Commands,
     time: Res<Time>,
+    lives: Res<Lives>,
     mut state_timer: ResMut<StateTimer>,
     mut life_cycle: ResMut<State<LifeCycle>>,
-    query: Query<&Life>
 ) {
     state_timer.tick(time.delta());
 
     if state_timer.finished() {
         commands.remove_resource::<StateTimer>();
 
-        if query.iter().count() > 0 {
+        if **lives > 0 {
             life_cycle.set(Ready).unwrap()
         } else {
             life_cycle.set(GameOver).unwrap()
@@ -185,7 +185,7 @@ fn switch_to_ghost_eaten_pause_when_ghost_was_eaten(
     mut event_reader: EventReader<EGhostEaten>,
     mut life_cycle: ResMut<State<LifeCycle>>
 ) {
-    for _ in event_reader.iter() {
+    if event_reader.iter().count() > 0 {
         life_cycle.set(GhostEatenPause).unwrap()
     }
 }
