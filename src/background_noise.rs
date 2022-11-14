@@ -102,6 +102,7 @@ fn set_background(
     }
 }
 
+#[derive(Resource)]
 struct NoiseHandles {
     siren: Handle<AudioSink>,
     frightened: Handle<AudioSink>,
@@ -150,6 +151,7 @@ impl NoiseHandles {
     }
 }
 
+#[derive(Resource)]
 enum CurrentBackground {
     Siren1,
     Siren2,

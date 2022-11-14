@@ -44,10 +44,9 @@ fn spawn_ghost(
     });
     animations.stop();
 
-    commands
-        .spawn()
-        .insert(Name::new("Ghost"))
-        .insert_bundle(SpriteBundle {
+    commands.spawn((
+        Name::new("Ghost"),
+        SpriteBundle {
             texture: animations.current().texture(),
             sprite: Sprite {
                 custom_size: Some(Vec2::splat(GHOST_DIMENSION)),
@@ -55,12 +54,12 @@ fn spawn_ghost(
             },
             transform: Transform::from_translation(spawn_coordinates),
             ..Default::default()
-        })
-        .insert(spawn.ghost)
-        .insert(spawn_direction)
-        .insert(Speed(GHOST_BASE_SPEED * specs_per_level.get_for(level).ghost_normal_speed_modifier))
-        .insert(Target::new())
-        .insert(State::Spawned)
-        .insert(animations)
-    ;
+        },
+        spawn.ghost,
+        spawn_direction,
+        Speed(GHOST_BASE_SPEED * specs_per_level.get_for(level).ghost_normal_speed_modifier),
+        Target::new(),
+        State::Spawned,
+        animations
+    ));
 }

@@ -30,12 +30,12 @@ pub fn spawn_labyrinth(
             spawn_labyrinth_wall(commands, transform, animations, custom_size)
         })
         .collect::<Vec<_>>();
-    commands.spawn()
-        .insert(Name::new("Labyrinth"))
-        .insert(Labyrinth)
-        .insert_bundle(SpatialBundle::default())
-        .push_children(walls)
-        .id()
+
+    commands.spawn((
+        Name::new("Labyrinth"),
+        Labyrinth,
+        SpatialBundle::default(),
+    )).push_children(walls).id()
 }
 
 fn spawn_labyrinth_wall(
@@ -44,8 +44,8 @@ fn spawn_labyrinth_wall(
     animations: Animations,
     custom_size: Option<Vec2>,
 ) -> Entity {
-    commands.spawn()
-        .insert_bundle(SpriteBundle {
+    commands.spawn((
+        SpriteBundle {
             texture: animations.current().texture(),
             sprite: Sprite {
                 custom_size,
@@ -53,11 +53,11 @@ fn spawn_labyrinth_wall(
             },
             transform,
             ..Default::default()
-        })
-        .insert(animations)
-        .insert(Wall)
-        .insert(Name::new("Wall"))
-        .id()
+        },
+        animations,
+        Name::new("Wall"),
+        Wall
+    )).id()
 }
 
 fn create_transform(position: &Position, rotation: &Rotation) -> Transform {

@@ -47,12 +47,12 @@ pub enum Fruit {
     Key,
 }
 
-#[derive(Deref, DerefMut)]
+#[derive(Deref, DerefMut, Resource)]
 pub struct FruitDespawnTimer(Timer);
 
 impl FruitDespawnTimer {
     fn new() -> Self {
-        FruitDespawnTimer(Timer::new(Duration::from_secs_f32(9.5), false))
+        FruitDespawnTimer(Timer::new(Duration::from_secs_f32(9.5), TimerMode::Once))
     }
 }
 
@@ -76,9 +76,9 @@ fn spawn_fruit_when_dot_limit_reached(
         if let 70 | 170 = num_eaten_dots {
             for spawn in &spawn_query {
                 let fruit = specs_per_level.get_for(&level).fruit_to_spawn;
-                commands.spawn()
-                    .insert(Name::new("Fruit"))
-                    .insert_bundle(SpriteBundle {
+                commands.spawn((
+                    Name::new("Fruit"),
+                    SpriteBundle {
                         texture: get_texture_for_fruit(&fruit, &loaded_assets),
                         sprite: Sprite {
                             custom_size: Some(Vec2::splat(FRUIT_DIMENSION)),
@@ -86,9 +86,10 @@ fn spawn_fruit_when_dot_limit_reached(
                         },
                         transform: Transform::from_translation(**spawn),
                         ..Default::default()
-                    })
-                    .insert(fruit)
-                    .insert(Edible);
+                    },
+                    fruit,
+                    Edible
+                ));
             }
             commands.insert_resource(FruitDespawnTimer::new());
         }

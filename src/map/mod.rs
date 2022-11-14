@@ -52,7 +52,7 @@ impl Plugin for MapPlugin {
 #[derive(Component)]
 pub struct Map {
     pub width: usize,
-    pub height: usize
+    pub height: usize,
 }
 
 /// Component to identify a wall
@@ -83,7 +83,7 @@ pub struct FruitSpawn(pub Vec3);
 #[derive(Component)]
 pub struct GhostCorner {
     pub ghost: Ghost,
-    pub position: Position
+    pub position: Position,
 }
 
 fn spawn_map(
@@ -95,15 +95,14 @@ fn spawn_map(
     let fields = fields_assets.get(&loaded_assets.get_handle("maps/default.map.json")).expect("the map should be loaded at this point");
     let tile_map = TileMap::new(&fields);
 
-    let map = commands
-        .spawn()
-        .insert_bundle(SpatialBundle::default())
-        .insert(Map {
+    let map = commands.spawn((
+        Name::new("Map"),
+        Map {
             width: tile_map.get_width(),
-            height: tile_map.get_height()
-        })
-        .insert(Name::new("Map"))
-        .id();
+            height: tile_map.get_height(),
+        },
+        SpatialBundle::default(),
+    )).id();
 
     let children = [spawn_labyrinth(&mut commands, &tile_map, &loaded_assets, &sprite_sheets)]
         .into_iter()
@@ -124,19 +123,20 @@ fn spawn_pacman_spawn(
     tile_map: &TileMap,
 ) -> Entity {
     let coordinates = Vec3::from_positions(tile_map.get_positions_matching(is!(Element::PacManSpawn)), PACMAN_Z);
-    commands.spawn()
-        .insert(Name::new("PacmanSpawn"))
-        .insert(PacmanSpawn(coordinates)).id()
+    commands.spawn((
+        Name::new("PacmanSpawn"),
+        PacmanSpawn(coordinates)
+    )).id()
 }
 
 fn spawn_dot_spawns(
     commands: &mut Commands,
     tile_map: &TileMap,
 ) -> Entity {
-    let dot_spawns = commands.spawn()
-        .insert(Name::new("DotSpawns"))
-        .insert(DotSpawns)
-        .id();
+    let dot_spawns = commands.spawn((
+        Name::new("DotSpawns"),
+        DotSpawns
+    )).id();
 
     tile_map.get_positions_matching(is!(Element::DotSpawn))
         .into_iter()
@@ -144,9 +144,10 @@ fn spawn_dot_spawns(
             commands
                 .entity(dot_spawns)
                 .with_children(|parent| {
-                    parent.spawn()
-                        .insert(Name::new("DotSpawn"))
-                        .insert(DotSpawn(pos.to_vec(DOT_Z)));
+                    parent.spawn((
+                        Name::new("DotSpawn"),
+                        DotSpawn(pos.to_vec(DOT_Z))
+                    ));
                 });
         });
 
@@ -157,19 +158,20 @@ fn spawn_energizer_spawns(
     commands: &mut Commands,
     tile_map: &TileMap,
 ) -> Entity {
-    let energizer_spawns = commands.spawn()
-        .insert(Name::new("EnergizerSpawns"))
-        .insert(EnergizerSpawns)
-        .id();
+    let energizer_spawns = commands.spawn((
+        Name::new("EnergizerSpawns"),
+        EnergizerSpawns
+    )).id();
 
     tile_map.get_positions_matching(is!(Element::EnergizerSpawn))
         .into_iter()
         .for_each(|pos| {
             commands.entity(energizer_spawns)
                 .with_children(|parent| {
-                    parent.spawn()
-                        .insert(Name::new("EnergizerSpawn"))
-                        .insert(EnergizerSpawn(pos.to_vec(ENERGIZER_Z)));
+                    parent.spawn((
+                        Name::new("EnergizerSpawn"),
+                        EnergizerSpawn(pos.to_vec(ENERGIZER_Z))
+                    ));
                 });
         });
 
@@ -182,20 +184,20 @@ fn spawn_fruit_spawns(
 ) -> Entity {
     let coordinates = Vec3::from_positions(tile_map.get_positions_matching(is!(Element::FruitSpawn)), FRUIT_Z);
 
-    commands.spawn()
-        .insert(Name::new("FruitSpawn"))
-        .insert(FruitSpawn(coordinates))
-        .id()
+    commands.spawn((
+        Name::new("FruitSpawn"),
+        FruitSpawn(coordinates)
+    )).id()
 }
 
 fn spawn_ghost_corners(
     commands: &mut Commands,
-    tile_map: &TileMap
+    tile_map: &TileMap,
 ) -> [Entity; 4] {
-    let mut spawn_corner = |ghost, position| commands.spawn()
-        .insert(Name::new("GhostCorner"))
-        .insert(GhostCorner {ghost, position})
-        .id();
+    let mut spawn_corner = |ghost, position| commands.spawn((
+        Name::new("GhostCorner"),
+        GhostCorner { ghost, position }
+    )).id();
 
     [
         (spawn_corner)(Blinky, tile_map.blinky_corner),

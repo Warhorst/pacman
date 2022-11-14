@@ -115,5 +115,5 @@ fn is_centered_enough(coordinates: Vec3, direction: Direction, position_coordina
 }
 
 /// Saves the wished direction pacman should move to next.
-#[derive(Deref, DerefMut)]
+#[derive(Deref, DerefMut, Resource)]
 pub struct InputBuffer(pub Option<Direction>);

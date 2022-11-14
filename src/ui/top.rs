@@ -6,13 +6,13 @@ use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::life_cycle::LifeCycle::{Running, Start};
 use crate::score::Score;
 
-pub (in crate::ui) struct ScoreUIPlugin;
+pub(in crate::ui) struct TopUIPlugin;
 
-impl Plugin for ScoreUIPlugin {
+impl Plugin for TopUIPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_system_set(
-                SystemSet::on_enter(Start).with_system(spawn_score_ui)
+                SystemSet::on_enter(Start).with_system(spawn_top_ui)
             )
             .add_system_set(
                 SystemSet::on_update(Running)
@@ -24,7 +24,7 @@ impl Plugin for ScoreUIPlugin {
 }
 
 #[derive(Component)]
-struct ScoresUI;
+struct TopUI;
 
 #[derive(Component)]
 struct ScoreBoard;
@@ -35,30 +35,29 @@ struct HighScoreBoard;
 #[derive(Component)]
 struct OneUpLabel;
 
-fn spawn_score_ui(
+fn spawn_top_ui(
     mut commands: Commands,
     loaded_assets: Res<LoadedAssets>,
 ) {
     let font = loaded_assets.get_handle(FONT);
 
-    commands.spawn()
-        .insert(Name::new("ScoreUI"))
-        .insert(ScoresUI)
-        .insert_bundle(NodeBundle {
+    commands.spawn((
+        Name::new("TopUI"),
+        TopUI,
+        NodeBundle {
             style: Style {
                 size: Size::new(Percent(40.0), Percent(10.0)),
                 justify_content: JustifyContent::SpaceBetween,
                 position: UiRect {
                     left: Percent(30.0),
-                    bottom: Percent(90.0),
                     ..default()
                 },
                 position_type: PositionType::Absolute,
                 ..default()
             },
-            color: UiColor(Color::NONE),
             ..default()
-        })
+        }
+    ))
         .with_children(|parent| spawn_score_board(font.clone(), parent))
         .with_children(|parent| spawn_high_score_board(font.clone(), parent))
         .with_children(|parent| spawn_high_score_label(font.clone(), parent))
@@ -70,73 +69,76 @@ fn spawn_score_board(
     font: Handle<Font>,
     parent: &mut ChildBuilder,
 ) {
-    parent.spawn()
-        .insert(Name::new("ScoreBoard"))
-        .insert(ScoreBoard)
-        .insert_bundle(
-            TextBundle::from_section(
-                "0",
-                TextStyle {
-                    font,
-                    font_size: 20.0,
-                    color: Color::rgb(1.0, 1.0, 1.0),
-                },
-            )
-        );
+    parent.spawn((
+        Name::new("ScoreBoard"),
+        ScoreBoard,
+        TextBundle::from_section(
+            "0",
+            TextStyle {
+                font,
+                font_size: 20.0,
+                color: Color::rgb(1.0, 1.0, 1.0),
+            },
+        ).with_style(Style {
+            position_type: PositionType::Absolute,
+            position: UiRect {
+                top: Percent(50.0),
+                ..default()
+            },
+            ..default()
+        })
+    ));
 }
 
 fn spawn_high_score_board(
     font: Handle<Font>,
     parent: &mut ChildBuilder,
 ) {
-    parent.spawn()
-        .insert(Name::new("HighScoreBoard"))
-        .insert(HighScoreBoard)
-        .insert_bundle(
-            TextBundle::from_section(
-                "0",
-                TextStyle {
-                    font,
-                    font_size: 20.0,
-                    color: Color::rgb(1.0, 1.0, 1.0),
-                },
-            )
-                .with_style(Style {
-                    position_type: PositionType::Absolute,
-                    position: UiRect {
-                        left: Percent(50.0),
-                        ..default()
-                    },
-                    ..default()
-                })
-        );
+    parent.spawn((
+        Name::new("HighScoreBoard"),
+        HighScoreBoard,
+        TextBundle::from_section(
+            "0",
+            TextStyle {
+                font,
+                font_size: 20.0,
+                color: Color::rgb(1.0, 1.0, 1.0),
+            },
+        ).with_style(Style {
+            position_type: PositionType::Absolute,
+            position: UiRect {
+                left: Percent(50.0),
+                top: Percent(50.0),
+                ..default()
+            },
+            ..default()
+        })
+    ));
 }
 
 fn spawn_high_score_label(
     font: Handle<Font>,
     parent: &mut ChildBuilder,
 ) {
-    parent.spawn()
-        .insert(Name::new("HighScoreBoardLabel"))
-        .insert_bundle(
-            TextBundle::from_section(
-                "HIGH SCORE",
-                TextStyle {
-                    font,
-                    font_size: 20.0,
-                    color: Color::rgb(1.0, 1.0, 1.0),
-                },
-            )
-                .with_style(Style {
-                    position_type: PositionType::Absolute,
-                    position: UiRect {
-                        left: Percent(30.0),
-                        bottom: Percent(50.0),
-                        ..default()
-                    },
-                    ..default()
-                })
-        );
+    parent.spawn((
+        Name::new("HighScoreBoardLabel"),
+        TextBundle::from_section(
+            "HIGH SCORE",
+            TextStyle {
+                font,
+                font_size: 20.0,
+                color: Color::rgb(1.0, 1.0, 1.0),
+            },
+        ).with_style(Style {
+            position_type: PositionType::Absolute,
+            position: UiRect {
+                top: Percent(10.0),
+                left: Percent(30.0),
+                ..default()
+            },
+            ..default()
+        })
+    ));
 }
 
 /// Spawn the "1UP" in the top left of the screen.
@@ -147,27 +149,25 @@ fn spawn_1up_label(
     font: Handle<Font>,
     parent: &mut ChildBuilder,
 ) {
-    parent.spawn()
-        .insert(Name::new("1UPLabel"))
-        .insert(OneUpLabel)
-        .insert_bundle(
-            TextBundle::from_section(
-                "1UP",
-                TextStyle {
-                    font,
-                    font_size: 20.0,
-                    color: Color::rgb(1.0, 1.0, 1.0),
-                },
-            )
-                .with_style(Style {
-                    position_type: PositionType::Absolute,
-                    position: UiRect {
-                        bottom: Percent(50.0),
-                        ..default()
-                    },
-                    ..default()
-                })
-        );
+    parent.spawn((
+        Name::new("1UPLabel"),
+        OneUpLabel,
+        TextBundle::from_section(
+            "1UP",
+            TextStyle {
+                font,
+                font_size: 20.0,
+                color: Color::rgb(1.0, 1.0, 1.0),
+            },
+        ).with_style(Style {
+            position_type: PositionType::Absolute,
+            position: UiRect {
+                top: Percent(10.0),
+                ..default()
+            },
+            ..default()
+        })
+    ));
 }
 
 fn update_scoreboard(
@@ -188,7 +188,7 @@ struct OneUpBlinkTimer(Timer);
 
 impl Default for OneUpBlinkTimer {
     fn default() -> Self {
-        OneUpBlinkTimer(Timer::new(Duration::from_secs_f32(0.2), true))
+        OneUpBlinkTimer(Timer::new(Duration::from_secs_f32(0.2), TimerMode::Repeating))
     }
 }
 
@@ -196,7 +196,7 @@ impl Default for OneUpBlinkTimer {
 fn blink_1_up_label(
     mut timer: Local<OneUpBlinkTimer>,
     time: Res<Time>,
-    mut query: Query<&mut Visibility, With<OneUpLabel>>
+    mut query: Query<&mut Visibility, With<OneUpLabel>>,
 ) {
     timer.tick(time.delta());
 

@@ -16,7 +16,7 @@ impl Plugin for LevelPlugin {
     }
 }
 
-#[derive(Deref, DerefMut, Ord, PartialOrd, Eq, PartialEq, Hash, Inspectable, Default)]
+#[derive(Deref, DerefMut, Ord, PartialOrd, Eq, PartialEq, Hash, Inspectable, Default, Resource)]
 pub struct Level(pub usize);
 
 impl Level {

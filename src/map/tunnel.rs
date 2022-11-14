@@ -57,9 +57,9 @@ fn spawn_tunnel(
     let tunnel_transform = Transform::from_translation(position.to_vec(TUNNEL_Z));
     let tunnel_entrance_transform = Transform::from_translation(position.neighbour_position(&direction.opposite()).to_vec(TUNNEL_Z));
 
-    let tunnel = commands.spawn()
-        .insert(Name::new("Tunnel"))
-        .insert_bundle(SpriteBundle {
+    let tunnel = commands.spawn((
+        Name::new("Tunnel"),
+        SpriteBundle {
             sprite: Sprite {
                 color: Color::rgb(0.0, 0.0, 0.0),
                 custom_size: Some(Vec2::splat(TUNNEL_DIMENSION)),
@@ -67,14 +67,14 @@ fn spawn_tunnel(
             },
             transform: tunnel_transform,
             ..Default::default()
-        })
-        .insert(Tunnel(index))
-        .insert(direction)
-        .id();
+        },
+        Tunnel(index),
+        direction
+    )).id();
 
-    let tunnel_entrance = commands.spawn()
-        .insert(Name::new("TunnelEntrance"))
-        .insert_bundle(SpriteBundle {
+    let tunnel_entrance = commands.spawn((
+        Name::new("TunnelEntrance"),
+        SpriteBundle {
             sprite: Sprite {
                 color: Color::rgb(0.0, 0.0, 0.0),
                 custom_size: Some(Vec2::splat(TUNNEL_DIMENSION)),
@@ -82,26 +82,26 @@ fn spawn_tunnel(
             },
             transform: tunnel_entrance_transform,
             ..Default::default()
-        })
-        .id();
+        }
+    )).id();
 
     [tunnel, tunnel_entrance]
 }
 
 pub fn spawn_tunnel_hallways(
     commands: &mut Commands,
-    tile_map: &TileMap
+    tile_map: &TileMap,
 ) -> Vec<Entity> {
     tile_map.get_positions_matching(is!(Element::TunnelHallway))
         .into_iter()
-        .map(|position| commands.spawn()
-            .insert(Name::new("TunnelHallway"))
-            .insert(TunnelHallway)
-            .insert_bundle(SpatialBundle {
+        .map(|position| commands.spawn((
+            Name::new("TunnelHallway"),
+            TunnelHallway,
+            SpatialBundle {
                 transform: Transform::from_translation(position.to_vec(TUNNEL_Z)),
                 ..default()
-            })
-            .id()
+            }
+        )).id()
         )
         .collect()
 }

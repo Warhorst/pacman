@@ -21,11 +21,12 @@ fn spawn_camera(
 ) {
     let map = map_query.single();
 
-    commands.spawn()
-        .insert(Name::new("GameCamera"))
-        .insert_bundle(Camera2dBundle {
+    commands.spawn((
+        Name::new("GameCamera"),
+        Camera2dBundle {
             transform: Transform::from_translation(Vec3::new((map.width as f32 * FIELD_DIMENSION) / 2.0, (map.height as f32 * FIELD_DIMENSION) / 2.0, 1000.0)),
             ..default()
-        })
-        .insert(UiCameraConfig { show_ui: true });
+        },
+        UiCameraConfig { show_ui: true }
+    ));
 }

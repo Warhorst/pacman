@@ -46,24 +46,24 @@ fn spawn_bottom_ui(
     level: Res<Level>,
     specs_per_level: Res<SpecsPerLevel>,
 ) {
-    let bottom_ui = commands.spawn()
-        .insert(Name::new("BottomUI"))
-        .insert(BottomUI)
-        .insert_bundle(NodeBundle {
+    let bottom_ui = commands.spawn((
+        Name::new("BottomUI"),
+        BottomUI,
+        NodeBundle {
             style: Style {
                 size: Size::new(Percent(40.0), Percent(10.0)),
                 justify_content: JustifyContent::SpaceBetween,
                 position: UiRect {
+                    top: Percent(90.0),
                     left: Percent(30.0),
                     ..default()
                 },
                 position_type: Absolute,
                 ..default()
             },
-            color: UiColor(Color::NONE),
             ..default()
-        })
-        .id();
+        }
+    )).id();
 
     let ui_lives = spawn_ui_lives(&mut commands, &loaded_assets, &lives);
     let ui_fruits = spawn_ui_fruits(&mut commands, &loaded_assets, &level, &specs_per_level);
@@ -76,10 +76,10 @@ fn spawn_ui_lives(
     loaded_assets: &LoadedAssets,
     lives: &Lives,
 ) -> Entity {
-    let ui_lives = commands.spawn()
-        .insert(Name::new("UILives"))
-        .insert(UILives)
-        .insert_bundle(NodeBundle {
+    let ui_lives = commands.spawn((
+        Name::new("UILives"),
+        UILives,
+        NodeBundle {
             style: Style {
                 size: Size::new(Percent(40.0), Percent(50.0)),
                 position_type: Absolute,
@@ -90,10 +90,9 @@ fn spawn_ui_lives(
                 justify_content: JustifyContent::SpaceBetween,
                 ..default()
             },
-            color: UiColor(Color::NONE),
             ..default()
-        })
-        .id();
+        }
+    )).id();
 
     let ui_live_vec = (0..**lives).into_iter()
         .map(|i| spawn_ui_live(i, commands, loaded_assets))
@@ -109,10 +108,10 @@ fn spawn_ui_live(
     loaded_assets: &LoadedAssets,
 ) -> Entity {
     let image = loaded_assets.get_handle("textures/pacman/pacman_life.png");
-    commands.spawn()
-        .insert(Name::new("UILive"))
-        .insert(UILive)
-        .insert_bundle(ImageBundle {
+    commands.spawn((
+        Name::new("UILive"),
+        UILive,
+        ImageBundle {
             image: UiImage(image.clone()),
             style: Style {
                 size: Size::new(Percent(20.0), Percent(100.0)),
@@ -124,20 +123,20 @@ fn spawn_ui_live(
                 ..default()
             },
             ..default()
-        })
-        .id()
+        },
+    )).id()
 }
 
 fn spawn_ui_fruits(
     commands: &mut Commands,
     loaded_assets: &LoadedAssets,
     level: &Level,
-    specs_per_level: &SpecsPerLevel
+    specs_per_level: &SpecsPerLevel,
 ) -> Entity {
-    let ui_fruits = commands.spawn()
-        .insert(Name::new("UIFruits"))
-        .insert(UIFruits)
-        .insert_bundle(NodeBundle {
+    let ui_fruits = commands.spawn((
+        Name::new("UIFruits"),
+        UIFruits,
+        NodeBundle {
             style: Style {
                 size: Size::new(Percent(60.0), Percent(50.0)),
                 position_type: Absolute,
@@ -149,10 +148,9 @@ fn spawn_ui_fruits(
                 justify_content: JustifyContent::SpaceBetween,
                 ..default()
             },
-            color: UiColor(Color::NONE),
             ..default()
-        })
-        .id();
+        }
+    )).id();
 
     let fruits_to_display = get_fruits_to_display(&level, &specs_per_level);
 
@@ -179,15 +177,15 @@ fn spawn_ui_fruit(
     commands: &mut Commands,
     loaded_assets: &LoadedAssets,
     index: usize,
-    fruit: Fruit
+    fruit: Fruit,
 ) -> Entity {
     let image = get_texture_for_fruit(&fruit, loaded_assets);
     let left_percent = 100.0 - index as f32 * (100.0 / 7.0) - 100.0 / 7.0;
 
-    commands.spawn()
-        .insert(Name::new("UIFruit"))
-        .insert(UIFruit)
-        .insert_bundle(ImageBundle {
+    commands.spawn((
+        Name::new("UIFruit"),
+        UIFruit,
+        ImageBundle {
             image: UiImage(image),
             style: Style {
                 size: Size::new(Percent(100.0 / 7.0), Percent(100.0)),
@@ -199,8 +197,8 @@ fn spawn_ui_fruit(
                 ..default()
             },
             ..default()
-        })
-        .id()
+        }
+    )).id()
 }
 
 fn get_texture_for_fruit(fruit: &Fruit, loaded_assets: &LoadedAssets) -> Handle<Image> {

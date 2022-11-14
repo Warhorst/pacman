@@ -294,6 +294,7 @@ fn create_specs_per_level() -> SpecsPerLevel {
     )
 }
 
+#[derive(Resource)]
 pub struct SpecsPerLevel {
     level_to_spec: HashMap<Level, Spec>,
     default: Spec

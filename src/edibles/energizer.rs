@@ -50,6 +50,7 @@ pub struct Energizer;
 #[derive(Copy, Clone)]
 pub struct EnergizerOver;
 
+#[derive(Resource)]
 pub struct EnergizerTimer {
     timer: Timer,
 }
@@ -57,7 +58,7 @@ pub struct EnergizerTimer {
 impl EnergizerTimer {
     fn start(seconds: f32) -> Self {
         EnergizerTimer {
-            timer: Timer::from_seconds(seconds, false)
+            timer: Timer::from_seconds(seconds, TimerMode::Once)
         }
     }
 
@@ -78,18 +79,18 @@ impl EnergizerTimer {
 fn spawn_energizer(
     mut commands: Commands,
     loaded_assets: Res<LoadedAssets>,
-    spawn_query: Query<&EnergizerSpawn>
+    spawn_query: Query<&EnergizerSpawn>,
 ) {
-    let energizers = commands.spawn()
-        .insert(Name::new("Energizers"))
-        .insert(Energizers)
-        .insert_bundle(SpatialBundle::default())
-        .id();
+    let energizers = commands.spawn((
+        Name::new("Energizers"),
+        Energizers,
+        SpatialBundle::default()
+    )).id();
 
     for spawn in &spawn_query {
         commands.entity(energizers).with_children(|parent| {
-            parent.spawn()
-                .insert_bundle(SpriteBundle {
+            parent.spawn((
+                SpriteBundle {
                     texture: loaded_assets.get_handle("textures/energizer.png"),
                     sprite: Sprite {
                         custom_size: Some(Vec2::splat(ENERGIZER_DIMENSION)),
@@ -97,10 +98,11 @@ fn spawn_energizer(
                     },
                     transform: Transform::from_translation(**spawn),
                     ..Default::default()
-                })
-                .insert(Energizer)
-                .insert(Edible)
-                .insert(Name::new("Energizer"));
+                },
+                Energizer,
+                Edible,
+                Name::new("Energizer")
+            ));
         });
     }
 }
@@ -109,7 +111,7 @@ fn start_energizer_timer_when_energizer_eaten(
     mut commands: Commands,
     mut event_reader: EventReader<EEnergizerEaten>,
     level: Res<Level>,
-    specs_per_level: Res<SpecsPerLevel>
+    specs_per_level: Res<SpecsPerLevel>,
 ) {
     for _ in event_reader.iter() {
         let spec = specs_per_level.get_for(&level);
@@ -136,5 +138,5 @@ fn update_energizer_timer(
 fn despawn_energizer_timer(
     mut commands: Commands,
 ) {
-   commands.remove_resource::<EnergizerTimer>();
+    commands.remove_resource::<EnergizerTimer>();
 }

@@ -9,6 +9,7 @@ type JSONPath = String;
 
 /// Container for assets that are already loaded. Used to load all assets at the app start
 /// and use them instantly. Primarily reduces pop-ins of assets.
+#[derive(Resource)]
 pub struct LoadedAssets {
     path_handle_map: HashMap<String, HandleUntyped>,
 }

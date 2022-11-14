@@ -29,9 +29,9 @@ fn spawn_screen(
     fruit_spawn_query: Query<&FruitSpawn>,
 ) {
     let transform = Transform::from_translation(fruit_spawn_query.single().0);
-    commands.spawn()
-        .insert(Name::new("ReadyScreen"))
-        .insert_bundle(Text2dBundle {
+    commands.spawn((
+        Name::new("ReadyScreen"),
+        Text2dBundle {
             text: Text::from_section(
                 "Ready!".to_string(),
                 TextStyle {
@@ -47,8 +47,9 @@ fn spawn_screen(
             ),
             transform,
             ..Default::default()
-        })
-        .insert(ReadyScreen);
+        },
+        ReadyScreen
+    ));
 }
 
 fn despawn_screen(

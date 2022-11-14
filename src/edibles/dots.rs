@@ -33,18 +33,18 @@ impl Plugin for DotPlugin {
 fn spawn_dots(
     mut commands: Commands,
     loaded_assets: Res<LoadedAssets>,
-    spawn_query: Query<&DotSpawn>
+    spawn_query: Query<&DotSpawn>,
 ) {
-    let dots = commands.spawn()
-        .insert(Name::new("Dots"))
-        .insert(Dots)
-        .insert_bundle(SpatialBundle::default())
-        .id();
+    let dots = commands.spawn((
+        Name::new("Dots"),
+        Dots,
+        SpatialBundle::default()
+    )).id();
 
     for spawn in &spawn_query {
         commands.entity(dots).with_children(|parent| {
-            parent.spawn()
-                .insert_bundle(SpriteBundle {
+            parent.spawn((
+                SpriteBundle {
                     texture: loaded_assets.get_handle("textures/dot.png"),
                     sprite: Sprite {
                         custom_size: Some(Vec2::splat(DOT_DIMENSION)),
@@ -52,17 +52,18 @@ fn spawn_dots(
                     },
                     transform: Transform::from_translation(**spawn),
                     ..Default::default()
-                })
-                .insert(Dot)
-                .insert(Edible)
-                .insert(Name::new("Dot"));
+                },
+                Dot,
+                Edible,
+                Name::new("Dot")
+            ));
         });
     }
 }
 
 fn create_eaten_dots(
     mut commands: Commands,
-    dot_spawn_query: Query<&DotSpawn>
+    dot_spawn_query: Query<&DotSpawn>,
 ) {
     let num_dots = dot_spawn_query.iter().count();
     commands.insert_resource(EatenDots::new(num_dots))
@@ -111,7 +112,7 @@ fn play_waka_when_dot_was_eaten(
         match *waka_timer {
             Some(_) => *cached = true,
             None => {
-                *waka_timer = Some(Timer::new(Duration::from_secs_f32(0.3), false));
+                *waka_timer = Some(Timer::new(Duration::from_secs_f32(0.3), TimerMode::Once));
                 audio.play(loaded_assets.get_handle("sounds/waka.ogg"));
             }
         };
@@ -125,6 +126,7 @@ pub struct Dots;
 #[derive(Component)]
 pub struct Dot;
 
+#[derive(Resource)]
 pub struct EatenDots {
     max: usize,
     eaten: usize,

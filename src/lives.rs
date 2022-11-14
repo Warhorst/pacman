@@ -22,11 +22,11 @@ impl Plugin for LivesPlugin {
 }
 
 /// Resource that tells how many lives pacman currently has.
-#[derive(Deref, DerefMut, Inspectable, Default)]
+#[derive(Deref, DerefMut, Inspectable, Default, Resource)]
 pub struct Lives(usize);
 
 /// Keeps track how many points the player needs to get a new life for pacman.
-#[derive(Deref, DerefMut)]
+#[derive(Deref, DerefMut, Resource)]
 pub struct PointsRequiredForExtraLife(usize);
 
 impl PointsRequiredForExtraLife {

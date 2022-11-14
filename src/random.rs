@@ -9,6 +9,7 @@ impl Plugin for RandomPlugin {
     }
 }
 
+#[derive(Resource)]
 pub struct Random;
 
 impl Random {

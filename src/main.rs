@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy::render::texture::ImageSettings;
 
 use crate::pacman::PacmanPlugin;
 use crate::animation::AnimationPlugin;
@@ -53,20 +52,24 @@ mod ui;
 
 fn main() {
     App::new()
-        .insert_resource(WindowDescriptor {
-            width: WINDOW_WIDTH,
-            height: WINDOW_HEIGHT,
-            title: "PacMan".to_string(),
-            resizable: false,
-            ..Default::default()
-        })
+        .add_plugins(DefaultPlugins
+            .set(WindowPlugin {
+                window: WindowDescriptor {
+                    width: WINDOW_WIDTH,
+                    height: WINDOW_HEIGHT,
+                    title: "PacMan".to_string(),
+                    resizable: false,
+                    ..Default::default()
+                },
+                ..default()
+            })
+            .set(ImagePlugin::default_nearest())
+        )
         .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
-        .insert_resource(ImageSettings::default_nearest())
         .add_plugin(GameStatePlugin)
         .add_plugin(GameAssetsPlugin)
         .add_plugin(AnimationPlugin)
         .add_plugin(CameraPlugin)
-        .add_plugins(DefaultPlugins)
         .add_plugin(MapPlugin)
         .add_plugin(EdiblePlugin)
         .add_plugin(PacmanPlugin)

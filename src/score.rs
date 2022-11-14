@@ -33,7 +33,7 @@ impl Plugin for ScorePlugin {
 }
 
 /// Resource that saves how many points the player has collected so far
-#[derive(Deref, DerefMut)]
+#[derive(Deref, DerefMut, Resource)]
 pub struct Score(usize);
 
 impl Score {
@@ -51,7 +51,7 @@ pub struct ScoreText;
 #[derive(Component, Deref, DerefMut)]
 pub struct ScoreTextTimer(Timer);
 
-#[derive(Deref, DerefMut)]
+#[derive(Deref, DerefMut, Resource)]
 struct EatenGhostCounter(usize);
 
 fn update_scoreboard(
@@ -147,26 +147,28 @@ fn spawn_score_text(
     points: usize,
     coordinates: Vec3,
 ) {
-    commands.spawn_bundle(Text2dBundle {
-        text: Text::from_section(
-            points.to_string(),
-            TextStyle {
-                font: game_asset_handles.get_handle(FONT),
-                font_size: 10.0,
-                color,
-            },
-        ).with_alignment(
-            TextAlignment {
-                vertical: VerticalAlign::Center,
-                horizontal: HorizontalAlign::Center,
-            }
-        ),
-        transform: Transform::from_translation(coordinates),
-        ..Default::default()
-    })
-        .insert(ScoreText)
-        .insert(ScoreTextTimer(Timer::new(Duration::from_secs(1), false)))
-    ;
+    commands.spawn((
+        Text2dBundle {
+            text: Text::from_section(
+                points.to_string(),
+                TextStyle {
+                    font: game_asset_handles.get_handle(FONT),
+                    font_size: 10.0,
+                    color,
+                },
+            ).with_alignment(
+                TextAlignment {
+                    vertical: VerticalAlign::Center,
+                    horizontal: HorizontalAlign::Center,
+                }
+            ),
+            transform: Transform::from_translation(coordinates),
+            ..Default::default()
+        },
+        Name::new("ScoreText"),
+        ScoreText,
+        ScoreTextTimer(Timer::new(Duration::from_secs(1), TimerMode::Once))
+    ));
 }
 
 fn update_score_texts(

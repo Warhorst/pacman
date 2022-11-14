@@ -7,7 +7,7 @@ use crate::ghosts::spawn::spawn_ghosts;
 use crate::ghosts::state::StatePlugin;
 use crate::ghosts::target::{Target, TargetPlugin};
 use crate::ghosts::textures::{start_animation, update_ghost_appearance};
-use crate::interactions::EGhostEaten;
+use crate::interactions::{EGhostEaten, LPacmanGhostHitDetection};
 use crate::life_cycle::LifeCycle::*;
 use crate::map::tunnel::GhostPassedTunnel;
 
@@ -37,7 +37,7 @@ impl Plugin for GhostPlugin {
                 SystemSet::on_update(Running)
                     .with_system(ghost_passed_tunnel)
                     .with_system(update_ghost_appearance)
-                    .with_system(play_ghost_eaten_sound_when_ghost_was_eaten)
+                    .with_system(play_ghost_eaten_sound_when_ghost_was_eaten.after(LPacmanGhostHitDetection))
             )
             .add_system_set(
                 SystemSet::on_enter(PacmanDying).with_system(despawn_ghosts)
@@ -126,5 +126,5 @@ pub enum Ghost {
 }
 
 /// Resource that holds the entity id of the ghost that is currently eaten by pacman
-#[derive(Deref)]
+#[derive(Deref, Resource)]
 pub struct CurrentlyEatenGhost(pub Entity);

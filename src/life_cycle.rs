@@ -81,7 +81,7 @@ impl Plugin for GameStatePlugin {
 
 /// Some lifecycle states just wait for a few seconds before switching. This timer and the related systems
 /// handle these states
-#[derive(Deref, DerefMut)]
+#[derive(Deref, DerefMut, Resource)]
 struct StateTimer(Timer);
 
 fn start_game_when_all_assets_loaded(
@@ -107,7 +107,7 @@ fn start_state_timer(
         _ => return
     };
 
-    commands.insert_resource(StateTimer(Timer::from_seconds(state_time, false)));
+    commands.insert_resource(StateTimer(Timer::from_seconds(state_time, TimerMode::Once)));
 }
 
 fn switch_state_when_state_timer_finished(

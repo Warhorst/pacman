@@ -83,6 +83,7 @@ fn switch_to_global_counter_when_pacman_got_killed(
 ///
 /// There is also a timer active. If the timer reaches zero, the waiting ghost can return immediately.
 /// The timer gets reset when pacman eats a dot.
+#[derive(Resource)]
 pub struct GhostHouseGate {
     released_ghosts: HashSet<Ghost>,
     ghost_preference_iterator: GhostPreferenceIterator,
@@ -107,8 +108,8 @@ impl GhostHouseGate {
 
     fn create_release_timer_for_level(level: &Level) -> Timer {
         match **level {
-            l if l < 5 => Timer::from_seconds(4.0, false),
-            _ => Timer::from_seconds(3.0, false)
+            l if l < 5 => Timer::from_seconds(4.0, TimerMode::Once),
+            _ => Timer::from_seconds(3.0, TimerMode::Once)
         }
     }
 

@@ -24,8 +24,8 @@ pub(in crate::pacman) fn spawn_pacman(
     let mut animations = create_pacman_animations(&game_assets, &sprite_sheets);
     animations.stop();
 
-    commands.spawn()
-        .insert_bundle(SpriteBundle {
+    commands.spawn((
+        SpriteBundle {
             texture: animations.current().texture(),
             sprite: Sprite {
                 custom_size: Some(Vec2::splat(PACMAN_DIMENSION)),
@@ -33,10 +33,11 @@ pub(in crate::pacman) fn spawn_pacman(
             },
             transform,
             ..Default::default()
-        })
-        .insert(Pacman)
-        .insert(Speed(PACMAN_BASE_SPEED * specs_per_level.get_for(&level).pacman_normal_speed_modifier))
-        .insert(Up)
-        .insert(animations)
-        .insert(Name::new("Pacman"));
+        },
+        Name::new("Pacman"),
+        Pacman,
+        Speed(PACMAN_BASE_SPEED * specs_per_level.get_for(&level).pacman_normal_speed_modifier),
+        Up,
+        animations
+    ));
 }

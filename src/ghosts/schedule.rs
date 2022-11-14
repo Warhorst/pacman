@@ -56,6 +56,7 @@ fn update_schedule(
     }
 }
 
+#[derive(Resource)]
 pub struct ScheduleByLevel {
     level_schedule_map: HashMap<Level, Schedule>,
     default_schedule: Schedule,
@@ -118,7 +119,7 @@ impl ScheduleByLevel {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Resource)]
 pub struct Schedule {
     current_phase_index: usize,
     current_phase_timer: Option<Timer>,
@@ -180,6 +181,6 @@ impl Phase {
     }
 
     fn phase_timer(&self) -> Option<Timer> {
-        Some(Timer::from_seconds(self.time?, false))
+        Some(Timer::from_seconds(self.time?, TimerMode::Once))
     }
 }

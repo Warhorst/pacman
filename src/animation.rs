@@ -64,7 +64,7 @@ impl Animation {
 
         Animation::TextureList {
             current_texture_index: 0,
-            timer: Timer::new(Duration::from_secs_f32(texture_display_time), true),
+            timer: Timer::new(Duration::from_secs_f32(texture_display_time), TimerMode::Repeating),
             repeating,
             textures,
         }
