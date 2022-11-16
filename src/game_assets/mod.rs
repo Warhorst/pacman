@@ -1,16 +1,22 @@
 use bevy::prelude::*;
+use crate::game_assets::animation::AnimationPlugin;
 use crate::game_assets::loaded_assets::LoadedAssets;
+use crate::game_assets::sprite_sheet::SpriteSheetPlugin;
 use crate::life_cycle::LifeCycle::Loading;
-use crate::sprite_sheet::aseprite_data::AsepriteData;
-use crate::sprite_sheet::SpriteSheet;
+use crate::game_assets::sprite_sheet::aseprite_data::AsepriteData;
+use crate::game_assets::sprite_sheet::SpriteSheet;
 
 pub mod loaded_assets;
+pub mod animation;
+pub mod sprite_sheet;
 
 pub struct GameAssetsPlugin;
 
 impl Plugin for GameAssetsPlugin {
     fn build(&self, app: &mut App) {
         app
+            .add_plugin(AnimationPlugin)
+            .add_plugin(SpriteSheetPlugin)
             .add_event::<EAllAssetsLoaded>()
             .add_system_set(
                 SystemSet::on_enter(Loading).with_system(start_asset_load)

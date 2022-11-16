@@ -1,10 +1,10 @@
 use bevy::prelude::*;
-use crate::pacman::{EPacmanDead};
+use crate::game::pacman::{EPacmanDead};
 use LifeCycle::*;
-use crate::edibles::EAllEdiblesEaten;
+use crate::game::edibles::EAllEdiblesEaten;
 use crate::game_assets::EAllAssetsLoaded;
-use crate::interactions::{EGhostEaten, EPacmanHit};
-use crate::lives::Lives;
+use crate::game::interactions::{EGhostEaten, EPacmanHit};
+use crate::game::lives::Lives;
 
 /// All lifecycle states of the app. See ./resources/lifecycle.png for a visualization.
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
@@ -21,9 +21,9 @@ pub enum LifeCycle {
     GhostEatenPause
 }
 
-pub struct GameStatePlugin;
+pub struct LifeCyclePlugin;
 
-impl Plugin for GameStatePlugin {
+impl Plugin for LifeCyclePlugin {
     fn build(&self, app: &mut App) {
         app
             .add_state(Loading)

@@ -1,8 +1,8 @@
 use bevy::asset::{Asset, HandleId, LoadState};
 use bevy::prelude::*;
 use bevy::utils::HashMap;
-use crate::sprite_sheet::aseprite_data::AsepriteData;
-use crate::sprite_sheet::{split_image_by_rectangles, SpriteSheet};
+use crate::game_assets::sprite_sheet::aseprite_data::AsepriteData;
+use crate::game_assets::sprite_sheet::{split_image_by_rectangles, SpriteSheet};
 
 type ImagePath = String;
 type JSONPath = String;

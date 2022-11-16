@@ -1,13 +1,13 @@
 use bevy::prelude::*;
 use bevy::prelude::Val::Percent;
 use bevy::ui::PositionType::Absolute;
-use crate::edibles::fruit::Fruit;
-use crate::edibles::fruit::Fruit::*;
+use crate::game::edibles::fruit::Fruit;
+use crate::game::edibles::fruit::Fruit::*;
 use crate::game_assets::loaded_assets::LoadedAssets;
-use crate::level::Level;
+use crate::game::level::Level;
 use crate::life_cycle::LifeCycle::{Running, Start};
-use crate::lives::Lives;
-use crate::specs_per_level::SpecsPerLevel;
+use crate::game::lives::Lives;
+use crate::game::specs_per_level::SpecsPerLevel;
 
 pub(in crate::ui) struct BottomUIPlugin;
 
