@@ -6,7 +6,7 @@ use bevy::prelude::*;
 use crate::game::direction::Direction;
 use crate::game::position::Position;
 use crate::game::edibles::energizer::EnergizerOver;
-use crate::life_cycle::LifeCycle::*;
+use crate::game_state::GameState::*;
 use crate::game::target::Target;
 use crate::game::ghosts::Ghost;
 use crate::game::schedule::Schedule;

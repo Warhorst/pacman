@@ -1,7 +1,7 @@
 use std::time::Duration;
 use bevy::prelude::*;
 use crate::game::interactions::{EDotEaten, EEnergizerEaten};
-use crate::life_cycle::LifeCycle::Running;
+use crate::game_state::GameState::Running;
 use crate::game::pacman::Pacman;
 
 /// When eating dots/energizers, pacman stops for 1/3 Frames in the original game.

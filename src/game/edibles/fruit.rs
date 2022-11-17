@@ -7,7 +7,7 @@ use crate::game::edibles::dots::EatenDots;
 use crate::game::edibles::Edible;
 use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game::interactions::{EDotEaten, EFruitEaten};
-use crate::life_cycle::LifeCycle::{LevelTransition, PacmanHit, Running};
+use crate::game_state::GameState::{LevelTransition, PacmanHit, Running};
 use crate::game::map::FruitSpawn;
 use crate::game::specs_per_level::SpecsPerLevel;
 
@@ -55,9 +55,6 @@ impl FruitDespawnTimer {
         FruitDespawnTimer(Timer::new(Duration::from_secs_f32(9.5), TimerMode::Once))
     }
 }
-
-#[derive(Component)]
-struct DisplayedFruit;
 
 /// Spawn a fruit for the current level when a specific amount of dots
 /// was eaten.

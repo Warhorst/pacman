@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use crate::constants::FONT;
 use crate::game_assets::loaded_assets::LoadedAssets;
-use crate::life_cycle::LifeCycle::GameOver;
+use crate::game_state::GameState::GameOver;
 use crate::game::map::FruitSpawn;
 
 pub (in crate::ui) struct GameOverScreenPlugin;

@@ -5,7 +5,7 @@ use crate::constants::ENERGIZER_DIMENSION;
 use crate::game::edibles::Edible;
 use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game::interactions::EEnergizerEaten;
-use crate::life_cycle::LifeCycle::*;
+use crate::game_state::GameState::*;
 use crate::game::level::Level;
 use crate::game::map::EnergizerSpawn;
 use crate::game::specs_per_level::SpecsPerLevel;
@@ -15,7 +15,6 @@ pub struct EnergizerPlugin;
 impl Plugin for EnergizerPlugin {
     fn build(&self, app: &mut App) {
         app
-
             .add_event::<EnergizerOver>()
             .add_system_set(
                 SystemSet::on_enter(Start).with_system(spawn_energizer)

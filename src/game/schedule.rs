@@ -1,11 +1,10 @@
 use bevy::prelude::*;
 use bevy::utils::{Duration, HashMap};
 use crate::game::edibles::energizer::EnergizerTimer;
-use crate::life_cycle::LifeCycle::*;
+use crate::game_state::GameState::*;
 use crate::game::level::Level;
 use crate::game::state::State;
 use crate::game::state::State::*;
-use crate::life_cycle::LifeCycle::Start;
 
 pub(in crate::game) struct SchedulePlugin;
 

@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use bevy::prelude::Val::Percent;
 use crate::constants::FONT;
 use crate::game_assets::loaded_assets::LoadedAssets;
-use crate::life_cycle::LifeCycle::{Running, Start};
+use crate::game_state::GameState::{Running, Start};
 use crate::game::score::Score;
 
 pub(in crate::ui) struct TopUIPlugin;

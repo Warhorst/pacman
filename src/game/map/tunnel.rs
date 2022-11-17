@@ -7,7 +7,7 @@ use crate::game::ghosts::Ghost;
 use crate::game::pacman::Pacman;
 use crate::game::helper::SetXY;
 use crate::is;
-use crate::life_cycle::LifeCycle::Running;
+use crate::game_state::GameState::Running;
 
 pub struct TunnelPlugin;
 

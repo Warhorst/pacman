@@ -1,8 +1,7 @@
 use bevy::prelude::*;
-use LifeCycle::Ready;
+use crate::game_state::GameState::Ready;
 use crate::constants::FONT;
 use crate::game_assets::loaded_assets::LoadedAssets;
-use crate::life_cycle::LifeCycle;
 use crate::game::map::FruitSpawn;
 
 pub (in crate::ui) struct ReadyScreenPlugin;

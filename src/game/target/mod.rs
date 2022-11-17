@@ -9,7 +9,7 @@ use crate::game::direction::Direction;
 use crate::game::direction::Direction::*;
 use crate::constants::FIELD_DIMENSION;
 use crate::game::ghost_house_gate::GhostHouseGate;
-use crate::life_cycle::LifeCycle::*;
+use crate::game_state::GameState::*;
 use crate::game::ghosts::Ghost;
 use crate::game::ghosts::Ghost::*;
 use crate::game::state::{State, StateSetter};

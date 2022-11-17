@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::game::direction::Direction;
 use crate::game::direction::Direction::*;
 use crate::game::ghosts::CurrentlyEatenGhost;
-use crate::life_cycle::LifeCycle::*;
+use crate::game_state::GameState::*;
 use crate::game::target::{Target, LTargetSetter};
 use crate::game::speed::Speed;
 use crate::game::state::State;

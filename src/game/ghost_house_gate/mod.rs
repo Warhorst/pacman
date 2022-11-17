@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use std::collections::HashSet;
 use std::time::Duration;
 
-use crate::life_cycle::LifeCycle::*;
+use crate::game_state::GameState::*;
 use crate::game::ghosts::Ghost;
 use crate::game::ghosts::Ghost::*;
 use crate::game::level::Level;

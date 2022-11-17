@@ -5,6 +5,22 @@ pub struct DebugPlugin;
 
 impl Plugin for DebugPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugin(WorldInspectorPlugin::new());
+        app
+            .add_plugin(WorldInspectorPlugin::new())
+            .add_system(toggle_time)
+        ;
+    }
+}
+
+fn toggle_time(
+    mut time: ResMut<Time>,
+    keyboard_input: Res<Input<KeyCode>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::Space) {
+        if time.relative_speed() == 1.0 {
+            time.set_relative_speed(0.0)
+        } else {
+            time.set_relative_speed(1.0)
+        }
     }
 }

@@ -1,12 +1,11 @@
 use bevy::audio::AudioSink;
 use bevy::prelude::*;
-use LifeCycle::Start;
+use crate::game_state::GameState::Start;
 use crate::game::edibles::dots::EatenDots;
 use crate::game::edibles::energizer::EnergizerTimer;
 use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game::ghosts::Ghost;
-use crate::life_cycle::LifeCycle;
-use crate::life_cycle::LifeCycle::Running;
+use crate::game_state::GameState::Running;
 use crate::game::state::State;
 
 pub struct MusicPlugin;
@@ -18,7 +17,7 @@ impl Plugin for MusicPlugin {
             .add_system_set(
                 SystemSet::on_enter(Start)
                     .with_system(play_start_sound)
-                    .with_system(init_noises)
+                    .with_system(init_music)
             )
             .add_system_set(
                 SystemSet::on_update(Running)
@@ -39,7 +38,7 @@ fn play_start_sound(
     audio.play(loaded_assets.get_handle("sounds/start.ogg"));
 }
 
-fn init_noises(
+fn init_music(
     mut commands: Commands,
     audio: Res<Audio>,
     loaded_assets: Res<LoadedAssets>,
@@ -47,7 +46,7 @@ fn init_noises(
 ) {
     let start_audio = |asset: &'static str| audio.play_with_settings(loaded_assets.get_handle(asset), PlaybackSettings::LOOP.with_volume(0.0));
 
-    commands.insert_resource(NoiseHandles {
+    commands.insert_resource(MusicHandles {
         siren: sinks.get_handle((start_audio)("sounds/siren.ogg")),
         frightened: sinks.get_handle((start_audio)("sounds/frightened.ogg")),
         eaten: sinks.get_handle((start_audio)("sounds/eaten.ogg")),
@@ -56,7 +55,7 @@ fn init_noises(
 
 fn mute(
     sinks: Res<Assets<AudioSink>>,
-    noise_handles: Res<NoiseHandles>
+    noise_handles: Res<MusicHandles>
 ) {
     noise_handles.mute_all(&sinks);
 }
@@ -86,7 +85,7 @@ fn update_current_background(
 fn set_background(
     current_background: Res<CurrentBackground>,
     sinks: Res<Assets<AudioSink>>,
-    noise_handles: Res<NoiseHandles>
+    noise_handles: Res<MusicHandles>
 ) {
     if !current_background.is_changed() {
         return;
@@ -103,13 +102,13 @@ fn set_background(
 }
 
 #[derive(Resource)]
-struct NoiseHandles {
+struct MusicHandles {
     siren: Handle<AudioSink>,
     frightened: Handle<AudioSink>,
     eaten: Handle<AudioSink>
 }
 
-impl NoiseHandles {
+impl MusicHandles {
     fn play_siren(&self, sinks: &Assets<AudioSink>, speed: f32) {
         if let Some(sink) = sinks.get(&self.siren) {
             sink.set_volume(1.0);

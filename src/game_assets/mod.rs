@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use crate::game_assets::animation::AnimationPlugin;
 use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game_assets::sprite_sheet::SpriteSheetPlugin;
-use crate::life_cycle::LifeCycle::Loading;
+use crate::game_state::GameState::Loading;
 use crate::game_assets::sprite_sheet::aseprite_data::AsepriteData;
 use crate::game_assets::sprite_sheet::SpriteSheet;
 

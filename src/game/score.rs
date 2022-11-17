@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use crate::constants::{FONT, POINTS_PER_DOT, POINTS_PER_ENERGIZER, POINTS_PER_GHOST, TEXT_Z};
 use crate::game::edibles::energizer::EnergizerOver;
 use crate::game::interactions::{EDotEaten, EEnergizerEaten, EFruitEaten, EGhostEaten};
-use crate::life_cycle::LifeCycle::{PacmanHit, Running};
+use crate::game_state::GameState::{PacmanHit, Running};
 use crate::game::edibles::fruit::Fruit::*;
 use crate::game_assets::loaded_assets::LoadedAssets;
 

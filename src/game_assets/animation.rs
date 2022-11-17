@@ -116,25 +116,25 @@ impl Animation {
         *current_texture_index = 0;
     }
 
-    /// Return if the current animation iteration is over
-    pub fn is_finished(&self) -> bool {
-        let (current_texture_index, timer, num_textures) = match self {
-            Animation::SingleTexture { .. } => return true,
-            Animation::TextureList { current_texture_index, timer, textures, .. } => (current_texture_index, timer, textures.len()),
-        };
+    // Return if the current animation iteration is over
+    // pub fn is_finished(&self) -> bool {
+    //     let (current_texture_index, timer, num_textures) = match self {
+    //         Animation::SingleTexture { .. } => return true,
+    //         Animation::TextureList { current_texture_index, timer, textures, .. } => (current_texture_index, timer, textures.len()),
+    //     };
+    //
+    //     *current_texture_index == num_textures - 1 && timer.just_finished()
+    // }
 
-        *current_texture_index == num_textures - 1 && timer.just_finished()
-    }
-
-    /// Return if an animation is completely finished, not just the current iteration
-    pub fn is_completely_finished(&self) -> bool {
-        let repeating = match self {
-            Animation::SingleTexture { .. } => false,
-            Animation::TextureList { repeating, .. } => *repeating,
-        };
-
-        !repeating && self.is_finished()
-    }
+    // Return if an animation is completely finished, not just the current iteration
+    // pub fn is_completely_finished(&self) -> bool {
+    //     let repeating = match self {
+    //         Animation::SingleTexture { .. } => false,
+    //         Animation::TextureList { repeating, .. } => *repeating,
+    //     };
+    //
+    //     !repeating && self.is_finished()
+    // }
 }
 
 /// Component for entities that might have more than one animation.

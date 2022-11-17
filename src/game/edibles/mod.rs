@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use crate::game::edibles::dots::DotPlugin;
 use crate::game::edibles::energizer::EnergizerPlugin;
 use crate::game::edibles::fruit::FruitPlugin;
-use crate::life_cycle::LifeCycle::Running;
+use crate::game_state::GameState::Running;
 
 pub mod dots;
 pub mod fruit;

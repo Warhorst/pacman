@@ -21,7 +21,7 @@ use crate::game_assets::animation::Animations;
 use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game_assets::sprite_sheet::SpriteSheet;
 use crate::is;
-use crate::life_cycle::LifeCycle::{LevelTransition, Loading};
+use crate::game_state::GameState::{LevelTransition, Loading};
 
 pub mod labyrinth;
 #[cfg(test)]

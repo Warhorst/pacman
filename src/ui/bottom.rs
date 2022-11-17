@@ -5,7 +5,7 @@ use crate::game::edibles::fruit::Fruit;
 use crate::game::edibles::fruit::Fruit::*;
 use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game::level::Level;
-use crate::life_cycle::LifeCycle::{Running, Start};
+use crate::game_state::GameState::{Running, Start};
 use crate::game::lives::Lives;
 use crate::game::specs_per_level::SpecsPerLevel;
 

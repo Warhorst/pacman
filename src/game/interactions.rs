@@ -6,7 +6,7 @@ use crate::game::edibles::energizer::Energizer;
 use crate::game::edibles::fruit::{Fruit, FruitDespawnTimer};
 use crate::game::ghosts::{CurrentlyEatenGhost, Ghost};
 use crate::game::state::State;
-use crate::life_cycle::LifeCycle::Running;
+use crate::game_state::GameState::Running;
 use crate::game::pacman::Pacman;
 
 pub (in crate::game) struct InteractionsPlugin;

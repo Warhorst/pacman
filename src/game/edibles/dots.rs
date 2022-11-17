@@ -1,11 +1,12 @@
 use std::time::Duration;
 use bevy::prelude::*;
+use bevy_inspector_egui::{Inspectable, InspectorPlugin};
 
 use crate::constants::DOT_DIMENSION;
 use crate::game::edibles::Edible;
 use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game::interactions::EDotEaten;
-use crate::life_cycle::LifeCycle::*;
+use crate::game_state::GameState::*;
 use crate::game::map::DotSpawn;
 
 pub struct DotPlugin;
@@ -13,6 +14,7 @@ pub struct DotPlugin;
 impl Plugin for DotPlugin {
     fn build(&self, app: &mut App) {
         app
+            .add_plugin(InspectorPlugin::<EatenDots>::new())
             .add_system_set(
                 SystemSet::on_enter(Start)
                     .with_system(spawn_dots)
@@ -126,7 +128,7 @@ pub struct Dots;
 #[derive(Component)]
 pub struct Dot;
 
-#[derive(Resource)]
+#[derive(Resource, Default, Inspectable)]
 pub struct EatenDots {
     max: usize,
     eaten: usize,

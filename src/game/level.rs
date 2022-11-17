@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_inspector_egui::{Inspectable, InspectorPlugin};
-use crate::life_cycle::LifeCycle::LevelTransition;
+use crate::game_state::GameState::LevelTransition;
 
 pub (in crate::game) struct LevelPlugin;
 

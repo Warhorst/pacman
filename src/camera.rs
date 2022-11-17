@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use crate::constants::FIELD_DIMENSION;
-use crate::life_cycle::LifeCycle::Start;
+use crate::game_state::GameState::Start;
 use crate::game::map::Map;
 
 pub struct CameraPlugin;

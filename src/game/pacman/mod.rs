@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use crate::game_assets::animation::Animations;
 use crate::game_assets::loaded_assets::LoadedAssets;
 
-use crate::life_cycle::LifeCycle::*;
+use crate::game_state::GameState::*;
 use crate::game::pacman::edible_eaten::EdibleEatenPlugin;
 use crate::game::pacman::spawn::spawn_pacman;
 use crate::game::pacman::movement::{InputBuffer, move_pacman_new, set_direction_based_on_keyboard_input};
@@ -17,15 +17,11 @@ mod edible_eaten;
 #[derive(Component)]
 pub struct Pacman;
 
-/// Fired when pacman died.
-pub struct EPacmanDead;
-
 pub (in crate::game) struct PacmanPlugin;
 
 impl Plugin for PacmanPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_event::<EPacmanDead>()
             .add_plugin(EdibleEatenPlugin)
             .insert_resource(InputBuffer(None))
             .add_system_set(
@@ -49,9 +45,6 @@ impl Plugin for PacmanPlugin {
                 SystemSet::on_enter(PacmanDying)
                     .with_system(play_the_dying_animation)
                     .with_system(play_the_dying_sound)
-            )
-            .add_system_set(
-                SystemSet::on_update(PacmanDying).with_system(check_if_pacman_finished_dying)
             )
             .add_system_set(
                 SystemSet::on_enter(PacmanDead).with_system(despawn_pacman)
@@ -94,17 +87,6 @@ fn play_the_dying_sound(
     loaded_assets: Res<LoadedAssets>,
 ) {
     audio.play(loaded_assets.get_handle("sounds/dying.ogg"));
-}
-
-fn check_if_pacman_finished_dying(
-    mut event_writer: EventWriter<EPacmanDead>,
-    query: Query<&Animations, With<Pacman>>,
-) {
-    for animations in query.iter() {
-        if animations.current().is_completely_finished() {
-            event_writer.send(EPacmanDead)
-        }
-    }
 }
 
 fn despawn_pacman(

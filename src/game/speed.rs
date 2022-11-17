@@ -11,7 +11,7 @@ use crate::game::state::State;
 use crate::game::level::Level;
 use crate::game::pacman::Pacman;
 use crate::game::edibles::dots::EatenDots;
-use crate::life_cycle::LifeCycle;
+use crate::game_state::GameState::*;
 use crate::game::map::tunnel::{Tunnel, TunnelHallway};
 use crate::game::specs_per_level::SpecsPerLevel;
 
@@ -22,7 +22,7 @@ impl Plugin for SpeedPlugin {
         app
             .register_inspectable::<Speed>()
             .add_system_set(
-                SystemSet::on_update(LifeCycle::Running)
+                SystemSet::on_update(Running)
                     .with_system(update_ghost_speed)
                     .with_system(update_pacman_speed)
             )

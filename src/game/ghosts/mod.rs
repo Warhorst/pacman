@@ -6,7 +6,7 @@ use crate::game::ghosts::spawn::spawn_ghosts;
 use crate::game::target::Target;
 use crate::game::ghosts::textures::{start_animation, update_ghost_appearance};
 use crate::game::interactions::{EGhostEaten, LPacmanGhostHitDetection};
-use crate::life_cycle::LifeCycle::*;
+use crate::game_state::GameState::*;
 use crate::game::map::tunnel::GhostPassedTunnel;
 
 pub mod movement;

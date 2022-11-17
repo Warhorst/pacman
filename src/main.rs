@@ -6,18 +6,18 @@ use crate::constants::{WINDOW_HEIGHT, WINDOW_WIDTH};
 use crate::debug::DebugPlugin;
 use crate::game::GamePlugin;
 use crate::game_assets::GameAssetsPlugin;
+use crate::game_state::GameStatePlugin;
 
-use crate::life_cycle::LifeCyclePlugin;
 use crate::ui::UIPlugin;
 
 mod camera;
 mod constants;
-mod life_cycle;
 mod game_assets;
 mod music;
 mod debug;
 mod ui;
 mod game;
+mod game_state;
 
 fn main() {
     App::new()
@@ -36,7 +36,7 @@ fn main() {
         )
         .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
         .add_plugin(GamePlugin)
-        .add_plugin(LifeCyclePlugin)
+        .add_plugin(GameStatePlugin)
         .add_plugin(GameAssetsPlugin)
         .add_plugin(CameraPlugin)
         .add_plugin(DebugPlugin)
