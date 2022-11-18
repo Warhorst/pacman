@@ -17,6 +17,9 @@ impl Plugin for LivesPlugin {
                     .with_system(remove_life_when_pacman_dies)
                     .with_system(add_life_if_player_reaches_specific_score)
             )
+            .add_system_set(
+                SystemSet::on_exit(GameOver).with_system(reset_lives)
+            )
         ;
     }
 }
@@ -43,7 +46,7 @@ fn remove_life_when_pacman_dies(
     mut event_reader: EventReader<EPacmanHit>,
     mut lives: ResMut<Lives>,
 ) {
-    for _ in event_reader.iter() {
+    if event_reader.iter().count() > 0 {
         if **lives > 0 {
             **lives -= 1;
         }
@@ -59,5 +62,11 @@ fn add_life_if_player_reaches_specific_score(
         **lives += 1;
         points_required_for_extra_life.increase_limit();
     }
+}
+
+fn reset_lives(
+    mut lives: ResMut<Lives>
+) {
+    lives.0 = 3;
 }
 

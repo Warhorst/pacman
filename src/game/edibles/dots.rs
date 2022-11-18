@@ -28,6 +28,11 @@ impl Plugin for DotPlugin {
                     .with_system(spawn_dots)
                     .with_system(reset_eaten_dots)
             )
+            .add_system_set(
+                SystemSet::on_exit(GameOver)
+                    .with_system(despawn_dots)
+                    .with_system(reset_eaten_dots)
+            )
         ;
     }
 }
@@ -118,6 +123,15 @@ fn play_waka_when_dot_was_eaten(
                 audio.play(loaded_assets.get_handle("sounds/waka.ogg"));
             }
         };
+    }
+}
+
+fn despawn_dots(
+    mut commands: Commands,
+    query: Query<Entity, With<Dots>>
+) {
+    for e in &query {
+        commands.entity(e).despawn_recursive();
     }
 }
 

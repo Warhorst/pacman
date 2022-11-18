@@ -19,7 +19,7 @@ pub(crate) struct MoveComponents<'a> {
     speed: &'a Speed,
 }
 
-pub(crate) fn move_pacman_new(
+pub(in crate::game) fn move_pacman_new(
     time: Res<Time>,
     wall_query: Query<&Transform, (With<Wall>, Without<Pacman>)>,
     mut pacman_query: Query<MoveComponents, (With<Pacman>, Without<EdibleEatenStop>)>,
@@ -56,7 +56,7 @@ fn get_modifiers_for_direction(direction: &Direction) -> (f32, f32) {
     }
 }
 
-pub(crate) fn set_direction_based_on_keyboard_input(
+pub(in crate::game) fn set_direction_based_on_keyboard_input(
     keyboard_input: Res<Input<KeyCode>>,
     mut input_buffer: ResMut<InputBuffer>,
     mut pacman_query: Query<(&Transform, &mut Direction), With<Pacman>>,
@@ -100,6 +100,12 @@ fn get_wished_direction(keyboard_input: &Input<KeyCode>, input_buffer: &InputBuf
     }
 
     **input_buffer
+}
+
+pub (in crate::game) fn reset_input_buffer(
+    mut input_buffer: ResMut<InputBuffer>
+) {
+    input_buffer.0 = None;
 }
 
 /// Return if pacman is near enough to his currents position center to move to an orthogonal position.

@@ -13,7 +13,7 @@ pub struct MusicPlugin;
 impl Plugin for MusicPlugin {
     fn build(&self, app: &mut App) {
         app
-            .insert_resource(CurrentBackground::Siren1)
+            .insert_resource(CurrentTrack::Siren1)
             .add_system_set(
                 SystemSet::on_enter(Start)
                     .with_system(play_start_sound)
@@ -21,8 +21,8 @@ impl Plugin for MusicPlugin {
             )
             .add_system_set(
                 SystemSet::on_update(Running)
-                    .with_system(update_current_background)
-                    .with_system(set_background)
+                    .with_system(update_current_track)
+                    .with_system(play_track)
             )
             .add_system_set(
                 SystemSet::on_exit(Running).with_system(mute)
@@ -55,13 +55,13 @@ fn init_music(
 
 fn mute(
     sinks: Res<Assets<AudioSink>>,
-    noise_handles: Res<MusicHandles>
+    music_handles: Res<MusicHandles>
 ) {
-    noise_handles.mute_all(&sinks);
+    music_handles.mute_all(&sinks);
 }
 
-fn update_current_background(
-    mut current_background: ResMut<CurrentBackground>,
+fn update_current_track(
+    mut current_track: ResMut<CurrentTrack>,
     energizer_timer_opt: Option<Res<EnergizerTimer>>,
     eaten_dots: Res<EatenDots>,
     query: Query<&State, With<Ghost>>
@@ -69,35 +69,35 @@ fn update_current_background(
     let eaten_ghosts = query.iter().filter(|s| s == &&State::Eaten).count();
 
     if eaten_ghosts > 0 {
-        *current_background = CurrentBackground::Eaten
+        *current_track = CurrentTrack::Eaten
     } else if let Some(_) = energizer_timer_opt {
-        *current_background = CurrentBackground::Frightened
+        *current_track = CurrentTrack::Frightened
     } else {
-        *current_background = match eaten_dots.get_eaten() as f32 / eaten_dots.get_max() as f32 {
-            r if r >= 0.0 && r < 0.25 => CurrentBackground::Siren1,
-            r if r >= 0.25 && r < 0.5 => CurrentBackground::Siren2,
-            r if r >= 0.5 && r < 0.75 => CurrentBackground::Siren3,
-            _ => CurrentBackground::Siren4,
+        *current_track = match eaten_dots.get_eaten() as f32 / eaten_dots.get_max() as f32 {
+            r if r >= 0.0 && r < 0.25 => CurrentTrack::Siren1,
+            r if r >= 0.25 && r < 0.5 => CurrentTrack::Siren2,
+            r if r >= 0.5 && r < 0.75 => CurrentTrack::Siren3,
+            _ => CurrentTrack::Siren4,
         }
     }
 }
 
-fn set_background(
-    current_background: Res<CurrentBackground>,
+fn play_track(
+    current_track: Res<CurrentTrack>,
     sinks: Res<Assets<AudioSink>>,
-    noise_handles: Res<MusicHandles>
+    music_handles: Res<MusicHandles>
 ) {
-    if !current_background.is_changed() {
+    if !current_track.is_changed() {
         return;
     }
 
-    match *current_background {
-        CurrentBackground::Siren1 => noise_handles.play_siren(&sinks, 1.0),
-        CurrentBackground::Siren2 => noise_handles.play_siren(&sinks, 1.05),
-        CurrentBackground::Siren3 => noise_handles.play_siren(&sinks, 1.1),
-        CurrentBackground::Siren4 => noise_handles.play_siren(&sinks, 1.15),
-        CurrentBackground::Frightened => noise_handles.play_frightened(&sinks),
-        CurrentBackground::Eaten => noise_handles.play_eaten(&sinks),
+    match *current_track {
+        CurrentTrack::Siren1 => music_handles.play_siren(&sinks, 1.0),
+        CurrentTrack::Siren2 => music_handles.play_siren(&sinks, 1.05),
+        CurrentTrack::Siren3 => music_handles.play_siren(&sinks, 1.1),
+        CurrentTrack::Siren4 => music_handles.play_siren(&sinks, 1.15),
+        CurrentTrack::Frightened => music_handles.play_frightened(&sinks),
+        CurrentTrack::Eaten => music_handles.play_eaten(&sinks),
     }
 }
 
@@ -151,7 +151,7 @@ impl MusicHandles {
 }
 
 #[derive(Resource)]
-enum CurrentBackground {
+enum CurrentTrack {
     Siren1,
     Siren2,
     Siren3,

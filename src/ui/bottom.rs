@@ -5,7 +5,7 @@ use crate::game::edibles::fruit::Fruit;
 use crate::game::edibles::fruit::Fruit::*;
 use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game::level::Level;
-use crate::game_state::GameState::{Running, Start};
+use crate::game_state::GameState::{GameOver, InGame, Start};
 use crate::game::lives::Lives;
 use crate::game::specs_per_level::SpecsPerLevel;
 
@@ -16,9 +16,12 @@ impl Plugin for BottomUIPlugin {
         app
             .add_system_set(SystemSet::on_enter(Start).with_system(spawn_bottom_ui))
             .add_system_set(
-                SystemSet::on_update(Running)
+                SystemSet::on_inactive_update(InGame)
                     .with_system(update_lives)
                     .with_system(update_fruits)
+            )
+            .add_system_set(
+                SystemSet::on_exit(GameOver).with_system(despawn_bottom_ui)
             )
         ;
     }
@@ -223,10 +226,14 @@ fn update_lives(
     ui_lives_query: Query<Entity, With<UILives>>,
 ) {
     if lives.is_changed() {
-        commands.entity(ui_lives_query.single()).despawn_recursive();
-        let bottom_ui = bottom_ui_query.single();
-        let ui_lives = spawn_ui_lives(&mut commands, &loaded_assets, &lives);
-        commands.entity(bottom_ui).push_children(&[ui_lives]);
+        for e in &ui_lives_query {
+            commands.entity(e).despawn_recursive();
+        }
+
+        for bottom_ui in &bottom_ui_query {
+            let ui_lives = spawn_ui_lives(&mut commands, &loaded_assets, &lives);
+            commands.entity(bottom_ui).push_children(&[ui_lives]);
+        }
     }
 }
 
@@ -239,9 +246,22 @@ fn update_fruits(
     ui_fruits_query: Query<Entity, With<UIFruits>>,
 ) {
     if level.is_changed() {
-        commands.entity(ui_fruits_query.single()).despawn_recursive();
-        let bottom_ui = bottom_ui_query.single();
-        let ui_fruits = spawn_ui_fruits(&mut commands, &loaded_assets, &level, &specs_per_level);
-        commands.entity(bottom_ui).push_children(&[ui_fruits]);
+        for e in &ui_fruits_query {
+            commands.entity(e).despawn_recursive();
+        }
+
+        for bottom_ui in &bottom_ui_query {
+            let ui_fruits = spawn_ui_fruits(&mut commands, &loaded_assets, &level, &specs_per_level);
+            commands.entity(bottom_ui).push_children(&[ui_fruits]);
+        }
+    }
+}
+
+fn despawn_bottom_ui(
+    mut commands: Commands,
+    query: Query<Entity, With<BottomUI>>
+) {
+    for e in &query {
+        commands.entity(e).despawn_recursive();
     }
 }

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use crate::constants::FIELD_DIMENSION;
-use crate::game_state::GameState::Start;
+use crate::game_state::GameState::{GameOver, Start};
 use crate::game::map::Map;
 
 pub struct CameraPlugin;
@@ -10,6 +10,9 @@ impl Plugin for CameraPlugin {
         app
             .add_system_set(
                 SystemSet::on_enter(Start).with_system(spawn_camera)
+            )
+            .add_system_set(
+                SystemSet::on_exit(GameOver).with_system(despawn_camera)
             )
         ;
     }
@@ -29,4 +32,13 @@ fn spawn_camera(
         },
         UiCameraConfig { show_ui: true }
     ));
+}
+
+fn despawn_camera(
+    mut commands: Commands,
+    query: Query<Entity, With<Camera>>
+) {
+    for e in &query {
+        commands.entity(e).despawn();
+    }
 }

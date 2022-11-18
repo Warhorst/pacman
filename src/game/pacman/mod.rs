@@ -5,7 +5,7 @@ use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game_state::GameState::*;
 use crate::game::pacman::edible_eaten::EdibleEatenPlugin;
 use crate::game::pacman::spawn::spawn_pacman;
-use crate::game::pacman::movement::{InputBuffer, move_pacman_new, set_direction_based_on_keyboard_input};
+use crate::game::pacman::movement::{InputBuffer, move_pacman_new, reset_input_buffer, set_direction_based_on_keyboard_input};
 use crate::game::pacman::textures::{start_animation, update_pacman_appearance};
 
 mod movement;
@@ -39,7 +39,9 @@ impl Plugin for PacmanPlugin {
                     .with_system(update_pacman_appearance.after(set_direction_based_on_keyboard_input))
             )
             .add_system_set(
-                SystemSet::on_enter(PacmanHit).with_system(stop_animation)
+                SystemSet::on_enter(PacmanHit)
+                    .with_system(stop_animation)
+                    .with_system(reset_input_buffer)
             )
             .add_system_set(
                 SystemSet::on_enter(PacmanDying)
@@ -50,7 +52,9 @@ impl Plugin for PacmanPlugin {
                 SystemSet::on_enter(PacmanDead).with_system(despawn_pacman)
             )
             .add_system_set(
-                SystemSet::on_enter(LevelTransition).with_system(stop_animation)
+                SystemSet::on_enter(LevelTransition)
+                    .with_system(stop_animation)
+                    .with_system(reset_input_buffer)
             )
             .add_system_set(
                 SystemSet::on_exit(LevelTransition).with_system(despawn_pacman)

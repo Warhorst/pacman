@@ -33,6 +33,11 @@ impl Plugin for EnergizerPlugin {
             .add_system_set(
                 SystemSet::on_enter(LevelTransition).with_system(despawn_energizer_timer)
             )
+            .add_system_set(
+                SystemSet::on_exit(GameOver)
+                    .with_system(despawn_energizers)
+                    .with_system(despawn_energizer_timer)
+            )
         ;
     }
 }
@@ -138,4 +143,13 @@ fn despawn_energizer_timer(
     mut commands: Commands,
 ) {
     commands.remove_resource::<EnergizerTimer>();
+}
+
+fn despawn_energizers(
+    mut commands: Commands,
+    query: Query<Entity, With<Energizers>>
+) {
+    for e in &query {
+        commands.entity(e).despawn_recursive();
+    }
 }

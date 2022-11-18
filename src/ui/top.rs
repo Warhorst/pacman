@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use bevy::prelude::Val::Percent;
 use crate::constants::FONT;
 use crate::game_assets::loaded_assets::LoadedAssets;
-use crate::game_state::GameState::{Running, Start};
+use crate::game_state::GameState::{GameOver, InGame, Start};
 use crate::game::score::Score;
 
 pub(in crate::ui) struct TopUIPlugin;
@@ -15,9 +15,12 @@ impl Plugin for TopUIPlugin {
                 SystemSet::on_enter(Start).with_system(spawn_top_ui)
             )
             .add_system_set(
-                SystemSet::on_update(Running)
+                SystemSet::on_inactive_update(InGame)
                     .with_system(update_scoreboard)
                     .with_system(blink_1_up_label)
+            )
+            .add_system_set(
+                SystemSet::on_exit(GameOver).with_system(despawn_top_ui)
             )
         ;
     }
@@ -206,5 +209,14 @@ fn blink_1_up_label(
         if timer_finished {
             vis.is_visible = !vis.is_visible;
         }
+    }
+}
+
+fn despawn_top_ui(
+    mut commands: Commands,
+    query: Query<Entity, With<TopUI>>
+) {
+    for e in &query {
+        commands.entity(e).despawn_recursive()
     }
 }

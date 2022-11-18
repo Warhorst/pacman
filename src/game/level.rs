@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_inspector_egui::{Inspectable, InspectorPlugin};
-use crate::game_state::GameState::LevelTransition;
+use crate::game_state::GameState::{GameOver, LevelTransition};
 
 pub (in crate::game) struct LevelPlugin;
 
@@ -11,6 +11,9 @@ impl Plugin for LevelPlugin {
             .insert_resource(Level(1))
             .add_system_set(
                 SystemSet::on_exit(LevelTransition).with_system(increase_level)
+            )
+            .add_system_set(
+                SystemSet::on_exit(GameOver).with_system(reset_level)
             )
         ;
     }
@@ -29,4 +32,10 @@ fn increase_level(
     mut level: ResMut<Level>,
 ) {
     level.increase();
+}
+
+fn reset_level(
+    mut level: ResMut<Level>
+) {
+    level.0 = 1;
 }

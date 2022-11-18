@@ -4,6 +4,7 @@ use crate::game::edibles::EAllEdiblesEaten;
 use crate::game::interactions::{EGhostEaten, EPacmanHit};
 use crate::game::lives::Lives;
 use crate::game_assets::EAllAssetsLoaded;
+use crate::ui::game_over_screen::EGameRestarted;
 
 pub struct GameStatePlugin;
 
@@ -49,7 +50,8 @@ fn update_state(
     assets_loaded_events: EventReader<EAllAssetsLoaded>,
     pacman_hit_events: EventReader<EPacmanHit>,
     edibles_eaten_events: EventReader<EAllEdiblesEaten>,
-    ghost_eaten_events: EventReader<EGhostEaten>
+    ghost_eaten_events: EventReader<EGhostEaten>,
+    game_restartet_events: EventReader<EGameRestarted>
 ) {
     match game_state.current() {
         Loading => switch_to_in_game_when_everything_loaded(&mut game_state, assets_loaded_events),
@@ -60,7 +62,7 @@ fn update_state(
         PacmanHit => switch_when_timer_finished(&mut commands, &state_timer, &mut game_state, 1.0, PacmanDying),
         PacmanDying => switch_when_timer_finished(&mut commands, &state_timer, &mut game_state, 1.5, PacmanDead),
         PacmanDead => switch_to_ready_or_game_over(&mut commands, &state_timer, &lives, &mut game_state),
-        GameOver => {} //coming soon!
+        GameOver => switch_to_start_after_game_over(&mut game_state, game_restartet_events),
         LevelTransition => switch_when_timer_finished(&mut commands, &state_timer, &mut game_state, 3.0, Ready),
         GhostEatenPause => switch_when_timer_finished(&mut commands, &state_timer, &mut game_state, 1.0, Running)
     }
@@ -139,6 +141,15 @@ fn switch_states_based_on_events(
     if ghost_eaten_events.iter().count() > 0 {
         game_state.set(GhostEatenPause).unwrap();
         return;
+    }
+}
+
+fn switch_to_start_after_game_over(
+    game_state: &mut State<GameState>,
+    mut game_restarted_events: EventReader<EGameRestarted>
+) {
+    if game_restarted_events.iter().count() > 0 {
+        game_state.set(Start).unwrap()
     }
 }
 

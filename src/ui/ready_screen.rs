@@ -1,8 +1,8 @@
 use bevy::prelude::*;
+use bevy::prelude::Val::Percent;
 use crate::game_state::GameState::Ready;
 use crate::constants::FONT;
 use crate::game_assets::loaded_assets::LoadedAssets;
-use crate::game::map::FruitSpawn;
 
 pub (in crate::ui) struct ReadyScreenPlugin;
 
@@ -25,29 +25,26 @@ struct ReadyScreen;
 fn spawn_screen(
     mut commands: Commands,
     game_asset_handles: Res<LoadedAssets>,
-    fruit_spawn_query: Query<&FruitSpawn>,
 ) {
-    let transform = Transform::from_translation(fruit_spawn_query.single().0);
     commands.spawn((
         Name::new("ReadyScreen"),
-        Text2dBundle {
-            text: Text::from_section(
-                "Ready!".to_string(),
-                TextStyle {
-                    font: game_asset_handles.get_handle(FONT),
-                    font_size: 20.0,
-                    color: Color::rgb(1.0, 1.0, 0.0),
-                },
-            ).with_alignment(
-                TextAlignment {
-                    vertical: VerticalAlign::Center,
-                    horizontal: HorizontalAlign::Center,
-                }
-            ),
-            transform,
-            ..Default::default()
-        },
-        ReadyScreen
+        ReadyScreen,
+        TextBundle::from_section(
+            "Ready!",
+            TextStyle {
+                font: game_asset_handles.get_handle(FONT),
+                font_size: 20.0,
+                color: Color::rgb(1.0, 1.0, 0.0),
+            },
+        ).with_style(Style {
+            position_type: PositionType::Absolute,
+            position: UiRect {
+                left: Percent(45.0),
+                top: Percent(55.0),
+                ..default()
+            },
+            ..default()
+        }),
     ));
 }
 

@@ -26,10 +26,9 @@ impl Plugin for SchedulePlugin {
 
 fn register_start_schedule(
     mut commands: Commands,
-    level: Res<Level>,
     schedule_by_level: Res<ScheduleByLevel>,
 ) {
-    commands.insert_resource(schedule_by_level.get_schedule_for_level(&level));
+    commands.insert_resource(schedule_by_level.get_schedule_for_level(&Level(1)));
 }
 
 fn switch_schedule_when_level_changed(

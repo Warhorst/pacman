@@ -7,7 +7,7 @@ use crate::game::edibles::dots::EatenDots;
 use crate::game::edibles::Edible;
 use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game::interactions::{EDotEaten, EFruitEaten};
-use crate::game_state::GameState::{LevelTransition, PacmanHit, Running};
+use crate::game_state::GameState::{GameOver, LevelTransition, PacmanHit, Running};
 use crate::game::map::FruitSpawn;
 use crate::game::specs_per_level::SpecsPerLevel;
 
@@ -29,6 +29,9 @@ impl Plugin for FruitPlugin {
             )
             .add_system_set(
                 SystemSet::on_enter(LevelTransition).with_system(despawn_fruit_and_timer)
+            )
+            .add_system_set(
+                SystemSet::on_exit(GameOver).with_system(despawn_fruit_and_timer)
             )
         ;
     }
