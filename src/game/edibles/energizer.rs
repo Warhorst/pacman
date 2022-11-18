@@ -38,6 +38,9 @@ impl Plugin for EnergizerPlugin {
                     .with_system(despawn_energizers)
                     .with_system(despawn_energizer_timer)
             )
+            .add_system_set(
+                SystemSet::on_inactive_update(InGame).with_system(animate_energizers)
+            )
         ;
     }
 }
@@ -151,5 +154,29 @@ fn despawn_energizers(
 ) {
     for e in &query {
         commands.entity(e).despawn_recursive();
+    }
+}
+
+#[derive(Deref, DerefMut)]
+struct EnergizerAnimationTimer(Timer);
+
+impl Default for EnergizerAnimationTimer {
+    fn default() -> Self {
+        EnergizerAnimationTimer(Timer::from_seconds(0.15, TimerMode::Repeating))
+    }
+}
+
+/// Let energizers blink like in the real game
+fn animate_energizers(
+    time: Res<Time>,
+    mut timer: Local<EnergizerAnimationTimer>,
+    mut query: Query<&mut Visibility, With<Energizers>>
+) {
+    timer.tick(time.delta());
+
+    if timer.just_finished() {
+        for mut vis in &mut query {
+            vis.is_visible = !vis.is_visible
+        }
     }
 }

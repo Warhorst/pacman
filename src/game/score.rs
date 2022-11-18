@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use crate::constants::{FONT, POINTS_PER_DOT, POINTS_PER_ENERGIZER, POINTS_PER_GHOST, TEXT_Z};
 use crate::game::edibles::energizer::EnergizerOver;
 use crate::game::interactions::{EDotEaten, EEnergizerEaten, EFruitEaten, EGhostEaten};
-use crate::game_state::GameState::{GameOver, PacmanHit, Running};
+use crate::game_state::GameState::{GameOver, LevelTransition, PacmanHit, Running};
 use crate::game::edibles::fruit::Fruit::*;
 use crate::game_assets::loaded_assets::LoadedAssets;
 
@@ -26,10 +26,15 @@ impl Plugin for ScorePlugin {
                     .with_system(update_score_texts)
             )
             .add_system_set(
-                SystemSet::on_enter(PacmanHit).with_system(despawn_score_texts)
+                SystemSet::on_enter(PacmanHit)
+                    .with_system(despawn_score_texts)
+                    .with_system(reset_ghost_eaten_counter)
             )
             .add_system_set(
                 SystemSet::on_exit(GameOver).with_system(reset_score)
+            )
+            .add_system_set(
+                SystemSet::on_enter(LevelTransition).with_system(reset_ghost_eaten_counter)
             )
         ;
     }
@@ -113,6 +118,12 @@ fn reset_eaten_ghost_counter_when_energizer_is_over(
     for _ in event_reader.iter() {
         **eaten_ghost_counter = 0
     }
+}
+
+fn reset_ghost_eaten_counter(
+    mut eaten_ghost_counter: ResMut<EatenGhostCounter>,
+) {
+    **eaten_ghost_counter = 0
 }
 
 fn add_points_for_eaten_fruit_and_display_score_text(

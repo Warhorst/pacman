@@ -42,9 +42,7 @@ As the core game is almost complete, I want to publish a 1.0 soon (I did not car
 ### TODOS
 Things that are required for 1.0
 - crop the background sounds
-- add a possibility to restart the game after game over
 - save a highscore for the current session and play a sound when beaten
-- add some blinking like in the real game (energizers, score, etc)
 - general bugfixing
 
 ### Ideas

@@ -28,8 +28,11 @@ impl Plugin for GhostPlugin {
             .add_system_set(
                 SystemSet::on_update(Running)
                     .with_system(ghost_passed_tunnel)
-                    .with_system(update_ghost_appearance)
+                    // .with_system(update_ghost_appearance)
                     .with_system(play_ghost_eaten_sound_when_ghost_was_eaten.after(LPacmanGhostHitDetection))
+            )
+            .add_system_set(
+                SystemSet::on_inactive_update(InGame).with_system(update_ghost_appearance)
             )
             .add_system_set(
                 SystemSet::on_enter(PacmanDying).with_system(despawn_ghosts)
@@ -104,7 +107,7 @@ fn play_ghost_eaten_sound_when_ghost_was_eaten(
     audio: Res<Audio>,
     mut event_reader: EventReader<EGhostEaten>
 ) {
-    for _ in event_reader.iter() {
+    if event_reader.iter().count() > 0 {
         audio.play(loaded_assets.get_handle("sounds/ghost_eaten.ogg"));
     }
 }
