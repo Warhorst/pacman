@@ -7,6 +7,7 @@ use crate::game::direction::Direction;
 use crate::game::position::Position;
 use crate::game::edibles::energizer::EnergizerOver;
 use crate::game_state::GameState::*;
+use crate::game_state::Game::*;
 use crate::game::target::Target;
 use crate::game::ghosts::Ghost;
 use crate::game::schedule::Schedule;
@@ -25,9 +26,9 @@ impl Plugin for StatePlugin {
                 .after(LPacmanGhostHitDetection)
                 .after(LPacmanEnergizerHitDetection)
                 .in_set(StateSetter)
-                .run_if(in_state(Running)),
+                .run_if(in_state(Game(Running))),
             )
-            .add_systems(Update, update_state_on_eaten_pause.run_if(in_state(GhostEatenPause)))
+            .add_systems(Update, update_state_on_eaten_pause.run_if(in_state(Game(GhostEatenPause))))
         ;
     }
 }

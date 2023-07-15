@@ -1,11 +1,11 @@
 use bevy::audio::{AudioSink, Volume};
 use bevy::prelude::*;
-use crate::game_state::GameState::Start;
+use crate::game_state::GameState::*;
 use crate::game::edibles::dots::EatenDots;
 use crate::game::edibles::energizer::EnergizerTimer;
 use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game::ghosts::Ghost;
-use crate::game_state::GameState::Running;
+use crate::game_state::Game::*;
 use crate::game::state::State;
 
 pub struct MusicPlugin;
@@ -14,15 +14,15 @@ impl Plugin for MusicPlugin {
     fn build(&self, app: &mut App) {
         app
             .insert_resource(CurrentTrack::Siren1)
-            .add_systems(OnEnter(Start), (
+            .add_systems(OnEnter(Game(Start)), (
                 play_start_sound,
                 init_background_music
             ))
             .add_systems(Update, (
                 update_current_track,
                 play_track
-            ).run_if(in_state(Running)))
-            .add_systems(OnExit(Running), mute)
+            ).run_if(in_state(Game(Running))))
+            .add_systems(OnExit(Game(Running)), mute)
         ;
     }
 }

@@ -6,11 +6,12 @@ use crate::constants::{GHOST_BASE_SPEED, PACMAN_BASE_SPEED};
 use crate::game::edibles::energizer::EnergizerTimer;
 use crate::game::ghosts::Ghost;
 use crate::game::ghosts::Ghost::*;
+use crate::game_state::GameState::*;
+use crate::game_state::Game::*;
 use crate::game::state::State;
 use crate::game::level::Level;
 use crate::game::pacman::Pacman;
 use crate::game::edibles::dots::EatenDots;
-use crate::game_state::GameState::*;
 use crate::game::map::tunnel::{Tunnel, TunnelHallway};
 use crate::game::specs_per_level::SpecsPerLevel;
 
@@ -23,7 +24,7 @@ impl Plugin for SpeedPlugin {
             .add_systems(Update, (
                 update_ghost_speed,
                 update_pacman_speed
-            ).run_if(in_state(Running)))
+            ).run_if(in_state(Game(Running))))
         ;
     }
 }

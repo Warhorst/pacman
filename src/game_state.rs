@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use GameState::*;
+use crate::game_state::GameState::*;
+use crate::game_state::Game::*;
 use crate::game::edibles::EAllEdiblesEaten;
 use crate::game::interactions::{EGhostEaten, EPacmanHit};
 use crate::game::lives::Lives;
@@ -20,11 +21,34 @@ impl Plugin for GameStatePlugin {
     }
 }
 
-#[derive(States, Clone, Default, Eq, PartialEq, Hash, Debug)]
+#[derive(Copy, Clone, Default, Eq, PartialEq, Hash, Debug)]
 pub enum GameState {
     #[default]
     Loading,
-    InGame,
+    Game(Game)
+}
+
+impl States for GameState {
+    type Iter = std::array::IntoIter<GameState, 10>;
+
+    fn variants() -> Self::Iter {
+        [
+            Loading,
+            Game(Start),
+            Game(Ready),
+            Game(Running),
+            Game(PacmanHit),
+            Game(PacmanDying),
+            Game(PacmanDead),
+            Game(GameOver),
+            Game(LevelTransition),
+            Game(GhostEatenPause)
+        ].into_iter()
+    }
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum Game {
     Start,
     Ready,
     Running,
@@ -38,6 +62,14 @@ pub enum GameState {
 
 #[derive(Deref, DerefMut, Resource)]
 struct StateTimer(Timer);
+
+/// A run condition which returns true if the current state is any variant of Game.
+pub fn in_game() -> impl Fn(Res<State<GameState>>) -> bool {
+    |current_state: Res<State<GameState>>| match current_state.get() {
+        Game(_) => true,
+        _ => false
+    }
+}
 
 /// Update the current game state based on multiple factors.
 ///
@@ -59,16 +91,15 @@ fn update_state(
 ) {
     match current_state.get() {
         Loading => switch_to_in_game_when_everything_loaded(&mut next_state, assets_loaded_events),
-        InGame => switch_to_start(&mut next_state),
-        Start => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 2.0, Ready),
-        Ready => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 2.5, Running),
-        Running => switch_states_based_on_events(&mut next_state, pacman_hit_events, edibles_eaten_events, ghost_eaten_events),
-        PacmanHit => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 1.0, PacmanDying),
-        PacmanDying => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 1.5, PacmanDead),
-        PacmanDead => switch_to_ready_or_game_over(&mut commands, &state_timer, &lives, &mut next_state),
-        GameOver => switch_to_start_after_game_over(&mut next_state, game_restartet_events),
-        LevelTransition => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 3.0, Ready),
-        GhostEatenPause => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 1.0, Running)
+        Game(Start) => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 2.0, Game(Ready)),
+        Game(Ready) => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 2.5, Game(Running)),
+        Game(Running) => switch_states_based_on_events(&mut next_state, pacman_hit_events, edibles_eaten_events, ghost_eaten_events),
+        Game(PacmanHit) => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 1.0, Game(PacmanDying)),
+        Game(PacmanDying) => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 1.5, Game(PacmanDead)),
+        Game(PacmanDead) => switch_to_ready_or_game_over(&mut commands, &state_timer, &lives, &mut next_state),
+        Game(GameOver) => switch_to_start_after_game_over(&mut next_state, game_restartet_events),
+        Game(LevelTransition) => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 3.0, Game(Ready)),
+        Game(GhostEatenPause) => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 1.0, Game(Running))
     }
 }
 
@@ -77,17 +108,8 @@ fn switch_to_in_game_when_everything_loaded(
     mut assets_loaded_events: EventReader<EAllAssetsLoaded>
 ) {
     if assets_loaded_events.iter().count() > 0 {
-        game_state.set(InGame)
+        game_state.set(Game(Start))
     }
-}
-
-/// Executed when the state stack only contains InGame. InGame does effectively nothing,
-/// but states over it do. So Start is pushed, as a single InGame should only exist after
-/// switching from Loading.
-fn switch_to_start(
-    game_state: &mut NextState<GameState>,
-) {
-    game_state.set(Start)
 }
 
 fn switch_when_timer_finished(
@@ -117,9 +139,9 @@ fn switch_to_ready_or_game_over(
             commands.remove_resource::<StateTimer>();
 
             if **lives > 0 {
-                game_state.set(Ready)
+                game_state.set(Game(Ready))
             } else {
-                game_state.set(GameOver)
+                game_state.set(Game(GameOver))
             }
         },
         None => commands.insert_resource(StateTimer(Timer::from_seconds(1.0, TimerMode::Once)))
@@ -133,17 +155,17 @@ fn switch_states_based_on_events(
     mut ghost_eaten_events: EventReader<EGhostEaten>
 ) {
     if pacman_hit_events.iter().count() > 0 {
-        game_state.set(PacmanHit);
+        game_state.set(Game(PacmanHit));
         return;
     }
 
     if edibles_eaten_events.iter().count() > 0 {
-        game_state.set(LevelTransition);
+        game_state.set(Game(LevelTransition));
         return;
     }
 
     if ghost_eaten_events.iter().count() > 0 {
-        game_state.set(GhostEatenPause);
+        game_state.set(Game(GhostEatenPause));
         return;
     }
 }
@@ -153,7 +175,7 @@ fn switch_to_start_after_game_over(
     mut game_restarted_events: EventReader<EGameRestarted>
 ) {
     if game_restarted_events.iter().count() > 0 {
-        game_state.set(Start)
+        game_state.set(Game(Start))
     }
 }
 

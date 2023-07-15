@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy_inspector_egui::quick::ResourceInspectorPlugin;
 use crate::game::interactions::EPacmanHit;
 use crate::game_state::GameState::*;
+use crate::game_state::Game::*;
 use crate::game::score::Score;
 
 pub(in crate::game) struct LivesPlugin;
@@ -16,8 +17,8 @@ impl Plugin for LivesPlugin {
             .add_systems(Update, (
                 remove_life_when_pacman_dies,
                 add_life_if_player_reaches_specific_score
-            ).run_if(in_state(Running)))
-            .add_systems(OnExit(GameOver), reset_lives)
+            ).run_if(in_state(Game(Running))))
+            .add_systems(OnExit(Game(GameOver)), reset_lives)
         ;
     }
 }

@@ -5,22 +5,23 @@ use crate::game::edibles::fruit::Fruit;
 use crate::game::edibles::fruit::Fruit::*;
 use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game::level::Level;
-use crate::game_state::GameState::{GameOver, InGame, Start};
+use crate::game_state::GameState::*;
+use crate::game_state::Game::*;
 use crate::game::lives::Lives;
 use crate::game::specs_per_level::SpecsPerLevel;
+use crate::game_state::in_game;
 
 pub(in crate::ui) struct BottomUIPlugin;
 
 impl Plugin for BottomUIPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(OnEnter(Start), spawn_bottom_ui)
-            // TODO dont run only in state InGame
+            .add_systems(OnEnter(Game(Start)), spawn_bottom_ui)
             .add_systems(Update, (
                 update_lives,
                 update_fruits
-            ).run_if(in_state(InGame)))
-            .add_systems(OnExit(GameOver), despawn_bottom_ui)
+            ).run_if(in_game()))
+            .add_systems(OnExit(Game(GameOver)), despawn_bottom_ui)
         ;
     }
 }

@@ -10,6 +10,7 @@ use crate::game::direction::Direction::*;
 use crate::constants::FIELD_DIMENSION;
 use crate::game::ghost_house_gate::GhostHouseGate;
 use crate::game_state::GameState::*;
+use crate::game_state::Game::*;
 use crate::game::ghosts::Ghost;
 use crate::game::ghosts::Ghost::*;
 use crate::game::state::{State, StateSetter};
@@ -30,12 +31,12 @@ impl Plugin for TargetPlugin {
             .add_systems(Update, set_target
                 .in_set(LTargetSetter)
                 .after(StateSetter)
-                .run_if(in_state(Running)),
+                .run_if(in_state(Game(Running))),
             )
             .add_systems(Update, set_target_on_ghost_pause
                 .in_set(LTargetSetter)
                 .after(StateSetter)
-                .run_if(in_state(GhostEatenPause)),
+                .run_if(in_state(Game(GhostEatenPause))),
             )
         ;
     }

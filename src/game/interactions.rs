@@ -6,7 +6,8 @@ use crate::game::edibles::energizer::Energizer;
 use crate::game::edibles::fruit::{Fruit, FruitDespawnTimer};
 use crate::game::ghosts::{CurrentlyEatenGhost, Ghost};
 use crate::game::state::State;
-use crate::game_state::GameState::Running;
+use crate::game_state::GameState::*;
+use crate::game_state::Game::*;
 use crate::game::pacman::Pacman;
 
 pub(in crate::game) struct InteractionsPlugin;
@@ -25,7 +26,7 @@ impl Plugin for InteractionsPlugin {
                 pacman_eat_dot,
                 pacman_eat_energizer,
                 eat_fruit_when_pacman_touches_it
-            ).in_set(LPacmanEnergizerHitDetection).run_if(in_state(Running)))
+            ).in_set(LPacmanEnergizerHitDetection).run_if(in_state(Game(Running))))
         ;
     }
 }

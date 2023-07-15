@@ -22,7 +22,8 @@ use crate::game_assets::animation::Animations;
 use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game_assets::sprite_sheet::SpriteSheet;
 use crate::is;
-use crate::game_state::GameState::{LevelTransition, Loading};
+use crate::game_state::GameState::*;
+use crate::game_state::Game::*;
 
 pub mod labyrinth;
 #[cfg(test)]
@@ -40,8 +41,8 @@ impl Plugin for MapPlugin {
                 JsonAssetPlugin::<RawMap>::new(&["map.json"])
             ))
             .add_systems(OnExit(Loading), spawn_map)
-            .add_systems(OnEnter(LevelTransition), set_animation_to_blinking)
-            .add_systems(OnExit(LevelTransition), set_animation_to_idle)
+            .add_systems(OnEnter(Game(LevelTransition)), set_animation_to_blinking)
+            .add_systems(OnExit(Game(LevelTransition)), set_animation_to_idle)
         ;
     }
 }

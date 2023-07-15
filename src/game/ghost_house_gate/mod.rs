@@ -3,6 +3,7 @@ use std::collections::HashSet;
 use std::time::Duration;
 
 use crate::game_state::GameState::*;
+use crate::game_state::Game::*;
 use crate::game::ghosts::Ghost;
 use crate::game::ghosts::Ghost::*;
 use crate::game::level::Level;
@@ -18,12 +19,12 @@ pub(in crate::game) struct GhostHouseGatePlugin;
 impl Plugin for GhostHouseGatePlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(OnEnter(Start), create_gate)
+            .add_systems(OnEnter(Game(Start)), create_gate)
             .add_systems(Update, (
                 update_ghost_house_gate,
                 increment_counter_when_dot_eaten,
                 switch_to_global_counter_when_pacman_got_killed
-            ).run_if(in_state(Running)))
+            ).run_if(in_state(Game(Running))))
         ;
     }
 }

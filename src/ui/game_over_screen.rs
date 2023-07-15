@@ -2,7 +2,8 @@ use bevy::prelude::*;
 use bevy::prelude::Val::Percent;
 use crate::constants::FONT;
 use crate::game_assets::loaded_assets::LoadedAssets;
-use crate::game_state::GameState::GameOver;
+use crate::game_state::GameState::*;
+use crate::game_state::Game::*;
 
 pub(in crate::ui) struct GameOverScreenPlugin;
 
@@ -10,9 +11,9 @@ impl Plugin for GameOverScreenPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<EGameRestarted>()
-            .add_systems(OnEnter(GameOver), spawn_screens)
-            .add_systems(Update, send_restart_event_when_key_pressed.run_if(in_state(GameOver)))
-            .add_systems(OnExit(GameOver), despawn_screens)
+            .add_systems(OnEnter(Game(GameOver)), spawn_screens)
+            .add_systems(Update, send_restart_event_when_key_pressed.run_if(in_state(Game(GameOver))))
+            .add_systems(OnExit(Game(GameOver)), despawn_screens)
         ;
     }
 }

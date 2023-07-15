@@ -7,7 +7,9 @@ use crate::game::target::Target;
 use crate::game::ghosts::textures::{start_animation, update_ghost_appearance};
 use crate::game::interactions::{EGhostEaten, LPacmanGhostHitDetection};
 use crate::game_state::GameState::*;
+use crate::game_state::Game::*;
 use crate::game::map::tunnel::GhostPassedTunnel;
+use crate::game_state::in_game;
 
 pub mod movement;
 pub mod spawn;
@@ -19,18 +21,17 @@ impl Plugin for GhostPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_plugins(MovePlugin)
-            .add_systems(OnEnter(Ready), spawn_ghosts)
-            .add_systems(OnEnter(Running), start_animation)
+            .add_systems(OnEnter(Game(Ready)), spawn_ghosts)
+            .add_systems(OnEnter(Game(Running)), start_animation)
             .add_systems(Update, (
                 ghost_passed_tunnel,
                 play_ghost_eaten_sound_when_ghost_was_eaten.after(LPacmanGhostHitDetection)
-            ).run_if(in_state(Running)))
-            // TODO fix this stack based approach, wont work
-            .add_systems(Update, update_ghost_appearance.run_if(in_state(InGame)))
-            .add_systems(OnEnter(PacmanDying), despawn_ghosts)
-            .add_systems(OnEnter(LevelTransition), despawn_ghosts)
-            .add_systems(OnEnter(GhostEatenPause), set_currently_eaten_ghost_invisible)
-            .add_systems(OnExit(GhostEatenPause), (
+            ).run_if(in_state(Game(Running))))
+            .add_systems(Update, update_ghost_appearance.run_if(in_game()))
+            .add_systems(OnEnter(Game(PacmanDying)), despawn_ghosts)
+            .add_systems(OnEnter(Game(LevelTransition)), despawn_ghosts)
+            .add_systems(OnEnter(Game(GhostEatenPause)), set_currently_eaten_ghost_invisible)
+            .add_systems(OnExit(Game(GhostEatenPause)), (
                 remove_currently_eaten_ghost,
                 set_currently_eaten_ghost_visible
             ))

@@ -6,9 +6,11 @@ use crate::game::edibles::Edible;
 use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game::interactions::EEnergizerEaten;
 use crate::game_state::GameState::*;
+use crate::game_state::Game::*;
 use crate::game::level::Level;
 use crate::game::map::EnergizerSpawn;
 use crate::game::specs_per_level::SpecsPerLevel;
+use crate::game_state::in_game;
 
 pub struct EnergizerPlugin;
 
@@ -16,20 +18,19 @@ impl Plugin for EnergizerPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<EnergizerOver>()
-            .add_systems(OnEnter(Start), spawn_energizer)
+            .add_systems(OnEnter(Game(Start)), spawn_energizer)
             .add_systems(Update, (
                 start_energizer_timer_when_energizer_eaten,
                 update_energizer_timer.after(start_energizer_timer_when_energizer_eaten)
-            ).run_if(in_state(Running)))
-            .add_systems(OnExit(LevelTransition), spawn_energizer)
-            .add_systems(OnEnter(PacmanHit), despawn_energizer_timer)
-            .add_systems(OnEnter(LevelTransition), despawn_energizer_timer)
-            .add_systems(OnExit(GameOver), (
+            ).run_if(in_state(Game(Running))))
+            .add_systems(OnExit(Game(LevelTransition)), spawn_energizer)
+            .add_systems(OnEnter(Game(PacmanHit)), despawn_energizer_timer)
+            .add_systems(OnEnter(Game(LevelTransition)), despawn_energizer_timer)
+            .add_systems(OnExit(Game(GameOver)), (
                 despawn_energizers,
                 despawn_energizer_timer
             ))
-            // TODO fix this legacy stack state
-            .add_systems(Update, animate_energizers.run_if(in_state(InGame)))
+            .add_systems(Update, animate_energizers.run_if(in_game()))
         ;
     }
 }

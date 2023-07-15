@@ -7,6 +7,7 @@ use crate::game::edibles::Edible;
 use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game::interactions::EDotEaten;
 use crate::game_state::GameState::*;
+use crate::game_state::Game::*;
 use crate::game::map::DotSpawn;
 
 pub struct DotPlugin;
@@ -16,16 +17,16 @@ impl Plugin for DotPlugin {
         app
             .register_type::<EatenDots>()
             .add_plugins(ResourceInspectorPlugin::<EatenDots>::default())
-            .add_systems(OnEnter(Start), (
+            .add_systems(OnEnter(Game(Start)), (
                 spawn_dots,
                 create_eaten_dots
             ))
-            .add_systems(Update, play_waka_when_dot_was_eaten.run_if(in_state(Running)))
-            .add_systems(OnExit(LevelTransition), (
+            .add_systems(Update, play_waka_when_dot_was_eaten.run_if(in_state(Game(Running))))
+            .add_systems(OnExit(Game(LevelTransition)), (
                 spawn_dots,
                 reset_eaten_dots
             ))
-            .add_systems(OnExit(GameOver), (
+            .add_systems(OnExit(Game(GameOver)), (
                 despawn_dots,
                 reset_eaten_dots
             ))

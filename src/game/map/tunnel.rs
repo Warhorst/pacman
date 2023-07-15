@@ -7,7 +7,8 @@ use crate::game::ghosts::Ghost;
 use crate::game::pacman::Pacman;
 use crate::game::helper::SetXY;
 use crate::is;
-use crate::game_state::GameState::Running;
+use crate::game_state::GameState::*;
+use crate::game_state::Game::*;
 
 pub struct TunnelPlugin;
 
@@ -18,7 +19,7 @@ impl Plugin for TunnelPlugin {
             .add_systems(Update, (
                 move_pacman_through_tunnel,
                 move_ghost_trough_tunnel
-                ).run_if(in_state(Running)))
+                ).run_if(in_state(Game(Running))))
         ;
     }
 }

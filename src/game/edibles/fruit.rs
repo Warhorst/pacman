@@ -7,7 +7,8 @@ use crate::game::edibles::dots::EatenDots;
 use crate::game::edibles::Edible;
 use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game::interactions::{EDotEaten, EFruitEaten};
-use crate::game_state::GameState::{GameOver, LevelTransition, PacmanHit, Running};
+use crate::game_state::GameState::*;
+use crate::game_state::Game::*;
 use crate::game::map::FruitSpawn;
 use crate::game::specs_per_level::SpecsPerLevel;
 
@@ -22,10 +23,10 @@ impl Plugin for FruitPlugin {
                 despawn_fruit_if_timer_exceeded,
                 play_fruit_eaten_sound_when_fruit_was_eaten,
                 reset_fruit_despawn_timer_when_level_changed
-            ).run_if(in_state(Running)))
-            .add_systems(OnEnter(PacmanHit), despawn_fruit_and_timer)
-            .add_systems(OnEnter(LevelTransition), despawn_fruit_and_timer)
-            .add_systems(OnExit(GameOver), despawn_fruit_and_timer)
+            ).run_if(in_state(Game(Running))))
+            .add_systems(OnEnter(Game(PacmanHit)), despawn_fruit_and_timer)
+            .add_systems(OnEnter(Game(LevelTransition)), despawn_fruit_and_timer)
+            .add_systems(OnExit(Game(GameOver)), despawn_fruit_and_timer)
         ;
     }
 }

@@ -2,7 +2,8 @@ use bevy::prelude::*;
 use crate::game::edibles::dots::DotPlugin;
 use crate::game::edibles::energizer::EnergizerPlugin;
 use crate::game::edibles::fruit::FruitPlugin;
-use crate::game_state::GameState::Running;
+use crate::game_state::GameState::*;
+use crate::game_state::Game::*;
 
 pub mod dots;
 pub mod fruit;
@@ -19,7 +20,7 @@ impl Plugin for EdiblePlugin {
                 EnergizerPlugin,
                 FruitPlugin
             ))
-            .add_systems(Update, check_if_all_edibles_eaten.run_if(in_state(Running)))
+            .add_systems(Update, check_if_all_edibles_eaten.run_if(in_state(Game(Running))))
         ;
     }
 }

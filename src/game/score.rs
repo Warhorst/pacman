@@ -4,7 +4,8 @@ use bevy::prelude::*;
 use crate::constants::{FONT, POINTS_PER_DOT, POINTS_PER_ENERGIZER, POINTS_PER_GHOST, TEXT_Z};
 use crate::game::edibles::energizer::EnergizerOver;
 use crate::game::interactions::{EDotEaten, EEnergizerEaten, EFruitEaten, EGhostEaten};
-use crate::game_state::GameState::{GameOver, LevelTransition, PacmanHit, Running};
+use crate::game_state::GameState::*;
+use crate::game_state::Game::*;
 use crate::game::edibles::fruit::Fruit::*;
 use crate::game_assets::loaded_assets::LoadedAssets;
 
@@ -23,13 +24,13 @@ impl Plugin for ScorePlugin {
                 reset_eaten_ghost_counter_when_energizer_is_over,
                 add_points_for_eaten_fruit_and_display_score_text,
                 update_score_texts
-            ).run_if(in_state(Running)))
-            .add_systems(OnEnter(PacmanHit), (
+            ).run_if(in_state(Game(Running))))
+            .add_systems(OnEnter(Game(PacmanHit)), (
                 despawn_score_texts,
                 reset_ghost_eaten_counter
             ))
-            .add_systems(OnExit(GameOver), reset_score)
-            .add_systems(OnEnter(LevelTransition), reset_ghost_eaten_counter)
+            .add_systems(OnExit(Game(GameOver)), reset_score)
+            .add_systems(OnEnter(Game(LevelTransition)), reset_ghost_eaten_counter)
         ;
     }
 }

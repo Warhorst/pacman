@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy::prelude::Val::Percent;
-use crate::game_state::GameState::Ready;
+use crate::game_state::GameState::*;
+use crate::game_state::Game::*;
 use crate::constants::FONT;
 use crate::game_assets::loaded_assets::LoadedAssets;
 
@@ -9,8 +10,8 @@ pub(in crate::ui) struct ReadyScreenPlugin;
 impl Plugin for ReadyScreenPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(OnEnter(Ready), spawn_screen)
-            .add_systems(OnExit(Ready), despawn_screen)
+            .add_systems(OnEnter(Game(Ready)), spawn_screen)
+            .add_systems(OnExit(Game(Ready)), despawn_screen)
         ;
     }
 }

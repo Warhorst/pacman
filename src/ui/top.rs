@@ -3,21 +3,22 @@ use bevy::prelude::*;
 use bevy::prelude::Val::Percent;
 use crate::constants::FONT;
 use crate::game_assets::loaded_assets::LoadedAssets;
-use crate::game_state::GameState::{GameOver, InGame, Start};
+use crate::game_state::GameState::*;
+use crate::game_state::Game::*;
 use crate::game::score::Score;
+use crate::game_state::in_game;
 
 pub(in crate::ui) struct TopUIPlugin;
 
 impl Plugin for TopUIPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(OnEnter(Start), spawn_top_ui)
-            // TODO dont run only in state InGame
+            .add_systems(OnEnter(Game(Start)), spawn_top_ui)
             .add_systems(Update, (
                 update_scoreboard,
                 blink_1_up_label
-            ).run_if(in_state(InGame)))
-            .add_systems(OnExit(GameOver), despawn_top_ui)
+            ).run_if(in_game()))
+            .add_systems(OnExit(Game(GameOver)), despawn_top_ui)
         ;
     }
 }

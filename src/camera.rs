@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use crate::constants::FIELD_DIMENSION;
-use crate::game_state::GameState::{GameOver, Start};
+use crate::game_state::GameState::*;
+use crate::game_state::Game::*;
 use crate::game::map::Map;
 
 pub struct CameraPlugin;
@@ -8,8 +9,8 @@ pub struct CameraPlugin;
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(OnEnter(Start), spawn_camera)
-            .add_systems(OnExit(GameOver), despawn_camera)
+            .add_systems(OnEnter(Game(Start)), spawn_camera)
+            .add_systems(OnExit(Game(GameOver)), despawn_camera)
         ;
     }
 }

@@ -3,6 +3,7 @@ use crate::game_assets::animation::Animations;
 use crate::game_assets::loaded_assets::LoadedAssets;
 
 use crate::game_state::GameState::*;
+use crate::game_state::Game::*;
 use crate::game::pacman::edible_eaten::EdibleEatenPlugin;
 use crate::game::pacman::spawn::spawn_pacman;
 use crate::game::pacman::movement::{InputBuffer, move_pacman_new, reset_input_buffer, set_direction_based_on_keyboard_input};
@@ -24,29 +25,29 @@ impl Plugin for PacmanPlugin {
         app
             .add_plugins(EdibleEatenPlugin)
             .insert_resource(InputBuffer(None))
-            .add_systems(OnEnter(Ready), spawn_pacman)
-            .add_systems(OnEnter(Running), start_animation)
+            .add_systems(OnEnter(Game(Ready)), spawn_pacman)
+            .add_systems(OnEnter(Game(Running)), start_animation)
             .add_systems(Update, (
                 move_pacman_new,
                 set_direction_based_on_keyboard_input,
                 update_pacman_appearance.after(set_direction_based_on_keyboard_input)
-            ).run_if(in_state(Running)))
-            .add_systems(OnEnter(PacmanHit), (
+            ).run_if(in_state(Game(Running))))
+            .add_systems(OnEnter(Game(PacmanHit)), (
                 stop_animation,
                 reset_input_buffer
             ))
-            .add_systems(OnEnter(PacmanDying), (
+            .add_systems(OnEnter(Game(PacmanDying)), (
                 play_the_dying_animation,
                 play_the_dying_sound
             ))
-            .add_systems(OnEnter(PacmanDead), despawn_pacman)
-            .add_systems(OnEnter(LevelTransition), (
+            .add_systems(OnEnter(Game(PacmanDead)), despawn_pacman)
+            .add_systems(OnEnter(Game(LevelTransition)), (
                 stop_animation,
                 reset_input_buffer
             ))
-            .add_systems(OnExit(LevelTransition), despawn_pacman)
-            .add_systems(OnEnter(GhostEatenPause), set_invisible)
-            .add_systems(OnExit(GhostEatenPause), set_visible)
+            .add_systems(OnExit(Game(LevelTransition)), despawn_pacman)
+            .add_systems(OnEnter(Game(GhostEatenPause)), set_invisible)
+            .add_systems(OnExit(Game(GhostEatenPause)), set_visible)
         ;
     }
 }

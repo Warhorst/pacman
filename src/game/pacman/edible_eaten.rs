@@ -1,7 +1,8 @@
 use std::time::Duration;
 use bevy::prelude::*;
 use crate::game::interactions::{EDotEaten, EEnergizerEaten};
-use crate::game_state::GameState::Running;
+use crate::game_state::GameState::*;
+use crate::game_state::Game::*;
 use crate::game::pacman::Pacman;
 
 /// When eating dots/energizers, pacman stops for 1/3 Frames in the original game.
@@ -15,7 +16,7 @@ impl Plugin for EdibleEatenPlugin {
                 add_edible_stop_when_dot_eaten,
                 add_edible_stop_when_energizer_eaten,
                 remove_edible_stop_when_timer_ended
-            ).run_if(in_state(Running)))
+            ).run_if(in_state(Game(Running))))
         ;
     }
 }

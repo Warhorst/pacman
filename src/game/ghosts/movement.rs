@@ -4,6 +4,7 @@ use crate::game::direction::Direction;
 use crate::game::direction::Direction::*;
 use crate::game::ghosts::CurrentlyEatenGhost;
 use crate::game_state::GameState::*;
+use crate::game_state::Game::*;
 use crate::game::target::{Target, LTargetSetter};
 use crate::game::speed::Speed;
 use crate::game::state::State;
@@ -14,8 +15,8 @@ pub struct MovePlugin;
 impl Plugin for MovePlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(Update, move_ghosts.after(LTargetSetter).run_if(in_state(Running)))
-            .add_systems(Update, move_only_not_currently_eaten_ghosts.after(LTargetSetter).run_if(in_state(GhostEatenPause)))
+            .add_systems(Update, move_ghosts.after(LTargetSetter).run_if(in_state(Game(Running))))
+            .add_systems(Update, move_only_not_currently_eaten_ghosts.after(LTargetSetter).run_if(in_state(Game(GhostEatenPause))))
         ;
     }
 }

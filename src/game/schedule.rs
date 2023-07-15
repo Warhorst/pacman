@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy::utils::{Duration, HashMap};
 use crate::game::edibles::energizer::EnergizerTimer;
 use crate::game_state::GameState::*;
+use crate::game_state::Game::*;
 use crate::game::level::Level;
 use crate::game::state::State;
 use crate::game::state::State::*;
@@ -12,11 +13,11 @@ impl Plugin for SchedulePlugin {
     fn build(&self, app: &mut App) {
         app
             .insert_resource(ScheduleByLevel::new())
-            .add_systems(OnEnter(Start), register_start_schedule)
+            .add_systems(OnEnter(Game(Start)), register_start_schedule)
             .add_systems(Update, (
                 switch_schedule_when_level_changed,
                 update_schedule
-            ).run_if(in_state(Running)))
+            ).run_if(in_state(Game(Running))))
         ;
     }
 }

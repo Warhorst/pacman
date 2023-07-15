@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy_inspector_egui::quick::ResourceInspectorPlugin;
-use crate::game_state::GameState::{GameOver, LevelTransition};
+use crate::game_state::GameState::*;
+use crate::game_state::Game::*;
 
 pub(in crate::game) struct LevelPlugin;
 
@@ -10,8 +11,8 @@ impl Plugin for LevelPlugin {
             .register_type::<Level>()
             .add_plugins(ResourceInspectorPlugin::<Level>::default())
             .insert_resource(Level(1))
-            .add_systems(OnExit(LevelTransition), increase_level)
-            .add_systems(OnExit(GameOver), reset_level)
+            .add_systems(OnExit(Game(LevelTransition)), increase_level)
+            .add_systems(OnExit(Game(GameOver)), reset_level)
         ;
     }
 }
