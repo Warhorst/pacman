@@ -11,17 +11,13 @@ pub(in crate::ui) struct TopUIPlugin;
 impl Plugin for TopUIPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_system_set(
-                SystemSet::on_enter(Start).with_system(spawn_top_ui)
-            )
-            .add_system_set(
-                SystemSet::on_inactive_update(InGame)
-                    .with_system(update_scoreboard)
-                    .with_system(blink_1_up_label)
-            )
-            .add_system_set(
-                SystemSet::on_exit(GameOver).with_system(despawn_top_ui)
-            )
+            .add_systems(OnEnter(Start), spawn_top_ui)
+            // TODO dont run only in state InGame
+            .add_systems(Update, (
+                update_scoreboard,
+                blink_1_up_label
+            ).run_if(in_state(InGame)))
+            .add_systems(OnExit(GameOver), despawn_top_ui)
         ;
     }
 }
@@ -49,12 +45,10 @@ fn spawn_top_ui(
         TopUI,
         NodeBundle {
             style: Style {
-                size: Size::new(Percent(40.0), Percent(10.0)),
+                width: Percent(40.0),
+                height: Percent(10.0),
                 justify_content: JustifyContent::SpaceBetween,
-                position: UiRect {
-                    left: Percent(30.0),
-                    ..default()
-                },
+                left: Percent(30.0),
                 position_type: PositionType::Absolute,
                 ..default()
             },
@@ -84,10 +78,7 @@ fn spawn_score_board(
             },
         ).with_style(Style {
             position_type: PositionType::Absolute,
-            position: UiRect {
-                top: Percent(50.0),
-                ..default()
-            },
+            top: Percent(50.0),
             ..default()
         })
     ));
@@ -109,11 +100,8 @@ fn spawn_high_score_board(
             },
         ).with_style(Style {
             position_type: PositionType::Absolute,
-            position: UiRect {
-                left: Percent(50.0),
-                top: Percent(50.0),
-                ..default()
-            },
+            left: Percent(50.0),
+            top: Percent(50.0),
             ..default()
         })
     ));
@@ -134,11 +122,8 @@ fn spawn_high_score_label(
             },
         ).with_style(Style {
             position_type: PositionType::Absolute,
-            position: UiRect {
-                top: Percent(10.0),
-                left: Percent(30.0),
-                ..default()
-            },
+            top: Percent(10.0),
+            left: Percent(30.0),
             ..default()
         })
     ));
@@ -164,10 +149,7 @@ fn spawn_1up_label(
             },
         ).with_style(Style {
             position_type: PositionType::Absolute,
-            position: UiRect {
-                top: Percent(10.0),
-                ..default()
-            },
+            top: Percent(10.0),
             ..default()
         })
     ));
@@ -207,14 +189,18 @@ fn blink_1_up_label(
 
     for mut vis in &mut query {
         if timer_finished {
-            vis.is_visible = !vis.is_visible;
+            *vis = match *vis {
+                Visibility::Visible => Visibility::Hidden,
+                Visibility::Hidden => Visibility::Visible,
+                _ => *vis
+            };
         }
     }
 }
 
 fn despawn_top_ui(
     mut commands: Commands,
-    query: Query<Entity, With<TopUI>>
+    query: Query<Entity, With<TopUI>>,
 ) {
     for e in &query {
         commands.entity(e).despawn_recursive()

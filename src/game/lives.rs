@@ -1,31 +1,29 @@
 use bevy::prelude::*;
-use bevy_inspector_egui::{Inspectable, InspectorPlugin};
+use bevy_inspector_egui::quick::ResourceInspectorPlugin;
 use crate::game::interactions::EPacmanHit;
 use crate::game_state::GameState::*;
 use crate::game::score::Score;
 
-pub (in crate::game) struct LivesPlugin;
+pub(in crate::game) struct LivesPlugin;
 
 impl Plugin for LivesPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_plugin(InspectorPlugin::<Lives>::new())
+            .register_type::<Lives>()
+            .add_plugins(ResourceInspectorPlugin::<Lives>::default())
             .insert_resource(Lives(3))
             .insert_resource(PointsRequiredForExtraLife::new())
-            .add_system_set(
-                SystemSet::on_update(Running)
-                    .with_system(remove_life_when_pacman_dies)
-                    .with_system(add_life_if_player_reaches_specific_score)
-            )
-            .add_system_set(
-                SystemSet::on_exit(GameOver).with_system(reset_lives)
-            )
+            .add_systems(Update, (
+                remove_life_when_pacman_dies,
+                add_life_if_player_reaches_specific_score
+            ).run_if(in_state(Running)))
+            .add_systems(OnExit(GameOver), reset_lives)
         ;
     }
 }
 
 /// Resource that tells how many lives pacman currently has.
-#[derive(Deref, DerefMut, Inspectable, Default, Resource)]
+#[derive(Deref, DerefMut, Reflect, Default, Resource)]
 pub struct Lives(usize);
 
 /// Keeps track how many points the player needs to get a new life for pacman.

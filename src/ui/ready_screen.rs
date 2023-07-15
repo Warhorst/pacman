@@ -4,17 +4,13 @@ use crate::game_state::GameState::Ready;
 use crate::constants::FONT;
 use crate::game_assets::loaded_assets::LoadedAssets;
 
-pub (in crate::ui) struct ReadyScreenPlugin;
+pub(in crate::ui) struct ReadyScreenPlugin;
 
 impl Plugin for ReadyScreenPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_system_set(
-                SystemSet::on_enter(Ready).with_system(spawn_screen)
-            )
-            .add_system_set(
-                SystemSet::on_exit(Ready).with_system(despawn_screen)
-            )
+            .add_systems(OnEnter(Ready), spawn_screen)
+            .add_systems(OnExit(Ready), despawn_screen)
         ;
     }
 }
@@ -38,11 +34,8 @@ fn spawn_screen(
             },
         ).with_style(Style {
             position_type: PositionType::Absolute,
-            position: UiRect {
-                left: Percent(45.0),
-                top: Percent(55.0),
-                ..default()
-            },
+            left: Percent(45.0),
+            top: Percent(55.0),
             ..default()
         }),
     ));

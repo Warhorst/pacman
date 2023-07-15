@@ -15,11 +15,10 @@ impl Plugin for TunnelPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<GhostPassedTunnel>()
-            .add_system_set(
-                SystemSet::on_update(Running)
-                    .with_system(move_pacman_through_tunnel)
-                    .with_system(move_ghost_trough_tunnel)
-            )
+            .add_systems(Update, (
+                move_pacman_through_tunnel,
+                move_ghost_trough_tunnel
+                ).run_if(in_state(Running)))
         ;
     }
 }
@@ -31,7 +30,7 @@ pub struct Tunnel(usize);
 pub struct TunnelHallway;
 
 /// Event. Fired when a ghost moved through a tunnel.
-#[derive(Deref, DerefMut)]
+#[derive( Event, Deref, DerefMut)]
 pub struct GhostPassedTunnel(pub Entity);
 
 pub(crate) fn spawn_tunnels(

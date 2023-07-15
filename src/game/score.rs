@@ -8,34 +8,28 @@ use crate::game_state::GameState::{GameOver, LevelTransition, PacmanHit, Running
 use crate::game::edibles::fruit::Fruit::*;
 use crate::game_assets::loaded_assets::LoadedAssets;
 
-pub (in crate::game) struct ScorePlugin;
+pub(in crate::game) struct ScorePlugin;
 
 impl Plugin for ScorePlugin {
     fn build(&self, app: &mut App) {
         app
             .insert_resource(Score(0))
             .insert_resource(EatenGhostCounter(0))
-            .add_system_set(
-                SystemSet::on_update(Running)
-                    .with_system(update_scoreboard)
-                    .with_system(add_points_for_eaten_dot)
-                    .with_system(add_points_for_eaten_energizer)
-                    .with_system(add_points_for_eaten_ghost_and_display_score_text)
-                    .with_system(reset_eaten_ghost_counter_when_energizer_is_over)
-                    .with_system(add_points_for_eaten_fruit_and_display_score_text)
-                    .with_system(update_score_texts)
-            )
-            .add_system_set(
-                SystemSet::on_enter(PacmanHit)
-                    .with_system(despawn_score_texts)
-                    .with_system(reset_ghost_eaten_counter)
-            )
-            .add_system_set(
-                SystemSet::on_exit(GameOver).with_system(reset_score)
-            )
-            .add_system_set(
-                SystemSet::on_enter(LevelTransition).with_system(reset_ghost_eaten_counter)
-            )
+            .add_systems(Update, (
+                update_scoreboard,
+                add_points_for_eaten_dot,
+                add_points_for_eaten_energizer,
+                add_points_for_eaten_ghost_and_display_score_text,
+                reset_eaten_ghost_counter_when_energizer_is_over,
+                add_points_for_eaten_fruit_and_display_score_text,
+                update_score_texts
+            ).run_if(in_state(Running)))
+            .add_systems(OnEnter(PacmanHit), (
+                despawn_score_texts,
+                reset_ghost_eaten_counter
+            ))
+            .add_systems(OnExit(GameOver), reset_score)
+            .add_systems(OnEnter(LevelTransition), reset_ghost_eaten_counter)
         ;
     }
 }
@@ -170,12 +164,7 @@ fn spawn_score_text(
                     font_size: 10.0,
                     color,
                 },
-            ).with_alignment(
-                TextAlignment {
-                    vertical: VerticalAlign::Center,
-                    horizontal: HorizontalAlign::Center,
-                }
-            ),
+            ).with_alignment(TextAlignment::Center),
             transform: Transform::from_translation(coordinates),
             ..Default::default()
         },

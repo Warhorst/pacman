@@ -1,25 +1,22 @@
 use bevy::prelude::*;
-use bevy_inspector_egui::{Inspectable, InspectorPlugin};
+use bevy_inspector_egui::quick::ResourceInspectorPlugin;
 use crate::game_state::GameState::{GameOver, LevelTransition};
 
-pub (in crate::game) struct LevelPlugin;
+pub(in crate::game) struct LevelPlugin;
 
 impl Plugin for LevelPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_plugin(InspectorPlugin::<Level>::new())
+            .register_type::<Level>()
+            .add_plugins(ResourceInspectorPlugin::<Level>::default())
             .insert_resource(Level(1))
-            .add_system_set(
-                SystemSet::on_exit(LevelTransition).with_system(increase_level)
-            )
-            .add_system_set(
-                SystemSet::on_exit(GameOver).with_system(reset_level)
-            )
+            .add_systems(OnExit(LevelTransition), increase_level)
+            .add_systems(OnExit(GameOver), reset_level)
         ;
     }
 }
 
-#[derive(Deref, DerefMut, Ord, PartialOrd, Eq, PartialEq, Hash, Inspectable, Default, Resource)]
+#[derive(Deref, DerefMut, Ord, PartialOrd, Eq, PartialEq, Hash, Reflect, Default, Resource)]
 pub struct Level(pub usize);
 
 impl Level {

@@ -14,12 +14,8 @@ pub struct MovePlugin;
 impl Plugin for MovePlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_system_set(
-                SystemSet::on_update(Running).with_system(move_ghosts.after(LTargetSetter))
-            )
-            .add_system_set(
-                SystemSet::on_update(GhostEatenPause).with_system(move_only_not_currently_eaten_ghosts.after(LTargetSetter))
-            )
+            .add_systems(Update, move_ghosts.after(LTargetSetter).run_if(in_state(Running)))
+            .add_systems(Update, move_only_not_currently_eaten_ghosts.after(LTargetSetter).run_if(in_state(GhostEatenPause)))
         ;
     }
 }

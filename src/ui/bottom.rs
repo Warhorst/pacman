@@ -14,15 +14,13 @@ pub(in crate::ui) struct BottomUIPlugin;
 impl Plugin for BottomUIPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_system_set(SystemSet::on_enter(Start).with_system(spawn_bottom_ui))
-            .add_system_set(
-                SystemSet::on_inactive_update(InGame)
-                    .with_system(update_lives)
-                    .with_system(update_fruits)
-            )
-            .add_system_set(
-                SystemSet::on_exit(GameOver).with_system(despawn_bottom_ui)
-            )
+            .add_systems(OnEnter(Start), spawn_bottom_ui)
+            // TODO dont run only in state InGame
+            .add_systems(Update, (
+                update_lives,
+                update_fruits
+            ).run_if(in_state(InGame)))
+            .add_systems(OnExit(GameOver), despawn_bottom_ui)
         ;
     }
 }
@@ -54,13 +52,11 @@ fn spawn_bottom_ui(
         BottomUI,
         NodeBundle {
             style: Style {
-                size: Size::new(Percent(40.0), Percent(10.0)),
+                width: Percent(40.0),
+                height: Percent(10.0),
                 justify_content: JustifyContent::SpaceBetween,
-                position: UiRect {
-                    top: Percent(90.0),
-                    left: Percent(30.0),
-                    ..default()
-                },
+                top: Percent(90.0),
+                left: Percent(30.0),
                 position_type: Absolute,
                 ..default()
             },
@@ -84,12 +80,10 @@ fn spawn_ui_lives(
         UILives,
         NodeBundle {
             style: Style {
-                size: Size::new(Percent(40.0), Percent(50.0)),
+                width: Percent(40.0),
+                height: Percent(50.0),
                 position_type: Absolute,
-                position: UiRect {
-                    bottom: Percent(40.0),
-                    ..default()
-                },
+                bottom: Percent(40.0),
                 justify_content: JustifyContent::SpaceBetween,
                 ..default()
             },
@@ -115,13 +109,11 @@ fn spawn_ui_live(
         Name::new("UILive"),
         UILive,
         ImageBundle {
-            image: UiImage(image.clone()),
+            image: UiImage::new(image.clone()),
             style: Style {
-                size: Size::new(Percent(20.0), Percent(100.0)),
-                position: UiRect {
-                    left: Percent(index as f32 * 20.0),
-                    ..default()
-                },
+                width: Percent(20.0),
+                height: Percent(100.0),
+                left: Percent(index as f32 * 20.0),
                 position_type: Absolute,
                 ..default()
             },
@@ -141,13 +133,11 @@ fn spawn_ui_fruits(
         UIFruits,
         NodeBundle {
             style: Style {
-                size: Size::new(Percent(60.0), Percent(50.0)),
+                width: Percent(60.0),
+                height: Percent(50.0),
                 position_type: Absolute,
-                position: UiRect {
-                    left: Percent(40.0),
-                    bottom: Percent(40.0),
-                    ..default()
-                },
+                left: Percent(40.0),
+                bottom: Percent(40.0),
                 justify_content: JustifyContent::SpaceBetween,
                 ..default()
             },
@@ -189,13 +179,11 @@ fn spawn_ui_fruit(
         Name::new("UIFruit"),
         UIFruit,
         ImageBundle {
-            image: UiImage(image),
+            image: UiImage::new(image),
             style: Style {
-                size: Size::new(Percent(100.0 / 7.0), Percent(100.0)),
-                position: UiRect {
-                    left: Percent(left_percent),
-                    ..default()
-                },
+                width: Percent(100.0 / 7.0),
+                height: Percent(100.0),
+                left: Percent(left_percent),
                 position_type: Absolute,
                 ..default()
             },
@@ -259,7 +247,7 @@ fn update_fruits(
 
 fn despawn_bottom_ui(
     mut commands: Commands,
-    query: Query<Entity, With<BottomUI>>
+    query: Query<Entity, With<BottomUI>>,
 ) {
     for e in &query {
         commands.entity(e).despawn_recursive();

@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy::reflect::TypeUuid;
+use bevy::reflect::{TypePath, TypeUuid};
 use bevy::render::texture::TextureFormatPixelInfo;
 use bevy_common_assets::json::JsonAssetPlugin;
 use wgpu_types::Extent3d;
@@ -16,13 +16,13 @@ impl Plugin for SpriteSheetPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_asset::<SpriteSheet>()
-            .add_plugin(JsonAssetPlugin::<AsepriteData>::new(&["aseprite.json"]))
+            .add_plugins(JsonAssetPlugin::<AsepriteData>::new(&["aseprite.json"]))
         ;
     }
 }
 
 /// A loaded sprite sheet with handles to all loaded sub images.
-#[derive(TypeUuid)]
+#[derive(TypeUuid, TypePath)]
 #[uuid = "997f1174-eb67-4d02-8ee6-fb41c987bb18"]
 pub struct SpriteSheet {
     pub textures: Vec<Handle<Image>>,

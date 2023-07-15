@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::f32::consts::PI;
 
 use bevy::prelude::*;
+use bevy::reflect::TypePath;
 use bevy::utils::HashSet;
 use bevy_common_assets::json::JsonAssetPlugin;
 use serde::{Deserialize, Serialize};
@@ -34,17 +35,13 @@ pub struct MapPlugin;
 impl Plugin for MapPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_plugin(TunnelPlugin)
-            .add_plugin(JsonAssetPlugin::<RawMap>::new(&["map.json"]))
-            .add_system_set(
-                SystemSet::on_exit(Loading).with_system(spawn_map)
-            )
-            .add_system_set(
-                SystemSet::on_enter(LevelTransition).with_system(set_animation_to_blinking)
-            )
-            .add_system_set(
-                SystemSet::on_exit(LevelTransition).with_system(set_animation_to_idle)
-            )
+            .add_plugins((
+                TunnelPlugin,
+                JsonAssetPlugin::<RawMap>::new(&["map.json"])
+            ))
+            .add_systems(OnExit(Loading), spawn_map)
+            .add_systems(OnEnter(LevelTransition), set_animation_to_blinking)
+            .add_systems(OnExit(LevelTransition), set_animation_to_idle)
         ;
     }
 }
@@ -224,7 +221,7 @@ fn set_animation_to_idle(
     }
 }
 
-#[derive(Clone, Serialize, Deserialize, bevy::reflect::TypeUuid)]
+#[derive(Clone, Serialize, Deserialize, bevy::reflect::TypeUuid, TypePath)]
 #[uuid = "a09992c9-9567-42d9-a0ac-c998756e4073"]
 pub struct RawMap {
     pub blinky_corner: Position,

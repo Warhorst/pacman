@@ -8,18 +8,18 @@ pub mod dots;
 pub mod fruit;
 pub mod energizer;
 
-pub (in crate::game) struct EdiblePlugin;
+pub(in crate::game) struct EdiblePlugin;
 
 impl Plugin for EdiblePlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<EAllEdiblesEaten>()
-            .add_plugin(DotPlugin)
-            .add_plugin(EnergizerPlugin)
-            .add_plugin(FruitPlugin)
-            .add_system_set(
-                SystemSet::on_update(Running).with_system(check_if_all_edibles_eaten)
-            )
+            .add_plugins((
+                DotPlugin,
+                EnergizerPlugin,
+                FruitPlugin
+            ))
+            .add_systems(Update, check_if_all_edibles_eaten.run_if(in_state(Running)))
         ;
     }
 }
@@ -29,11 +29,12 @@ impl Plugin for EdiblePlugin {
 pub struct Edible;
 
 /// Event that gets fired when all edibles are eaten (or at least gone), so the maze is empty
+#[derive(Event)]
 pub struct EAllEdiblesEaten;
 
 fn check_if_all_edibles_eaten(
     mut event_writer: EventWriter<EAllEdiblesEaten>,
-    query: Query<&Edible>
+    query: Query<&Edible>,
 ) {
     if query.iter().count() == 0 {
         event_writer.send(EAllEdiblesEaten)

@@ -9,7 +9,7 @@ use crate::game::state::State;
 use crate::game_state::GameState::Running;
 use crate::game::pacman::Pacman;
 
-pub (in crate::game) struct InteractionsPlugin;
+pub(in crate::game) struct InteractionsPlugin;
 
 impl Plugin for InteractionsPlugin {
     fn build(&self, app: &mut App) {
@@ -19,43 +19,43 @@ impl Plugin for InteractionsPlugin {
             .add_event::<EDotEaten>()
             .add_event::<EEnergizerEaten>()
             .add_event::<EFruitEaten>()
-            .add_system_set(
-                SystemSet::on_update(Running)
-                    .with_system(pacman_hits_ghost.label(LPacmanGhostHitDetection))
-                    .with_system(pacman_eat_dot)
-                    .with_system(pacman_eat_energizer)
-                    .with_system(eat_fruit_when_pacman_touches_it)
-                    .label(LPacmanEnergizerHitDetection)
-            )
+            // TODO is this double set setup still valid?
+            .add_systems(Update, (
+                pacman_hits_ghost.in_set(LPacmanGhostHitDetection),
+                pacman_eat_dot,
+                pacman_eat_energizer,
+                eat_fruit_when_pacman_touches_it
+            ).in_set(LPacmanEnergizerHitDetection).run_if(in_state(Running)))
         ;
     }
 }
 
 /// Marks systems that check hits between pacman and ghosts
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-#[derive(SystemLabel)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, SystemSet)]
 pub struct LPacmanGhostHitDetection;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-#[derive(SystemLabel)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, SystemSet)]
 pub struct LPacmanEnergizerHitDetection;
 
 /// Fired when pacman was hit by a ghost.
+#[derive(Event)]
 pub struct EPacmanHit;
 
 /// Fired when Pacman ate a ghost in frightened state.
 /// Contains the eaten ghost entity and transform.
-#[derive(Copy, Clone)]
+#[derive(Event, Copy, Clone)]
 pub struct EGhostEaten(pub Entity, pub Transform);
 
 /// Fired when pacman eats a dot.
+#[derive(Event)]
 pub struct EDotEaten;
 
 /// Fired when pacman eats an energizer.
-#[derive(Copy, Clone)]
+#[derive(Event, Copy, Clone)]
 pub struct EEnergizerEaten;
 
 /// Event that gets fired when pacman ate a fruit.
+#[derive(Event)]
 pub struct EFruitEaten(pub Fruit, pub Transform);
 
 fn pacman_hits_ghost(
@@ -120,7 +120,7 @@ fn eat_fruit_when_pacman_touches_it(
     mut commands: Commands,
     mut event_writer: EventWriter<EFruitEaten>,
     pacman_query: Query<&Transform, With<Pacman>>,
-    fruit_query: Query<(Entity, &Fruit, &Transform)>
+    fruit_query: Query<(Entity, &Fruit, &Transform)>,
 ) {
     for pacman_tf in &pacman_query {
         for (entity, fruit, fruit_tf) in &fruit_query {

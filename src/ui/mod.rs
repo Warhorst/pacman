@@ -15,10 +15,12 @@ pub struct UIPlugin;
 impl Plugin for UIPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_plugin(TopUIPlugin)
-            .add_plugin(BottomUIPlugin)
-            .add_plugin(ReadyScreenPlugin)
-            .add_plugin(GameOverScreenPlugin)
+            .add_plugins((
+                TopUIPlugin,
+                BottomUIPlugin,
+                ReadyScreenPlugin,
+                GameOverScreenPlugin
+            ))
         ;
     }
 }

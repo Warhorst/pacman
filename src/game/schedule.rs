@@ -12,14 +12,11 @@ impl Plugin for SchedulePlugin {
     fn build(&self, app: &mut App) {
         app
             .insert_resource(ScheduleByLevel::new())
-            .add_system_set(
-                SystemSet::on_enter(Start).with_system(register_start_schedule)
-            )
-            .add_system_set(
-                SystemSet::on_update(Running)
-                    .with_system(switch_schedule_when_level_changed)
-                    .with_system(update_schedule)
-            )
+            .add_systems(OnEnter(Start), register_start_schedule)
+            .add_systems(Update, (
+                switch_schedule_when_level_changed,
+                update_schedule
+            ).run_if(in_state(Running)))
         ;
     }
 }

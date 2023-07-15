@@ -1,5 +1,6 @@
 use std::cmp::Ordering::*;
 use std::collections::HashMap;
+use bevy::reflect::TypePath;
 use serde::Deserialize;
 
 use crate::game::position::Position;
@@ -7,7 +8,7 @@ use crate::game_assets::sprite_sheet::rectangles::{Rect, RectIter};
 
 /// Represents the json data for a sprite sheet that can be generated when exporting a sheet.
 /// Used to load sheets from images using the data from the json file.
-#[derive(Deserialize, bevy::reflect::TypeUuid)]
+#[derive(Deserialize, bevy::reflect::TypeUuid, TypePath)]
 #[uuid = "187ce97b-0f53-4bf6-824d-b5f8289c4bfe"]
 pub struct AsepriteData {
     frames: HashMap<String, FrameValue>,

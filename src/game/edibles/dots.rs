@@ -1,6 +1,6 @@
 use std::time::Duration;
 use bevy::prelude::*;
-use bevy_inspector_egui::{Inspectable, InspectorPlugin};
+use bevy_inspector_egui::quick::ResourceInspectorPlugin;
 
 use crate::constants::DOT_DIMENSION;
 use crate::game::edibles::Edible;
@@ -14,25 +14,21 @@ pub struct DotPlugin;
 impl Plugin for DotPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_plugin(InspectorPlugin::<EatenDots>::new())
-            .add_system_set(
-                SystemSet::on_enter(Start)
-                    .with_system(spawn_dots)
-                    .with_system(create_eaten_dots)
-            )
-            .add_system_set(
-                SystemSet::on_update(Running).with_system(play_waka_when_dot_was_eaten)
-            )
-            .add_system_set(
-                SystemSet::on_exit(LevelTransition)
-                    .with_system(spawn_dots)
-                    .with_system(reset_eaten_dots)
-            )
-            .add_system_set(
-                SystemSet::on_exit(GameOver)
-                    .with_system(despawn_dots)
-                    .with_system(reset_eaten_dots)
-            )
+            .register_type::<EatenDots>()
+            .add_plugins(ResourceInspectorPlugin::<EatenDots>::default())
+            .add_systems(OnEnter(Start), (
+                spawn_dots,
+                create_eaten_dots
+            ))
+            .add_systems(Update, play_waka_when_dot_was_eaten.run_if(in_state(Running)))
+            .add_systems(OnExit(LevelTransition), (
+                spawn_dots,
+                reset_eaten_dots
+            ))
+            .add_systems(OnExit(GameOver), (
+                despawn_dots,
+                reset_eaten_dots
+            ))
         ;
     }
 }
@@ -94,11 +90,11 @@ fn reset_eaten_dots(
 /// When the timer finishes and a waka is cached, it is instantly played and the timer gets reset.
 /// (This might lead to an additional waka playing, but more waka waka = more fun)
 fn play_waka_when_dot_was_eaten(
+    mut commands: Commands,
     time: Res<Time>,
     mut waka_timer: Local<Option<Timer>>,
     mut cached: Local<bool>,
     loaded_assets: Res<LoadedAssets>,
-    audio: Res<Audio>,
     mut event_reader: EventReader<EDotEaten>,
 ) {
     if let Some(ref mut timer) = *waka_timer {
@@ -107,7 +103,14 @@ fn play_waka_when_dot_was_eaten(
         if timer.finished() {
             if *cached {
                 timer.reset();
-                audio.play(loaded_assets.get_handle("sounds/waka.ogg"));
+
+                commands.spawn(
+                    AudioBundle {
+                        source: loaded_assets.get_handle("sounds/waka.ogg"),
+                        ..default()
+                    }
+                );
+
                 *cached = false;
             } else {
                 *waka_timer = None
@@ -120,7 +123,13 @@ fn play_waka_when_dot_was_eaten(
             Some(_) => *cached = true,
             None => {
                 *waka_timer = Some(Timer::new(Duration::from_secs_f32(0.3), TimerMode::Once));
-                audio.play(loaded_assets.get_handle("sounds/waka.ogg"));
+
+                commands.spawn(
+                    AudioBundle {
+                        source: loaded_assets.get_handle("sounds/waka.ogg"),
+                        ..default()
+                    }
+                );
             }
         };
     }
@@ -128,7 +137,7 @@ fn play_waka_when_dot_was_eaten(
 
 fn despawn_dots(
     mut commands: Commands,
-    query: Query<Entity, With<Dots>>
+    query: Query<Entity, With<Dots>>,
 ) {
     for e in &query {
         commands.entity(e).despawn_recursive();
@@ -142,7 +151,7 @@ pub struct Dots;
 #[derive(Component)]
 pub struct Dot;
 
-#[derive(Resource, Default, Inspectable)]
+#[derive(Resource, Default, Reflect)]
 pub struct EatenDots {
     max: usize,
     eaten: usize,

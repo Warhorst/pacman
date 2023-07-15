@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 use bevy::ecs::query::WorldQuery;
-use bevy_inspector_egui::{Inspectable, RegisterInspectable};
 use crate::game::position::Position;
 use crate::constants::{GHOST_BASE_SPEED, PACMAN_BASE_SPEED};
 
@@ -15,23 +14,22 @@ use crate::game_state::GameState::*;
 use crate::game::map::tunnel::{Tunnel, TunnelHallway};
 use crate::game::specs_per_level::SpecsPerLevel;
 
-pub (in crate::game) struct SpeedPlugin;
+pub(in crate::game) struct SpeedPlugin;
 
 impl Plugin for SpeedPlugin {
     fn build(&self, app: &mut App) {
         app
-            .register_inspectable::<Speed>()
-            .add_system_set(
-                SystemSet::on_update(Running)
-                    .with_system(update_ghost_speed)
-                    .with_system(update_pacman_speed)
-            )
+            .register_type::<Speed>()
+            .add_systems(Update, (
+                update_ghost_speed,
+                update_pacman_speed
+            ).run_if(in_state(Running)))
         ;
     }
 }
 
 /// The current speed of a moving entity
-#[derive(Copy, Clone, Default, Component, Deref, DerefMut, Inspectable)]
+#[derive(Copy, Clone, Default, Component, Deref, DerefMut, Reflect)]
 pub struct Speed(pub f32);
 
 #[derive(WorldQuery)]
@@ -40,7 +38,7 @@ struct GhostSpeedUpdateComponents<'a> {
     ghost: &'a Ghost,
     transform: &'a Transform,
     speed: &'a mut Speed,
-    state: &'a State
+    state: &'a State,
 }
 
 fn update_ghost_speed(
@@ -48,7 +46,7 @@ fn update_ghost_speed(
     eaten_dots: Res<EatenDots>,
     specs_per_level: Res<SpecsPerLevel>,
     mut ghost_query: Query<GhostSpeedUpdateComponents>,
-    tunnel_query: Query<&Transform, Or<(With<Tunnel>, With<TunnelHallway>)>>
+    tunnel_query: Query<&Transform, Or<(With<Tunnel>, With<TunnelHallway>)>>,
 ) {
     for mut comps in ghost_query.iter_mut() {
         match *comps.ghost {
@@ -66,7 +64,7 @@ fn update_blinky_speed(
     specs_per_level: &SpecsPerLevel,
     eaten_dots: &EatenDots,
     comps: &mut GhostSpeedUpdateComponentsItem,
-    tunnel_query: &Query<&Transform, Or<(With<Tunnel>, With<TunnelHallway>)>>
+    tunnel_query: &Query<&Transform, Or<(With<Tunnel>, With<TunnelHallway>)>>,
 ) {
     let spec = specs_per_level.get_for(&level);
     let remaining_dots = eaten_dots.get_remaining();
@@ -90,7 +88,7 @@ fn update_non_blinky_speed(
     level: &Level,
     specs_per_level: &SpecsPerLevel,
     comps: &mut GhostSpeedUpdateComponentsItem,
-    tunnel_query: &Query<&Transform, Or<(With<Tunnel>, With<TunnelHallway>)>>
+    tunnel_query: &Query<&Transform, Or<(With<Tunnel>, With<TunnelHallway>)>>,
 ) {
     let spec = specs_per_level.get_for(&level);
 
@@ -107,7 +105,7 @@ fn update_non_blinky_speed(
 
 fn is_in_tunnel(
     ghost_transform: &Transform,
-    tunnel_query: &Query<&Transform, Or<(With<Tunnel>, With<TunnelHallway>)>>
+    tunnel_query: &Query<&Transform, Or<(With<Tunnel>, With<TunnelHallway>)>>,
 ) -> bool {
     tunnel_query
         .iter()

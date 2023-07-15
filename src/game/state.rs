@@ -16,28 +16,23 @@ use crate::game::ghosts::Ghost::{Blinky, Pinky};
 use crate::game::state::State::*;
 use crate::game::map::ghost_house::GhostSpawn;
 
-pub (in crate::game) struct StatePlugin;
+pub(in crate::game) struct StatePlugin;
 
 impl Plugin for StatePlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_system_set(
-                SystemSet::on_update(Running)
-                    .with_system(update_state)
-                    .after(LPacmanGhostHitDetection)
-                    .after(LPacmanEnergizerHitDetection)
-                    .label(StateSetter)
+            .add_systems(Update, update_state
+                .after(LPacmanGhostHitDetection)
+                .after(LPacmanEnergizerHitDetection)
+                .in_set(StateSetter)
+                .run_if(in_state(Running)),
             )
-            .add_system_set(
-                SystemSet::on_update(GhostEatenPause)
-                    .with_system(update_state_on_eaten_pause)
-            )
+            .add_systems(Update, update_state_on_eaten_pause.run_if(in_state(GhostEatenPause)))
         ;
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[derive(SystemLabel)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, SystemSet)]
 pub struct StateSetter;
 
 #[derive(Component, Copy, Clone, Debug, Eq, PartialEq)]
@@ -144,7 +139,7 @@ fn process_energizer_eaten(
 fn process_spawned(
     schedule: &Schedule,
     components: &mut StateUpdateComponentsItem,
-    spawns_query: &Query<&GhostSpawn>
+    spawns_query: &Query<&GhostSpawn>,
 ) {
     let blinky_spawn = spawns_query.iter().filter(|spawn| spawn.ghost == Blinky).next().expect("blinky should have a spawn");
 
@@ -192,7 +187,7 @@ fn process_frightened(
 
 fn process_eaten(
     components: &mut StateUpdateComponentsItem,
-    spawns_query: &Query<&GhostSpawn>
+    spawns_query: &Query<&GhostSpawn>,
 ) {
     let respawn = spawns_query
         .iter()

@@ -23,24 +23,25 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins
             .set(WindowPlugin {
-                window: WindowDescriptor {
-                    width: WINDOW_WIDTH,
-                    height: WINDOW_HEIGHT,
+                primary_window: Some(Window {
+                    resolution: (WINDOW_WIDTH, WINDOW_HEIGHT).into(),
                     title: "PacMan".to_string(),
                     resizable: false,
                     ..Default::default()
-                },
+                }),
                 ..default()
             })
             .set(ImagePlugin::default_nearest())
         )
         .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
-        .add_plugin(GamePlugin)
-        .add_plugin(GameStatePlugin)
-        .add_plugin(GameAssetsPlugin)
-        .add_plugin(CameraPlugin)
-        .add_plugin(DebugPlugin)
-        .add_plugin(UIPlugin)
-        .add_plugin(MusicPlugin)
+        .add_plugins((
+            GamePlugin,
+            GameStatePlugin,
+            GameAssetsPlugin,
+            CameraPlugin,
+            DebugPlugin,
+            UIPlugin,
+            MusicPlugin
+        ))
         .run()
 }

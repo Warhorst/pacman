@@ -40,21 +40,23 @@ pub struct GamePlugin;
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_plugin(EdiblePlugin)
-            .add_plugin(GhostPlugin)
-            .add_plugin(GhostHouseGatePlugin)
-            .add_plugin(InteractionsPlugin)
-            .add_plugin(LevelPlugin)
-            .add_plugin(LivesPlugin)
-            .add_plugin(MapPlugin)
-            .add_plugin(PacmanPlugin)
-            .add_plugin(RandomPlugin)
-            .add_plugin(SchedulePlugin)
-            .add_plugin(ScorePlugin)
-            .add_plugin(SpecsPerLevelPlugin)
-            .add_plugin(SpeedPlugin)
-            .add_plugin(StatePlugin)
-            .add_plugin(TargetPlugin)
+            .add_plugins((
+                EdiblePlugin,
+                GhostPlugin,
+                GhostHouseGatePlugin,
+                InteractionsPlugin,
+                LevelPlugin,
+                LivesPlugin,
+                MapPlugin,
+                PacmanPlugin,
+                RandomPlugin,
+                SchedulePlugin,
+                ScorePlugin,
+                SpecsPerLevelPlugin,
+                SpeedPlugin,
+                StatePlugin,
+                TargetPlugin
+            ))
         ;
     }
 }

@@ -11,12 +11,11 @@ pub(crate) struct EdibleEatenPlugin;
 impl Plugin for EdibleEatenPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_system_set(
-                SystemSet::on_update(Running)
-                    .with_system(add_edible_stop_when_dot_eaten)
-                    .with_system(add_edible_stop_when_energizer_eaten)
-                    .with_system(remove_edible_stop_when_timer_ended)
-            )
+            .add_systems(Update, (
+                add_edible_stop_when_dot_eaten,
+                add_edible_stop_when_energizer_eaten,
+                remove_edible_stop_when_timer_ended
+            ).run_if(in_state(Running)))
         ;
     }
 }
@@ -24,7 +23,7 @@ impl Plugin for EdibleEatenPlugin {
 fn add_edible_stop_when_dot_eaten(
     mut commands: Commands,
     mut event_reader: EventReader<EDotEaten>,
-    query: Query<Entity, With<Pacman>>
+    query: Query<Entity, With<Pacman>>,
 ) {
     for _ in event_reader.iter() {
         for e in &query {
@@ -36,7 +35,7 @@ fn add_edible_stop_when_dot_eaten(
 fn add_edible_stop_when_energizer_eaten(
     mut commands: Commands,
     mut event_reader: EventReader<EEnergizerEaten>,
-    query: Query<Entity, With<Pacman>>
+    query: Query<Entity, With<Pacman>>,
 ) {
     for _ in event_reader.iter() {
         for e in &query {
@@ -48,7 +47,7 @@ fn add_edible_stop_when_energizer_eaten(
 fn remove_edible_stop_when_timer_ended(
     mut commands: Commands,
     time: Res<Time>,
-    mut query: Query<(Entity, &mut EdibleEatenStop), With<Pacman>>
+    mut query: Query<(Entity, &mut EdibleEatenStop), With<Pacman>>,
 ) {
     for (e, mut stop) in &mut query {
         stop.tick(time.delta());

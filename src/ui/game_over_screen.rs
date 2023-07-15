@@ -10,15 +10,9 @@ impl Plugin for GameOverScreenPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<EGameRestarted>()
-            .add_system_set(
-                SystemSet::on_enter(GameOver).with_system(spawn_screens)
-            )
-            .add_system_set(
-                SystemSet::on_update(GameOver).with_system(send_restart_event_when_key_pressed)
-            )
-            .add_system_set(
-                SystemSet::on_exit(GameOver).with_system(despawn_screens)
-            )
+            .add_systems(OnEnter(GameOver), spawn_screens)
+            .add_systems(Update, send_restart_event_when_key_pressed.run_if(in_state(GameOver)))
+            .add_systems(OnExit(GameOver), despawn_screens)
         ;
     }
 }
@@ -30,6 +24,7 @@ struct GameOverScreen;
 struct RestartGameScreen;
 
 /// Event this is sent when the player decides to restart
+#[derive(Event)]
 pub struct EGameRestarted;
 
 fn spawn_screens(
@@ -48,11 +43,8 @@ fn spawn_screens(
             },
         ).with_style(Style {
             position_type: PositionType::Absolute,
-            position: UiRect {
-                left: Percent(42.5),
-                top: Percent(55.0),
-                ..default()
-            },
+            left: Percent(42.5),
+            top: Percent(55.0),
             ..default()
         }),
     ));
@@ -69,11 +61,8 @@ fn spawn_screens(
             },
         ).with_style(Style {
             position_type: PositionType::Absolute,
-            position: UiRect {
-                left: Percent(37.5),
-                top: Percent(96.0),
-                ..default()
-            },
+            left: Percent(37.5),
+            top: Percent(96.0),
             ..default()
         }),
     ));
@@ -90,7 +79,7 @@ fn send_restart_event_when_key_pressed(
 
 fn despawn_screens(
     mut commands: Commands,
-    query: Query<Entity, Or<(With<GameOverScreen>, With<RestartGameScreen>)>>
+    query: Query<Entity, Or<(With<GameOverScreen>, With<RestartGameScreen>)>>,
 ) {
     for e in &query {
         commands.entity(e).despawn();

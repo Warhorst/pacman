@@ -16,31 +16,20 @@ impl Plugin for EnergizerPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<EnergizerOver>()
-            .add_system_set(
-                SystemSet::on_enter(Start).with_system(spawn_energizer)
-            )
-            .add_system_set(
-                SystemSet::on_update(Running)
-                    .with_system(start_energizer_timer_when_energizer_eaten)
-                    .with_system(update_energizer_timer.after(start_energizer_timer_when_energizer_eaten))
-            )
-            .add_system_set(
-                SystemSet::on_exit(LevelTransition).with_system(spawn_energizer)
-            )
-            .add_system_set(
-                SystemSet::on_enter(PacmanHit).with_system(despawn_energizer_timer)
-            )
-            .add_system_set(
-                SystemSet::on_enter(LevelTransition).with_system(despawn_energizer_timer)
-            )
-            .add_system_set(
-                SystemSet::on_exit(GameOver)
-                    .with_system(despawn_energizers)
-                    .with_system(despawn_energizer_timer)
-            )
-            .add_system_set(
-                SystemSet::on_inactive_update(InGame).with_system(animate_energizers)
-            )
+            .add_systems(OnEnter(Start), spawn_energizer)
+            .add_systems(Update, (
+                start_energizer_timer_when_energizer_eaten,
+                update_energizer_timer.after(start_energizer_timer_when_energizer_eaten)
+            ).run_if(in_state(Running)))
+            .add_systems(OnExit(LevelTransition), spawn_energizer)
+            .add_systems(OnEnter(PacmanHit), despawn_energizer_timer)
+            .add_systems(OnEnter(LevelTransition), despawn_energizer_timer)
+            .add_systems(OnExit(GameOver), (
+                despawn_energizers,
+                despawn_energizer_timer
+            ))
+            // TODO fix this legacy stack state
+            .add_systems(Update, animate_energizers.run_if(in_state(InGame)))
         ;
     }
 }
@@ -54,7 +43,7 @@ pub struct Energizers;
 pub struct Energizer;
 
 /// Fired when an energizer is no longer active
-#[derive(Copy, Clone)]
+#[derive(Event, Copy, Clone)]
 pub struct EnergizerOver;
 
 #[derive(Resource)]
@@ -150,7 +139,7 @@ fn despawn_energizer_timer(
 
 fn despawn_energizers(
     mut commands: Commands,
-    query: Query<Entity, With<Energizers>>
+    query: Query<Entity, With<Energizers>>,
 ) {
     for e in &query {
         commands.entity(e).despawn_recursive();
@@ -170,13 +159,17 @@ impl Default for EnergizerAnimationTimer {
 fn animate_energizers(
     time: Res<Time>,
     mut timer: Local<EnergizerAnimationTimer>,
-    mut query: Query<&mut Visibility, With<Energizers>>
+    mut query: Query<&mut Visibility, With<Energizers>>,
 ) {
     timer.tick(time.delta());
 
     if timer.just_finished() {
         for mut vis in &mut query {
-            vis.is_visible = !vis.is_visible
+            *vis = match *vis {
+                Visibility::Visible => Visibility::Hidden,
+                Visibility::Hidden => Visibility::Visible,
+                _ => *vis
+            }
         }
     }
 }

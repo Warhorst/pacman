@@ -22,30 +22,27 @@ use crate::game::random::Random;
 mod spawned;
 mod eaten;
 
-pub (in crate::game) struct TargetPlugin;
+pub(in crate::game) struct TargetPlugin;
 
 impl Plugin for TargetPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_system_set(
-                SystemSet::on_update(Running)
-                    .with_system(set_target)
-                    .label(LTargetSetter)
-                    .after(StateSetter)
+            .add_systems(Update, set_target
+                .in_set(LTargetSetter)
+                .after(StateSetter)
+                .run_if(in_state(Running)),
             )
-            .add_system_set(
-                SystemSet::on_update(GhostEatenPause)
-                    .with_system(set_target_on_ghost_pause)
-                    .label(LTargetSetter)
-                    .after(StateSetter)
+            .add_systems(Update, set_target_on_ghost_pause
+                .in_set(LTargetSetter)
+                .after(StateSetter)
+                .run_if(in_state(GhostEatenPause)),
             )
         ;
     }
 }
 
 /// Marks every system that sets a ghosts target.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[derive(SystemLabel)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, SystemSet)]
 pub struct LTargetSetter;
 
 #[derive(WorldQuery)]
@@ -166,7 +163,7 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
         corner_query: &Query<&GhostCorner>,
         wall_query: &Query<&Transform, With<Wall>>,
         ghost_spawn_query: &Query<&GhostSpawn>,
-        components: &'a mut TargetComponentsItem<'b, 'c>
+        components: &'a mut TargetComponentsItem<'b, 'c>,
     ) -> Self {
         let corner_positions = corner_query.iter().map(|corner| (corner.ghost, corner.position)).collect();
         let wall_positions = wall_query.iter().map(|transform| Position::from_vec(&transform.translation)).collect();
@@ -223,7 +220,7 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
 
     fn set_clyde_chase_target(&mut self) {
         let target = if self.clyde_is_near_pacman() {
-            *self.corner_positions.get(&self.components.ghost).unwrap()
+            *self.corner_positions.get(self.components.ghost).unwrap()
         } else {
             Position::from_vec(&self.pacman_transform.translation)
         };
@@ -241,7 +238,7 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
     }
 
     fn set_scatter_target(&mut self) {
-        let corner_pos = *self.corner_positions.get(&self.components.ghost).unwrap();
+        let corner_pos = *self.corner_positions.get(self.components.ghost).unwrap();
         let next_target_neighbour = self.get_nearest_neighbour_to(corner_pos);
         self.set_target_to_neighbour(next_target_neighbour)
     }

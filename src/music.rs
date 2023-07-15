@@ -1,4 +1,4 @@
-use bevy::audio::AudioSink;
+use bevy::audio::{AudioSink, Volume};
 use bevy::prelude::*;
 use crate::game_state::GameState::Start;
 use crate::game::edibles::dots::EatenDots;
@@ -14,57 +14,84 @@ impl Plugin for MusicPlugin {
     fn build(&self, app: &mut App) {
         app
             .insert_resource(CurrentTrack::Siren1)
-            .add_system_set(
-                SystemSet::on_enter(Start)
-                    .with_system(play_start_sound)
-                    .with_system(init_music)
-            )
-            .add_system_set(
-                SystemSet::on_update(Running)
-                    .with_system(update_current_track)
-                    .with_system(play_track)
-            )
-            .add_system_set(
-                SystemSet::on_exit(Running).with_system(mute)
-            )
+            .add_systems(OnEnter(Start), (
+                play_start_sound,
+                init_background_music
+            ))
+            .add_systems(Update, (
+                update_current_track,
+                play_track
+            ).run_if(in_state(Running)))
+            .add_systems(OnExit(Running), mute)
         ;
     }
 }
 
+/// Marker for a background track
+#[derive(Component)]
+struct BackgroundTrack;
+
+/// Marker for the siren background track
+#[derive(Component)]
+struct SirenBackground;
+
+/// Marker for the frightened background track
+#[derive(Component)]
+struct FrightenedBackground;
+
+/// Marker for the frightened eaten track
+#[derive(Component)]
+struct EatenBackground;
+
 fn play_start_sound(
+    mut commands: Commands,
     loaded_assets: Res<LoadedAssets>,
-    audio: Res<Audio>
 ) {
-    audio.play(loaded_assets.get_handle("sounds/start.ogg"));
+    commands.spawn(
+        AudioBundle {
+            source: loaded_assets.get_handle("sounds/start.ogg"),
+            ..default()
+        }
+    );
 }
 
-fn init_music(
+/// Starts every background track at the same time with volume of 0.
+fn init_background_music(
     mut commands: Commands,
-    audio: Res<Audio>,
     loaded_assets: Res<LoadedAssets>,
-    sinks: Res<Assets<AudioSink>>,
 ) {
-    let start_audio = |asset: &'static str| audio.play_with_settings(loaded_assets.get_handle(asset), PlaybackSettings::LOOP.with_volume(0.0));
+    start_background_track(&mut commands, &loaded_assets, SirenBackground, "sounds/siren.ogg");
+    start_background_track(&mut commands, &loaded_assets, FrightenedBackground, "sounds/frightened.ogg");
+    start_background_track(&mut commands, &loaded_assets, EatenBackground, "sounds/eaten.ogg");
+}
 
-    commands.insert_resource(MusicHandles {
-        siren: sinks.get_handle((start_audio)("sounds/siren.ogg")),
-        frightened: sinks.get_handle((start_audio)("sounds/frightened.ogg")),
-        eaten: sinks.get_handle((start_audio)("sounds/eaten.ogg")),
-    });
+fn start_background_track(
+    commands: &mut Commands,
+    loaded_assets: &LoadedAssets,
+    marker: impl Component,
+    name: &'static str,
+) {
+    commands.spawn((
+        marker,
+        AudioBundle {
+            source: loaded_assets.get_handle(name),
+            settings: PlaybackSettings::LOOP.with_volume(Volume::new_relative(0.0)),
+            ..default()
+        }
+    ));
 }
 
 fn mute(
-    sinks: Res<Assets<AudioSink>>,
-    music_handles: Res<MusicHandles>
+    background_tracks: Query<&AudioSink, With<BackgroundTrack>>,
 ) {
-    music_handles.mute_all(&sinks);
+    background_tracks.for_each(|sink| sink.set_volume(0.0));
 }
 
 fn update_current_track(
     mut current_track: ResMut<CurrentTrack>,
     energizer_timer_opt: Option<Res<EnergizerTimer>>,
     eaten_dots: Res<EatenDots>,
-    query: Query<&State, With<Ghost>>
+    query: Query<&State, With<Ghost>>,
 ) {
     let eaten_ghosts = query.iter().filter(|s| s == &&State::Eaten).count();
 
@@ -84,69 +111,77 @@ fn update_current_track(
 
 fn play_track(
     current_track: Res<CurrentTrack>,
-    sinks: Res<Assets<AudioSink>>,
-    music_handles: Res<MusicHandles>
+    siren_tracks: Query<&AudioSink, With<SirenBackground>>,
+    frightened_tracks: Query<&AudioSink, With<FrightenedBackground>>,
+    eaten_tracks: Query<&AudioSink, With<EatenBackground>>,
 ) {
     if !current_track.is_changed() {
         return;
     }
 
+    let mixer = match (
+        siren_tracks.get_single(),
+        frightened_tracks.get_single(),
+        eaten_tracks.get_single()
+    ) {
+        (Ok(siren), Ok(frightened), Ok(eaten)) => Mixer::new(siren, frightened, eaten),
+        _ => return
+    };
+
     match *current_track {
-        CurrentTrack::Siren1 => music_handles.play_siren(&sinks, 1.0),
-        CurrentTrack::Siren2 => music_handles.play_siren(&sinks, 1.05),
-        CurrentTrack::Siren3 => music_handles.play_siren(&sinks, 1.1),
-        CurrentTrack::Siren4 => music_handles.play_siren(&sinks, 1.15),
-        CurrentTrack::Frightened => music_handles.play_frightened(&sinks),
-        CurrentTrack::Eaten => music_handles.play_eaten(&sinks),
+        CurrentTrack::Siren1 => mixer.play_siren_1(),
+        CurrentTrack::Siren2 => mixer.play_siren_2(),
+        CurrentTrack::Siren3 => mixer.play_siren_3(),
+        CurrentTrack::Siren4 => mixer.play_siren_4(),
+        CurrentTrack::Frightened => mixer.play_frightened(),
+        CurrentTrack::Eaten => mixer.play_eaten(),
     }
 }
 
-#[derive(Resource)]
-struct MusicHandles {
-    siren: Handle<AudioSink>,
-    frightened: Handle<AudioSink>,
-    eaten: Handle<AudioSink>
+struct Mixer<'a> {
+    siren_track: &'a AudioSink,
+    frightened_track: &'a AudioSink,
+    eaten_track: &'a AudioSink,
 }
 
-impl MusicHandles {
-    fn play_siren(&self, sinks: &Assets<AudioSink>, speed: f32) {
-        if let Some(sink) = sinks.get(&self.siren) {
-            sink.set_volume(1.0);
-            sink.set_speed(speed)
-        }
-
-        Self::mute(&self.eaten, sinks);
-        Self::mute(&self.frightened, sinks);
+impl<'a> Mixer<'a> {
+    pub fn new(siren_track: &'a AudioSink, frightened_track: &'a AudioSink, eaten_track: &'a AudioSink) -> Self {
+        Self { siren_track, frightened_track, eaten_track }
     }
 
-    fn play_frightened(&self, sinks: &Assets<AudioSink>) {
-        Self::play(&self.frightened, sinks);
-        Self::mute(&self.siren, sinks);
-        Self::mute(&self.eaten, sinks);
+    fn play_siren_1(self) {
+        self.play_siren(1.0)
     }
 
-    fn play_eaten(&self, sinks: &Assets<AudioSink>) {
-        Self::play(&self.eaten, sinks);
-        Self::mute(&self.siren, sinks);
-        Self::mute(&self.frightened, sinks);
+    fn play_siren_2(self) {
+        self.play_siren(1.05)
     }
 
-    fn play(handle: &Handle<AudioSink>, sinks: &Assets<AudioSink>) {
-        if let Some(sink) = sinks.get(handle) {
-            sink.set_volume(1.0);
-        }
+    fn play_siren_3(self) {
+        self.play_siren(1.1)
     }
 
-    fn mute_all(&self, sinks: &Assets<AudioSink>) {
-        Self::mute(&self.siren, sinks);
-        Self::mute(&self.eaten, sinks);
-        Self::mute(&self.frightened, sinks);
+    fn play_siren_4(self) {
+        self.play_siren(1.15)
     }
 
-    fn mute(handle: &Handle<AudioSink>, sinks: &Assets<AudioSink>) {
-        if let Some(sink) = sinks.get(handle) {
-            sink.set_volume(0.0);
-        }
+    fn play_siren(self, speed: f32) {
+        self.siren_track.set_volume(1.0);
+        self.siren_track.set_speed(speed);
+        self.frightened_track.set_volume(0.0);
+        self.eaten_track.set_volume(0.0);
+    }
+
+    fn play_frightened(self) {
+        self.siren_track.set_volume(0.0);
+        self.frightened_track.set_volume(1.0);
+        self.eaten_track.set_volume(0.0);
+    }
+
+    fn play_eaten(self) {
+        self.siren_track.set_volume(0.0);
+        self.frightened_track.set_volume(0.0);
+        self.eaten_track.set_volume(1.0);
     }
 }
 

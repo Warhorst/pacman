@@ -15,15 +15,13 @@ pub struct GameAssetsPlugin;
 impl Plugin for GameAssetsPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_plugin(AnimationPlugin)
-            .add_plugin(SpriteSheetPlugin)
+            .add_plugins((
+                AnimationPlugin,
+                SpriteSheetPlugin
+            ))
             .add_event::<EAllAssetsLoaded>()
-            .add_system_set(
-                SystemSet::on_enter(Loading).with_system(start_asset_load)
-            )
-            .add_system_set(
-                SystemSet::on_update(Loading).with_system(create_sprite_sheets_and_send_event_when_all_loaded)
-            )
+            .add_systems(OnEnter(Loading), start_asset_load)
+            .add_systems(Update, create_sprite_sheets_and_send_event_when_all_loaded.run_if(in_state(Loading)))
         ;
     }
 }
@@ -50,4 +48,5 @@ fn create_sprite_sheets_and_send_event_when_all_loaded(
 }
 
 /// Fired when all assets were successfully loaded
+#[derive(Event)]
 pub struct EAllAssetsLoaded;

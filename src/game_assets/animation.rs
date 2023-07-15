@@ -7,7 +7,7 @@ pub (in crate::game_assets) struct AnimationPlugin;
 impl Plugin for AnimationPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_system(update_entities_with_animations)
+            .add_systems(Update, update_entities_with_animations)
         ;
     }
 }
@@ -18,7 +18,7 @@ fn update_entities_with_animations(
 ) {
     let delta = time.delta();
     for (visibility, mut texture, mut animations) in query.iter_mut() {
-        if visibility.is_visible && animations.is_running() {
+        if visibility == Visibility::Visible && animations.is_running() {
             animations.current_mut().update(delta);
             *texture = animations.current().texture()
         }

@@ -17,54 +17,36 @@ mod edible_eaten;
 #[derive(Component)]
 pub struct Pacman;
 
-pub (in crate::game) struct PacmanPlugin;
+pub(in crate::game) struct PacmanPlugin;
 
 impl Plugin for PacmanPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_plugin(EdibleEatenPlugin)
+            .add_plugins(EdibleEatenPlugin)
             .insert_resource(InputBuffer(None))
-            .add_system_set(
-                SystemSet::on_enter(Ready)
-                    .with_system(spawn_pacman)
-            )
-            .add_system_set(
-                SystemSet::on_enter(Running)
-                    .with_system(start_animation)
-            )
-            .add_system_set(
-                SystemSet::on_update(Running)
-                    .with_system(move_pacman_new)
-                    .with_system(set_direction_based_on_keyboard_input)
-                    .with_system(update_pacman_appearance.after(set_direction_based_on_keyboard_input))
-            )
-            .add_system_set(
-                SystemSet::on_enter(PacmanHit)
-                    .with_system(stop_animation)
-                    .with_system(reset_input_buffer)
-            )
-            .add_system_set(
-                SystemSet::on_enter(PacmanDying)
-                    .with_system(play_the_dying_animation)
-                    .with_system(play_the_dying_sound)
-            )
-            .add_system_set(
-                SystemSet::on_enter(PacmanDead).with_system(despawn_pacman)
-            )
-            .add_system_set(
-                SystemSet::on_enter(LevelTransition)
-                    .with_system(stop_animation)
-                    .with_system(reset_input_buffer)
-            )
-            .add_system_set(
-                SystemSet::on_exit(LevelTransition).with_system(despawn_pacman)
-            )
-            .add_system_set(
-                SystemSet::on_enter(GhostEatenPause).with_system(set_invisible)
-            )
-            .add_system_set(
-                SystemSet::on_exit(GhostEatenPause).with_system(set_visible)
-            )
+            .add_systems(OnEnter(Ready), spawn_pacman)
+            .add_systems(OnEnter(Running), start_animation)
+            .add_systems(Update, (
+                move_pacman_new,
+                set_direction_based_on_keyboard_input,
+                update_pacman_appearance.after(set_direction_based_on_keyboard_input)
+            ).run_if(in_state(Running)))
+            .add_systems(OnEnter(PacmanHit), (
+                stop_animation,
+                reset_input_buffer
+            ))
+            .add_systems(OnEnter(PacmanDying), (
+                play_the_dying_animation,
+                play_the_dying_sound
+            ))
+            .add_systems(OnEnter(PacmanDead), despawn_pacman)
+            .add_systems(OnEnter(LevelTransition), (
+                stop_animation,
+                reset_input_buffer
+            ))
+            .add_systems(OnExit(LevelTransition), despawn_pacman)
+            .add_systems(OnEnter(GhostEatenPause), set_invisible)
+            .add_systems(OnExit(GhostEatenPause), set_visible)
         ;
     }
 }
@@ -87,10 +69,15 @@ fn play_the_dying_animation(
 }
 
 fn play_the_dying_sound(
-    audio: Res<Audio>,
+    mut commands: Commands,
     loaded_assets: Res<LoadedAssets>,
 ) {
-    audio.play(loaded_assets.get_handle("sounds/dying.ogg"));
+    commands.spawn(
+        AudioBundle {
+            source: loaded_assets.get_handle("sounds/dying.ogg"),
+            ..default()
+        }
+    );
 }
 
 fn despawn_pacman(
@@ -106,7 +93,7 @@ fn set_invisible(
     mut query: Query<&mut Visibility, With<Pacman>>
 ) {
     for mut vis in &mut query {
-        vis.is_visible = false
+        *vis = Visibility::Hidden
     }
 }
 
@@ -114,6 +101,6 @@ fn set_visible(
     mut query: Query<&mut Visibility, With<Pacman>>
 ) {
     for mut vis in &mut query {
-        vis.is_visible = true
+        *vis = Visibility::Visible
     }
 }

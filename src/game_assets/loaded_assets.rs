@@ -26,7 +26,7 @@ impl LoadedAssets {
 
         LoadedAssets {
             path_handle_map: handles.into_iter()
-                .map(|handle| (asset_server.get_handle_path(handle.id).unwrap(), handle))
+                .map(|handle| (asset_server.get_handle_path(handle.id()).unwrap(), handle))
                 .map(|(asset_path, handle)| (asset_path.path().to_str().unwrap().replace("\\", "/"), handle))
                 .collect()
         }
@@ -64,7 +64,7 @@ impl LoadedAssets {
     }
 
     fn handle_ids<'a>(&'a self) -> impl IntoIterator<Item=HandleId> + 'a {
-        self.path_handle_map.values().map(|handle| handle.id)
+        self.path_handle_map.values().map(|handle| handle.id())
     }
 
     pub fn add_sprite_sheets(&mut self, sheets: &mut Assets<SpriteSheet>, images: &mut Assets<Image>, aseprite_data: &mut Assets<AsepriteData>) {

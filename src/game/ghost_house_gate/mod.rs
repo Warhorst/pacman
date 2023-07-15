@@ -13,20 +13,17 @@ mod counter;
 
 const NUM_GHOST_TYPES: usize = 4;
 
-pub (in crate::game) struct GhostHouseGatePlugin;
+pub(in crate::game) struct GhostHouseGatePlugin;
 
 impl Plugin for GhostHouseGatePlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_system_set(
-                SystemSet::on_enter(Start).with_system(create_gate)
-            )
-            .add_system_set(
-                SystemSet::on_update(Running)
-                    .with_system(update_ghost_house_gate)
-                    .with_system(increment_counter_when_dot_eaten)
-                    .with_system(switch_to_global_counter_when_pacman_got_killed)
-            )
+            .add_systems(OnEnter(Start), create_gate)
+            .add_systems(Update, (
+                update_ghost_house_gate,
+                increment_counter_when_dot_eaten,
+                switch_to_global_counter_when_pacman_got_killed
+            ).run_if(in_state(Running)))
         ;
     }
 }

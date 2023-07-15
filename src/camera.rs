@@ -8,12 +8,8 @@ pub struct CameraPlugin;
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_system_set(
-                SystemSet::on_enter(Start).with_system(spawn_camera)
-            )
-            .add_system_set(
-                SystemSet::on_exit(GameOver).with_system(despawn_camera)
-            )
+            .add_systems(OnEnter(Start), spawn_camera)
+            .add_systems(OnExit(GameOver), despawn_camera)
         ;
     }
 }
