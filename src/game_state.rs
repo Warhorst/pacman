@@ -21,10 +21,13 @@ impl Plugin for GameStatePlugin {
     }
 }
 
+/// The states of the games state machine.
 #[derive(Copy, Clone, Default, Eq, PartialEq, Hash, Debug)]
 pub enum GameState {
+    /// The startup state of the game. It will leave Loading when all assets are loaded.
     #[default]
     Loading,
+    /// A group of states which represent different phases off the actual game (when you move pacman through the labyrinth)
     Game(Game)
 }
 
@@ -49,14 +52,23 @@ impl States for GameState {
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum Game {
+    /// Startup state which spawns the labyrinth, ui, etc
     Start,
+    /// Phase which spawns pacman, ghosts and the "Ready!" text
     Ready,
+    /// The phase of the actual game, when you move around with pacman, eat dots and dodge ghosts.
     Running,
+    /// The phase when you were hit by a ghost. Just stops the game for drama.
     PacmanHit,
+    /// The phase where the ghosts get despawned and pacman plays his dying animation.
     PacmanDying,
+    /// The phase after pacman finished dying. Just another pause for more drama.
     PacmanDead,
+    /// The phase that gets entered if pacman died and all lives are lost.
     GameOver,
+    /// Short phase where the transition to the next level happens.
     LevelTransition,
+    /// A short phase after pacman ate a ghost. A score gets displayed and only already eaten ghosts can move.
     GhostEatenPause
 }
 
