@@ -27,7 +27,7 @@ impl Plugin for GhostPlugin {
                 ghost_passed_tunnel,
                 play_ghost_eaten_sound_when_ghost_was_eaten.after(LPacmanGhostHitDetection)
             ).run_if(in_state(Game(Running))))
-            .add_systems(Update, update_ghost_appearance.run_if(in_game()))
+            .add_systems(Update, update_ghost_appearance.run_if(in_game))
             .add_systems(OnEnter(Game(PacmanDying)), despawn_ghosts)
             .add_systems(OnEnter(Game(LevelTransition)), despawn_ghosts)
             .add_systems(OnEnter(Game(GhostEatenPause)), set_currently_eaten_ghost_invisible)

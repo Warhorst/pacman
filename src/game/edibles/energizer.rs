@@ -30,7 +30,7 @@ impl Plugin for EnergizerPlugin {
                 despawn_energizers,
                 despawn_energizer_timer
             ))
-            .add_systems(Update, animate_energizers.run_if(in_game()))
+            .add_systems(Update, animate_energizers.run_if(in_game))
         ;
     }
 }

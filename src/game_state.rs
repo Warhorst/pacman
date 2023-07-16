@@ -64,8 +64,8 @@ pub enum Game {
 struct StateTimer(Timer);
 
 /// A run condition which returns true if the current state is any variant of Game.
-pub fn in_game() -> impl Fn(Res<State<GameState>>) -> bool {
-    |current_state: Res<State<GameState>>| match current_state.get() {
+pub fn in_game(current_state: Res<State<GameState>>) -> bool {
+     match current_state.get() {
         Game(_) => true,
         _ => false
     }

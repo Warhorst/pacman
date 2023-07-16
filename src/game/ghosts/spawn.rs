@@ -53,6 +53,7 @@ fn spawn_ghost(
                 ..default()
             },
             transform: Transform::from_translation(spawn_coordinates),
+            visibility: Visibility::Visible,
             ..Default::default()
         },
         spawn.ghost,

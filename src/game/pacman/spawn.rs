@@ -32,6 +32,7 @@ pub(crate) fn spawn_pacman(
                 ..default()
             },
             transform,
+            visibility: Visibility::Visible,
             ..Default::default()
         },
         Name::new("Pacman"),

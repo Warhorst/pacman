@@ -20,7 +20,7 @@ impl Plugin for BottomUIPlugin {
             .add_systems(Update, (
                 update_lives,
                 update_fruits
-            ).run_if(in_game()))
+            ).run_if(in_game))
             .add_systems(OnExit(Game(GameOver)), despawn_bottom_ui)
         ;
     }

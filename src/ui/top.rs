@@ -17,7 +17,7 @@ impl Plugin for TopUIPlugin {
             .add_systems(Update, (
                 update_scoreboard,
                 blink_1_up_label
-            ).run_if(in_game()))
+            ).run_if(in_game))
             .add_systems(OnExit(Game(GameOver)), despawn_top_ui)
         ;
     }
