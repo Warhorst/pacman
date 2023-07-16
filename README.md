@@ -47,6 +47,11 @@ Things that are required for 1.0
   - refactorings
   - doc
 
+#### Current Bugs
+- The music does not stop when it should (pacman hit, ghost eaten)
+- animations do not stop when they should (pacman hit, ghost eaten)
+- Some events happen twice, like removing a live
+
 ### Ideas
 Some ideas for future development
 - a real map editor
