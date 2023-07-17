@@ -25,7 +25,7 @@ impl Plugin for StatePlugin {
             .add_systems(Update, update_state
                 .after(LPacmanGhostHitDetection)
                 .after(LPacmanEnergizerHitDetection)
-                .in_set(StateSetter)
+                .in_set(SetState)
                 .run_if(in_state(Game(Running))),
             )
             .add_systems(Update, update_state_on_eaten_pause.run_if(in_state(Game(GhostEatenPause))))
@@ -33,8 +33,8 @@ impl Plugin for StatePlugin {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, SystemSet)]
-pub struct StateSetter;
+#[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct SetState;
 
 #[derive(Component, Copy, Clone, Debug, Eq, PartialEq)]
 pub enum State {

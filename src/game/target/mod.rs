@@ -13,7 +13,7 @@ use crate::game_state::GameState::*;
 use crate::game_state::Game::*;
 use crate::game::ghosts::Ghost;
 use crate::game::ghosts::Ghost::*;
-use crate::game::state::{State, StateSetter};
+use crate::game::state::{State, SetState};
 use crate::game::state::State::*;
 use crate::game::map::ghost_house::GhostSpawn;
 use crate::game::map::{GhostCorner, Wall};
@@ -29,13 +29,13 @@ impl Plugin for TargetPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(Update, set_target
-                .in_set(LTargetSetter)
-                .after(StateSetter)
+                .in_set(SetTarget)
+                .after(SetState)
                 .run_if(in_state(Game(Running))),
             )
             .add_systems(Update, set_target_on_ghost_pause
-                .in_set(LTargetSetter)
-                .after(StateSetter)
+                .in_set(SetTarget)
+                .after(SetState)
                 .run_if(in_state(Game(GhostEatenPause))),
             )
         ;
@@ -43,8 +43,8 @@ impl Plugin for TargetPlugin {
 }
 
 /// Marks every system that sets a ghosts target.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, SystemSet)]
-pub struct LTargetSetter;
+#[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct SetTarget;
 
 #[derive(WorldQuery)]
 #[world_query(mutable)]

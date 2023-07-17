@@ -7,6 +7,7 @@ use crate::debug::DebugPlugin;
 use crate::game::GamePlugin;
 use crate::game_assets::GameAssetsPlugin;
 use crate::game_state::GameStatePlugin;
+use crate::system_sets::SystemSetsPlugin;
 
 use crate::ui::UIPlugin;
 
@@ -18,6 +19,7 @@ mod debug;
 mod ui;
 mod game;
 mod game_state;
+pub mod system_sets;
 
 fn main() {
     App::new()
@@ -37,6 +39,7 @@ fn main() {
         .add_plugins((
             GamePlugin,
             GameStatePlugin,
+            SystemSetsPlugin,
             GameAssetsPlugin,
             CameraPlugin,
             DebugPlugin,
