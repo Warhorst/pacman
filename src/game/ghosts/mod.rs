@@ -1,15 +1,16 @@
 use bevy::prelude::*;
-use crate::game_assets::loaded_assets::LoadedAssets;
 
 use crate::game::ghosts::movement::MovePlugin;
 use crate::game::ghosts::spawn::spawn_ghosts;
-use crate::game::target::Target;
 use crate::game::ghosts::textures::{start_animation, update_ghost_appearance};
-use crate::game::interactions::{EGhostEaten, LPacmanGhostHitDetection};
-use crate::game_state::GameState::*;
-use crate::game_state::Game::*;
+use crate::game::interactions::GhostWasEaten;
 use crate::game::map::tunnel::GhostPassedTunnel;
+use crate::game::target::Target;
+use crate::game_assets::loaded_assets::LoadedAssets;
+use crate::game_state::Game::*;
+use crate::game_state::GameState::*;
 use crate::game_state::in_game;
+use crate::system_sets::ProcessIntersectionsWithPacman;
 
 pub mod movement;
 pub mod spawn;
@@ -21,20 +22,45 @@ impl Plugin for GhostPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_plugins(MovePlugin)
-            .add_systems(OnEnter(Game(Ready)), spawn_ghosts)
-            .add_systems(OnEnter(Game(Running)), start_animation)
-            .add_systems(Update, (
-                ghost_passed_tunnel,
-                play_ghost_eaten_sound_when_ghost_was_eaten.after(LPacmanGhostHitDetection)
-            ).run_if(in_state(Game(Running))))
-            .add_systems(Update, update_ghost_appearance.run_if(in_game))
-            .add_systems(OnEnter(Game(PacmanDying)), despawn_ghosts)
-            .add_systems(OnEnter(Game(LevelTransition)), despawn_ghosts)
-            .add_systems(OnEnter(Game(GhostEatenPause)), set_currently_eaten_ghost_invisible)
-            .add_systems(OnExit(Game(GhostEatenPause)), (
-                remove_currently_eaten_ghost,
-                set_currently_eaten_ghost_visible
-            ))
+            .add_systems(
+                OnEnter(Game(Ready)),
+                spawn_ghosts,
+            )
+            .add_systems(
+                OnEnter(Game(Running)),
+                start_animation,
+            )
+            .add_systems(
+                Update, (
+                    ghost_passed_tunnel,
+                    play_ghost_eaten_sound_when_ghost_was_eaten
+                        .in_set(ProcessIntersectionsWithPacman)
+                )
+                    .run_if(in_state(Game(Running))),
+            )
+            .add_systems(
+                Update,
+                update_ghost_appearance.run_if(in_game),
+            )
+            .add_systems(
+                OnEnter(Game(PacmanDying)),
+                despawn_ghosts,
+            )
+            .add_systems(
+                OnEnter(Game(LevelTransition)),
+                despawn_ghosts,
+            )
+            .add_systems(
+                OnEnter(Game(GhostEatenPause)),
+                set_currently_eaten_ghost_invisible,
+            )
+            .add_systems(
+                OnExit(Game(GhostEatenPause)),
+                (
+                    remove_currently_eaten_ghost,
+                    set_currently_eaten_ghost_visible
+                ),
+            )
         ;
     }
 }
@@ -92,7 +118,7 @@ fn set_currently_eaten_ghost_visible(
 fn play_ghost_eaten_sound_when_ghost_was_eaten(
     mut commands: Commands,
     loaded_assets: Res<LoadedAssets>,
-    mut event_reader: EventReader<EGhostEaten>,
+    mut event_reader: EventReader<GhostWasEaten>,
 ) {
     if event_reader.iter().count() > 0 {
         commands.spawn(

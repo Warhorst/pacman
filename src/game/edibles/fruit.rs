@@ -6,27 +6,43 @@ use crate::constants::FRUIT_DIMENSION;
 use crate::game::edibles::dots::EatenDots;
 use crate::game::edibles::Edible;
 use crate::game_assets::loaded_assets::LoadedAssets;
-use crate::game::interactions::{EDotEaten, EFruitEaten};
+use crate::game::interactions::{DotWasEaten, FruitWasEaten};
 use crate::game_state::GameState::*;
 use crate::game_state::Game::*;
 use crate::game::map::FruitSpawn;
 use crate::game::specs_per_level::SpecsPerLevel;
+use crate::system_sets::ProcessIntersectionsWithPacman;
 
 pub struct FruitPlugin;
 
 impl Plugin for FruitPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(Update, (
-                spawn_fruit_when_dot_limit_reached,
-                update_despawn_timer,
-                despawn_fruit_if_timer_exceeded,
-                play_fruit_eaten_sound_when_fruit_was_eaten,
-                reset_fruit_despawn_timer_when_level_changed
-            ).run_if(in_state(Game(Running))))
-            .add_systems(OnEnter(Game(PacmanHit)), despawn_fruit_and_timer)
-            .add_systems(OnEnter(Game(LevelTransition)), despawn_fruit_and_timer)
-            .add_systems(OnExit(Game(GameOver)), despawn_fruit_and_timer)
+            .add_systems(
+                Update,
+                (
+                    spawn_fruit_when_dot_limit_reached
+                        .in_set(ProcessIntersectionsWithPacman),
+                    update_despawn_timer,
+                    despawn_fruit_if_timer_exceeded,
+                    play_fruit_eaten_sound_when_fruit_was_eaten
+                        .in_set(ProcessIntersectionsWithPacman),
+                    reset_fruit_despawn_timer_when_level_changed
+                )
+                    .run_if(in_state(Game(Running))),
+            )
+            .add_systems(
+                OnEnter(Game(PacmanHit)),
+                despawn_fruit_and_timer
+            )
+            .add_systems(
+                OnEnter(Game(LevelTransition)),
+                despawn_fruit_and_timer
+            )
+            .add_systems(
+                OnExit(Game(GameOver)),
+                despawn_fruit_and_timer
+            )
         ;
     }
 }
@@ -61,7 +77,7 @@ fn spawn_fruit_when_dot_limit_reached(
     level: Res<Level>,
     eaten_dots: Res<EatenDots>,
     specs_per_level: Res<SpecsPerLevel>,
-    mut event_reader: EventReader<EDotEaten>,
+    mut event_reader: EventReader<DotWasEaten>,
     spawn_query: Query<&FruitSpawn>,
 ) {
     let num_eaten_dots = eaten_dots.get_eaten();
@@ -140,7 +156,7 @@ fn despawn_fruit_and_timer(
 fn play_fruit_eaten_sound_when_fruit_was_eaten(
     mut commands: Commands,
     loaded_assets: Res<LoadedAssets>,
-    mut event_reader: EventReader<EFruitEaten>,
+    mut event_reader: EventReader<FruitWasEaten>,
 ) {
     for _ in event_reader.iter() {
         commands.spawn(

@@ -1,29 +1,35 @@
 use std::time::Duration;
 use bevy::prelude::*;
-use crate::game::interactions::{EDotEaten, EEnergizerEaten};
+use crate::game::interactions::{DotWasEaten, EnergizerWasEaten};
 use crate::game_state::GameState::*;
 use crate::game_state::Game::*;
 use crate::game::pacman::Pacman;
+use crate::system_sets::ProcessIntersectionsWithPacman;
 
-/// When eating dots/energizers, pacman stops for 1/3 Frames in the original game.
+/// When eating dots/energizers, pacman stops for 1 or 3 Frames in the original game.
 /// The systems in this plugin do the same thing, but with timers for 1/60 and 3/60 seconds
 pub(crate) struct EdibleEatenPlugin;
 
 impl Plugin for EdibleEatenPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(Update, (
-                add_edible_stop_when_dot_eaten,
-                add_edible_stop_when_energizer_eaten,
-                remove_edible_stop_when_timer_ended
-            ).run_if(in_state(Game(Running))))
+            .add_systems(
+                Update,
+                (
+                    add_edible_stop_when_dot_eaten
+                        .in_set(ProcessIntersectionsWithPacman),
+                    add_edible_stop_when_energizer_eaten
+                        .in_set(ProcessIntersectionsWithPacman),
+                    remove_edible_stop_when_timer_ended
+                )
+                    .run_if(in_state(Game(Running))))
         ;
     }
 }
 
 fn add_edible_stop_when_dot_eaten(
     mut commands: Commands,
-    mut event_reader: EventReader<EDotEaten>,
+    mut event_reader: EventReader<DotWasEaten>,
     query: Query<Entity, With<Pacman>>,
 ) {
     for _ in event_reader.iter() {
@@ -35,7 +41,7 @@ fn add_edible_stop_when_dot_eaten(
 
 fn add_edible_stop_when_energizer_eaten(
     mut commands: Commands,
-    mut event_reader: EventReader<EEnergizerEaten>,
+    mut event_reader: EventReader<EnergizerWasEaten>,
     query: Query<Entity, With<Pacman>>,
 ) {
     for _ in event_reader.iter() {

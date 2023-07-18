@@ -4,13 +4,14 @@ use bevy::prelude::*;
 use crate::constants::ENERGIZER_DIMENSION;
 use crate::game::edibles::Edible;
 use crate::game_assets::loaded_assets::LoadedAssets;
-use crate::game::interactions::EEnergizerEaten;
+use crate::game::interactions::EnergizerWasEaten;
 use crate::game_state::GameState::*;
 use crate::game_state::Game::*;
 use crate::game::level::Level;
 use crate::game::map::EnergizerSpawn;
 use crate::game::specs_per_level::SpecsPerLevel;
 use crate::game_state::in_game;
+use crate::system_sets::ProcessIntersectionsWithPacman;
 
 pub struct EnergizerPlugin;
 
@@ -18,19 +19,44 @@ impl Plugin for EnergizerPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<EnergizerOver>()
-            .add_systems(OnEnter(Game(Start)), spawn_energizer)
-            .add_systems(Update, (
-                start_energizer_timer_when_energizer_eaten,
-                update_energizer_timer.after(start_energizer_timer_when_energizer_eaten)
-            ).run_if(in_state(Game(Running))))
-            .add_systems(OnExit(Game(LevelTransition)), spawn_energizer)
-            .add_systems(OnEnter(Game(PacmanHit)), despawn_energizer_timer)
-            .add_systems(OnEnter(Game(LevelTransition)), despawn_energizer_timer)
-            .add_systems(OnExit(Game(GameOver)), (
-                despawn_energizers,
-                despawn_energizer_timer
-            ))
-            .add_systems(Update, animate_energizers.run_if(in_game))
+            .add_systems(
+                OnEnter(Game(Start)),
+                spawn_energizer,
+            )
+            .add_systems(
+                Update,
+                (
+                    start_energizer_timer_when_energizer_eaten
+                        .in_set(ProcessIntersectionsWithPacman),
+                    update_energizer_timer
+                        .after(start_energizer_timer_when_energizer_eaten)
+                )
+                    .run_if(in_state(Game(Running))),
+            )
+            .add_systems(
+                OnExit(Game(LevelTransition)),
+                spawn_energizer,
+            )
+            .add_systems(
+                OnEnter(Game(PacmanHit)),
+                despawn_energizer_timer,
+            )
+            .add_systems(
+                OnEnter(Game(LevelTransition)),
+                despawn_energizer_timer,
+            )
+            .add_systems(
+                OnExit(Game(GameOver)),
+                (
+                    despawn_energizers,
+                    despawn_energizer_timer
+                ),
+            )
+            .add_systems(
+                Update,
+                animate_energizers
+                    .run_if(in_game),
+            )
         ;
     }
 }
@@ -106,7 +132,7 @@ fn spawn_energizer(
 
 fn start_energizer_timer_when_energizer_eaten(
     mut commands: Commands,
-    mut event_reader: EventReader<EEnergizerEaten>,
+    mut event_reader: EventReader<EnergizerWasEaten>,
     level: Res<Level>,
     specs_per_level: Res<SpecsPerLevel>,
 ) {

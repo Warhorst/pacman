@@ -3,11 +3,12 @@ use bevy::prelude::*;
 
 use crate::constants::{FONT, POINTS_PER_DOT, POINTS_PER_ENERGIZER, POINTS_PER_GHOST, TEXT_Z};
 use crate::game::edibles::energizer::EnergizerOver;
-use crate::game::interactions::{EDotEaten, EEnergizerEaten, EFruitEaten, EGhostEaten};
+use crate::game::interactions::{DotWasEaten, EnergizerWasEaten, FruitWasEaten, GhostWasEaten};
 use crate::game_state::GameState::*;
 use crate::game_state::Game::*;
 use crate::game::edibles::fruit::Fruit::*;
 use crate::game_assets::loaded_assets::LoadedAssets;
+use crate::system_sets::ProcessIntersectionsWithPacman;
 
 pub(in crate::game) struct ScorePlugin;
 
@@ -16,21 +17,38 @@ impl Plugin for ScorePlugin {
         app
             .insert_resource(Score(0))
             .insert_resource(EatenGhostCounter(0))
-            .add_systems(Update, (
-                update_scoreboard,
-                add_points_for_eaten_dot,
-                add_points_for_eaten_energizer,
-                add_points_for_eaten_ghost_and_display_score_text,
-                reset_eaten_ghost_counter_when_energizer_is_over,
-                add_points_for_eaten_fruit_and_display_score_text,
-                update_score_texts
-            ).run_if(in_state(Game(Running))))
-            .add_systems(OnEnter(Game(PacmanHit)), (
-                despawn_score_texts,
-                reset_ghost_eaten_counter
-            ))
-            .add_systems(OnExit(Game(GameOver)), reset_score)
-            .add_systems(OnEnter(Game(LevelTransition)), reset_ghost_eaten_counter)
+            .add_systems(
+                Update,
+                (
+                    update_scoreboard,
+                    reset_eaten_ghost_counter_when_energizer_is_over,
+                    update_score_texts,
+                    add_points_for_eaten_dot
+                        .in_set(ProcessIntersectionsWithPacman),
+                    add_points_for_eaten_energizer
+                        .in_set(ProcessIntersectionsWithPacman),
+                    add_points_for_eaten_ghost_and_display_score_text
+                        .in_set(ProcessIntersectionsWithPacman),
+                    add_points_for_eaten_fruit_and_display_score_text
+                        .in_set(ProcessIntersectionsWithPacman),
+                )
+                    .run_if(in_state(Game(Running))),
+            )
+            .add_systems(
+                OnEnter(Game(PacmanHit)),
+                (
+                    despawn_score_texts,
+                    reset_ghost_eaten_counter
+                ),
+            )
+            .add_systems(
+                OnExit(Game(GameOver)),
+                reset_score,
+            )
+            .add_systems(
+                OnEnter(Game(LevelTransition)),
+                reset_ghost_eaten_counter,
+            )
         ;
     }
 }
@@ -72,7 +90,7 @@ fn update_scoreboard(
 
 fn add_points_for_eaten_dot(
     mut score: ResMut<Score>,
-    mut event_reader: EventReader<EDotEaten>,
+    mut event_reader: EventReader<DotWasEaten>,
 ) {
     for _ in event_reader.iter() {
         score.add(POINTS_PER_DOT)
@@ -81,7 +99,7 @@ fn add_points_for_eaten_dot(
 
 fn add_points_for_eaten_energizer(
     mut score: ResMut<Score>,
-    mut event_reader: EventReader<EEnergizerEaten>,
+    mut event_reader: EventReader<EnergizerWasEaten>,
 ) {
     for _ in event_reader.iter() {
         score.add(POINTS_PER_ENERGIZER)
@@ -93,7 +111,7 @@ fn add_points_for_eaten_ghost_and_display_score_text(
     game_asset_handles: Res<LoadedAssets>,
     mut score: ResMut<Score>,
     mut eaten_ghost_counter: ResMut<EatenGhostCounter>,
-    mut event_reader: EventReader<EGhostEaten>,
+    mut event_reader: EventReader<GhostWasEaten>,
 ) {
     for event in event_reader.iter() {
         let points = POINTS_PER_GHOST * 2usize.pow(**eaten_ghost_counter as u32);
@@ -125,7 +143,7 @@ fn add_points_for_eaten_fruit_and_display_score_text(
     mut commands: Commands,
     game_asset_handles: Res<LoadedAssets>,
     mut score: ResMut<Score>,
-    mut event_reader: EventReader<EFruitEaten>,
+    mut event_reader: EventReader<FruitWasEaten>,
 ) {
     for event in event_reader.iter() {
         let (fruit, transform) = (event.0, event.1);

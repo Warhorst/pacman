@@ -11,30 +11,32 @@ use crate::game_state::Game::*;
 use crate::game::target::Target;
 use crate::game::ghosts::Ghost;
 use crate::game::schedule::Schedule;
-use crate::game::interactions::{EEnergizerEaten, EGhostEaten, LPacmanEnergizerHitDetection, LPacmanGhostHitDetection};
+use crate::game::interactions::{EnergizerWasEaten, GhostWasEaten};
 use crate::game::helper::XYEqual;
 use crate::game::ghosts::Ghost::{Blinky, Pinky};
 use crate::game::state::State::*;
 use crate::game::map::ghost_house::GhostSpawn;
+use crate::system_sets::SetState;
 
 pub(in crate::game) struct StatePlugin;
 
 impl Plugin for StatePlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(Update, update_state
-                .after(LPacmanGhostHitDetection)
-                .after(LPacmanEnergizerHitDetection)
-                .in_set(SetState)
-                .run_if(in_state(Game(Running))),
+            .add_systems(
+                Update,
+                update_state
+                    .in_set(SetState)
+                    .run_if(in_state(Game(Running))),
             )
-            .add_systems(Update, update_state_on_eaten_pause.run_if(in_state(Game(GhostEatenPause))))
+            .add_systems(
+                Update,
+                update_state_on_eaten_pause
+                    .in_set(SetState)
+                    .run_if(in_state(Game(GhostEatenPause))))
         ;
     }
 }
-
-#[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct SetState;
 
 #[derive(Component, Copy, Clone, Debug, Eq, PartialEq)]
 pub enum State {
@@ -59,8 +61,8 @@ struct StateUpdateComponents<'a> {
 fn update_state(
     schedule: Res<Schedule>,
     energizer_over_events: EventReader<EnergizerOver>,
-    energizer_eaten_events: EventReader<EEnergizerEaten>,
-    ghost_eaten_events: EventReader<EGhostEaten>,
+    energizer_eaten_events: EventReader<EnergizerWasEaten>,
+    ghost_eaten_events: EventReader<GhostWasEaten>,
     spawns_query: Query<&GhostSpawn>,
     mut query: Query<StateUpdateComponents, With<Ghost>>,
 ) {
@@ -103,10 +105,10 @@ fn update_state_on_eaten_pause(
 }
 
 fn collect_events<'a, E: Copy + Event>(mut event_reader: EventReader<E>) -> Vec<E> {
-    event_reader.iter().map(|e| *e).collect()
+    event_reader.iter().copied().collect()
 }
 
-fn energizer_eaten(mut events: EventReader<EEnergizerEaten>) -> bool {
+fn energizer_eaten(mut events: EventReader<EnergizerWasEaten>) -> bool {
     events.iter().count() > 0
 }
 
@@ -114,7 +116,7 @@ fn energizer_over(mut events: EventReader<EnergizerOver>) -> bool {
     events.iter().count() > 0
 }
 
-fn ghost_eaten(entity: Entity, eaten_events: &Vec<EGhostEaten>) -> bool {
+fn ghost_eaten(entity: Entity, eaten_events: &[GhostWasEaten]) -> bool {
     eaten_events
         .iter()
         .filter(|e| e.0 == entity)
@@ -142,7 +144,10 @@ fn process_spawned(
     components: &mut StateUpdateComponentsItem,
     spawns_query: &Query<&GhostSpawn>,
 ) {
-    let blinky_spawn = spawns_query.iter().filter(|spawn| spawn.ghost == Blinky).next().expect("blinky should have a spawn");
+    let blinky_spawn = spawns_query
+        .iter()
+        .find(|spawn| spawn.ghost == Blinky)
+        .expect("blinky should have a spawn");
 
     let coordinates = components.transform.translation;
     if coordinates.xy_equal(&blinky_spawn.coordinates) {
@@ -192,11 +197,10 @@ fn process_eaten(
 ) {
     let respawn = spawns_query
         .iter()
-        .filter(|spawn| match *components.ghost {
+        .find(|spawn| match *components.ghost {
             Blinky => spawn.ghost == Pinky,
             _ => spawn.ghost == *components.ghost
         })
-        .next()
         .expect("every ghost should have a spawn");
     let coordinates = components.transform.translation;
 

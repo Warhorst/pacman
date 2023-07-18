@@ -5,10 +5,11 @@ use bevy_inspector_egui::quick::ResourceInspectorPlugin;
 use crate::constants::DOT_DIMENSION;
 use crate::game::edibles::Edible;
 use crate::game_assets::loaded_assets::LoadedAssets;
-use crate::game::interactions::EDotEaten;
+use crate::game::interactions::DotWasEaten;
 use crate::game_state::GameState::*;
 use crate::game_state::Game::*;
 use crate::game::map::DotSpawn;
+use crate::system_sets::ProcessIntersectionsWithPacman;
 
 pub struct DotPlugin;
 
@@ -17,19 +18,33 @@ impl Plugin for DotPlugin {
         app
             .register_type::<EatenDots>()
             .add_plugins(ResourceInspectorPlugin::<EatenDots>::default())
-            .add_systems(OnEnter(Game(Start)), (
-                spawn_dots,
-                create_eaten_dots
-            ))
-            .add_systems(Update, play_waka_when_dot_was_eaten.run_if(in_state(Game(Running))))
-            .add_systems(OnExit(Game(LevelTransition)), (
-                spawn_dots,
-                reset_eaten_dots
-            ))
-            .add_systems(OnExit(Game(GameOver)), (
-                despawn_dots,
-                reset_eaten_dots
-            ))
+            .add_systems(
+                OnEnter(Game(Start)),
+                (
+                    spawn_dots,
+                    create_eaten_dots
+                ),
+            )
+            .add_systems(
+                Update,
+                play_waka_when_dot_was_eaten
+                    .in_set(ProcessIntersectionsWithPacman)
+                    .run_if(in_state(Game(Running))),
+            )
+            .add_systems(
+                OnExit(Game(LevelTransition)),
+                (
+                    spawn_dots,
+                    reset_eaten_dots
+                ),
+            )
+            .add_systems(
+                OnExit(Game(GameOver)),
+                (
+                    despawn_dots,
+                    reset_eaten_dots
+                ),
+            )
         ;
     }
 }
@@ -96,7 +111,7 @@ fn play_waka_when_dot_was_eaten(
     mut waka_timer: Local<Option<Timer>>,
     mut cached: Local<bool>,
     loaded_assets: Res<LoadedAssets>,
-    mut event_reader: EventReader<EDotEaten>,
+    mut event_reader: EventReader<DotWasEaten>,
 ) {
     if let Some(ref mut timer) = *waka_timer {
         timer.tick(time.delta());

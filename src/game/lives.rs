@@ -1,9 +1,10 @@
 use bevy::prelude::*;
 use bevy_inspector_egui::quick::ResourceInspectorPlugin;
-use crate::game::interactions::EPacmanHit;
+use crate::game::interactions::PacmanWasHit;
 use crate::game_state::GameState::*;
 use crate::game_state::Game::*;
 use crate::game::score::Score;
+use crate::system_sets::ProcessIntersectionsWithPacman;
 
 pub(in crate::game) struct LivesPlugin;
 
@@ -14,11 +15,17 @@ impl Plugin for LivesPlugin {
             .add_plugins(ResourceInspectorPlugin::<Lives>::default())
             .insert_resource(Lives(3))
             .insert_resource(PointsRequiredForExtraLife::new())
-            .add_systems(Update, (
-                remove_life_when_pacman_dies,
-                add_life_if_player_reaches_specific_score
-            ).run_if(in_state(Game(Running))))
-            .add_systems(OnExit(Game(GameOver)), reset_lives)
+            .add_systems(
+                Update,
+                (
+                    remove_life_when_pacman_dies.in_set(ProcessIntersectionsWithPacman),
+                    add_life_if_player_reaches_specific_score
+                )
+                    .run_if(in_state(Game(Running))))
+            .add_systems(
+                OnExit(Game(GameOver)),
+                reset_lives,
+            )
         ;
     }
 }
@@ -42,13 +49,11 @@ impl PointsRequiredForExtraLife {
 }
 
 fn remove_life_when_pacman_dies(
-    mut event_reader: EventReader<EPacmanHit>,
+    mut event_reader: EventReader<PacmanWasHit>,
     mut lives: ResMut<Lives>,
 ) {
-    if event_reader.iter().count() > 0 {
-        if **lives > 0 {
-            **lives -= 1;
-        }
+    if event_reader.iter().count() > 0 && **lives > 0 {
+        **lives -= 1;
     }
 }
 

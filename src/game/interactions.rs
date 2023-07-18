@@ -9,60 +9,60 @@ use crate::game::state::State;
 use crate::game_state::GameState::*;
 use crate::game_state::Game::*;
 use crate::game::pacman::Pacman;
+use crate::system_sets::DetectIntersectionsWithPacman;
 
 pub(in crate::game) struct InteractionsPlugin;
 
 impl Plugin for InteractionsPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_event::<EPacmanHit>()
-            .add_event::<EGhostEaten>()
-            .add_event::<EDotEaten>()
-            .add_event::<EEnergizerEaten>()
-            .add_event::<EFruitEaten>()
-            // TODO is this double set setup still valid?
-            .add_systems(Update, (
-                pacman_hits_ghost.in_set(LPacmanGhostHitDetection),
-                pacman_eat_dot,
-                pacman_eat_energizer,
-                eat_fruit_when_pacman_touches_it
-            ).in_set(LPacmanEnergizerHitDetection).run_if(in_state(Game(Running))))
+            .add_event::<PacmanWasHit>()
+            .add_event::<GhostWasEaten>()
+            .add_event::<DotWasEaten>()
+            .add_event::<EnergizerWasEaten>()
+            .add_event::<FruitWasEaten>()
+            .add_systems(
+                Update,
+                (
+                    pacman_hits_ghost,
+                    pacman_eat_dot,
+                    pacman_eat_energizer,
+                    eat_fruit_when_pacman_touches_it
+                )
+                    .in_set(DetectIntersectionsWithPacman)
+                    .run_if(in_state(Game(Running))))
         ;
     }
 }
 
-/// Marks systems that check hits between pacman and ghosts
-#[derive(Debug, Clone, PartialEq, Eq, Hash, SystemSet)]
-pub struct LPacmanGhostHitDetection;
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash, SystemSet)]
-pub struct LPacmanEnergizerHitDetection;
-
 /// Fired when pacman was hit by a ghost.
 #[derive(Event)]
-pub struct EPacmanHit;
+pub struct PacmanWasHit;
 
 /// Fired when Pacman ate a ghost in frightened state.
-/// Contains the eaten ghost entity and transform.
+/// Contains the eaten ghost entity and the transform to show a score on the ghosts
+/// former position.
 #[derive(Event, Copy, Clone)]
-pub struct EGhostEaten(pub Entity, pub Transform);
+pub struct GhostWasEaten(pub Entity, pub Transform);
 
 /// Fired when pacman eats a dot.
 #[derive(Event)]
-pub struct EDotEaten;
+pub struct DotWasEaten;
 
 /// Fired when pacman eats an energizer.
 #[derive(Event, Copy, Clone)]
-pub struct EEnergizerEaten;
+pub struct EnergizerWasEaten;
 
 /// Event that gets fired when pacman ate a fruit.
+/// Holds the type of fruit and the transform to show a score on the fruits
+/// former position.
 #[derive(Event)]
-pub struct EFruitEaten(pub Fruit, pub Transform);
+pub struct FruitWasEaten(pub Fruit, pub Transform);
 
 fn pacman_hits_ghost(
     mut commands: Commands,
-    mut killed_event_writer: EventWriter<EPacmanHit>,
-    mut eat_event_writer: EventWriter<EGhostEaten>,
+    mut killed_event_writer: EventWriter<PacmanWasHit>,
+    mut eat_event_writer: EventWriter<GhostWasEaten>,
     pacman_query: Query<&Transform, With<Pacman>>,
     ghost_query: Query<(Entity, &Transform, &State), With<Ghost>>,
 ) {
@@ -70,11 +70,11 @@ fn pacman_hits_ghost(
         for (entity, ghost_transform, state) in &ghost_query {
             if Position::from_vec(&pacman_transform.translation) == Position::from_vec(&ghost_transform.translation) {
                 if let State::Scatter | State::Chase = state {
-                    killed_event_writer.send(EPacmanHit)
+                    killed_event_writer.send(PacmanWasHit)
                 }
 
                 if let State::Frightened = state {
-                    eat_event_writer.send(EGhostEaten(entity, *ghost_transform));
+                    eat_event_writer.send(GhostWasEaten(entity, *ghost_transform));
                     commands.insert_resource(CurrentlyEatenGhost(entity))
                 }
             }
@@ -84,7 +84,7 @@ fn pacman_hits_ghost(
 
 fn pacman_eat_dot(
     mut commands: Commands,
-    mut event_writer: EventWriter<EDotEaten>,
+    mut event_writer: EventWriter<DotWasEaten>,
     mut eaten_dots: ResMut<EatenDots>,
     pacman_positions: Query<&Transform, With<Pacman>>,
     dot_positions: Query<(Entity, &Transform), With<Dot>>,
@@ -94,7 +94,7 @@ fn pacman_eat_dot(
             if Position::from_vec(&pacman_tf.translation) == Position::from_vec(&dot_tf.translation) {
                 commands.entity(entity).despawn();
                 eaten_dots.increment();
-                event_writer.send(EDotEaten)
+                event_writer.send(DotWasEaten)
             }
         }
     }
@@ -102,7 +102,7 @@ fn pacman_eat_dot(
 
 fn pacman_eat_energizer(
     mut commands: Commands,
-    mut event_writer: EventWriter<EEnergizerEaten>,
+    mut event_writer: EventWriter<EnergizerWasEaten>,
     pacman_positions: Query<&Transform, With<Pacman>>,
     energizer_positions: Query<(Entity, &Transform), With<Energizer>>,
 ) {
@@ -110,7 +110,7 @@ fn pacman_eat_energizer(
         for (energizer_entity, energizer_transform) in &energizer_positions {
             if Position::from_vec(&energizer_transform.translation) == Position::from_vec(&pacman_transform.translation) {
                 commands.entity(energizer_entity).despawn();
-                event_writer.send(EEnergizerEaten)
+                event_writer.send(EnergizerWasEaten)
             }
         }
     }
@@ -119,7 +119,7 @@ fn pacman_eat_energizer(
 /// If pacman touches the fruit, despawn it, remove the timer and send an event.
 fn eat_fruit_when_pacman_touches_it(
     mut commands: Commands,
-    mut event_writer: EventWriter<EFruitEaten>,
+    mut event_writer: EventWriter<FruitWasEaten>,
     pacman_query: Query<&Transform, With<Pacman>>,
     fruit_query: Query<(Entity, &Fruit, &Transform)>,
 ) {
@@ -128,7 +128,7 @@ fn eat_fruit_when_pacman_touches_it(
             if Position::from_vec(&pacman_tf.translation) == Position::from_vec(&fruit_tf.translation) {
                 commands.entity(entity).despawn();
                 commands.remove_resource::<FruitDespawnTimer>();
-                event_writer.send(EFruitEaten(*fruit, *fruit_tf))
+                event_writer.send(FruitWasEaten(*fruit, *fruit_tf))
             }
         }
     }

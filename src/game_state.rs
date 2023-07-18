@@ -1,22 +1,31 @@
 use bevy::prelude::*;
-use crate::game_state::GameState::*;
-use crate::game_state::Game::*;
+
 use crate::game::edibles::EAllEdiblesEaten;
-use crate::game::interactions::{EGhostEaten, EPacmanHit};
+use crate::game::interactions::{GhostWasEaten, PacmanWasHit};
 use crate::game::lives::Lives;
 use crate::game_assets::EAllAssetsLoaded;
+use crate::game_state::Game::*;
+use crate::game_state::GameState::*;
+use crate::system_sets::ProcessIntersectionsWithPacman;
 use crate::ui::game_over_screen::EGameRestarted;
 
 pub struct GameStatePlugin;
 
 impl Plugin for GameStatePlugin {
+    // TODO there is a bug with an infinite loop when eating a ghost
+    //  This is caused by the new set order, where a ghosts state
+    //  does not get updated before another hit detection occurs
     fn build(&self, app: &mut App) {
         app
             .add_state::<GameState>()
-            .add_systems(Update, (
-                update_state,
-                update_state_timer
-            ))
+            .add_systems(
+                Update,
+                (
+                    update_state
+                        .in_set(ProcessIntersectionsWithPacman),
+                    update_state_timer
+                ),
+            )
         ;
     }
 }
@@ -28,7 +37,7 @@ pub enum GameState {
     #[default]
     Loading,
     /// A group of states which represent different phases off the actual game (when you move pacman through the labyrinth)
-    Game(Game)
+    Game(Game),
 }
 
 impl States for GameState {
@@ -69,7 +78,7 @@ pub enum Game {
     /// Short phase where the transition to the next level happens.
     LevelTransition,
     /// A short phase after pacman ate a ghost. A score gets displayed and only already eaten ghosts can move.
-    GhostEatenPause
+    GhostEatenPause,
 }
 
 #[derive(Deref, DerefMut, Resource)]
@@ -77,10 +86,7 @@ struct StateTimer(Timer);
 
 /// A run condition which returns true if the current state is any variant of Game.
 pub fn in_game(current_state: Res<State<GameState>>) -> bool {
-     match current_state.get() {
-        Game(_) => true,
-        _ => false
-    }
+    matches!(current_state.get(), Game(_))
 }
 
 /// Update the current game state based on multiple factors.
@@ -96,10 +102,10 @@ fn update_state(
     lives: Res<Lives>,
     state_timer: Option<Res<StateTimer>>,
     assets_loaded_events: EventReader<EAllAssetsLoaded>,
-    pacman_hit_events: EventReader<EPacmanHit>,
+    pacman_hit_events: EventReader<PacmanWasHit>,
     edibles_eaten_events: EventReader<EAllEdiblesEaten>,
-    ghost_eaten_events: EventReader<EGhostEaten>,
-    game_restartet_events: EventReader<EGameRestarted>
+    ghost_eaten_events: EventReader<GhostWasEaten>,
+    game_restartet_events: EventReader<EGameRestarted>,
 ) {
     match current_state.get() {
         Loading => switch_to_in_game_when_everything_loaded(&mut next_state, assets_loaded_events),
@@ -117,7 +123,7 @@ fn update_state(
 
 fn switch_to_in_game_when_everything_loaded(
     game_state: &mut NextState<GameState>,
-    mut assets_loaded_events: EventReader<EAllAssetsLoaded>
+    mut assets_loaded_events: EventReader<EAllAssetsLoaded>,
 ) {
     if assets_loaded_events.iter().count() > 0 {
         game_state.set(Game(Start))
@@ -129,7 +135,7 @@ fn switch_when_timer_finished(
     state_timer: &Option<Res<StateTimer>>,
     game_state: &mut NextState<GameState>,
     time: f32,
-    new_state: GameState
+    new_state: GameState,
 ) {
     match state_timer {
         Some(timer) => if timer.finished() {
@@ -144,7 +150,7 @@ fn switch_to_ready_or_game_over(
     commands: &mut Commands,
     state_timer: &Option<Res<StateTimer>>,
     lives: &Lives,
-    game_state: &mut NextState<GameState>
+    game_state: &mut NextState<GameState>,
 ) {
     match state_timer {
         Some(timer) => if timer.finished() {
@@ -162,9 +168,9 @@ fn switch_to_ready_or_game_over(
 
 fn switch_states_based_on_events(
     game_state: &mut NextState<GameState>,
-    mut pacman_hit_events: EventReader<EPacmanHit>,
+    mut pacman_hit_events: EventReader<PacmanWasHit>,
     mut edibles_eaten_events: EventReader<EAllEdiblesEaten>,
-    mut ghost_eaten_events: EventReader<EGhostEaten>
+    mut ghost_eaten_events: EventReader<GhostWasEaten>,
 ) {
     if pacman_hit_events.iter().count() > 0 {
         game_state.set(Game(PacmanHit));
@@ -184,7 +190,7 @@ fn switch_states_based_on_events(
 
 fn switch_to_start_after_game_over(
     game_state: &mut NextState<GameState>,
-    mut game_restarted_events: EventReader<EGameRestarted>
+    mut game_restarted_events: EventReader<EGameRestarted>,
 ) {
     if game_restarted_events.iter().count() > 0 {
         game_state.set(Game(Start))
@@ -193,7 +199,7 @@ fn switch_to_start_after_game_over(
 
 fn update_state_timer(
     time: Res<Time>,
-    state_timer: Option<ResMut<StateTimer>>
+    state_timer: Option<ResMut<StateTimer>>,
 ) {
     if let Some(mut timer) = state_timer {
         timer.tick(time.delta());

@@ -1,24 +1,25 @@
 use std::cmp::Ordering;
 
-use bevy::prelude::*;
 use bevy::ecs::query::WorldQuery;
+use bevy::prelude::*;
 use bevy::utils::{HashMap, HashSet};
 
-use crate::game::position::{Neighbour, Position};
+use crate::constants::FIELD_DIMENSION;
 use crate::game::direction::Direction;
 use crate::game::direction::Direction::*;
-use crate::constants::FIELD_DIMENSION;
 use crate::game::ghost_house_gate::GhostHouseGate;
-use crate::game_state::GameState::*;
-use crate::game_state::Game::*;
 use crate::game::ghosts::Ghost;
 use crate::game::ghosts::Ghost::*;
-use crate::game::state::{State, SetState};
-use crate::game::state::State::*;
-use crate::game::map::ghost_house::GhostSpawn;
 use crate::game::map::{GhostCorner, Wall};
+use crate::game::map::ghost_house::GhostSpawn;
 use crate::game::pacman::Pacman;
+use crate::game::position::{Neighbour, Position};
 use crate::game::random::Random;
+use crate::game::state::State;
+use crate::game::state::State::*;
+use crate::game_state::Game::*;
+use crate::game_state::GameState::*;
+use crate::system_sets::SetTarget;
 
 mod spawned;
 mod eaten;
@@ -28,23 +29,21 @@ pub(in crate::game) struct TargetPlugin;
 impl Plugin for TargetPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(Update, set_target
-                .in_set(SetTarget)
-                .after(SetState)
-                .run_if(in_state(Game(Running))),
+            .add_systems(
+                Update,
+                set_target
+                    .in_set(SetTarget)
+                    .run_if(in_state(Game(Running))),
             )
-            .add_systems(Update, set_target_on_ghost_pause
-                .in_set(SetTarget)
-                .after(SetState)
-                .run_if(in_state(Game(GhostEatenPause))),
+            .add_systems(
+                Update,
+                set_target_on_ghost_pause
+                    .in_set(SetTarget)
+                    .run_if(in_state(Game(GhostEatenPause))),
             )
         ;
     }
 }
-
-/// Marks every system that sets a ghosts target.
-#[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct SetTarget;
 
 #[derive(WorldQuery)]
 #[world_query(mutable)]

@@ -8,7 +8,8 @@ use crate::game::ghosts::Ghost;
 use crate::game::ghosts::Ghost::*;
 use crate::game::level::Level;
 use crate::game::ghost_house_gate::counter::Counter;
-use crate::game::interactions::{EDotEaten, EPacmanHit};
+use crate::game::interactions::{DotWasEaten, PacmanWasHit};
+use crate::system_sets::ProcessIntersectionsWithPacman;
 
 mod counter;
 
@@ -20,11 +21,16 @@ impl Plugin for GhostHouseGatePlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(OnEnter(Game(Start)), create_gate)
-            .add_systems(Update, (
-                update_ghost_house_gate,
-                increment_counter_when_dot_eaten,
-                switch_to_global_counter_when_pacman_got_killed
-            ).run_if(in_state(Game(Running))))
+            .add_systems(
+                Update,
+                (
+                    update_ghost_house_gate,
+                    increment_counter_when_dot_eaten
+                        .in_set(ProcessIntersectionsWithPacman),
+                    switch_to_global_counter_when_pacman_got_killed
+                        .in_set(ProcessIntersectionsWithPacman)
+                )
+                    .run_if(in_state(Game(Running))))
         ;
     }
 }
@@ -44,7 +50,7 @@ fn update_ghost_house_gate(
 }
 
 fn increment_counter_when_dot_eaten(
-    mut event_reader: EventReader<EDotEaten>,
+    mut event_reader: EventReader<DotWasEaten>,
     mut ghost_house_gate: ResMut<GhostHouseGate>,
 ) {
     for _ in event_reader.iter() {
@@ -53,7 +59,7 @@ fn increment_counter_when_dot_eaten(
 }
 
 fn switch_to_global_counter_when_pacman_got_killed(
-    mut event_reader: EventReader<EPacmanHit>,
+    mut event_reader: EventReader<PacmanWasHit>,
     mut ghost_house_gate: ResMut<GhostHouseGate>,
 ) {
     for _ in event_reader.iter() {
