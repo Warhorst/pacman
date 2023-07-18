@@ -42,6 +42,7 @@ As the core game is almost complete, I want to publish a 1.0 soon (I did not car
 ### TODOS
 Things that are required for 1.0
 - save a highscore for the current session and play a sound when beaten
+- ghosts only change direction at specific points, like in the real game
 - general stuff like
   - bugfixing
   - refactorings

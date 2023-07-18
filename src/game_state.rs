@@ -6,15 +6,12 @@ use crate::game::lives::Lives;
 use crate::game_assets::EAllAssetsLoaded;
 use crate::game_state::Game::*;
 use crate::game_state::GameState::*;
-use crate::system_sets::ProcessIntersectionsWithPacman;
+use crate::system_sets::UpdateGameState;
 use crate::ui::game_over_screen::EGameRestarted;
 
 pub struct GameStatePlugin;
 
 impl Plugin for GameStatePlugin {
-    // TODO there is a bug with an infinite loop when eating a ghost
-    //  This is caused by the new set order, where a ghosts state
-    //  does not get updated before another hit detection occurs
     fn build(&self, app: &mut App) {
         app
             .add_state::<GameState>()
@@ -22,7 +19,7 @@ impl Plugin for GameStatePlugin {
                 Update,
                 (
                     update_state
-                        .in_set(ProcessIntersectionsWithPacman),
+                        .in_set(UpdateGameState),
                     update_state_timer
                 ),
             )

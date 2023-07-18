@@ -6,10 +6,11 @@ pub struct SystemSetsPlugin;
 impl Plugin for SystemSetsPlugin {
     fn build(&self, app: &mut App) {
         app
+            .configure_set(Update, DetectIntersectionsWithPacman.before(ProcessIntersectionsWithPacman))
+            .configure_set(Update, ProcessIntersectionsWithPacman.before(SetState))
             .configure_set(Update, SetState.before(SetTarget))
             .configure_set(Update, SetTarget.before(MoveEntities))
-            .configure_set(Update, MoveEntities.before(DetectIntersectionsWithPacman))
-            .configure_set(Update, DetectIntersectionsWithPacman.before(ProcessIntersectionsWithPacman))
+            .configure_set(Update, MoveEntities.before(UpdateGameState))
         ;
     }
 }
@@ -33,3 +34,7 @@ pub struct DetectIntersectionsWithPacman;
 /// Set for all systems that process intersections between pacman and other entities.
 #[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ProcessIntersectionsWithPacman;
+
+/// Set for all systems which update the current game state
+#[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct UpdateGameState;
