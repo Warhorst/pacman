@@ -333,7 +333,7 @@ pub struct Spec {
 
 #[cfg(test)]
 mod tests {
-    use crate::edibles::fruit::Fruit;
+    use crate::game::edibles::fruit::Fruit;
     use crate::game::level::Level;
     use crate::game::specs_per_level::{Spec, SpecsPerLevel};
 
