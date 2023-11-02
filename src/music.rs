@@ -22,7 +22,10 @@ impl Plugin for MusicPlugin {
                 update_current_track,
                 play_track
             ).run_if(in_state(Game(Running))))
-            .add_systems(OnExit(Game(Running)), mute)
+            .add_systems(
+                OnExit(Game(Running)),
+                mute
+            )
         ;
     }
 }
@@ -47,12 +50,13 @@ fn play_start_sound(
     mut commands: Commands,
     loaded_assets: Res<LoadedAssets>,
 ) {
-    commands.spawn(
+    commands.spawn((
+        Name::new("StartSound"),
         AudioBundle {
             source: loaded_assets.get_handle("sounds/start.ogg"),
             ..default()
         }
-    );
+    ));
 }
 
 /// Starts every background track at the same time with volume of 0.
@@ -72,6 +76,7 @@ fn start_background_track(
     name: &'static str,
 ) {
     commands.spawn((
+        Name::new(name),
         marker,
         AudioBundle {
             source: loaded_assets.get_handle(name),
@@ -81,6 +86,7 @@ fn start_background_track(
     ));
 }
 
+/// Stop all background music.
 fn mute(
     background_tracks: Query<&AudioSink, With<BackgroundTrack>>,
 ) {
