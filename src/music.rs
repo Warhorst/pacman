@@ -7,24 +7,31 @@ use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game::ghosts::Ghost;
 use crate::game_state::Game::*;
 use crate::game::state::State;
+use crate::game_state::in_game;
+use crate::music::CurrentTrack::*;
 
 pub struct MusicPlugin;
 
 impl Plugin for MusicPlugin {
     fn build(&self, app: &mut App) {
         app
-            .insert_resource(CurrentTrack::Siren1)
-            .add_systems(OnEnter(Game(Start)), (
-                play_start_sound,
-                init_background_music
-            ))
+            .insert_resource(BackgroundMusic::new_muted())
+            .add_systems(
+                OnEnter(Game(Start)), (
+                    play_start_sound,
+                    init_background_music
+                ))
+            .add_systems(
+                OnEnter(Game(Running)),
+                unmute_background_music,
+            )
             .add_systems(Update, (
-                update_current_track,
+                update_background_music,
                 play_track
-            ).run_if(in_state(Game(Running))))
+            ).run_if(in_game))
             .add_systems(
                 OnExit(Game(Running)),
-                mute
+                mute_background_music,
             )
         ;
     }
@@ -81,20 +88,26 @@ fn start_background_track(
         AudioBundle {
             source: loaded_assets.get_handle(name),
             settings: PlaybackSettings::LOOP.with_volume(Volume::new_relative(0.0)),
-            ..default()
         }
     ));
 }
 
-/// Stop all background music.
-fn mute(
-    background_tracks: Query<&AudioSink, With<BackgroundTrack>>,
+/// Unmute the background music.
+fn unmute_background_music(
+    mut background_music: ResMut<BackgroundMusic>,
 ) {
-    background_tracks.for_each(|sink| sink.set_volume(0.0));
+    background_music.muted = false
 }
 
-fn update_current_track(
-    mut current_track: ResMut<CurrentTrack>,
+/// Mute the background music.
+fn mute_background_music(
+    mut background_music: ResMut<BackgroundMusic>,
+) {
+    background_music.muted = true
+}
+
+fn update_background_music(
+    mut background_music: ResMut<BackgroundMusic>,
     energizer_timer_opt: Option<Res<EnergizerTimer>>,
     eaten_dots: Res<EatenDots>,
     query: Query<&State, With<Ghost>>,
@@ -102,26 +115,26 @@ fn update_current_track(
     let eaten_ghosts = query.iter().filter(|s| s == &&State::Eaten).count();
 
     if eaten_ghosts > 0 {
-        *current_track = CurrentTrack::Eaten
-    } else if let Some(_) = energizer_timer_opt {
-        *current_track = CurrentTrack::Frightened
+        background_music.current_track = Eaten
+    } else if energizer_timer_opt.is_some() {
+        background_music.current_track = Frightened
     } else {
-        *current_track = match eaten_dots.get_eaten() as f32 / eaten_dots.get_max() as f32 {
-            r if r >= 0.0 && r < 0.25 => CurrentTrack::Siren1,
-            r if r >= 0.25 && r < 0.5 => CurrentTrack::Siren2,
-            r if r >= 0.5 && r < 0.75 => CurrentTrack::Siren3,
-            _ => CurrentTrack::Siren4,
+        background_music.current_track = match eaten_dots.get_eaten() as f32 / eaten_dots.get_max() as f32 {
+            r if (0.0..0.25).contains(&r) => Siren1,
+            r if (0.25..0.5).contains(&r) => Siren2,
+            r if (0.5..0.75).contains(&r) => Siren3,
+            _ => Siren4,
         }
     }
 }
 
 fn play_track(
-    current_track: Res<CurrentTrack>,
+    background_music: Res<BackgroundMusic>,
     siren_tracks: Query<&AudioSink, With<SirenBackground>>,
     frightened_tracks: Query<&AudioSink, With<FrightenedBackground>>,
     eaten_tracks: Query<&AudioSink, With<EatenBackground>>,
 ) {
-    if !current_track.is_changed() {
+    if !background_music.is_changed() {
         return;
     }
 
@@ -134,13 +147,18 @@ fn play_track(
         _ => return
     };
 
-    match *current_track {
-        CurrentTrack::Siren1 => mixer.play_siren_1(),
-        CurrentTrack::Siren2 => mixer.play_siren_2(),
-        CurrentTrack::Siren3 => mixer.play_siren_3(),
-        CurrentTrack::Siren4 => mixer.play_siren_4(),
-        CurrentTrack::Frightened => mixer.play_frightened(),
-        CurrentTrack::Eaten => mixer.play_eaten(),
+    if background_music.muted {
+        mixer.mute_all();
+        return;
+    }
+
+    match &background_music.current_track {
+        Siren1 => mixer.play_siren_1(),
+        Siren2 => mixer.play_siren_2(),
+        Siren3 => mixer.play_siren_3(),
+        Siren4 => mixer.play_siren_4(),
+        Frightened => mixer.play_frightened(),
+        Eaten => mixer.play_eaten(),
     }
 }
 
@@ -189,14 +207,42 @@ impl<'a> Mixer<'a> {
         self.frightened_track.set_volume(0.0);
         self.eaten_track.set_volume(1.0);
     }
+
+    fn mute_all(self) {
+        self.siren_track.set_volume(0.0);
+        self.frightened_track.set_volume(0.0);
+        self.eaten_track.set_volume(0.0);
+    }
 }
 
+/// Controller for the music that will play in the background
 #[derive(Resource)]
+struct BackgroundMusic {
+    current_track: CurrentTrack,
+    muted: bool,
+}
+
+impl BackgroundMusic {
+    fn new_muted() -> Self {
+        BackgroundMusic {
+            current_track: Siren1,
+            muted: true,
+        }
+    }
+}
+
+/// Identifiers for the current track that should be played
 enum CurrentTrack {
+    /// The siren sound, when the remaining dots are between 100% and 75%
     Siren1,
+    /// The siren sound, when the remaining dots are between 75% and 50%
     Siren2,
+    /// The siren sound, when the remaining dots are between 50% and 25%
     Siren3,
+    /// The siren sound, when the remaining dots are between 25% and 0%
     Siren4,
+    /// The music that plays when pacman ate an energizer and the ghosts turn blue
     Frightened,
+    /// The sound that plays when an eaten ghost returns to the ghost house
     Eaten,
 }
