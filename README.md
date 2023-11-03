@@ -3,7 +3,7 @@ A recreation of the arcade game "Pacman" with rust and the bevy engine.
 
 Despite its age and appearance, Pacman was a quite complex game. Therefore, this project aims to battle test bevy.
 
-[Play the latest build (WIP)](https://warhorst.github.io/pacman/)
+[Play the latest WASM build (last updated October 10, 2022)](https://warhorst.github.io/pacman/)
 
 (Use WASD or arrow keys to control pacman. Click into the canvas if it's not working)
 
@@ -36,24 +36,14 @@ Did some cutting with [LosslessCut](https://github.com/mifi/lossless-cut) and ht
 (Tip: Don't even try to download the sounds from other sides than YouTube. The quality is trash and the tracks are incomplete)
 
 
-## Road to 1.0
-As the core game is almost complete, I want to publish a 1.0 soon (I did not care incrementing the version until now). This version will provide the typical pacman experience.
-
-### TODOS
+## TODOS
 Things that are required for 1.0
 - save a highscore for the current session and play a sound when beaten
 - ghosts only change direction at specific points, like in the real game
-- general stuff like
-  - bugfixing
-  - refactorings
-  - doc
+- store the map in the bevy scene format
+- create a 1.0 WASM build
 
-#### Current Bugs
-- The music does not stop when it should (pacman hit, ghost eaten)
-- animations do not stop when they should (pacman hit, ghost eaten)
-- Some events happen twice, like removing a live
-
-### Ideas
+## Ideas
 Some ideas for future development
 - a real map editor
 - main menu with persistent highscores and intro sequence
