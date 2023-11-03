@@ -11,6 +11,7 @@ use crate::game_state::GameState::*;
 use crate::game_state::Game::*;
 use crate::game::map::FruitSpawn;
 use crate::game::specs_per_level::SpecsPerLevel;
+use crate::sound_effect::SoundEfect;
 use crate::system_sets::ProcessIntersectionsWithPacman;
 
 pub struct FruitPlugin;
@@ -18,7 +19,6 @@ pub struct FruitPlugin;
 impl Plugin for FruitPlugin {
     fn build(&self, app: &mut App) {
         app
-            .register_type::<FruitEatenSound>()
             .add_systems(
                 Update,
                 (
@@ -31,10 +31,6 @@ impl Plugin for FruitPlugin {
                     reset_fruit_despawn_timer_when_level_changed
                 )
                     .run_if(in_state(Game(Running))),
-            )
-            .add_systems(
-                Update,
-                update_fruit_eaten_sound_timer
             )
             .add_systems(
                 OnEnter(Game(PacmanHit)),
@@ -71,29 +67,6 @@ pub struct FruitDespawnTimer(Timer);
 impl FruitDespawnTimer {
     fn new() -> Self {
         FruitDespawnTimer(Timer::new(Duration::from_secs_f32(9.5), TimerMode::Once))
-    }
-}
-
-/// The sound that plays when a fruit was eaten. Has a timer to it
-/// to check if it can be despawned.
-#[derive(Component, Reflect)]
-struct FruitEatenSound {
-    timer: Timer
-}
-
-impl FruitEatenSound {
-    fn new() -> Self {
-        FruitEatenSound {
-            timer: Timer::new(Duration::from_secs(1), TimerMode::Once)
-        }
-    }
-
-    fn update(&mut self, delta: Duration) {
-        self.timer.tick(delta);
-    }
-
-    fn finished(&self) -> bool {
-        self.timer.finished()
     }
 }
 
@@ -189,7 +162,7 @@ fn play_fruit_eaten_sound_when_fruit_was_eaten(
     for _ in event_reader.iter() {
         commands.spawn((
             Name::new("FruitEatenSound"),
-            FruitEatenSound::new(),
+            SoundEfect::new(),
             AudioBundle {
                 source: loaded_assets.get_handle("sounds/fruit_eaten.ogg"),
                 ..default()
@@ -209,22 +182,4 @@ fn get_texture_for_fruit(fruit: &Fruit, asset_handles: &LoadedAssets) -> Handle<
         Bell => "bell",
         Key => "key"
     }))
-}
-
-/// Updates the timer on a fruit eaten sound. As I currently know no other way to check if a sound
-/// finished playing, this is the solution.
-fn update_fruit_eaten_sound_timer(
-    mut commands: Commands,
-    time: Res<Time>,
-    mut sounds: Query<(Entity, &mut FruitEatenSound)>
-) {
-    let delta = time.delta();
-
-    for (entity, mut sound) in &mut sounds {
-        sound.update(delta);
-
-        if sound.finished() {
-            commands.entity(entity).despawn();
-        }
-    }
 }

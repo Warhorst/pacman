@@ -9,6 +9,7 @@ use crate::game_state::Game::*;
 use crate::game::state::State;
 use crate::game_state::in_game;
 use crate::music::CurrentTrack::*;
+use crate::sound_effect::SoundEfect;
 
 pub struct MusicPlugin;
 
@@ -59,6 +60,7 @@ fn play_start_sound(
 ) {
     commands.spawn((
         Name::new("StartSound"),
+        SoundEfect::new(),
         AudioBundle {
             source: loaded_assets.get_handle("sounds/start.ogg"),
             ..default()

@@ -8,7 +8,7 @@ use crate::game::pacman::edible_eaten::EdibleEatenPlugin;
 use crate::game::pacman::spawn::spawn_pacman;
 use crate::game::pacman::movement::{InputBuffer, move_pacman_new, reset_input_buffer, set_direction_based_on_keyboard_input};
 use crate::game::pacman::textures::{start_animation, update_pacman_appearance};
-use std::time::Duration;
+use crate::sound_effect::SoundEfect;
 
 mod movement;
 mod spawn;
@@ -29,10 +29,6 @@ impl Plugin for PacmanPlugin {
                 set_direction_based_on_keyboard_input,
                 update_pacman_appearance.after(set_direction_based_on_keyboard_input)
             ).run_if(in_state(Game(Running))))
-            .add_systems(
-                Update,
-                update_pacman_dying_sound_timer
-            )
             .add_systems(OnEnter(Game(PacmanHit)), (
                 stop_animation,
                 reset_input_buffer
@@ -57,29 +53,6 @@ impl Plugin for PacmanPlugin {
 #[derive(Component)]
 pub struct Pacman;
 
-/// The sound that plays when a ghost was eaten. Has a timer to it
-/// to check if it can be despawned.
-#[derive(Component, Reflect)]
-struct PacmanDyingSound {
-    timer: Timer
-}
-
-impl PacmanDyingSound {
-    fn new() -> Self {
-        PacmanDyingSound {
-            timer: Timer::new(Duration::from_secs(1), TimerMode::Once)
-        }
-    }
-
-    fn update(&mut self, delta: Duration) {
-        self.timer.tick(delta);
-    }
-
-    fn finished(&self) -> bool {
-        self.timer.finished()
-    }
-}
-
 fn stop_animation(
     mut query: Query<&mut Animations, With<Pacman>>
 ) {
@@ -103,7 +76,7 @@ fn play_the_dying_sound(
 ) {
     commands.spawn((
         Name::new("PacmanDyingSound"),
-        PacmanDyingSound::new(),
+        SoundEfect::new(),
         AudioBundle {
             source: loaded_assets.get_handle("sounds/dying.ogg"),
             ..default()
@@ -133,23 +106,5 @@ fn set_visible(
 ) {
     for mut vis in &mut query {
         *vis = Visibility::Visible
-    }
-}
-
-/// Updates the timer on a pacman dying sound. As I currently know no other way to check if a sound
-/// finished playing, this is the solution.
-fn update_pacman_dying_sound_timer(
-    mut commands: Commands,
-    time: Res<Time>,
-    mut sounds: Query<(Entity, &mut PacmanDyingSound)>
-) {
-    let delta = time.delta();
-
-    for (entity, mut sound) in &mut sounds {
-        sound.update(delta);
-
-        if sound.finished() {
-            commands.entity(entity).despawn();
-        }
     }
 }

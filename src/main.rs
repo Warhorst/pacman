@@ -7,6 +7,7 @@ use crate::debug::DebugPlugin;
 use crate::game::GamePlugin;
 use crate::game_assets::GameAssetsPlugin;
 use crate::game_state::GameStatePlugin;
+use crate::sound_effect::SoundEffectPlugin;
 use crate::system_sets::SystemSetsPlugin;
 
 use crate::ui::UIPlugin;
@@ -15,6 +16,7 @@ mod camera;
 mod constants;
 mod game_assets;
 mod music;
+mod sound_effect;
 mod debug;
 mod ui;
 mod game;
@@ -44,7 +46,8 @@ fn main() {
             CameraPlugin,
             DebugPlugin,
             UIPlugin,
-            MusicPlugin
+            MusicPlugin,
+            SoundEffectPlugin
         ))
         .run()
 }

@@ -9,6 +9,7 @@ use crate::game::interactions::DotWasEaten;
 use crate::game_state::GameState::*;
 use crate::game_state::Game::*;
 use crate::game::map::DotSpawn;
+use crate::sound_effect::SoundEfect;
 use crate::system_sets::ProcessIntersectionsWithPacman;
 
 pub struct DotPlugin;
@@ -17,7 +18,6 @@ impl Plugin for DotPlugin {
     fn build(&self, app: &mut App) {
         app
             .register_type::<EatenDots>()
-            .register_type::<WakaSound>()
             .add_plugins(ResourceInspectorPlugin::<EatenDots>::default())
             .add_systems(
                 OnEnter(Game(Start)),
@@ -31,10 +31,6 @@ impl Plugin for DotPlugin {
                 play_waka_when_dot_was_eaten
                     .in_set(ProcessIntersectionsWithPacman)
                     .run_if(in_state(Game(Running))),
-            )
-            .add_systems(
-                Update,
-                update_waka_sound_timer
             )
             .add_systems(
                 OnExit(Game(LevelTransition)),
@@ -127,7 +123,7 @@ fn play_waka_when_dot_was_eaten(
 
                 commands.spawn((
                     Name::new("WakaSound"),
-                    WakaSound::new(),
+                    SoundEfect::new(),
                     AudioBundle {
                         source: loaded_assets.get_handle("sounds/waka.ogg"),
                         ..default()
@@ -149,7 +145,7 @@ fn play_waka_when_dot_was_eaten(
 
                 commands.spawn((
                     Name::new("WakaSound"),
-                    WakaSound::new(),
+                    SoundEfect::new(),
                     AudioBundle {
                         source: loaded_assets.get_handle("sounds/waka.ogg"),
                         ..default()
@@ -166,24 +162,6 @@ fn despawn_dots(
 ) {
     for e in &query {
         commands.entity(e).despawn_recursive();
-    }
-}
-
-/// Updates the timer on a waka sound. As I currently know no other way to check if a sound
-/// finished playing, this is the solution.
-fn update_waka_sound_timer(
-    mut commands: Commands,
-    time: Res<Time>,
-    mut wakas: Query<(Entity, &mut WakaSound)>
-) {
-    let delta = time.delta();
-
-    for (entity, mut waka) in &mut wakas {
-        waka.update(delta);
-
-        if waka.finished() {
-            commands.entity(entity).despawn();
-        }
     }
 }
 
@@ -226,28 +204,5 @@ impl EatenDots {
 
     fn reset(&mut self) {
         self.eaten = 0
-    }
-}
-
-/// The "waka waka" sound effect that gets played when pacman eats a dot. Has a timer to it
-/// to check if it can be despawned.
-#[derive(Component, Reflect)]
-pub struct WakaSound {
-    timer: Timer
-}
-
-impl WakaSound {
-    fn new() -> Self {
-        WakaSound {
-            timer: Timer::new(Duration::from_secs(1), TimerMode::Once)
-        }
-    }
-
-    fn update(&mut self, delta: Duration) {
-        self.timer.tick(delta);
-    }
-
-    fn finished(&self) -> bool {
-        self.timer.finished()
     }
 }

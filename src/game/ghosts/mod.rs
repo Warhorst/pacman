@@ -11,7 +11,7 @@ use crate::game_state::Game::*;
 use crate::game_state::GameState::*;
 use crate::game_state::in_game;
 use crate::system_sets::ProcessIntersectionsWithPacman;
-use std::time::Duration;
+use crate::sound_effect::SoundEfect;
 
 pub mod movement;
 pub mod spawn;
@@ -22,7 +22,6 @@ pub(in crate::game) struct GhostPlugin;
 impl Plugin for GhostPlugin {
     fn build(&self, app: &mut App) {
         app
-            .register_type::<GhostEatenSound>()
             .add_plugins(MovePlugin)
             .add_systems(
                 OnEnter(Game(Ready)),
@@ -43,10 +42,6 @@ impl Plugin for GhostPlugin {
             .add_systems(
                 Update,
                 update_ghost_appearance.run_if(in_game),
-            )
-            .add_systems(
-                Update,
-                update_ghost_eaten_sound_timer
             )
             .add_systems(
                 OnEnter(Game(PacmanDying)),
@@ -129,30 +124,12 @@ fn play_ghost_eaten_sound_when_ghost_was_eaten(
     if event_reader.iter().count() > 0 {
         commands.spawn((
             Name::new("GhostEatenSound"),
-            GhostEatenSound::new(),
+            SoundEfect::new(),
             AudioBundle {
                 source: loaded_assets.get_handle("sounds/ghost_eaten.ogg"),
                 ..default()
             }
         ));
-    }
-}
-
-/// Updates the timer on a ghost eaten sound. As I currently know no other way to check if a sound
-/// finished playing, this is the solution.
-fn update_ghost_eaten_sound_timer(
-    mut commands: Commands,
-    time: Res<Time>,
-    mut sounds: Query<(Entity, &mut GhostEatenSound)>
-) {
-    let delta = time.delta();
-
-    for (entity, mut sound) in &mut sounds {
-        sound.update(delta);
-
-        if sound.finished() {
-            commands.entity(entity).despawn();
-        }
     }
 }
 
@@ -167,26 +144,3 @@ pub enum Ghost {
 /// Resource that holds the entity id of the ghost that is currently eaten by pacman
 #[derive(Deref, Resource)]
 pub struct CurrentlyEatenGhost(pub Entity);
-
-/// The sound that plays when a ghost was eaten. Has a timer to it
-/// to check if it can be despawned.
-#[derive(Component, Reflect)]
-struct GhostEatenSound {
-    timer: Timer
-}
-
-impl GhostEatenSound {
-    fn new() -> Self {
-        GhostEatenSound {
-            timer: Timer::new(Duration::from_secs(1), TimerMode::Once)
-        }
-    }
-
-    fn update(&mut self, delta: Duration) {
-        self.timer.tick(delta);
-    }
-
-    fn finished(&self) -> bool {
-        self.timer.finished()
-    }
-}
