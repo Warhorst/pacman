@@ -50,7 +50,8 @@ impl Plugin for PacmanPlugin {
 }
 
 /// Marker component for a pacman entity.
-#[derive(Component)]
+#[derive(Component, Reflect, Default)]
+#[reflect(Component)]
 pub struct Pacman;
 
 fn stop_animation(

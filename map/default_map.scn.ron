@@ -1,0 +1,10 @@
+(
+  resources: {},
+  entities: {
+    0: (
+      components: {
+        "pacman::game::pacman::Pacman": (),
+      },
+    ),
+  },
+)
