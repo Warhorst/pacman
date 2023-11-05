@@ -1,4 +1,3 @@
-use std::env;
 use bevy::prelude::*;
 
 use crate::music::MusicPlugin;
@@ -8,7 +7,6 @@ use crate::debug::DebugPlugin;
 use crate::game::GamePlugin;
 use crate::game_assets::GameAssetsPlugin;
 use crate::game_state::GameStatePlugin;
-use crate::map_creator::MapCreator;
 use crate::sound_effect::SoundEffectPlugin;
 use crate::system_sets::SystemSetsPlugin;
 
@@ -24,11 +22,9 @@ mod ui;
 mod game;
 mod game_state;
 pub mod system_sets;
-mod map_creator;
 
 fn main() {
-    let mut app = App::new();
-    app
+    App::new()
         .add_plugins(DefaultPlugins
             .set(WindowPlugin {
                 primary_window: Some(Window {
@@ -52,16 +48,6 @@ fn main() {
             UIPlugin,
             MusicPlugin,
             SoundEffectPlugin
-        ));
-
-
-    let args: Vec<String> = env::args().collect();
-
-    if args.contains(&"create_map".to_string()) {
-        let mut map_creator = MapCreator::new(app);
-        map_creator.create_map();
-        map_creator.store_as_scene();
-    } else {
-        app.run()
-    }
+        ))
+        .run()
 }

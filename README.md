@@ -40,12 +40,15 @@ Did some cutting with [LosslessCut](https://github.com/mifi/lossless-cut) and ht
 Things that are required for 1.0
 - save a highscore for the current session and play a sound when beaten
 - ghosts only change direction at specific points, like in the real game
-- store the map in the bevy scene format
 - create a 1.0 WASM build
+
+### Current Bugs
+- the labyrinth does not blink when the player finished a level
+- the music does not resume after the player restarted the game after a game over
 
 ## Ideas
 Some ideas for future development
-- a real map editor
+- a real map editor (maybe using the bevy scenes format)
 - main menu with persistent highscores and intro sequence
 - cutscenes
 - savegames
