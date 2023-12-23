@@ -13,7 +13,7 @@ impl Plugin for DebugPlugin {
 }
 
 fn toggle_time(
-    mut time: ResMut<Time>,
+    mut time: ResMut<Time<Virtual>>,
     keyboard_input: Res<Input<KeyCode>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::Space) {

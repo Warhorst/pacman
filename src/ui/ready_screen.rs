@@ -3,7 +3,6 @@ use bevy::prelude::Val::Percent;
 use crate::game_state::GameState::*;
 use crate::game_state::Game::*;
 use crate::constants::FONT;
-use crate::game_assets::loaded_assets::LoadedAssets;
 
 pub(in crate::ui) struct ReadyScreenPlugin;
 
@@ -21,7 +20,7 @@ struct ReadyScreen;
 
 fn spawn_screen(
     mut commands: Commands,
-    game_asset_handles: Res<LoadedAssets>,
+    asset_server: Res<AssetServer>,
 ) {
     commands.spawn((
         Name::new("ReadyScreen"),
@@ -29,7 +28,7 @@ fn spawn_screen(
         TextBundle::from_section(
             "Ready!",
             TextStyle {
-                font: game_asset_handles.get_handle(FONT),
+                font: asset_server.load(FONT),
                 font_size: 20.0,
                 color: Color::rgb(1.0, 1.0, 0.0),
             },

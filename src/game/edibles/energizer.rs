@@ -3,7 +3,6 @@ use bevy::prelude::*;
 
 use crate::constants::ENERGIZER_DIMENSION;
 use crate::game::edibles::Edible;
-use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game::interactions::EnergizerWasEaten;
 use crate::game_state::GameState::*;
 use crate::game_state::Game::*;
@@ -101,7 +100,7 @@ impl EnergizerTimer {
 
 fn spawn_energizer(
     mut commands: Commands,
-    loaded_assets: Res<LoadedAssets>,
+    asset_server: Res<AssetServer>,
     spawn_query: Query<&EnergizerSpawn>,
 ) {
     let energizers = commands.spawn((
@@ -114,7 +113,7 @@ fn spawn_energizer(
         commands.entity(energizers).with_children(|parent| {
             parent.spawn((
                 SpriteBundle {
-                    texture: loaded_assets.get_handle("textures/energizer.png"),
+                    texture: asset_server.load("textures/energizer.png"),
                     sprite: Sprite {
                         custom_size: Some(Vec2::splat(ENERGIZER_DIMENSION)),
                         ..default()
@@ -136,7 +135,7 @@ fn start_energizer_timer_when_energizer_eaten(
     level: Res<Level>,
     specs_per_level: Res<SpecsPerLevel>,
 ) {
-    for _ in event_reader.iter() {
+    for _ in event_reader.read() {
         let spec = specs_per_level.get_for(&level);
         commands.insert_resource(EnergizerTimer::start(spec.frightened_time));
     }

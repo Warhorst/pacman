@@ -105,15 +105,15 @@ fn update_state_on_eaten_pause(
 }
 
 fn collect_events<'a, E: Copy + Event>(mut event_reader: EventReader<E>) -> Vec<E> {
-    event_reader.iter().copied().collect()
+    event_reader.read().copied().collect()
 }
 
 fn energizer_eaten(mut events: EventReader<EnergizerWasEaten>) -> bool {
-    events.iter().count() > 0
+    events.read().count() > 0
 }
 
 fn energizer_over(mut events: EventReader<EnergizerOver>) -> bool {
-    events.iter().count() > 0
+    events.read().count() > 0
 }
 
 fn ghost_eaten(entity: Entity, eaten_events: &[GhostWasEaten]) -> bool {

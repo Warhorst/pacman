@@ -5,7 +5,6 @@ use Fruit::*;
 use crate::constants::FRUIT_DIMENSION;
 use crate::game::edibles::dots::EatenDots;
 use crate::game::edibles::Edible;
-use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game::interactions::{DotWasEaten, FruitWasEaten};
 use crate::game_state::GameState::*;
 use crate::game_state::Game::*;
@@ -74,7 +73,7 @@ impl FruitDespawnTimer {
 /// was eaten.
 fn spawn_fruit_when_dot_limit_reached(
     mut commands: Commands,
-    loaded_assets: Res<LoadedAssets>,
+    asset_server: Res<AssetServer>,
     level: Res<Level>,
     eaten_dots: Res<EatenDots>,
     specs_per_level: Res<SpecsPerLevel>,
@@ -83,14 +82,14 @@ fn spawn_fruit_when_dot_limit_reached(
 ) {
     let num_eaten_dots = eaten_dots.get_eaten();
 
-    for _ in event_reader.iter() {
+    for _ in event_reader.read() {
         if let 70 | 170 = num_eaten_dots {
             for spawn in &spawn_query {
                 let fruit = specs_per_level.get_for(&level).fruit_to_spawn;
                 commands.spawn((
                     Name::new("Fruit"),
                     SpriteBundle {
-                        texture: get_texture_for_fruit(&fruit, &loaded_assets),
+                        texture: get_texture_for_fruit(&fruit, &asset_server),
                         sprite: Sprite {
                             custom_size: Some(Vec2::splat(FRUIT_DIMENSION)),
                             ..default()
@@ -156,23 +155,23 @@ fn despawn_fruit_and_timer(
 
 fn play_fruit_eaten_sound_when_fruit_was_eaten(
     mut commands: Commands,
-    loaded_assets: Res<LoadedAssets>,
+    asset_server: Res<AssetServer>,
     mut event_reader: EventReader<FruitWasEaten>,
 ) {
-    for _ in event_reader.iter() {
+    for _ in event_reader.read() {
         commands.spawn((
             Name::new("FruitEatenSound"),
             SoundEfect::new(),
             AudioBundle {
-                source: loaded_assets.get_handle("sounds/fruit_eaten.ogg"),
+                source: asset_server.load("sounds/fruit_eaten.ogg"),
                 ..default()
             }
         ));
     }
 }
 
-fn get_texture_for_fruit(fruit: &Fruit, asset_handles: &LoadedAssets) -> Handle<Image> {
-    asset_handles.get_handle(&format!("textures/fruits/{}.png", match fruit {
+fn get_texture_for_fruit(fruit: &Fruit, asset_server: &AssetServer) -> Handle<Image> {
+    asset_server.load(&format!("textures/fruits/{}.png", match fruit {
         Cherry => "cherry",
         Strawberry => "strawberry",
         Peach => "peach",

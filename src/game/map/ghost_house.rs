@@ -1,17 +1,16 @@
 use bevy::prelude::*;
+use bevy_sprite_sheet::{SpriteSheet, SpriteSheets};
 use crate::game_assets::animation::{Animation, Animations};
 use crate::game::direction::Direction;
 use crate::game::direction::Direction::*;
 use crate::game::helper::FromPositions;
 use crate::game::position::Position;
 use crate::constants::{BLINKY_Z, CLYDE_Z, INKY_Z, PINKY_Z, WALL_DIMENSION};
-use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game::ghosts::Ghost;
 use crate::game::ghosts::Ghost::*;
 use crate::is;
 use crate::game::map::{Element, Rotation, TileMap, Wall};
 use crate::game::map::Rotation::{D0, D180, D270, D90};
-use crate::game_assets::sprite_sheet::SpriteSheet;
 
 /// Parent component for everything related to the ghost house
 #[derive(Component)]
@@ -28,8 +27,8 @@ pub struct GhostSpawn {
 pub(crate) fn spawn_ghost_house(
     commands: &mut Commands,
     tile_map: &TileMap,
-    loaded_assets: &LoadedAssets,
-    sprite_sheets: &Assets<SpriteSheet>,
+    asset_server: &AssetServer,
+    sprite_sheets: &SpriteSheets,
 ) -> Entity {
     let bottom_left = get_bottom_left(tile_map);
     let rotation = get_rotation(tile_map);
@@ -50,7 +49,7 @@ pub(crate) fn spawn_ghost_house(
         });
     }
 
-    spawn_house_walls(commands, ghost_house, bottom_left, rotation, loaded_assets, sprite_sheets);
+    spawn_house_walls(commands, ghost_house, bottom_left, rotation, asset_server, sprite_sheets);
 
     ghost_house
 }
@@ -151,8 +150,8 @@ fn spawn_house_walls(
     ghost_house: Entity,
     bottom_left: Position,
     rotation: Rotation,
-    loaded_assets: &LoadedAssets,
-    sprite_sheets: &Assets<SpriteSheet>,
+    asset_server: &AssetServer,
+    sprite_sheets: &SpriteSheets,
 ) {
     let top_right = match rotation {
         D0 | D180 => Position::new(bottom_left.x + 7, bottom_left.y + 4),
@@ -163,13 +162,12 @@ fn spawn_house_walls(
         commands,
         bottom_left,
         top_right,
-        loaded_assets,
         sprite_sheets,
     );
-    let top = spawn_top(commands, rotation, bottom_left, top_right, loaded_assets, sprite_sheets);
-    let bottom = spawn_bottom(commands, rotation, bottom_left, loaded_assets, sprite_sheets);
-    let left = spawn_left(commands, rotation, bottom_left, loaded_assets, sprite_sheets);
-    let right = spawn_right(commands, rotation, bottom_left, top_right, loaded_assets, sprite_sheets);
+    let top = spawn_top(commands, rotation, bottom_left, top_right, asset_server, sprite_sheets);
+    let bottom = spawn_bottom(commands, rotation, bottom_left, asset_server, sprite_sheets);
+    let left = spawn_left(commands, rotation, bottom_left, asset_server, sprite_sheets);
+    let right = spawn_right(commands, rotation, bottom_left, top_right, asset_server, sprite_sheets);
     commands.entity(ghost_house).push_children(&corners);
     commands.entity(ghost_house).push_children(&top);
     commands.entity(ghost_house).push_children(&bottom);
@@ -181,15 +179,14 @@ fn spawn_corners(
     commands: &mut Commands,
     bottom_left: Position,
     top_right: Position,
-    loaded_assets: &LoadedAssets,
-    sprite_sheets: &Assets<SpriteSheet>,
+    sprite_sheets: &SpriteSheets,
 ) -> [Entity; 4] {
-    let sheet = loaded_assets.get_handle("textures/walls/ghost_house_wall_corner");
+    let sheet = sprite_sheets.get_sheet("textures/walls/ghost_house_wall_corner");
     [
-        spawn_wall(commands, &sheet, D0, Position::new(bottom_left.x, top_right.y), sprite_sheets),
-        spawn_wall(commands, &sheet, D90, top_right, sprite_sheets),
-        spawn_wall(commands, &sheet, D180, Position::new(top_right.x, bottom_left.y), sprite_sheets),
-        spawn_wall(commands, &sheet, D270, bottom_left, sprite_sheets),
+        spawn_wall(commands, &sheet, D0, Position::new(bottom_left.x, top_right.y)),
+        spawn_wall(commands, &sheet, D90, top_right),
+        spawn_wall(commands, &sheet, D180, Position::new(top_right.x, bottom_left.y)),
+        spawn_wall(commands, &sheet, D270, bottom_left),
     ]
 }
 
@@ -198,34 +195,34 @@ fn spawn_top(
     rotation: Rotation,
     bottom_left: Position,
     top_right: Position,
-    loaded_assets: &LoadedAssets,
-    sprite_sheets: &Assets<SpriteSheet>,
+    asset_server: &AssetServer,
+    sprite_sheets: &SpriteSheets,
 ) -> Vec<Entity> {
     let x = bottom_left.x + 1;
     let y = top_right.y;
-    let sheet = loaded_assets.get_handle("textures/walls/ghost_house_wall");
+    let sheet = sprite_sheets.get_sheet("textures/walls/ghost_house_wall");
 
     match rotation {
         D0 => vec![
-            spawn_wall(commands, &sheet, rotation, Position::new(x, y), sprite_sheets),
-            spawn_wall(commands, &sheet, rotation, Position::new(x + 1, y), sprite_sheets),
-            spawn_entrance(commands, loaded_assets, rotation, Position::new(x + 2, y)),
-            spawn_entrance(commands, loaded_assets, rotation, Position::new(x + 3, y)),
-            spawn_wall(commands, &sheet, rotation, Position::new(x + 4, y), sprite_sheets),
-            spawn_wall(commands, &sheet, rotation, Position::new(x + 5, y), sprite_sheets),
+            spawn_wall(commands, &sheet, rotation, Position::new(x, y)),
+            spawn_wall(commands, &sheet, rotation, Position::new(x + 1, y)),
+            spawn_entrance(commands, asset_server, rotation, Position::new(x + 2, y)),
+            spawn_entrance(commands, asset_server, rotation, Position::new(x + 3, y)),
+            spawn_wall(commands, &sheet, rotation, Position::new(x + 4, y)),
+            spawn_wall(commands, &sheet, rotation, Position::new(x + 5, y)),
         ],
         D180 => vec![
-            spawn_wall(commands, &sheet, rotation, Position::new(x, y), sprite_sheets),
-            spawn_wall(commands, &sheet, rotation, Position::new(x + 1, y), sprite_sheets),
-            spawn_wall(commands, &sheet, rotation, Position::new(x + 2, y), sprite_sheets),
-            spawn_wall(commands, &sheet, rotation, Position::new(x + 3, y), sprite_sheets),
-            spawn_wall(commands, &sheet, rotation, Position::new(x + 4, y), sprite_sheets),
-            spawn_wall(commands, &sheet, rotation, Position::new(x + 5, y), sprite_sheets),
+            spawn_wall(commands, &sheet, rotation, Position::new(x, y)),
+            spawn_wall(commands, &sheet, rotation, Position::new(x + 1, y)),
+            spawn_wall(commands, &sheet, rotation, Position::new(x + 2, y)),
+            spawn_wall(commands, &sheet, rotation, Position::new(x + 3, y)),
+            spawn_wall(commands, &sheet, rotation, Position::new(x + 4, y)),
+            spawn_wall(commands, &sheet, rotation, Position::new(x + 5, y)),
         ],
         _ => vec![
-            spawn_wall(commands, &sheet, rotation, Position::new(x, y), sprite_sheets),
-            spawn_wall(commands, &sheet, rotation, Position::new(x + 1, y), sprite_sheets),
-            spawn_wall(commands, &sheet, rotation, Position::new(x + 2, y), sprite_sheets),
+            spawn_wall(commands, &sheet, rotation, Position::new(x, y)),
+            spawn_wall(commands, &sheet, rotation, Position::new(x + 1, y)),
+            spawn_wall(commands, &sheet, rotation, Position::new(x + 2, y)),
         ],
     }
 }
@@ -234,34 +231,34 @@ fn spawn_bottom(
     commands: &mut Commands,
     rotation: Rotation,
     bottom_left: Position,
-    loaded_assets: &LoadedAssets,
-    sprite_sheets: &Assets<SpriteSheet>,
+    asset_server: &AssetServer,
+    sprite_sheets: &SpriteSheets,
 ) -> Vec<Entity> {
     let x = bottom_left.x + 1;
     let y = bottom_left.y;
-    let sheet = loaded_assets.get_handle("textures/walls/ghost_house_wall");
+    let sheet = sprite_sheets.get_sheet("textures/walls/ghost_house_wall");
 
     match rotation {
         D180 => vec![
-            spawn_wall(commands, &sheet, rotation, Position::new(x, y), sprite_sheets),
-            spawn_wall(commands, &sheet, rotation, Position::new(x + 1, y), sprite_sheets),
-            spawn_entrance(commands, loaded_assets, rotation, Position::new(x + 2, y)),
-            spawn_entrance(commands, loaded_assets, rotation, Position::new(x + 3, y)),
-            spawn_wall(commands, &sheet, rotation, Position::new(x + 4, y), sprite_sheets),
-            spawn_wall(commands, &sheet, rotation, Position::new(x + 5, y), sprite_sheets),
+            spawn_wall(commands, &sheet, rotation, Position::new(x, y)),
+            spawn_wall(commands, &sheet, rotation, Position::new(x + 1, y)),
+            spawn_entrance(commands, asset_server, rotation, Position::new(x + 2, y)),
+            spawn_entrance(commands, asset_server, rotation, Position::new(x + 3, y)),
+            spawn_wall(commands, &sheet, rotation, Position::new(x + 4, y)),
+            spawn_wall(commands, &sheet, rotation, Position::new(x + 5, y)),
         ],
         D0 => vec![
-            spawn_wall(commands, &sheet, rotation, Position::new(x, y), sprite_sheets),
-            spawn_wall(commands, &sheet, rotation, Position::new(x + 1, y), sprite_sheets),
-            spawn_wall(commands, &sheet, rotation, Position::new(x + 2, y), sprite_sheets),
-            spawn_wall(commands, &sheet, rotation, Position::new(x + 3, y), sprite_sheets),
-            spawn_wall(commands, &sheet, rotation, Position::new(x + 4, y), sprite_sheets),
-            spawn_wall(commands, &sheet, rotation, Position::new(x + 5, y), sprite_sheets),
+            spawn_wall(commands, &sheet, rotation, Position::new(x, y)),
+            spawn_wall(commands, &sheet, rotation, Position::new(x + 1, y)),
+            spawn_wall(commands, &sheet, rotation, Position::new(x + 2, y)),
+            spawn_wall(commands, &sheet, rotation, Position::new(x + 3, y)),
+            spawn_wall(commands, &sheet, rotation, Position::new(x + 4, y)),
+            spawn_wall(commands, &sheet, rotation, Position::new(x + 5, y)),
         ],
         _ => vec![
-            spawn_wall(commands, &sheet, rotation, Position::new(x, y), sprite_sheets),
-            spawn_wall(commands, &sheet, rotation, Position::new(x + 1, y), sprite_sheets),
-            spawn_wall(commands, &sheet, rotation, Position::new(x + 2, y), sprite_sheets),
+            spawn_wall(commands, &sheet, rotation, Position::new(x, y)),
+            spawn_wall(commands, &sheet, rotation, Position::new(x + 1, y)),
+            spawn_wall(commands, &sheet, rotation, Position::new(x + 2, y)),
         ],
     }
 }
@@ -270,34 +267,34 @@ fn spawn_left(
     commands: &mut Commands,
     rotation: Rotation,
     bottom_left: Position,
-    loaded_assets: &LoadedAssets,
-    sprite_sheets: &Assets<SpriteSheet>,
+    asset_server: &AssetServer,
+    sprite_sheets: &SpriteSheets,
 ) -> Vec<Entity> {
     let x = bottom_left.x;
     let y = bottom_left.y + 1;
-    let sheet = loaded_assets.get_handle("textures/walls/ghost_house_wall");
+    let sheet = sprite_sheets.get_sheet("textures/walls/ghost_house_wall");
 
     match rotation {
         D270 => vec![
-            spawn_wall(commands, &sheet, D90, Position::new(x, y), sprite_sheets),
-            spawn_wall(commands, &sheet, D90, Position::new(x, y + 1), sprite_sheets),
-            spawn_entrance(commands, loaded_assets, D90, Position::new(x, y + 2)),
-            spawn_entrance(commands, loaded_assets, D90, Position::new(x, y + 3)),
-            spawn_wall(commands, &sheet, D90, Position::new(x, y + 4), sprite_sheets),
-            spawn_wall(commands, &sheet, D90, Position::new(x, y + 5), sprite_sheets),
+            spawn_wall(commands, sheet, D90, Position::new(x, y)),
+            spawn_wall(commands, sheet, D90, Position::new(x, y + 1)),
+            spawn_entrance(commands, asset_server, D90, Position::new(x, y + 2)),
+            spawn_entrance(commands, asset_server, D90, Position::new(x, y + 3)),
+            spawn_wall(commands, sheet, D90, Position::new(x, y + 4)),
+            spawn_wall(commands, sheet, D90, Position::new(x, y + 5)),
         ],
         D90 => vec![
-            spawn_wall(commands, &sheet, D90, Position::new(x, y), sprite_sheets),
-            spawn_wall(commands, &sheet, D90, Position::new(x, y + 1), sprite_sheets),
-            spawn_wall(commands, &sheet, D90, Position::new(x, y + 2), sprite_sheets),
-            spawn_wall(commands, &sheet, D90, Position::new(x, y + 3), sprite_sheets),
-            spawn_wall(commands, &sheet, D90, Position::new(x, y + 4), sprite_sheets),
-            spawn_wall(commands, &sheet, D90, Position::new(x, y + 5), sprite_sheets),
+            spawn_wall(commands, sheet, D90, Position::new(x, y)),
+            spawn_wall(commands, sheet, D90, Position::new(x, y + 1)),
+            spawn_wall(commands, sheet, D90, Position::new(x, y + 2)),
+            spawn_wall(commands, sheet, D90, Position::new(x, y + 3)),
+            spawn_wall(commands, sheet, D90, Position::new(x, y + 4)),
+            spawn_wall(commands, sheet, D90, Position::new(x, y + 5)),
         ],
         D0 | D180 => vec![
-            spawn_wall(commands, &sheet, D90, Position::new(x, y), sprite_sheets),
-            spawn_wall(commands, &sheet, D90, Position::new(x, y + 1), sprite_sheets),
-            spawn_wall(commands, &sheet, D90, Position::new(x, y + 2), sprite_sheets),
+            spawn_wall(commands, sheet, D90, Position::new(x, y)),
+            spawn_wall(commands, sheet, D90, Position::new(x, y + 1)),
+            spawn_wall(commands, sheet, D90, Position::new(x, y + 2)),
         ],
     }
 }
@@ -307,46 +304,44 @@ fn spawn_right(
     rotation: Rotation,
     bottom_left: Position,
     top_right: Position,
-    loaded_assets: &LoadedAssets,
-    sprite_sheets: &Assets<SpriteSheet>,
+    asset_server: &AssetServer,
+    sprite_sheets: &SpriteSheets,
 ) -> Vec<Entity> {
     let x = top_right.x;
     let y = bottom_left.y + 1;
-    let sheet = loaded_assets.get_handle("textures/walls/ghost_house_wall");
+    let sheet = sprite_sheets.get_sheet("textures/walls/ghost_house_wall");
 
     match rotation {
         D90 => vec![
-            spawn_wall(commands, &sheet, D90, Position::new(x, y), sprite_sheets),
-            spawn_wall(commands, &sheet, D90, Position::new(x, y + 1), sprite_sheets),
-            spawn_entrance(commands, loaded_assets, D90, Position::new(x, y + 2)),
-            spawn_entrance(commands, loaded_assets, D90, Position::new(x, y + 3)),
-            spawn_wall(commands, &sheet, D90, Position::new(x, y + 4), sprite_sheets),
-            spawn_wall(commands, &sheet, D90, Position::new(x, y + 5), sprite_sheets),
+            spawn_wall(commands, sheet, D90, Position::new(x, y)),
+            spawn_wall(commands, sheet, D90, Position::new(x, y + 1)),
+            spawn_entrance(commands, asset_server, D90, Position::new(x, y + 2)),
+            spawn_entrance(commands, asset_server, D90, Position::new(x, y + 3)),
+            spawn_wall(commands, sheet, D90, Position::new(x, y + 4)),
+            spawn_wall(commands, sheet, D90, Position::new(x, y + 5)),
         ],
         D270 => vec![
-            spawn_wall(commands, &sheet, D90, Position::new(x, y), sprite_sheets),
-            spawn_wall(commands, &sheet, D90, Position::new(x, y + 1), sprite_sheets),
-            spawn_wall(commands, &sheet, D90, Position::new(x, y + 2), sprite_sheets),
-            spawn_wall(commands, &sheet, D90, Position::new(x, y + 3), sprite_sheets),
-            spawn_wall(commands, &sheet, D90, Position::new(x, y + 4), sprite_sheets),
-            spawn_wall(commands, &sheet, D90, Position::new(x, y + 5), sprite_sheets),
+            spawn_wall(commands, sheet, D90, Position::new(x, y)),
+            spawn_wall(commands, sheet, D90, Position::new(x, y + 1)),
+            spawn_wall(commands, sheet, D90, Position::new(x, y + 2)),
+            spawn_wall(commands, sheet, D90, Position::new(x, y + 3)),
+            spawn_wall(commands, sheet, D90, Position::new(x, y + 4)),
+            spawn_wall(commands, sheet, D90, Position::new(x, y + 5)),
         ],
         D0 | D180 => vec![
-            spawn_wall(commands, &sheet, D90, Position::new(x, y), sprite_sheets),
-            spawn_wall(commands, &sheet, D90, Position::new(x, y + 1), sprite_sheets),
-            spawn_wall(commands, &sheet, D90, Position::new(x, y + 2), sprite_sheets),
+            spawn_wall(commands, sheet, D90, Position::new(x, y)),
+            spawn_wall(commands, sheet, D90, Position::new(x, y + 1)),
+            spawn_wall(commands, sheet, D90, Position::new(x, y + 2)),
         ],
     }
 }
 
 fn spawn_wall(
     commands: &mut Commands,
-    sheet: &Handle<SpriteSheet>,
+    sheet: &SpriteSheet,
     rotation: Rotation,
     position: Position,
-    sprite_sheets: &Assets<SpriteSheet>,
 ) -> Entity {
-    let sheet = sprite_sheets.get(sheet).expect("should be there");
     let animations = Animations::new(
         [
             ("idle", Animation::from_texture(sheet.image_at(0))),
@@ -376,7 +371,7 @@ fn spawn_wall(
 
 fn spawn_entrance(
     commands: &mut Commands,
-    loaded_assets: &LoadedAssets,
+    asset_server: &AssetServer,
     rotation: Rotation,
     position: Position,
 ) -> Entity {
@@ -387,7 +382,7 @@ fn spawn_entrance(
         Name::new("Wall"),
         Wall,
         SpriteBundle {
-            texture: loaded_assets.get_handle("textures/walls/ghost_house_entrance.png"),
+            texture: asset_server.load("textures/walls/ghost_house_entrance.png"),
             sprite: Sprite {
                 custom_size: Some(Vec2::splat(WALL_DIMENSION)),
                 ..default()

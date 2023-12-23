@@ -4,7 +4,6 @@ use bevy_inspector_egui::quick::ResourceInspectorPlugin;
 
 use crate::constants::DOT_DIMENSION;
 use crate::game::edibles::Edible;
-use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game::interactions::DotWasEaten;
 use crate::game_state::GameState::*;
 use crate::game_state::Game::*;
@@ -52,7 +51,7 @@ impl Plugin for DotPlugin {
 
 fn spawn_dots(
     mut commands: Commands,
-    loaded_assets: Res<LoadedAssets>,
+    asset_server: Res<AssetServer>,
     spawn_query: Query<&DotSpawn>,
 ) {
     let dots = commands.spawn((
@@ -65,7 +64,7 @@ fn spawn_dots(
         commands.entity(dots).with_children(|parent| {
             parent.spawn((
                 SpriteBundle {
-                    texture: loaded_assets.get_handle("textures/dot.png"),
+                    texture: asset_server.load("textures/dot.png"),
                     sprite: Sprite {
                         custom_size: Some(Vec2::splat(DOT_DIMENSION)),
                         ..default()
@@ -111,7 +110,7 @@ fn play_waka_when_dot_was_eaten(
     time: Res<Time>,
     mut waka_timer: Local<Option<Timer>>,
     mut cached: Local<bool>,
-    loaded_assets: Res<LoadedAssets>,
+    asset_server: Res<AssetServer>,
     mut event_reader: EventReader<DotWasEaten>,
 ) {
     if let Some(ref mut timer) = *waka_timer {
@@ -125,7 +124,7 @@ fn play_waka_when_dot_was_eaten(
                     Name::new("WakaSound"),
                     SoundEfect::new(),
                     AudioBundle {
-                        source: loaded_assets.get_handle("sounds/waka.ogg"),
+                        source: asset_server.load("sounds/waka.ogg"),
                         ..default()
                     }
                 ));
@@ -137,7 +136,7 @@ fn play_waka_when_dot_was_eaten(
         }
     }
 
-    for _ in event_reader.iter() {
+    for _ in event_reader.read() {
         match *waka_timer {
             Some(_) => *cached = true,
             None => {
@@ -147,7 +146,7 @@ fn play_waka_when_dot_was_eaten(
                     Name::new("WakaSound"),
                     SoundEfect::new(),
                     AudioBundle {
-                        source: loaded_assets.get_handle("sounds/waka.ogg"),
+                        source: asset_server.load("sounds/waka.ogg"),
                         ..default()
                     }
                 ));

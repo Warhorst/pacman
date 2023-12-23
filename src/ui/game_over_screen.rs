@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 use bevy::prelude::Val::Percent;
 use crate::constants::FONT;
-use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game_state::GameState::*;
 use crate::game_state::Game::*;
 
@@ -30,7 +29,7 @@ pub struct EGameRestarted;
 
 fn spawn_screens(
     mut commands: Commands,
-    game_asset_handles: Res<LoadedAssets>,
+    asset_server: Res<AssetServer>,
 ) {
     commands.spawn((
         Name::new("GameOverScreen"),
@@ -38,7 +37,7 @@ fn spawn_screens(
         TextBundle::from_section(
             "GAME OVER",
             TextStyle {
-                font: game_asset_handles.get_handle(FONT),
+                font: asset_server.load(FONT),
                 font_size: 20.0,
                 color: Color::rgb(1.0, 0.0, 0.0),
             },
@@ -56,7 +55,7 @@ fn spawn_screens(
         TextBundle::from_section(
             "Press R to restart",
             TextStyle {
-                font: game_asset_handles.get_handle(FONT),
+                font: asset_server.load(FONT),
                 font_size: 20.0,
                 color: Color::rgb(1.0, 0.0, 0.0),
             },

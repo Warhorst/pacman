@@ -3,7 +3,6 @@ use bevy::prelude::*;
 use crate::game::edibles::EAllEdiblesEaten;
 use crate::game::interactions::{GhostWasEaten, PacmanWasHit};
 use crate::game::lives::Lives;
-use crate::game_assets::EAllAssetsLoaded;
 use crate::game_state::Game::*;
 use crate::game_state::GameState::*;
 use crate::system_sets::UpdateGameState;
@@ -28,32 +27,15 @@ impl Plugin for GameStatePlugin {
 }
 
 /// The states of the games state machine.
-#[derive(Copy, Clone, Default, Eq, PartialEq, Hash, Debug)]
+#[derive(States, Copy, Clone, Default, Eq, PartialEq, Hash, Debug)]
 pub enum GameState {
     /// The startup state of the game. It will leave Loading when all assets are loaded.
     #[default]
     Loading,
+    /// Create sprite sheets from the loaded assets
+    CreateSpriteSheets,
     /// A group of states which represent different phases off the actual game (when you move pacman through the labyrinth)
     Game(Game),
-}
-
-impl States for GameState {
-    type Iter = std::array::IntoIter<GameState, 10>;
-
-    fn variants() -> Self::Iter {
-        [
-            Loading,
-            Game(Start),
-            Game(Ready),
-            Game(Running),
-            Game(PacmanHit),
-            Game(PacmanDying),
-            Game(PacmanDead),
-            Game(GameOver),
-            Game(LevelTransition),
-            Game(GhostEatenPause)
-        ].into_iter()
-    }
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -98,14 +80,12 @@ fn update_state(
     mut next_state: ResMut<NextState<GameState>>,
     lives: Res<Lives>,
     state_timer: Option<Res<StateTimer>>,
-    assets_loaded_events: EventReader<EAllAssetsLoaded>,
     pacman_hit_events: EventReader<PacmanWasHit>,
     edibles_eaten_events: EventReader<EAllEdiblesEaten>,
     ghost_eaten_events: EventReader<GhostWasEaten>,
     game_restartet_events: EventReader<EGameRestarted>,
 ) {
     match current_state.get() {
-        Loading => switch_to_in_game_when_everything_loaded(&mut next_state, assets_loaded_events),
         Game(Start) => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 2.0, Game(Ready)),
         Game(Ready) => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 2.5, Game(Running)),
         Game(Running) => switch_states_based_on_events(&mut next_state, pacman_hit_events, edibles_eaten_events, ghost_eaten_events),
@@ -114,16 +94,8 @@ fn update_state(
         Game(PacmanDead) => switch_to_ready_or_game_over(&mut commands, &state_timer, &lives, &mut next_state),
         Game(GameOver) => switch_to_start_after_game_over(&mut next_state, game_restartet_events),
         Game(LevelTransition) => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 3.0, Game(Ready)),
-        Game(GhostEatenPause) => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 1.0, Game(Running))
-    }
-}
-
-fn switch_to_in_game_when_everything_loaded(
-    game_state: &mut NextState<GameState>,
-    mut assets_loaded_events: EventReader<EAllAssetsLoaded>,
-) {
-    if assets_loaded_events.iter().count() > 0 {
-        game_state.set(Game(Start))
+        Game(GhostEatenPause) => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 1.0, Game(Running)),
+        _ => {}
     }
 }
 
@@ -169,17 +141,17 @@ fn switch_states_based_on_events(
     mut edibles_eaten_events: EventReader<EAllEdiblesEaten>,
     mut ghost_eaten_events: EventReader<GhostWasEaten>,
 ) {
-    if pacman_hit_events.iter().count() > 0 {
+    if pacman_hit_events.read().count() > 0 {
         game_state.set(Game(PacmanHit));
         return;
     }
 
-    if edibles_eaten_events.iter().count() > 0 {
+    if edibles_eaten_events.read().count() > 0 {
         game_state.set(Game(LevelTransition));
         return;
     }
 
-    if ghost_eaten_events.iter().count() > 0 {
+    if ghost_eaten_events.read().count() > 0 {
         game_state.set(Game(GhostEatenPause));
         return;
     }
@@ -189,7 +161,7 @@ fn switch_to_start_after_game_over(
     game_state: &mut NextState<GameState>,
     mut game_restarted_events: EventReader<EGameRestarted>,
 ) {
-    if game_restarted_events.iter().count() > 0 {
+    if game_restarted_events.read().count() > 0 {
         game_state.set(Game(Start))
     }
 }

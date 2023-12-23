@@ -53,7 +53,7 @@ fn increment_counter_when_dot_eaten(
     mut event_reader: EventReader<DotWasEaten>,
     mut ghost_house_gate: ResMut<GhostHouseGate>,
 ) {
-    for _ in event_reader.iter() {
+    for _ in event_reader.read() {
         ghost_house_gate.increment_counter()
     }
 }
@@ -62,7 +62,7 @@ fn switch_to_global_counter_when_pacman_got_killed(
     mut event_reader: EventReader<PacmanWasHit>,
     mut ghost_house_gate: ResMut<GhostHouseGate>,
 ) {
-    for _ in event_reader.iter() {
+    for _ in event_reader.read() {
         ghost_house_gate.switch_to_global_counter()
     }
 }

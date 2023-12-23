@@ -1,12 +1,11 @@
 use bevy::prelude::*;
+use bevy_sprite_sheet::{SpriteSheet, SpriteSheets};
 use crate::game_assets::animation::{Animation, Animations};
 use crate::game::direction::Direction;
 use crate::game::edibles::energizer::EnergizerTimer;
-use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game::ghosts::Ghost;
 use crate::game::ghosts::Ghost::*;
 use crate::game::state::State;
-use crate::game_assets::sprite_sheet::SpriteSheet;
 
 pub(crate) fn update_ghost_appearance(
     energizer_timer: Option<Res<EnergizerTimer>>,
@@ -27,28 +26,32 @@ pub(crate) fn update_ghost_appearance(
     }
 }
 
-pub(crate) fn create_animations_for_ghost(ghost: &Ghost, game_assets: &LoadedAssets, sprite_sheets: &Assets<SpriteSheet>) -> Animations {
+pub(crate) fn create_animations_for_ghost(ghost: &Ghost, asset_server: &AssetServer, sprite_sheets: &SpriteSheets) -> Animations {
     match *ghost {
-        Blinky => create_animations_for(game_assets, sprite_sheets, ["textures/ghost/blinky_up", "textures/ghost/blinky_down", "textures/ghost/blinky_left", "textures/ghost/blinky_right"]),
-        Pinky => create_animations_for(game_assets, sprite_sheets, ["textures/ghost/pinky_up", "textures/ghost/pinky_down", "textures/ghost/pinky_left", "textures/ghost/pinky_right"]),
-        Inky => create_animations_for(game_assets, sprite_sheets, ["textures/ghost/inky_up", "textures/ghost/inky_down", "textures/ghost/inky_left", "textures/ghost/inky_right"]),
-        Clyde => create_animations_for(game_assets, sprite_sheets, ["textures/ghost/clyde_up", "textures/ghost/clyde_down", "textures/ghost/clyde_left", "textures/ghost/clyde_right"]),
+        Blinky => create_animations_for(asset_server, sprite_sheets, ["textures/ghost/blinky_up", "textures/ghost/blinky_down", "textures/ghost/blinky_left", "textures/ghost/blinky_right"]),
+        Pinky => create_animations_for(asset_server, sprite_sheets, ["textures/ghost/pinky_up", "textures/ghost/pinky_down", "textures/ghost/pinky_left", "textures/ghost/pinky_right"]),
+        Inky => create_animations_for(asset_server, sprite_sheets, ["textures/ghost/inky_up", "textures/ghost/inky_down", "textures/ghost/inky_left", "textures/ghost/inky_right"]),
+        Clyde => create_animations_for(asset_server, sprite_sheets, ["textures/ghost/clyde_up", "textures/ghost/clyde_down", "textures/ghost/clyde_left", "textures/ghost/clyde_right"]),
     }
 }
 
-fn create_animations_for(game_assets: &LoadedAssets, sprite_sheets: &Assets<SpriteSheet>, normal_animation_keys: [&'static str; 4]) -> Animations {
+fn create_animations_for(
+    asset_server: &AssetServer,
+    sprite_sheets: &SpriteSheets,
+    normal_animation_keys: [&'static str; 4]
+) -> Animations {
     Animations::new(
         [
-            ("normal_up", create_normal_animation(game_assets.get_asset(normal_animation_keys[0], sprite_sheets))),
-            ("normal_down", create_normal_animation(game_assets.get_asset(normal_animation_keys[1], sprite_sheets))),
-            ("normal_left", create_normal_animation(game_assets.get_asset(normal_animation_keys[2], sprite_sheets))),
-            ("normal_right", create_normal_animation(game_assets.get_asset(normal_animation_keys[3], sprite_sheets))),
-            ("eaten_up", create_eaten_animation(game_assets, "textures/ghost/eaten_up.png")),
-            ("eaten_down", create_eaten_animation(game_assets, "textures/ghost/eaten_down.png")),
-            ("eaten_left", create_eaten_animation(game_assets, "textures/ghost/eaten_left.png")),
-            ("eaten_right", create_eaten_animation(game_assets, "textures/ghost/eaten_right.png")),
-            ("frightened", create_frightened_animation(game_assets.get_asset("textures/ghost/frightened", sprite_sheets))),
-            ("frightened_blinking", create_frightened_blinking_animation(game_assets.get_asset("textures/ghost/frightened_blinking", sprite_sheets))),
+            ("normal_up", create_normal_animation(sprite_sheets.get_sheet(normal_animation_keys[0]))),
+            ("normal_down", create_normal_animation(sprite_sheets.get_sheet(normal_animation_keys[1]))),
+            ("normal_left", create_normal_animation(sprite_sheets.get_sheet(normal_animation_keys[2]))),
+            ("normal_right", create_normal_animation(sprite_sheets.get_sheet(normal_animation_keys[3]))),
+            ("eaten_up", create_eaten_animation(asset_server, "textures/ghost/eaten_up.png")),
+            ("eaten_down", create_eaten_animation(asset_server, "textures/ghost/eaten_down.png")),
+            ("eaten_left", create_eaten_animation(asset_server, "textures/ghost/eaten_left.png")),
+            ("eaten_right", create_eaten_animation(asset_server, "textures/ghost/eaten_right.png")),
+            ("frightened", create_frightened_animation(sprite_sheets.get_sheet("textures/ghost/frightened"))),
+            ("frightened_blinking", create_frightened_blinking_animation(sprite_sheets.get_sheet("textures/ghost/frightened_blinking"))),
         ],
         "normal_left")
 }
@@ -61,8 +64,8 @@ fn create_normal_animation(sprite_sheet: &SpriteSheet) -> Animation {
     )
 }
 
-fn create_eaten_animation(game_assets: &LoadedAssets, key: &'static str) -> Animation {
-    Animation::from_texture(game_assets.get_handle(key))
+fn create_eaten_animation(asset_server: &AssetServer, key: &'static str) -> Animation {
+    Animation::from_texture(asset_server.load(key))
 }
 
 fn create_frightened_animation(sprite_sheet: &SpriteSheet) -> Animation {

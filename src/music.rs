@@ -3,7 +3,6 @@ use bevy::prelude::*;
 use crate::game_state::GameState::*;
 use crate::game::edibles::dots::EatenDots;
 use crate::game::edibles::energizer::EnergizerTimer;
-use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game::ghosts::Ghost;
 use crate::game_state::Game::*;
 use crate::game::state::State;
@@ -56,13 +55,13 @@ struct EatenBackground;
 
 fn play_start_sound(
     mut commands: Commands,
-    loaded_assets: Res<LoadedAssets>,
+    asset_server: Res<AssetServer>,
 ) {
     commands.spawn((
         Name::new("StartSound"),
         SoundEfect::new(),
         AudioBundle {
-            source: loaded_assets.get_handle("sounds/start.ogg"),
+            source: asset_server.load("sounds/start.ogg"),
             ..default()
         }
     ));
@@ -71,24 +70,24 @@ fn play_start_sound(
 /// Starts every background track at the same time with volume of 0.
 fn init_background_music(
     mut commands: Commands,
-    loaded_assets: Res<LoadedAssets>,
+    asset_server: Res<AssetServer>,
 ) {
-    start_background_track(&mut commands, &loaded_assets, SirenBackground, "sounds/siren.ogg");
-    start_background_track(&mut commands, &loaded_assets, FrightenedBackground, "sounds/frightened.ogg");
-    start_background_track(&mut commands, &loaded_assets, EatenBackground, "sounds/eaten.ogg");
+    start_background_track(&mut commands, &asset_server, SirenBackground, "sounds/siren.ogg");
+    start_background_track(&mut commands, &asset_server, FrightenedBackground, "sounds/frightened.ogg");
+    start_background_track(&mut commands, &asset_server, EatenBackground, "sounds/eaten.ogg");
 }
 
 fn start_background_track(
     commands: &mut Commands,
-    loaded_assets: &LoadedAssets,
+    loaded_assets: &AssetServer,
     marker: impl Component,
-    name: &'static str,
+    path: &'static str,
 ) {
     commands.spawn((
-        Name::new(name),
+        Name::new(path),
         marker,
         AudioBundle {
-            source: loaded_assets.get_handle(name),
+            source: loaded_assets.load(path),
             settings: PlaybackSettings::LOOP.with_volume(Volume::new_relative(0.0)),
         }
     ));

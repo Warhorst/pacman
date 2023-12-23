@@ -1,11 +1,10 @@
 use bevy::prelude::*;
+use bevy_sprite_sheet::{SpriteSheet, SpriteSheets};
 use crate::game_assets::animation::{Animation, Animations};
 
 use crate::game::pacman::Pacman;
 use crate::game::direction::Direction;
 use crate::game::direction::Direction::*;
-use crate::game_assets::loaded_assets::LoadedAssets;
-use crate::game_assets::sprite_sheet::SpriteSheet;
 
 pub(crate) fn update_pacman_appearance(
     mut query: Query<(&Direction, &mut Animations), With<Pacman>>
@@ -21,16 +20,15 @@ pub(crate) fn update_pacman_appearance(
 }
 
 pub(crate) fn create_pacman_animations(
-    game_assets: &LoadedAssets,
-    sprite_sheets: &Assets<SpriteSheet>
+    sprite_sheets: &SpriteSheets
 ) -> Animations {
     Animations::new(
         [
-            ("eating_left", create_eating_animation(game_assets.get_asset("textures/pacman/pacman_walking_left", sprite_sheets))),
-            ("eating_right", create_eating_animation(game_assets.get_asset("textures/pacman/pacman_walking_right", sprite_sheets))),
-            ("eating_up", create_eating_animation(game_assets.get_asset("textures/pacman/pacman_walking_up", sprite_sheets))),
-            ("eating_down", create_eating_animation(game_assets.get_asset("textures/pacman/pacman_walking_down", sprite_sheets))),
-            ("dying", create_dying_animation(game_assets.get_asset("textures/pacman/pacman_dying", sprite_sheets)))
+            ("eating_left", create_eating_animation(sprite_sheets.get_sheet("textures/pacman/pacman_walking_left"))),
+            ("eating_right", create_eating_animation(sprite_sheets.get_sheet("textures/pacman/pacman_walking_right"))),
+            ("eating_up", create_eating_animation(sprite_sheets.get_sheet("textures/pacman/pacman_walking_up"))),
+            ("eating_down", create_eating_animation(sprite_sheets.get_sheet("textures/pacman/pacman_walking_down"))),
+            ("dying", create_dying_animation(sprite_sheets.get_sheet("textures/pacman/pacman_dying")))
         ],
         "eating_up",
     )

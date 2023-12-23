@@ -5,6 +5,7 @@ use bevy::prelude::*;
 use bevy::reflect::TypePath;
 use bevy::utils::HashSet;
 use bevy_common_assets::json::JsonAssetPlugin;
+use bevy_sprite_sheet::SpriteSheets;
 use serde::{Deserialize, Serialize};
 
 use Rotation::*;
@@ -19,8 +20,6 @@ use crate::game::map::labyrinth::spawn_labyrinth;
 use crate::game::map::tunnel::{spawn_tunnel_hallways, spawn_tunnels, TunnelPlugin};
 use crate::game::position::Position;
 use crate::game_assets::animation::Animations;
-use crate::game_assets::loaded_assets::LoadedAssets;
-use crate::game_assets::sprite_sheet::SpriteSheet;
 use crate::is;
 use crate::game_state::GameState::*;
 use crate::game_state::Game::*;
@@ -40,7 +39,7 @@ impl Plugin for MapPlugin {
                 TunnelPlugin,
                 JsonAssetPlugin::<RawMap>::new(&["map.json"])
             ))
-            .add_systems(OnExit(Loading), spawn_map)
+            .add_systems(OnExit(CreateSpriteSheets), spawn_map)
             .add_systems(OnEnter(Game(LevelTransition)), set_animation_to_blinking)
             .add_systems(OnExit(Game(LevelTransition)), set_animation_to_idle)
         ;
@@ -87,11 +86,11 @@ pub struct GhostCorner {
 
 fn spawn_map(
     mut commands: Commands,
-    loaded_assets: Res<LoadedAssets>,
-    sprite_sheets: Res<Assets<SpriteSheet>>,
+    asset_server: Res<AssetServer>,
+    sprite_sheets: Res<SpriteSheets>,
     fields_assets: Res<Assets<RawMap>>,
 ) {
-    let fields = fields_assets.get(&loaded_assets.get_handle("maps/default.map.json")).expect("the map should be loaded at this point");
+    let fields = fields_assets.get(&asset_server.load("maps/default.map.json")).expect("the map should be loaded at this point");
     let tile_map = TileMap::new(&fields);
 
     let map = commands.spawn((
@@ -103,13 +102,13 @@ fn spawn_map(
         SpatialBundle::default(),
     )).id();
 
-    let children = [spawn_labyrinth(&mut commands, &tile_map, &loaded_assets, &sprite_sheets)]
+    let children = [spawn_labyrinth(&mut commands, &tile_map, &sprite_sheets)]
         .into_iter()
         .chain([spawn_dot_spawns(&mut commands, &tile_map)])
         .chain([spawn_energizer_spawns(&mut commands, &tile_map)])
         .chain([spawn_pacman_spawn(&mut commands, &tile_map)])
         .chain([spawn_fruit_spawns(&mut commands, &tile_map)])
-        .chain([spawn_ghost_house(&mut commands, &tile_map, &loaded_assets, &sprite_sheets)])
+        .chain([spawn_ghost_house(&mut commands, &tile_map, &asset_server, &sprite_sheets)])
         .chain(spawn_tunnels(&mut commands, &tile_map))
         .chain(spawn_tunnel_hallways(&mut commands, &tile_map))
         .chain(spawn_ghost_corners(&mut commands, &tile_map))
@@ -222,7 +221,7 @@ fn set_animation_to_idle(
     }
 }
 
-#[derive(Clone, Serialize, Deserialize, bevy::reflect::TypeUuid, TypePath)]
+#[derive(Clone, Asset, Serialize, Deserialize, bevy::reflect::TypeUuid, TypePath)]
 #[uuid = "a09992c9-9567-42d9-a0ac-c998756e4073"]
 pub struct RawMap {
     pub blinky_corner: Position,

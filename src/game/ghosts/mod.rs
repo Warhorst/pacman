@@ -6,7 +6,6 @@ use crate::game::ghosts::textures::{start_animation, update_ghost_appearance};
 use crate::game::interactions::GhostWasEaten;
 use crate::game::map::tunnel::GhostPassedTunnel;
 use crate::game::target::Target;
-use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game_state::Game::*;
 use crate::game_state::GameState::*;
 use crate::game_state::in_game;
@@ -70,7 +69,7 @@ fn ghost_passed_tunnel(
     mut event_reader: EventReader<GhostPassedTunnel>,
     mut query: Query<(Entity, &mut Target), With<Ghost>>,
 ) {
-    for event in event_reader.iter() {
+    for event in event_reader.read() {
         for (entity, mut target) in query.iter_mut() {
             if entity == **event {
                 target.clear();
@@ -118,15 +117,15 @@ fn set_currently_eaten_ghost_visible(
 
 fn play_ghost_eaten_sound_when_ghost_was_eaten(
     mut commands: Commands,
-    loaded_assets: Res<LoadedAssets>,
+    asset_server: Res<AssetServer>,
     mut event_reader: EventReader<GhostWasEaten>,
 ) {
-    if event_reader.iter().count() > 0 {
+    if event_reader.read().count() > 0 {
         commands.spawn((
             Name::new("GhostEatenSound"),
             SoundEfect::new(),
             AudioBundle {
-                source: loaded_assets.get_handle("sounds/ghost_eaten.ogg"),
+                source: asset_server.load("sounds/ghost_eaten.ogg"),
                 ..default()
             }
         ));

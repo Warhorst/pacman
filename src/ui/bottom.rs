@@ -3,7 +3,6 @@ use bevy::prelude::Val::Percent;
 use bevy::ui::PositionType::Absolute;
 use crate::game::edibles::fruit::Fruit;
 use crate::game::edibles::fruit::Fruit::*;
-use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game::level::Level;
 use crate::game_state::GameState::*;
 use crate::game_state::Game::*;
@@ -43,7 +42,7 @@ struct UIFruit;
 
 fn spawn_bottom_ui(
     mut commands: Commands,
-    loaded_assets: Res<LoadedAssets>,
+    asset_server: Res<AssetServer>,
     lives: Res<Lives>,
     level: Res<Level>,
     specs_per_level: Res<SpecsPerLevel>,
@@ -65,15 +64,15 @@ fn spawn_bottom_ui(
         }
     )).id();
 
-    let ui_lives = spawn_ui_lives(&mut commands, &loaded_assets, &lives);
-    let ui_fruits = spawn_ui_fruits(&mut commands, &loaded_assets, &level, &specs_per_level);
+    let ui_lives = spawn_ui_lives(&mut commands, &asset_server, &lives);
+    let ui_fruits = spawn_ui_fruits(&mut commands, &asset_server, &level, &specs_per_level);
 
     commands.entity(bottom_ui).push_children(&[ui_lives, ui_fruits]);
 }
 
 fn spawn_ui_lives(
     commands: &mut Commands,
-    loaded_assets: &LoadedAssets,
+    asset_server: &AssetServer,
     lives: &Lives,
 ) -> Entity {
     let ui_lives = commands.spawn((
@@ -93,7 +92,7 @@ fn spawn_ui_lives(
     )).id();
 
     let ui_live_vec = (0..**lives).into_iter()
-        .map(|i| spawn_ui_live(i, commands, loaded_assets))
+        .map(|i| spawn_ui_live(i, commands, asset_server))
         .collect::<Vec<_>>();
 
     commands.entity(ui_lives).push_children(&ui_live_vec);
@@ -103,9 +102,9 @@ fn spawn_ui_lives(
 fn spawn_ui_live(
     index: usize,
     commands: &mut Commands,
-    loaded_assets: &LoadedAssets,
+    asset_server: &AssetServer,
 ) -> Entity {
-    let image = loaded_assets.get_handle("textures/pacman/pacman_life.png");
+    let image = asset_server.load("textures/pacman/pacman_life.png");
     commands.spawn((
         Name::new("UILive"),
         UILive,
@@ -125,7 +124,7 @@ fn spawn_ui_live(
 
 fn spawn_ui_fruits(
     commands: &mut Commands,
-    loaded_assets: &LoadedAssets,
+    asset_server: &AssetServer,
     level: &Level,
     specs_per_level: &SpecsPerLevel,
 ) -> Entity {
@@ -149,7 +148,7 @@ fn spawn_ui_fruits(
     let fruits_to_display = get_fruits_to_display(&level, &specs_per_level);
 
     for (i, fruit) in fruits_to_display.into_iter().enumerate() {
-        let ui_fruit = spawn_ui_fruit(commands, loaded_assets, i, fruit);
+        let ui_fruit = spawn_ui_fruit(commands, asset_server, i, fruit);
         commands.entity(ui_fruits).push_children(&[ui_fruit]);
     }
 
@@ -169,11 +168,11 @@ fn get_fruits_to_display(
 
 fn spawn_ui_fruit(
     commands: &mut Commands,
-    loaded_assets: &LoadedAssets,
+    asset_server: &AssetServer,
     index: usize,
     fruit: Fruit,
 ) -> Entity {
-    let image = get_texture_for_fruit(&fruit, loaded_assets);
+    let image = get_texture_for_fruit(&fruit, asset_server);
     let left_percent = 100.0 - index as f32 * (100.0 / 7.0) - 100.0 / 7.0;
 
     commands.spawn((
@@ -193,8 +192,8 @@ fn spawn_ui_fruit(
     )).id()
 }
 
-fn get_texture_for_fruit(fruit: &Fruit, loaded_assets: &LoadedAssets) -> Handle<Image> {
-    loaded_assets.get_handle(&format!("textures/fruits/{}.png", match fruit {
+fn get_texture_for_fruit(fruit: &Fruit, asset_server: &AssetServer) -> Handle<Image> {
+    asset_server.load(&format!("textures/fruits/{}.png", match fruit {
         Cherry => "cherry",
         Strawberry => "strawberry",
         Peach => "peach",
@@ -210,7 +209,7 @@ fn get_texture_for_fruit(fruit: &Fruit, loaded_assets: &LoadedAssets) -> Handle<
 fn update_lives(
     mut commands: Commands,
     lives: Res<Lives>,
-    loaded_assets: Res<LoadedAssets>,
+    asset_server: Res<AssetServer>,
     bottom_ui_query: Query<Entity, With<BottomUI>>,
     ui_lives_query: Query<Entity, With<UILives>>,
 ) {
@@ -220,7 +219,7 @@ fn update_lives(
         }
 
         for bottom_ui in &bottom_ui_query {
-            let ui_lives = spawn_ui_lives(&mut commands, &loaded_assets, &lives);
+            let ui_lives = spawn_ui_lives(&mut commands, &asset_server, &lives);
             commands.entity(bottom_ui).push_children(&[ui_lives]);
         }
     }
@@ -228,7 +227,7 @@ fn update_lives(
 
 fn update_fruits(
     mut commands: Commands,
-    loaded_assets: Res<LoadedAssets>,
+    asset_server: Res<AssetServer>,
     level: Res<Level>,
     specs_per_level: Res<SpecsPerLevel>,
     bottom_ui_query: Query<Entity, With<BottomUI>>,
@@ -240,7 +239,7 @@ fn update_fruits(
         }
 
         for bottom_ui in &bottom_ui_query {
-            let ui_fruits = spawn_ui_fruits(&mut commands, &loaded_assets, &level, &specs_per_level);
+            let ui_fruits = spawn_ui_fruits(&mut commands, &asset_server, &level, &specs_per_level);
             commands.entity(bottom_ui).push_children(&[ui_fruits]);
         }
     }

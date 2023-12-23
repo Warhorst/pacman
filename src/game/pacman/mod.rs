@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 use crate::game_assets::animation::Animations;
-use crate::game_assets::loaded_assets::LoadedAssets;
 
 use crate::game_state::GameState::*;
 use crate::game_state::Game::*;
@@ -73,13 +72,13 @@ fn play_the_dying_animation(
 
 fn play_the_dying_sound(
     mut commands: Commands,
-    loaded_assets: Res<LoadedAssets>,
+    asset_server: Res<AssetServer>,
 ) {
     commands.spawn((
         Name::new("PacmanDyingSound"),
         SoundEfect::new(),
         AudioBundle {
-            source: loaded_assets.get_handle("sounds/dying.ogg"),
+            source: asset_server.load("sounds/dying.ogg"),
             ..default()
         }
     ));

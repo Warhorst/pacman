@@ -32,7 +32,7 @@ fn add_edible_stop_when_dot_eaten(
     mut event_reader: EventReader<DotWasEaten>,
     query: Query<Entity, With<Pacman>>,
 ) {
-    for _ in event_reader.iter() {
+    for _ in event_reader.read() {
         for e in &query {
             commands.entity(e).insert(EdibleEatenStop(Timer::new(Duration::from_secs_f32(1.0 / 60.0), TimerMode::Once)));
         }
@@ -44,7 +44,7 @@ fn add_edible_stop_when_energizer_eaten(
     mut event_reader: EventReader<EnergizerWasEaten>,
     query: Query<Entity, With<Pacman>>,
 ) {
-    for _ in event_reader.iter() {
+    for _ in event_reader.read() {
         for e in &query {
             commands.entity(e).insert(EdibleEatenStop(Timer::new(Duration::from_secs_f32(3.0 / 60.0), TimerMode::Once)));
         }

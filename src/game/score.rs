@@ -7,7 +7,6 @@ use crate::game::interactions::{DotWasEaten, EnergizerWasEaten, FruitWasEaten, G
 use crate::game_state::GameState::*;
 use crate::game_state::Game::*;
 use crate::game::edibles::fruit::Fruit::*;
-use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::system_sets::ProcessIntersectionsWithPacman;
 
 pub(in crate::game) struct ScorePlugin;
@@ -92,7 +91,7 @@ fn add_points_for_eaten_dot(
     mut score: ResMut<Score>,
     mut event_reader: EventReader<DotWasEaten>,
 ) {
-    for _ in event_reader.iter() {
+    for _ in event_reader.read() {
         score.add(POINTS_PER_DOT)
     }
 }
@@ -101,26 +100,26 @@ fn add_points_for_eaten_energizer(
     mut score: ResMut<Score>,
     mut event_reader: EventReader<EnergizerWasEaten>,
 ) {
-    for _ in event_reader.iter() {
+    for _ in event_reader.read() {
         score.add(POINTS_PER_ENERGIZER)
     }
 }
 
 fn add_points_for_eaten_ghost_and_display_score_text(
     mut commands: Commands,
-    game_asset_handles: Res<LoadedAssets>,
+    asset_server: Res<AssetServer>,
     mut score: ResMut<Score>,
     mut eaten_ghost_counter: ResMut<EatenGhostCounter>,
     mut event_reader: EventReader<GhostWasEaten>,
 ) {
-    for event in event_reader.iter() {
+    for event in event_reader.read() {
         let points = POINTS_PER_GHOST * 2usize.pow(**eaten_ghost_counter as u32);
         score.add(points);
         **eaten_ghost_counter += 1;
 
         let mut coordinates = event.1.translation;
         coordinates.z = TEXT_Z;
-        spawn_score_text(&mut commands, &game_asset_handles, Color::hex("31FFFF").unwrap(), points, coordinates)
+        spawn_score_text(&mut commands, &asset_server, Color::hex("31FFFF").unwrap(), points, coordinates)
     }
 }
 
@@ -128,7 +127,7 @@ fn reset_eaten_ghost_counter_when_energizer_is_over(
     mut event_reader: EventReader<EnergizerOver>,
     mut eaten_ghost_counter: ResMut<EatenGhostCounter>,
 ) {
-    for _ in event_reader.iter() {
+    for _ in event_reader.read() {
         **eaten_ghost_counter = 0
     }
 }
@@ -141,11 +140,11 @@ fn reset_ghost_eaten_counter(
 
 fn add_points_for_eaten_fruit_and_display_score_text(
     mut commands: Commands,
-    game_asset_handles: Res<LoadedAssets>,
+    asset_server: Res<AssetServer>,
     mut score: ResMut<Score>,
     mut event_reader: EventReader<FruitWasEaten>,
 ) {
-    for event in event_reader.iter() {
+    for event in event_reader.read() {
         let (fruit, transform) = (event.0, event.1);
 
         let points = match fruit {
@@ -163,13 +162,13 @@ fn add_points_for_eaten_fruit_and_display_score_text(
         coordinates.z = TEXT_Z;
 
         score.add(points);
-        spawn_score_text(&mut commands, &game_asset_handles, Color::hex("FFBDFF").unwrap(), points, coordinates)
+        spawn_score_text(&mut commands, &asset_server, Color::hex("FFBDFF").unwrap(), points, coordinates)
     }
 }
 
 fn spawn_score_text(
     commands: &mut Commands,
-    game_asset_handles: &LoadedAssets,
+    asset_server: &AssetServer,
     color: Color,
     points: usize,
     coordinates: Vec3,
@@ -179,7 +178,7 @@ fn spawn_score_text(
             text: Text::from_section(
                 points.to_string(),
                 TextStyle {
-                    font: game_asset_handles.get_handle(FONT),
+                    font: asset_server.load(FONT),
                     font_size: 10.0,
                     color,
                 },

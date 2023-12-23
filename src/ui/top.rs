@@ -2,7 +2,6 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy::prelude::Val::Percent;
 use crate::constants::FONT;
-use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game_state::GameState::*;
 use crate::game_state::Game::*;
 use crate::game::score::Score;
@@ -37,9 +36,9 @@ struct OneUpLabel;
 
 fn spawn_top_ui(
     mut commands: Commands,
-    loaded_assets: Res<LoadedAssets>,
+    asset_server: Res<AssetServer>,
 ) {
-    let font = loaded_assets.get_handle(FONT);
+    let font = asset_server.load(FONT);
 
     commands.spawn((
         Name::new("TopUI"),

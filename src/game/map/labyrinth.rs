@@ -1,22 +1,22 @@
 use bevy::prelude::*;
 use bevy::utils::HashMap;
+use bevy_sprite_sheet::{SpriteSheet, SpriteSheets};
 use crate::game_assets::animation::{Animation, Animations};
 use crate::game::position::Position;
 use crate::constants::WALL_DIMENSION;
-use crate::game_assets::loaded_assets::LoadedAssets;
 use crate::game::map::{Element, TileMap, Rotation, WallType, Wall};
-use crate::game_assets::sprite_sheet::SpriteSheet;
 
 #[derive(Component)]
 pub struct Labyrinth;
 
+type IsCorner = bool;
+
 pub fn spawn_labyrinth(
     commands: &mut Commands,
     map: &TileMap,
-    loaded_assets: &LoadedAssets,
-    sprite_sheets: &Assets<SpriteSheet>,
+    sprite_sheets: &SpriteSheets,
 ) -> Entity {
-    let wall_animations_map = create_animations(loaded_assets, sprite_sheets);
+    let wall_animations_map = create_animations(sprite_sheets);
     let walls = &map.position_element_iter()
         .into_iter()
         .filter_map(|(position, element)| match element {
@@ -66,15 +66,17 @@ fn create_transform(position: &Position, rotation: &Rotation) -> Transform {
     transform
 }
 
-fn create_animations(loaded_assets: &LoadedAssets, sprite_sheets: &Assets<SpriteSheet>) -> HashMap<(WallType, bool), Animations> {
+fn create_animations(
+    sprite_sheets: &SpriteSheets
+) -> HashMap<(WallType, IsCorner), Animations> {
     [
-        (WallType::Outer, true, loaded_assets.get_handle("textures/walls/outer_wall_corner")),
-        (WallType::Outer, false, loaded_assets.get_handle("textures/walls/outer_wall")),
-        (WallType::Inner, true, loaded_assets.get_handle("textures/walls/inner_wall_corner")),
-        (WallType::Inner, false, loaded_assets.get_handle("textures/walls/inner_wall")),
+        (WallType::Outer, true, "textures/walls/outer_wall_corner"),
+        (WallType::Outer, false, "textures/walls/outer_wall"),
+        (WallType::Inner, true, "textures/walls/inner_wall_corner"),
+        (WallType::Inner, false, "textures/walls/inner_wall"),
     ]
         .into_iter()
-        .map(|(tp, is_corner, sheet_handle)| ((tp, is_corner), create_wall_animations(sprite_sheets.get(&sheet_handle).expect("sheet should be present"))))
+        .map(|(tp, is_corner, sheet_path)| ((tp, is_corner), create_wall_animations(sprite_sheets.get_sheet(sheet_path))))
         .collect()
 }
 
