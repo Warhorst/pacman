@@ -12,6 +12,7 @@ use crate::game_state::GameState::{CreateSpriteSheets, Game, Loading};
 use crate::game_state::GameStatePlugin;
 use crate::sound_effect::SoundEffectPlugin;
 use crate::system_sets::SystemSetsPlugin;
+use crate::animation::AnimationPlugin;
 
 use crate::ui::UIPlugin;
 
