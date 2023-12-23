@@ -45,6 +45,7 @@ Things that are required for 1.0
 ### Current Bugs
 - the labyrinth does not blink when the player finished a level
 - the music does not resume after the player restarted the game after a game over
+- sound effects and music just stop after a second
 
 ## Ideas
 Some ideas for future development

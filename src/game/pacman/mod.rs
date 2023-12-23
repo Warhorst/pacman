@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::game_assets::animation::Animations;
+use crate::animation::Animations;
 
 use crate::game_state::GameState::*;
 use crate::game_state::Game::*;

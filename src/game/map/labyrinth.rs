@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy::utils::HashMap;
 use bevy_sprite_sheet::{SpriteSheet, SpriteSheets};
-use crate::game_assets::animation::{Animation, Animations};
+use crate::animation::{Animation, Animations};
 use crate::game::position::Position;
 use crate::constants::WALL_DIMENSION;
 use crate::game::map::{Element, TileMap, Rotation, WallType, Wall};

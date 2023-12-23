@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 use std::time::Duration;
 
-pub (in crate::game_assets) struct AnimationPlugin;
+pub struct AnimationPlugin;
 
 impl Plugin for AnimationPlugin {
     fn build(&self, app: &mut App) {

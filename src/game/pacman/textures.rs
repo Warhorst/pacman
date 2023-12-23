@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_sprite_sheet::{SpriteSheet, SpriteSheets};
-use crate::game_assets::animation::{Animation, Animations};
+use crate::animation::{Animation, Animations};
 
 use crate::game::pacman::Pacman;
 use crate::game::direction::Direction;

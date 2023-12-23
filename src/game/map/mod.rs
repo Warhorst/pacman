@@ -19,7 +19,7 @@ use crate::game::map::ghost_house::spawn_ghost_house;
 use crate::game::map::labyrinth::spawn_labyrinth;
 use crate::game::map::tunnel::{spawn_tunnel_hallways, spawn_tunnels, TunnelPlugin};
 use crate::game::position::Position;
-use crate::game_assets::animation::Animations;
+use crate::animation::Animations;
 use crate::is;
 use crate::game_state::GameState::*;
 use crate::game_state::Game::*;

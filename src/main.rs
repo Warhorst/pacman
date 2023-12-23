@@ -7,7 +7,6 @@ use crate::camera::CameraPlugin;
 use crate::constants::{WINDOW_HEIGHT, WINDOW_WIDTH};
 use crate::debug::DebugPlugin;
 use crate::game::GamePlugin;
-use crate::game_assets::GameAssetsPlugin;
 use crate::game_state::Game::Start;
 use crate::game_state::GameState::{CreateSpriteSheets, Game, Loading};
 use crate::game_state::GameStatePlugin;
@@ -18,7 +17,7 @@ use crate::ui::UIPlugin;
 
 mod camera;
 mod constants;
-mod game_assets;
+mod animation;
 mod music;
 mod sound_effect;
 mod debug;
@@ -48,7 +47,7 @@ fn main() {
             SpriteSheetPlugin::new(CreateSpriteSheets, Game(Start)),
             GameStatePlugin,
             SystemSetsPlugin,
-            GameAssetsPlugin,
+            AnimationPlugin,
             CameraPlugin,
             DebugPlugin,
             UIPlugin,
