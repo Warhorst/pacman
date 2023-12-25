@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::constants::FIELD_DIMENSION;
+use crate::constants::FIELD_SIZE;
 use crate::game_state::GameState::*;
 use crate::game_state::Game::*;
 use crate::game::map::Map;
@@ -24,7 +24,7 @@ fn spawn_camera(
     commands.spawn((
         Name::new("GameCamera"),
         Camera2dBundle {
-            transform: Transform::from_translation(Vec3::new((map.width as f32 * FIELD_DIMENSION) / 2.0, (map.height as f32 * FIELD_DIMENSION) / 2.0, 1000.0)),
+            transform: Transform::from_translation(Vec3::new((map.width as f32 * FIELD_SIZE) / 2.0, (map.height as f32 * FIELD_SIZE) / 2.0, 1000.0)),
             ..default()
         },
         UiCameraConfig { show_ui: true }

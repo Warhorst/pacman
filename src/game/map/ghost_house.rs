@@ -1,16 +1,16 @@
 use bevy::prelude::*;
 use bevy_sprite_sheet::{SpriteSheet, SpriteSheets};
+use pad::Position;
 use crate::animation::{Animation, Animations};
-use crate::game::direction::Direction;
-use crate::game::direction::Direction::*;
 use crate::game::helper::FromPositions;
-use crate::game::position::Position;
-use crate::constants::{BLINKY_Z, CLYDE_Z, INKY_Z, PINKY_Z, WALL_DIMENSION};
+use crate::constants::{BLINKY_Z, CLYDE_Z, FIELD_DIMENSION, INKY_Z, PINKY_Z, WALL_DIMENSION};
 use crate::game::ghosts::Ghost;
 use crate::game::ghosts::Ghost::*;
 use crate::is;
 use crate::game::map::{Element, Rotation, TileMap, Wall};
 use crate::game::map::Rotation::{D0, D180, D270, D90};
+use pad::Direction;
+use pad::Direction::*;
 
 /// Parent component for everything related to the ghost house
 #[derive(Component)]
@@ -88,37 +88,37 @@ fn create_spawns(rotation: Rotation, bottom_left: Position) -> [GhostSpawn; 4] {
 
 fn create_blinky_spawn(rotation: Rotation, bottom_left: Position) -> GhostSpawn {
     match rotation {
-        D0 => create_spawn_with_offsets(bottom_left, (3, 5), (4, 5), BLINKY_Z, Blinky, Left),
-        D90 => create_spawn_with_offsets(bottom_left, (5, 3), (5, 4), BLINKY_Z, Blinky, Up),
-        D180 => create_spawn_with_offsets(bottom_left, (3, -1), (4, -1), BLINKY_Z, Blinky, Right),
-        D270 => create_spawn_with_offsets(bottom_left, (-1, 3), (-1, 4), BLINKY_Z, Blinky, Down),
+        D0 => create_spawn_with_offsets(bottom_left, (3, 5), (4, 5), BLINKY_Z, Blinky, XM),
+        D90 => create_spawn_with_offsets(bottom_left, (5, 3), (5, 4), BLINKY_Z, Blinky, YP),
+        D180 => create_spawn_with_offsets(bottom_left, (3, -1), (4, -1), BLINKY_Z, Blinky, XP),
+        D270 => create_spawn_with_offsets(bottom_left, (-1, 3), (-1, 4), BLINKY_Z, Blinky, YM),
     }
 }
 
 fn create_pinky_spawn(rotation: Rotation, bottom_left: Position) -> GhostSpawn {
     match rotation {
-        D0 => create_spawn_with_offsets(bottom_left, (3, 2), (4, 2), PINKY_Z, Pinky, Up),
-        D90 => create_spawn_with_offsets(bottom_left, (2, 3), (2, 4), PINKY_Z, Pinky, Right),
-        D180 => create_spawn_with_offsets(bottom_left, (3, 2), (4, 2), PINKY_Z, Pinky, Down),
-        D270 => create_spawn_with_offsets(bottom_left, (2, 3), (2, 4), PINKY_Z, Pinky, Left),
+        D0 => create_spawn_with_offsets(bottom_left, (3, 2), (4, 2), PINKY_Z, Pinky, YP),
+        D90 => create_spawn_with_offsets(bottom_left, (2, 3), (2, 4), PINKY_Z, Pinky, XP),
+        D180 => create_spawn_with_offsets(bottom_left, (3, 2), (4, 2), PINKY_Z, Pinky, YM),
+        D270 => create_spawn_with_offsets(bottom_left, (2, 3), (2, 4), PINKY_Z, Pinky, XM),
     }
 }
 
 fn create_inky_spawn(rotation: Rotation, bottom_left: Position) -> GhostSpawn {
     match rotation {
-        D0 => create_spawn_with_offsets(bottom_left, (1, 2), (2, 2), INKY_Z, Inky, Down),
-        D90 => create_spawn_with_offsets(bottom_left, (2, 5), (2, 6), INKY_Z, Inky, Left),
-        D180 => create_spawn_with_offsets(bottom_left, (5, 2), (6, 2), INKY_Z, Inky, Up),
-        D270 => create_spawn_with_offsets(bottom_left, (2, 1), (2, 2), INKY_Z, Inky, Right),
+        D0 => create_spawn_with_offsets(bottom_left, (1, 2), (2, 2), INKY_Z, Inky, YM),
+        D90 => create_spawn_with_offsets(bottom_left, (2, 5), (2, 6), INKY_Z, Inky, XM),
+        D180 => create_spawn_with_offsets(bottom_left, (5, 2), (6, 2), INKY_Z, Inky, YP),
+        D270 => create_spawn_with_offsets(bottom_left, (2, 1), (2, 2), INKY_Z, Inky, XP),
     }
 }
 
 fn create_clyde_spawn(rotation: Rotation, bottom_left: Position) -> GhostSpawn {
     match rotation {
-        D0 => create_spawn_with_offsets(bottom_left, (5, 2), (6, 2), CLYDE_Z, Clyde, Down),
-        D90 => create_spawn_with_offsets(bottom_left, (2, 1), (2, 2), CLYDE_Z, Clyde, Left),
-        D180 => create_spawn_with_offsets(bottom_left, (1, 2), (2, 2), CLYDE_Z, Clyde, Up),
-        D270 => create_spawn_with_offsets(bottom_left, (2, 5), (2, 6), CLYDE_Z, Clyde, Right),
+        D0 => create_spawn_with_offsets(bottom_left, (5, 2), (6, 2), CLYDE_Z, Clyde, YM),
+        D90 => create_spawn_with_offsets(bottom_left, (2, 1), (2, 2), CLYDE_Z, Clyde, XM),
+        D180 => create_spawn_with_offsets(bottom_left, (1, 2), (2, 2), CLYDE_Z, Clyde, YP),
+        D270 => create_spawn_with_offsets(bottom_left, (2, 5), (2, 6), CLYDE_Z, Clyde, XP),
     }
 }
 
@@ -350,7 +350,7 @@ fn spawn_wall(
         , "idle",
     );
 
-    let mut transform = Transform::from_translation(position.to_vec(0.0));
+    let mut transform = Transform::from_translation(position.to_vec3(FIELD_DIMENSION, 0.0));
     transform.rotation = rotation.quat_z();
 
     commands.spawn((
@@ -375,7 +375,7 @@ fn spawn_entrance(
     rotation: Rotation,
     position: Position,
 ) -> Entity {
-    let mut transform = Transform::from_translation(position.to_vec(0.0));
+    let mut transform = Transform::from_translation(position.to_vec3(FIELD_DIMENSION, 0.0));
     transform.rotation = rotation.quat_z();
 
     commands.spawn((

@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy::ecs::query::WorldQuery;
-use crate::game::position::Position;
-use crate::constants::{GHOST_BASE_SPEED, PACMAN_BASE_SPEED};
+use pad::Position;
+use crate::constants::{FIELD_DIMENSION, GHOST_BASE_SPEED, PACMAN_BASE_SPEED};
 
 use crate::game::edibles::energizer::EnergizerTimer;
 use crate::game::ghosts::Ghost;
@@ -110,7 +110,11 @@ fn is_in_tunnel(
 ) -> bool {
     tunnel_query
         .iter()
-        .any(|transform| Position::from_vec(&transform.translation) == Position::from_vec(&ghost_transform.translation))
+        .any(|transform| {
+            let tunnel_pos = Position::from_vec3(transform.translation, FIELD_DIMENSION);
+            let ghost_pos = Position::from_vec3(ghost_transform.translation, FIELD_DIMENSION);
+            tunnel_pos == ghost_pos
+        })
 }
 
 fn update_pacman_speed(

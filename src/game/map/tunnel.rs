@@ -1,14 +1,15 @@
 use bevy::prelude::*;
-use crate::game::position::Position;
-use crate::constants::{TUNNEL_DIMENSION, TUNNEL_Z};
+use pad::Position;
+use crate::constants::{FIELD_DIMENSION, TUNNEL_DIMENSION, TUNNEL_Z};
+use crate::game::direction::MovementDirection;
 use crate::game::map::{Element, TileMap};
-use crate::game::direction::Direction;
 use crate::game::ghosts::Ghost;
 use crate::game::pacman::Pacman;
 use crate::game::helper::SetXY;
 use crate::is;
 use crate::game_state::GameState::*;
 use crate::game_state::Game::*;
+use pad::Direction;
 
 pub struct TunnelPlugin;
 
@@ -54,8 +55,8 @@ fn spawn_tunnel(
     position: Position,
     direction: Direction,
 ) -> [Entity; 2] {
-    let tunnel_transform = Transform::from_translation(position.to_vec(TUNNEL_Z));
-    let tunnel_entrance_transform = Transform::from_translation(position.neighbour_position(&direction.opposite()).to_vec(TUNNEL_Z));
+    let tunnel_transform = Transform::from_translation(position.to_vec3(FIELD_DIMENSION, TUNNEL_Z));
+    let tunnel_entrance_transform = Transform::from_translation(position.neighbour_in_direction(direction.opposite()).to_vec3(FIELD_DIMENSION, TUNNEL_Z));
 
     let tunnel = commands.spawn((
         Name::new("Tunnel"),
@@ -69,7 +70,7 @@ fn spawn_tunnel(
             ..Default::default()
         },
         Tunnel(index),
-        direction
+        MovementDirection(direction)
     )).id();
 
     let tunnel_entrance = commands.spawn((
@@ -98,7 +99,7 @@ pub fn spawn_tunnel_hallways(
             Name::new("TunnelHallway"),
             TunnelHallway,
             SpatialBundle {
-                transform: Transform::from_translation(position.to_vec(TUNNEL_Z)),
+                transform: Transform::from_translation(position.to_vec3(FIELD_DIMENSION, TUNNEL_Z)),
                 ..default()
             }
         )).id()
@@ -107,20 +108,23 @@ pub fn spawn_tunnel_hallways(
 }
 
 fn move_pacman_through_tunnel(
-    tunnel_query_0: Query<(Entity, &Tunnel, &Transform, &Direction), Without<Pacman>>,
-    tunnel_query_1: Query<(Entity, &Tunnel, &Transform, &Direction), Without<Pacman>>,
-    mut pacman_query: Query<(&mut Transform, &mut Direction), With<Pacman>>,
+    tunnel_query_0: Query<(Entity, &Tunnel, &Transform, &MovementDirection), Without<Pacman>>,
+    tunnel_query_1: Query<(Entity, &Tunnel, &Transform, &MovementDirection), Without<Pacman>>,
+    mut pacman_query: Query<(&mut Transform, &mut MovementDirection), With<Pacman>>,
 ) {
     for (entity_0, tunnel_0, tunnel_transform_0, tunnel_direction_0) in tunnel_query_0.iter() {
         for (mut transform, mut pacman_direction) in pacman_query.iter_mut() {
-            if Position::from_vec(&transform.translation) != Position::from_vec(&tunnel_transform_0.translation) || *pacman_direction != *tunnel_direction_0 {
+            let entity_pos = Position::from_vec3(transform.translation, FIELD_DIMENSION);
+            let tunnel_pos = Position::from_vec3(tunnel_transform_0.translation, FIELD_DIMENSION);
+
+            if entity_pos != tunnel_pos || *pacman_direction != *tunnel_direction_0 {
                 continue;
             }
 
             for (entity_1, tunnel_1, tunnel_transform_1, tunnel_direction_1) in tunnel_query_1.iter() {
                 if entity_0 != entity_1 && **tunnel_0 == **tunnel_1 {
                     transform.translation.set_xy(&tunnel_transform_1.translation);
-                    *pacman_direction = tunnel_direction_1.opposite()
+                    **pacman_direction = tunnel_direction_1.opposite()
                 }
             }
         }
@@ -129,20 +133,23 @@ fn move_pacman_through_tunnel(
 
 fn move_ghost_trough_tunnel(
     mut event_writer: EventWriter<GhostPassedTunnel>,
-    tunnel_query_0: Query<(Entity, &Tunnel, &Transform, &Direction), Without<Ghost>>,
-    tunnel_query_1: Query<(Entity, &Tunnel, &Transform, &Direction), Without<Ghost>>,
-    mut ghost_query: Query<(Entity, &mut Transform, &mut Direction), With<Ghost>>,
+    tunnel_query_0: Query<(Entity, &Tunnel, &Transform, &MovementDirection), Without<Ghost>>,
+    tunnel_query_1: Query<(Entity, &Tunnel, &Transform, &MovementDirection), Without<Ghost>>,
+    mut ghost_query: Query<(Entity, &mut Transform, &mut MovementDirection), With<Ghost>>,
 ) {
     for (entity_0, tunnel_0, tunnel_transform_0, tunnel_direction_0) in tunnel_query_0.iter() {
         for (ghost_entity, mut transform, mut ghost_direction) in ghost_query.iter_mut() {
-            if Position::from_vec(&transform.translation) != Position::from_vec(&tunnel_transform_0.translation) || *ghost_direction != *tunnel_direction_0 {
+            let entity_pos = Position::from_vec3(transform.translation, FIELD_DIMENSION);
+            let tunnel_pos = Position::from_vec3(tunnel_transform_0.translation, FIELD_DIMENSION);
+
+            if entity_pos != tunnel_pos || *ghost_direction != *tunnel_direction_0 {
                 continue;
             }
 
             for (entity_1, tunnel_1, tunnel_transform_1, tunnel_direction_1) in tunnel_query_1.iter() {
                 if entity_0 != entity_1 && **tunnel_0 == **tunnel_1 {
                     transform.translation.set_xy(&tunnel_transform_1.translation);
-                    *ghost_direction = tunnel_direction_1.opposite();
+                    **ghost_direction = tunnel_direction_1.opposite();
                     event_writer.send(GhostPassedTunnel(ghost_entity));
                 }
             }

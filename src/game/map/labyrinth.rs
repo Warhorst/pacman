@@ -1,9 +1,9 @@
 use bevy::prelude::*;
 use bevy::utils::HashMap;
 use bevy_sprite_sheet::{SpriteSheet, SpriteSheets};
+use pad::Position;
 use crate::animation::{Animation, Animations};
-use crate::game::position::Position;
-use crate::constants::WALL_DIMENSION;
+use crate::constants::{FIELD_DIMENSION, WALL_DIMENSION};
 use crate::game::map::{Element, TileMap, Rotation, WallType, Wall};
 
 #[derive(Component)]
@@ -61,7 +61,7 @@ fn spawn_labyrinth_wall(
 }
 
 fn create_transform(position: &Position, rotation: &Rotation) -> Transform {
-    let mut transform = Transform::from_translation(position.to_vec(0.0));
+    let mut transform = Transform::from_translation(position.to_vec3(FIELD_DIMENSION, 0.0));
     transform.rotation = rotation.quat_z();
     transform
 }

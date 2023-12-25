@@ -1,8 +1,9 @@
+use pad::Position;
 use crate::game::target::TargetSetter;
-use crate::game::direction::Direction::*;
-use crate::game::position::Position;
 use crate::game::helper::XYEqual;
 use crate::game::ghosts::Ghost::{Blinky, Pinky};
+use pad::Direction::*;
+use crate::constants::FIELD_DIMENSION;
 
 impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
     /// Determine the next target coordinates for a ghost when in "Eaten" state.
@@ -29,28 +30,32 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
 
     fn move_in_house_center(&mut self) {
         let pinky_spawn = *self.get_spawn(Pinky);
-        *self.components.direction = pinky_spawn.spawn_direction.opposite();
+        **self.components.direction = pinky_spawn.spawn_direction.opposite();
         self.components.target.set(pinky_spawn.coordinates);
     }
 
     /// Return if the ghost is just on a position in front of the house.
     fn is_before_entrance(&self) -> bool {
-        self.get_spawn(Blinky).positions.into_iter().any(|pos| pos == Position::from_vec(&self.components.transform.translation))
+        self.get_spawn(Blinky)
+            .positions
+            .into_iter()
+            .any(|pos| pos == Position::from_vec3(self.components.transform.translation, FIELD_DIMENSION))
     }
 
     fn move_directly_before_entrance(&mut self) {
         let in_front_of_house = self.get_spawn(Blinky).coordinates;
-        let position_coordinates = Position::from_vec(&self.components.transform.translation).to_vec(0.0);
+        let position_coordinates = Position::from_vec3(self.components.transform.translation, FIELD_DIMENSION).to_vec3(FIELD_DIMENSION, 0.0);
 
-        *self.components.direction = match self.get_spawn(Pinky).spawn_direction {
-            Up | Down => match in_front_of_house.x < position_coordinates.x {
-                true => Left,
-                false => Right
+        **self.components.direction = match self.get_spawn(Pinky).spawn_direction {
+            YP | YM => match in_front_of_house.x < position_coordinates.x {
+                true => XM,
+                false => XP
             },
-            Left | Right => match in_front_of_house.y < position_coordinates.y {
-                true => Down,
-                false => Up
-            }
+            XP | XM => match in_front_of_house.y < position_coordinates.y {
+                true => YM,
+                false => YP
+            },
+            _ => panic!("invalid direction")
         };
         self.components.target.set(in_front_of_house);
     }
@@ -66,21 +71,30 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
             _ => self.get_spawn(*self.components.ghost).coordinates
         };
 
-        *self.components.direction = match self.get_spawn(Pinky).spawn_direction {
-            Up | Down => match respawn.x < center.x {
-                true => Left,
-                false => Right
+        **self.components.direction = match self.get_spawn(Pinky).spawn_direction {
+            YP | YM => match respawn.x < center.x {
+                true => XM,
+                false => XP
             },
-            Left | Right => match respawn.y < center.y {
-                true => Down,
-                false => Up
-            }
+            XP | XM => match respawn.y < center.y {
+                true => YM,
+                false => YP
+            },
+            _ => panic!("invalid direction")
         };
         self.components.target.set(respawn);
     }
 
     fn move_to_nearest_position_before_entrance(&mut self) {
-        let nearest_spawn_position = Position::from_vec(&self.components.transform.translation).get_nearest_position_from(self.get_spawn(Blinky).positions);
+        let position = Position::from_vec3(self.components.transform.translation, FIELD_DIMENSION);
+        let nearest_spawn_position = self.get_spawn(Blinky)
+            .positions
+            .into_iter()
+            .map(|pos| (pos, pos.euclidean_distance(&position)))
+            .min_by(|(_, dis_a), (_, dis_b)| dis_a.partial_cmp(&dis_b).unwrap())
+            .map(|(pos, _)| pos)
+            .unwrap();
+
         let next_target_neighbour = self.get_nearest_neighbour_to(nearest_spawn_position);
         self.set_target_to_neighbour(next_target_neighbour)
     }

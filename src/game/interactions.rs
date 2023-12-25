@@ -1,14 +1,15 @@
 use bevy::prelude::*;
-use crate::game::position::Position;
+use pad::Position;
 
+use crate::constants::FIELD_DIMENSION;
 use crate::game::edibles::dots::{Dot, EatenDots};
 use crate::game::edibles::energizer::Energizer;
 use crate::game::edibles::fruit::{Fruit, FruitDespawnTimer};
 use crate::game::ghosts::{CurrentlyEatenGhost, Ghost};
-use crate::game::state::State;
-use crate::game_state::GameState::*;
-use crate::game_state::Game::*;
 use crate::game::pacman::Pacman;
+use crate::game::state::State;
+use crate::game_state::Game::*;
+use crate::game_state::GameState::*;
 use crate::system_sets::DetectIntersectionsWithPacman;
 
 pub(in crate::game) struct InteractionsPlugin;
@@ -68,7 +69,10 @@ fn pacman_hits_ghost(
 ) {
     for pacman_transform in &pacman_query {
         for (entity, ghost_transform, state) in &ghost_query {
-            if Position::from_vec(&pacman_transform.translation) == Position::from_vec(&ghost_transform.translation) {
+            let pacman_pos = Position::from_vec3(pacman_transform.translation, FIELD_DIMENSION);
+            let ghost_pos = Position::from_vec3(ghost_transform.translation, FIELD_DIMENSION);
+
+            if pacman_pos == ghost_pos {
                 if let State::Scatter | State::Chase = state {
                     killed_event_writer.send(PacmanWasHit)
                 }
@@ -91,7 +95,10 @@ fn pacman_eat_dot(
 ) {
     for pacman_tf in &pacman_positions {
         for (entity, dot_tf) in &dot_positions {
-            if Position::from_vec(&pacman_tf.translation) == Position::from_vec(&dot_tf.translation) {
+            let pacman_pos = Position::from_vec3(pacman_tf.translation, FIELD_DIMENSION);
+            let dot_pos = Position::from_vec3(dot_tf.translation, FIELD_DIMENSION);
+
+            if pacman_pos == dot_pos {
                 commands.entity(entity).despawn();
                 eaten_dots.increment();
                 event_writer.send(DotWasEaten)
@@ -108,7 +115,10 @@ fn pacman_eat_energizer(
 ) {
     for pacman_transform in &pacman_positions {
         for (energizer_entity, energizer_transform) in &energizer_positions {
-            if Position::from_vec(&energizer_transform.translation) == Position::from_vec(&pacman_transform.translation) {
+            let energizer_pos = Position::from_vec3(energizer_transform.translation, FIELD_DIMENSION);
+            let pacman_pos = Position::from_vec3(pacman_transform.translation, FIELD_DIMENSION);
+
+            if energizer_pos == pacman_pos {
                 commands.entity(energizer_entity).despawn();
                 event_writer.send(EnergizerWasEaten)
             }
@@ -125,7 +135,10 @@ fn eat_fruit_when_pacman_touches_it(
 ) {
     for pacman_tf in &pacman_query {
         for (entity, fruit, fruit_tf) in &fruit_query {
-            if Position::from_vec(&pacman_tf.translation) == Position::from_vec(&fruit_tf.translation) {
+            let pacman_pos = Position::from_vec3(pacman_tf.translation, FIELD_DIMENSION);
+            let fruit_pos = Position::from_vec3(fruit_tf.translation, FIELD_DIMENSION);
+
+            if pacman_pos == fruit_pos {
                 commands.entity(entity).despawn();
                 commands.remove_resource::<FruitDespawnTimer>();
                 event_writer.send(FruitWasEaten(*fruit, *fruit_tf))

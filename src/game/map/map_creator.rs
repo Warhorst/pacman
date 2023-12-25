@@ -1,6 +1,4 @@
 use crate::game::map::{RawMap, WallType};
-use crate::game::position::Position;
-use crate::game::direction::Direction;
 use crate::game::map::Element;
 use crate::game::map::Element::*;
 use crate::game::map::Field;
@@ -9,6 +7,7 @@ use crate::game::map::Rotation::*;
 use QuickWall::*;
 use std::fs::OpenOptions;
 use std::io::Write;
+use pad::{Position, Direction};
 
 const TARGET_FILE: &'static str = "./assets/maps/default.map.json";
 
@@ -621,7 +620,7 @@ fn empty(amount: usize) -> Vec<Element> {
     (0..amount).into_iter()
         .map(|_| Tunnel {
             index: 42,
-            opening_direction: Direction::Left,
+            opening_direction: Direction::XM,
         })
         .collect()
 }
@@ -639,13 +638,13 @@ fn elem(amount: usize, elem: Element) -> Vec<Element> {
 fn tunnel_right() -> Vec<Element> {
     vec![Tunnel {
         index: 0,
-        opening_direction: Direction::Right,
+        opening_direction: Direction::XP,
     }]
 }
 
 fn tunnel_left() -> Vec<Element> {
     vec![Tunnel {
         index: 0,
-        opening_direction: Direction::Left,
+        opening_direction: Direction::XM,
     }]
 }

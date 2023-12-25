@@ -27,7 +27,6 @@ pub mod map;
 pub mod edibles;
 pub mod pacman;
 pub mod ghosts;
-pub mod position;
 pub mod direction;
 pub mod helper;
 mod schedule;

@@ -1,6 +1,7 @@
 use bevy::prelude::*;
-use crate::game::direction::Direction::*;
-use crate::game::position::Position;
+use pad::Position;
+use pad::Direction::*;
+use crate::constants::FIELD_DIMENSION;
 
 /// Provides a helper method to set the x and y value from this Vec3 to the x and y from another Vec3.
 /// Using 'this = other' might overwrite the z value wrong, leading to graphic errors.
@@ -39,20 +40,21 @@ impl FromPositions for Vec3 {
         assert_eq!(positions.len(), 2);
 
         let (pos0, pos1) = (positions[0], positions[1]);
-        let neighbour_direction = pos0.get_neighbour_direction(&pos1).expect("the two positions must be neighbored");
-        let (vec0, vec1) = (pos0.to_vec(0.0), pos1.to_vec(0.0));
+        let neighbour_direction = pos0.get_direction_to_neighbour(&pos1).expect("the two positions must be neighbored");
+        let (vec0, vec1) = (pos0.to_vec3(FIELD_DIMENSION, 0.0), pos1.to_vec3(FIELD_DIMENSION, 0.0));
 
         match neighbour_direction {
-            Up | Down => {
+            YP | YM => {
                 let x = vec0.x;
                 let y = (vec0.y + vec1.y) / 2.0;
                 Vec3::new(x, y, 0.0)
             }
-            Left | Right => {
+            XP | XM => {
                 let x = (vec0.x + vec1.x) / 2.0;
                 let y = vec0.y;
                 Vec3::new(x, y, z)
-            }
+            },
+            _ => panic!("invalid direction")
         }
     }
 }

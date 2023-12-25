@@ -1,3 +1,5 @@
+use bevy::prelude::*;
+
 pub const WINDOW_WIDTH: f32 = 1280.0;
 pub const WINDOW_HEIGHT: f32 = 720.0;
 
@@ -18,14 +20,15 @@ pub const FRUIT_Z: f32 = 30.0;
 
 pub const FONT: &'static str = "fonts/PressStart2P-Regular.ttf";
 
-pub const FIELD_DIMENSION: f32 = 18.5;
-pub const WALL_DIMENSION: f32 = FIELD_DIMENSION;
-pub const PACMAN_DIMENSION: f32 = FIELD_DIMENSION + FIELD_DIMENSION * 0.6;
+pub const FIELD_SIZE: f32 = 18.5;
+pub const FIELD_DIMENSION: Vec2 = Vec2::splat(FIELD_SIZE);
+pub const WALL_DIMENSION: f32 = FIELD_SIZE;
+pub const PACMAN_DIMENSION: f32 = FIELD_SIZE + FIELD_SIZE * 0.6;
 pub const TUNNEL_DIMENSION: f32 = PACMAN_DIMENSION;
 pub const DOT_DIMENSION: f32 = PACMAN_DIMENSION;
 pub const ENERGIZER_DIMENSION: f32 = PACMAN_DIMENSION;
 pub const FRUIT_DIMENSION: f32 = PACMAN_DIMENSION;
 pub const GHOST_DIMENSION: f32 = PACMAN_DIMENSION;
 
-pub const PACMAN_BASE_SPEED: f32 = FIELD_DIMENSION * 9.0;
+pub const PACMAN_BASE_SPEED: f32 = FIELD_SIZE * 9.0;
 pub const GHOST_BASE_SPEED: f32 = PACMAN_BASE_SPEED;

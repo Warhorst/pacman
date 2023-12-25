@@ -19,3 +19,4 @@ bevy_common_assets = { version = "0.8.0", features = ["json"]}
 bevy-inspector-egui = "0.21.0"
 bevy_asset_preload = {git = "https://github.com/Warhorst/bevy_asset_preload"}
 bevy_sprite_sheet = {git = "https://github.com/Warhorst/bevy_sprite_sheet"}
+pad = {git = "https://github.com/Warhorst/pad"}

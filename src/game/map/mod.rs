@@ -6,23 +6,23 @@ use bevy::reflect::TypePath;
 use bevy::utils::HashSet;
 use bevy_common_assets::json::JsonAssetPlugin;
 use bevy_sprite_sheet::SpriteSheets;
+use pad::Position;
 use serde::{Deserialize, Serialize};
 
 use Rotation::*;
 
-use crate::constants::{DOT_Z, ENERGIZER_Z, FRUIT_Z, PACMAN_Z};
-use crate::game::direction::Direction;
+use crate::constants::{DOT_Z, ENERGIZER_Z, FIELD_DIMENSION, FRUIT_Z, PACMAN_Z};
 use crate::game::ghosts::Ghost;
 use crate::game::ghosts::Ghost::{Blinky, Clyde, Inky, Pinky};
 use crate::game::helper::FromPositions;
 use crate::game::map::ghost_house::spawn_ghost_house;
 use crate::game::map::labyrinth::spawn_labyrinth;
 use crate::game::map::tunnel::{spawn_tunnel_hallways, spawn_tunnels, TunnelPlugin};
-use crate::game::position::Position;
 use crate::animation::Animations;
 use crate::is;
 use crate::game_state::GameState::*;
 use crate::game_state::Game::*;
+use pad::Direction;
 
 pub mod labyrinth;
 #[cfg(test)]
@@ -144,7 +144,7 @@ fn spawn_dot_spawns(
                 .with_children(|parent| {
                     parent.spawn((
                         Name::new("DotSpawn"),
-                        DotSpawn(pos.to_vec(DOT_Z))
+                        DotSpawn(pos.to_vec3(FIELD_DIMENSION, DOT_Z))
                     ));
                 });
         });
@@ -168,7 +168,7 @@ fn spawn_energizer_spawns(
                 .with_children(|parent| {
                     parent.spawn((
                         Name::new("EnergizerSpawn"),
-                        EnergizerSpawn(pos.to_vec(ENERGIZER_Z))
+                        EnergizerSpawn(pos.to_vec3(FIELD_DIMENSION, ENERGIZER_Z))
                     ));
                 });
         });

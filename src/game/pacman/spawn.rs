@@ -1,8 +1,9 @@
 use bevy::prelude::*;
 use bevy_sprite_sheet::SpriteSheets;
-use crate::game::direction::Direction::*;
+use pad::Direction::*;
 
 use crate::constants::{PACMAN_BASE_SPEED, PACMAN_DIMENSION};
+use crate::game::direction::MovementDirection;
 use crate::game::level::Level;
 use crate::game::map::PacmanSpawn;
 use crate::game::pacman::Pacman;
@@ -36,7 +37,7 @@ pub(crate) fn spawn_pacman(
         Name::new("Pacman"),
         Pacman,
         Speed(PACMAN_BASE_SPEED * specs_per_level.get_for(&level).pacman_normal_speed_modifier),
-        Up,
+        MovementDirection(YP),
         animations
     ));
 }
