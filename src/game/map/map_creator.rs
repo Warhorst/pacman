@@ -7,7 +7,8 @@ use crate::game::map::Rotation::*;
 use QuickWall::*;
 use std::fs::OpenOptions;
 use std::io::Write;
-use pad::{Position, Direction};
+use crate::game::position::Pos;
+use crate::game::direction::Dir::*;
 
 const TARGET_FILE: &'static str = "./assets/maps/default.map.json";
 
@@ -544,14 +545,14 @@ fn run() {
         .collect::<Vec<_>>();
     flat_fields.iter_mut()
         .for_each(|f| {
-            f.position.y = (height as isize) - (f.position.y + 1)
+            f.position = Pos::new(f.position.x(), (height as isize) - (f.position.y() + 1));
         });
 
     let raw_map = RawMap {
-        blinky_corner: Position::new(28, 30),
-        pinky_corner: Position::new(0, 30),
-        inky_corner: Position::new(28, 0),
-        clyde_corner: Position::new(0, 0),
+        blinky_corner: Pos::new(28, 30),
+        pinky_corner: Pos::new(0, 30),
+        inky_corner: Pos::new(28, 0),
+        clyde_corner: Pos::new(0, 0),
         fields: flat_fields
     };
 
@@ -580,7 +581,7 @@ fn create_field_line(y: isize, elements: Vec<Vec<Element>>) -> Vec<Field> {
         .flat_map(|i| i)
         .enumerate()
         .map(|(i, elem)| Field {
-            position: Position::new(i as isize, y),
+            position: Pos::new(i as isize, y),
             element: elem,
         })
         .filter(|f| match f.element {
@@ -620,7 +621,7 @@ fn empty(amount: usize) -> Vec<Element> {
     (0..amount).into_iter()
         .map(|_| Tunnel {
             index: 42,
-            opening_direction: Direction::XM,
+            opening_direction: Left,
         })
         .collect()
 }
@@ -638,13 +639,13 @@ fn elem(amount: usize, elem: Element) -> Vec<Element> {
 fn tunnel_right() -> Vec<Element> {
     vec![Tunnel {
         index: 0,
-        opening_direction: Direction::XP,
+        opening_direction: Right,
     }]
 }
 
 fn tunnel_left() -> Vec<Element> {
     vec![Tunnel {
         index: 0,
-        opening_direction: Direction::XM,
+        opening_direction: Left,
     }]
 }

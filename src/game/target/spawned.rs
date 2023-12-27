@@ -3,8 +3,8 @@ use crate::game::target::TargetSetter;
 use crate::game::helper::XYEqual;
 use crate::constants::FIELD_SIZE;
 use crate::game::ghosts::Ghost::{Blinky, Pinky};
-use pad::Direction;
-use pad::Direction::*;
+use crate::game::direction::Dir;
+use crate::game::direction::Dir::*;
 
 impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
     /// Determine the next target coordinates for a ghost when in "Spawned" state.
@@ -31,15 +31,15 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
 
         if coordinates.xy_equal(&respawn) {
             match *self.components.direction {
-                dir if *dir == self.get_spawn(Pinky).spawn_direction => self.components.target.set(above_respawn),
+                dir if dir == self.get_spawn(Pinky).spawn_direction => self.components.target.set(above_respawn),
                 _ => self.components.target.set(below_respawn)
             };
         } else if coordinates.xy_equal(&above_respawn) {
             self.components.target.set(below_respawn);
-            **self.components.direction = self.get_spawn(Pinky).spawn_direction.opposite();
+            *self.components.direction = self.get_spawn(Pinky).spawn_direction.opposite();
         } else if coordinates.xy_equal(&below_respawn) {
             self.components.target.set(above_respawn);
-            **self.components.direction = self.get_spawn(Pinky).spawn_direction;
+            *self.components.direction = self.get_spawn(Pinky).spawn_direction;
         }
     }
 
@@ -56,14 +56,13 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
         let center = self.get_spawn(Pinky).coordinates;
 
         match self.get_spawn(Pinky).spawn_direction {
-            YP | YM => coordinates.x == center.x,
-            XP | XM => coordinates.y == center.y,
-            _ => panic!("invalid direction")
+            Up | Down => coordinates.x == center.x,
+            Left | Right => coordinates.y == center.y,
         }
     }
 
     fn move_to_entrance(&mut self) {
-        **self.components.direction = self.get_spawn(Pinky).spawn_direction;
+        *self.components.direction = self.get_spawn(Pinky).spawn_direction;
         let entrance_coordinates = self.get_spawn(Blinky).coordinates;
         self.components.target.set(entrance_coordinates);
     }
@@ -76,9 +75,8 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
         };
 
         match self.get_spawn(Pinky).spawn_direction {
-            YP | YM => coordinates.x == respawn.x,
-            XP | XM => coordinates.y == respawn.y,
-            _ => panic!("invalid direction")
+            Up | Down => coordinates.x == respawn.x,
+            Left | Right => coordinates.y == respawn.y,
         }
     }
 
@@ -87,35 +85,32 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
         let center = self.get_spawn(Pinky).coordinates;
         let respawn = self.get_spawn(*self.components.ghost).coordinates;
 
-        **self.components.direction = match self.get_spawn(Pinky).spawn_direction {
-            YP | YM => match respawn.x < center.x {
-                true => XP,
-                false => XM
+        *self.components.direction = match self.get_spawn(Pinky).spawn_direction {
+            Up | Down => match respawn.x < center.x {
+                true => Right,
+                false => Left
             },
-            XP | XM => match respawn.y < center.y {
-                true => YP,
-                false => YM
+            Right | Left => match respawn.y < center.y {
+                true => Up,
+                false => Down
             },
-            _ => panic!("invalid direction")
         };
 
         match self.get_spawn(Pinky).spawn_direction {
-            YP | YM => self.components.target.set(Vec3::new(center.x, coordinates.y, 0.0)),
-            XP | XM => self.components.target.set(Vec3::new(coordinates.x, center.y, 0.0)),
-            _ => {}
+            Up | Down => self.components.target.set(Vec3::new(center.x, coordinates.y, 0.0)),
+            Left | Right => self.components.target.set(Vec3::new(coordinates.x, center.y, 0.0)),
         }
     }
 
     /// A ghost in the ghost house does not walk a full field in the ghost house (because he would clip into the wall).
     /// When bouncing around in the ghost house, he only moves slightly in one direction.
-    fn coordinates_slightly_in_direction(&self, v: Vec3, d: Direction) -> Vec3 {
+    fn coordinates_slightly_in_direction(&self, v: Vec3, d: Dir) -> Vec3 {
         let distance = FIELD_SIZE / 2.0;
         match d {
-            YP => Vec3::new(v.x, v.y + distance, v.z),
-            YM => Vec3::new(v.x, v.y - distance, v.z),
-            XM => Vec3::new(v.x - distance, v.y, v.z),
-            XP => Vec3::new(v.x + distance, v.y, v.z),
-            _ => panic!("invalid direction")
+            Up => Vec3::new(v.x, v.y + distance, v.z),
+            Down => Vec3::new(v.x, v.y - distance, v.z),
+            Left => Vec3::new(v.x - distance, v.y, v.z),
+            Right => Vec3::new(v.x + distance, v.y, v.z),
         }
     }
 }

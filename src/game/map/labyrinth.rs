@@ -1,10 +1,11 @@
 use bevy::prelude::*;
 use bevy::utils::HashMap;
 use bevy_sprite_sheet::{SpriteSheet, SpriteSheets};
-use pad::Position;
+
 use crate::animation::{Animation, Animations};
-use crate::constants::{FIELD_DIMENSION, WALL_DIMENSION};
-use crate::game::map::{Element, TileMap, Rotation, WallType, Wall};
+use crate::constants::WALL_DIMENSION;
+use crate::game::map::{Element, Rotation, TileMap, Wall, WallType};
+use crate::game::position::Pos;
 
 #[derive(Component)]
 pub struct Labyrinth;
@@ -60,8 +61,8 @@ fn spawn_labyrinth_wall(
     )).id()
 }
 
-fn create_transform(position: &Position, rotation: &Rotation) -> Transform {
-    let mut transform = Transform::from_translation(position.to_vec3(FIELD_DIMENSION, 0.0));
+fn create_transform(position: &Pos, rotation: &Rotation) -> Transform {
+    let mut transform = Transform::from_translation(position.to_vec3(0.0));
     transform.rotation = rotation.quat_z();
     transform
 }

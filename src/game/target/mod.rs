@@ -4,27 +4,27 @@ use bevy::ecs::query::WorldQuery;
 use bevy::prelude::*;
 use bevy::utils::{HashMap, HashSet};
 
-use crate::constants::{FIELD_DIMENSION, FIELD_SIZE};
+use crate::constants::FIELD_SIZE;
+use crate::game::direction::Dir;
+use crate::game::direction::Dir::*;
 use crate::game::ghost_house_gate::GhostHouseGate;
 use crate::game::ghosts::Ghost;
 use crate::game::ghosts::Ghost::*;
 use crate::game::map::{GhostCorner, Wall};
 use crate::game::map::ghost_house::GhostSpawn;
 use crate::game::pacman::Pacman;
+use crate::game::position::Pos;
 use crate::game::random::Random;
 use crate::game::state::State;
 use crate::game::state::State::*;
 use crate::game_state::Game::*;
 use crate::game_state::GameState::*;
 use crate::system_sets::SetTarget;
-use pad::{Direction, Position};
-use pad::Direction::*;
-use crate::game::direction::MovementDirection;
 
 mod spawned;
 mod eaten;
 
-type Neighbour = (Position, Direction);
+type Neighbour = (Pos, Dir);
 
 pub(in crate::game) struct TargetPlugin;
 
@@ -52,7 +52,7 @@ impl Plugin for TargetPlugin {
 pub struct TargetComponents<'a> {
     ghost: &'a Ghost,
     target: &'a mut Target,
-    direction: &'a mut MovementDirection,
+    direction: &'a mut Dir,
     transform: &'a Transform,
     state: &'a State,
 }
@@ -63,7 +63,7 @@ fn set_target(
     corner_query: Query<&GhostCorner>,
     wall_query: Query<&Transform, With<Wall>>,
     ghost_spawn_query: Query<&GhostSpawn>,
-    pacman_query: Query<(&Transform, &MovementDirection), With<Pacman>>,
+    pacman_query: Query<(&Transform, &Dir), With<Pacman>>,
     mut ghost_query: Query<TargetComponents, Without<Pacman>>,
 ) {
     let (pm_transform, pm_dir) = pacman_query.single();
@@ -79,7 +79,7 @@ fn set_target(
             &random,
             &ghost_house_gate,
             *pm_transform,
-            **pm_dir,
+            *pm_dir,
             blinky_transform,
             &corner_query,
             &wall_query,
@@ -111,7 +111,7 @@ fn set_target_on_ghost_pause(
     corner_query: Query<&GhostCorner>,
     wall_query: Query<&Transform, With<Wall>>,
     ghost_spawn_query: Query<&GhostSpawn>,
-    pacman_query: Query<(&Transform, &MovementDirection), With<Pacman>>,
+    pacman_query: Query<(&Transform, &Dir), With<Pacman>>,
     mut ghost_query: Query<TargetComponents, Without<Pacman>>,
 ) {
     let (pm_transform, pm_dir) = pacman_query.single();
@@ -127,7 +127,7 @@ fn set_target_on_ghost_pause(
             &random,
             &ghost_house_gate,
             *pm_transform,
-            **pm_dir,
+            *pm_dir,
             blinky_transform,
             &corner_query,
             &wall_query,
@@ -147,10 +147,10 @@ struct TargetSetter<'a, 'b, 'c> {
     random: &'a Random,
     ghost_house_gate: &'a GhostHouseGate,
     pacman_transform: Transform,
-    pacman_direction: Direction,
+    pacman_direction: Dir,
     blinky_transform: Transform,
-    corner_positions: HashMap<Ghost, Position>,
-    wall_positions: HashSet<Position>,
+    corner_positions: HashMap<Ghost, Pos>,
+    wall_positions: HashSet<Pos>,
     ghost_spawns: HashMap<Ghost, GhostSpawn>,
     components: &'a mut TargetComponentsItem<'b, 'c>,
 }
@@ -160,7 +160,7 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
         random: &'a Random,
         ghost_house_gate: &'a GhostHouseGate,
         pacman_transform: Transform,
-        pacman_direction: Direction,
+        pacman_direction: Dir,
         blinky_transform: Transform,
         corner_query: &Query<&GhostCorner>,
         wall_query: &Query<&Transform, With<Wall>>,
@@ -168,13 +168,13 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
         components: &'a mut TargetComponentsItem<'b, 'c>,
     ) -> Self {
         let corner_positions = corner_query.iter().map(|corner| (corner.ghost, corner.position)).collect();
-        let wall_positions = wall_query.iter().map(|transform| Position::from_vec3(transform.translation, FIELD_DIMENSION)).collect();
+        let wall_positions = wall_query.iter().map(|transform| Pos::from_vec3(transform.translation)).collect();
         let ghost_spawns = ghost_spawn_query.iter().map(|spawn| (spawn.ghost, *spawn)).collect();
         Self { random, ghost_spawns, ghost_house_gate, pacman_transform, pacman_direction, blinky_transform, corner_positions, wall_positions, components }
     }
 
     fn set_blinky_chase_target(&mut self) {
-        let pacman_position = Position::from_vec3(self.pacman_transform.translation, FIELD_DIMENSION);
+        let pacman_position = Pos::from_vec3(self.pacman_transform.translation);
         let next_target_neighbour = self.get_nearest_neighbour_to(pacman_position);
         self.set_target_to_neighbour(next_target_neighbour)
     }
@@ -187,17 +187,16 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
 
     /// Return the pinky target position 4 fields in pacmans direction.
     /// If pacman is idle, the field to its right is choosen.
-    fn calculate_pinky_target(&self) -> Position {
-        let pacman_position = Position::from_vec3(self.pacman_transform.translation, FIELD_DIMENSION);
-        let x = pacman_position.x;
-        let y = pacman_position.y;
+    fn calculate_pinky_target(&self) -> Pos {
+        let pacman_position = Pos::from_vec3(self.pacman_transform.translation);
+        let x = pacman_position.x();
+        let y = pacman_position.y();
 
         match self.pacman_direction {
-            YP => Position::new(x, y + 4),
-            YM => Position::new(x, y - 4),
-            XM => Position::new(x - 4, y),
-            XP => Position::new(x + 4, y),
-            _ => panic!("invalid direction")
+            Up => Pos::new(x, y + 4),
+            Down => Pos::new(x, y - 4),
+            Left => Pos::new(x - 4, y),
+            Right => Pos::new(x + 4, y),
         }
     }
 
@@ -212,20 +211,20 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
     /// 1. You take a field pacman is facing with two fields distance
     /// 2. You shoot a line from blinkys position trough this field
     /// 3. You double this distance. The field this line is ending on is inkys target.
-    fn calculate_inky_target(&self) -> Position {
-        let pacman_position = Position::from_vec3(self.pacman_transform.translation, FIELD_DIMENSION);
-        let blinky_position = Position::from_vec3(self.blinky_transform.translation, FIELD_DIMENSION);
+    fn calculate_inky_target(&self) -> Pos {
+        let pacman_position = Pos::from_vec3(self.pacman_transform.translation);
+        let blinky_position = Pos::from_vec3(self.blinky_transform.translation);
         let position_pacman_is_facing = pacman_position.position_in_direction(self.pacman_direction, 2);
-        let x_diff = position_pacman_is_facing.x - blinky_position.x;
-        let y_diff = position_pacman_is_facing.y - blinky_position.y;
-        Position::new(blinky_position.x + 2 * x_diff, blinky_position.y + 2 * y_diff)
+        let x_diff = position_pacman_is_facing.x() - blinky_position.x();
+        let y_diff = position_pacman_is_facing.y() - blinky_position.y();
+        Pos::new(blinky_position.x() + 2 * x_diff, blinky_position.y() + 2 * y_diff)
     }
 
     fn set_clyde_chase_target(&mut self) {
         let target = if self.clyde_is_near_pacman() {
             *self.corner_positions.get(self.components.ghost).unwrap()
         } else {
-            Position::from_vec3(self.pacman_transform.translation, FIELD_DIMENSION)
+            Pos::from_vec3(self.pacman_transform.translation)
         };
 
         let next_target_neighbour = self.get_nearest_neighbour_to(target);
@@ -233,9 +232,9 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
     }
 
     fn clyde_is_near_pacman(&self) -> bool {
-        let pacman_position = Position::from_vec3(self.pacman_transform.translation, FIELD_DIMENSION);
+        let pacman_position = Pos::from_vec3(self.pacman_transform.translation);
         let clyde_coordinates = self.components.transform.translation;
-        let pacman_coordinates = pacman_position.to_vec3(FIELD_DIMENSION, clyde_coordinates.z);
+        let pacman_coordinates = pacman_position.to_vec3(clyde_coordinates.z);
         let distance = clyde_coordinates.distance(pacman_coordinates);
         distance < FIELD_SIZE * 8.0
     }
@@ -247,14 +246,14 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
     }
 
     fn set_frightened_target(&mut self) {
-        let possible_neighbours = Position::from_vec3(self.components.transform.translation, FIELD_DIMENSION)
-            .cardinal_neighbours_with_directions()
+        let possible_neighbours = Pos::from_vec3(self.components.transform.translation)
+            .neighbours_with_directions()
             .into_iter()
             .filter(|(_, dir)| *dir != self.components.direction.opposite())
             .filter(|(pos, _)| !self.wall_positions.contains(pos))
             .collect::<Vec<_>>();
         let next_target_neighbour = match possible_neighbours.len() {
-            0 => (Position::from_vec3(self.components.transform.translation, FIELD_DIMENSION).neighbour_in_direction(self.components.direction.opposite()), self.components.direction.opposite()),
+            0 => (Pos::from_vec3(self.components.transform.translation).neighbour_in_direction(self.components.direction.opposite()), self.components.direction.opposite()),
             1 => possible_neighbours.get(0).unwrap().clone(),
             len => possible_neighbours.get(self.random.zero_to(len)).unwrap().clone()
         };
@@ -267,19 +266,19 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
     /// It is generally not allowed for ghosts to turn around, so the position behind the ghost is always filtered. However,
     /// if due to some circumstances (like bad map design) a ghost has no other way to go, we allow the pour soul to
     /// turn around.
-    fn get_nearest_neighbour_to(&self, target: Position) -> Neighbour {
-        Position::from_vec3(self.components.transform.translation, FIELD_DIMENSION)
-            .cardinal_neighbours_with_directions()
+    fn get_nearest_neighbour_to(&self, target: Pos) -> Neighbour {
+        Pos::from_vec3(self.components.transform.translation)
+            .neighbours_with_directions()
             .into_iter()
             .filter(|(_, dir)| *dir != self.components.direction.opposite())
             .filter(|(pos, _)| !self.wall_positions.contains(pos))
             .min_by(|n_a, n_b| minimal_distance_to_neighbours(&target, n_a, n_b))
-            .unwrap_or_else(|| (Position::from_vec3(self.components.transform.translation, FIELD_DIMENSION).neighbour_in_direction(self.components.direction.opposite()), self.components.direction.opposite()))
+            .unwrap_or_else(|| (Pos::from_vec3(self.components.transform.translation).neighbour_in_direction(self.components.direction.opposite()), self.components.direction.opposite()))
     }
 
     fn set_target_to_neighbour(&mut self, neighbour: Neighbour) {
-        **self.components.direction = neighbour.1;
-        self.components.target.set(neighbour.0.to_vec3(FIELD_DIMENSION, 0.0));
+        *self.components.direction = neighbour.1;
+        self.components.target.set(neighbour.0.to_vec3(0.0));
     }
 
     fn get_spawn(&self, ghost: Ghost) -> &GhostSpawn {
@@ -298,12 +297,12 @@ fn get_blinky_transform(query: &Query<TargetComponents, Without<Pacman>>) -> Tra
         .expect("there should be one blinky")
 }
 
-fn minimal_distance_to_neighbours(big_target: &Position, neighbour_a: &Neighbour, neighbour_b: &Neighbour) -> Ordering {
+fn minimal_distance_to_neighbours(big_target: &Pos, neighbour_a: &Neighbour, neighbour_b: &Neighbour) -> Ordering {
     minimal_distance_to_positions(big_target, &neighbour_a.0, &neighbour_b.0)
 }
 
-fn minimal_distance_to_positions(big_target: &Position, position_a: &Position, position_b: &Position) -> Ordering {
-    big_target.euclidean_distance(position_a).partial_cmp(&big_target.euclidean_distance(position_b)).unwrap()
+fn minimal_distance_to_positions(big_target: &Pos, position_a: &Pos, position_b: &Pos) -> Ordering {
+    big_target.distance(position_a).partial_cmp(&big_target.distance(position_b)).unwrap()
 }
 
 #[derive(Component)]

@@ -1,22 +1,20 @@
 use bevy::prelude::*;
 use bevy_sprite_sheet::{SpriteSheet, SpriteSheets};
 use crate::animation::{Animation, Animations};
-use crate::game::direction::MovementDirection;
+use crate::game::direction::Dir;
+use crate::game::direction::Dir::*;
 
 use crate::game::pacman::Pacman;
 
-use pad::Direction::*;
-
 pub(crate) fn update_pacman_appearance(
-    mut query: Query<(&MovementDirection, &mut Animations), With<Pacman>>
+    mut query: Query<(&Dir, &mut Animations), With<Pacman>>
 ) {
     for (direction, mut animations) in query.iter_mut() {
-        match **direction {
-            YP => animations.change_animation_to("eating_up"),
-            YM => animations.change_animation_to("eating_down"),
-            XM => animations.change_animation_to("eating_left"),
-            XP => animations.change_animation_to("eating_right"),
-            _ => {}
+        match *direction {
+            Up => animations.change_animation_to("eating_up"),
+            Down => animations.change_animation_to("eating_down"),
+            Left => animations.change_animation_to("eating_left"),
+            Right => animations.change_animation_to("eating_right"),
         }
     }
 }

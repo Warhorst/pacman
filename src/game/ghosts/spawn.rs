@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_sprite_sheet::SpriteSheets;
 
 use crate::constants::{GHOST_BASE_SPEED, GHOST_DIMENSION};
-use crate::game::direction::MovementDirection;
+use crate::game::direction::Dir::*;
 use crate::game::state::State;
 use crate::game::target::Target;
 use crate::game::ghosts::textures::create_animations_for_ghost;
@@ -10,7 +10,6 @@ use crate::game::level::Level;
 use crate::game::map::ghost_house::GhostSpawn;
 use crate::game::specs_per_level::SpecsPerLevel;
 use crate::game::speed::Speed;
-use pad::Direction::*;
 
 pub fn spawn_ghosts(
     mut commands: Commands,
@@ -37,11 +36,10 @@ fn spawn_ghost(
     let spawn_coordinates = spawn.coordinates;
     let mut animations = create_animations_for_ghost(&spawn.ghost, asset_server, sprite_sheets);
     animations.change_animation_to(match spawn.spawn_direction {
-        YP => "normal_up",
-        YM => "normal_down",
-        XM => "normal_left",
-        XP => "normal_right",
-        _ => panic!("invalid direction")
+        Up => "normal_up",
+        Down => "normal_down",
+        Left => "normal_left",
+        Right => "normal_right",
     });
     animations.stop();
 
@@ -58,7 +56,7 @@ fn spawn_ghost(
             ..Default::default()
         },
         spawn.ghost,
-        MovementDirection(spawn_direction),
+        spawn_direction,
         Speed(GHOST_BASE_SPEED * specs_per_level.get_for(level).ghost_normal_speed_modifier),
         Target::new(),
         State::Spawned,

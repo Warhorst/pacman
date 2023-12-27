@@ -2,9 +2,7 @@ use std::fmt::Formatter;
 use bevy::ecs::event::Event;
 use bevy::ecs::query::WorldQuery;
 use bevy::prelude::*;
-use pad::Position;
-use crate::constants::FIELD_DIMENSION;
-use crate::game::direction::MovementDirection;
+use crate::game::direction::Dir;
 
 use crate::game::edibles::energizer::EnergizerOver;
 use crate::game_state::GameState::*;
@@ -17,6 +15,7 @@ use crate::game::helper::XYEqual;
 use crate::game::ghosts::Ghost::{Blinky, Pinky};
 use crate::game::state::State::*;
 use crate::game::map::ghost_house::GhostSpawn;
+use crate::game::position::Pos;
 use crate::system_sets::SetState;
 
 pub(in crate::game) struct StatePlugin;
@@ -55,7 +54,7 @@ struct StateUpdateComponents<'a> {
     ghost: &'a Ghost,
     state: &'a mut State,
     target: &'a mut Target,
-    direction: &'a mut MovementDirection,
+    direction: &'a mut Dir,
     transform: &'a Transform,
 }
 
@@ -132,11 +131,11 @@ fn process_energizer_eaten(
     } else {
         components.transform.translation
     };
-    let target_position = Position::from_vec3(target_coordinates, FIELD_DIMENSION);
-    let coordinates_ghost_came_from = target_position.neighbour_in_direction(components.direction.opposite()).to_vec3(FIELD_DIMENSION, 0.0);
+    let target_position = Pos::from_vec3(target_coordinates);
+    let coordinates_ghost_came_from = target_position.neighbour_in_direction(components.direction.opposite()).to_vec3(0.0);
 
     *components.state = Frightened;
-    **components.direction = components.direction.opposite();
+    *components.direction = components.direction.opposite();
     components.target.set(coordinates_ghost_came_from);
 }
 
@@ -153,7 +152,7 @@ fn process_spawned(
     let coordinates = components.transform.translation;
     if coordinates.xy_equal(&blinky_spawn.coordinates) {
         *components.state = schedule.current_state();
-        **components.direction = blinky_spawn.spawn_direction;
+        *components.direction = blinky_spawn.spawn_direction;
     }
 }
 
@@ -174,10 +173,10 @@ fn process_scatter_chase(
             components.transform.translation
         };
 
-        let target_position = Position::from_vec3(target_coordinates, FIELD_DIMENSION);
-        let coordinates_ghost_came_from = target_position.neighbour_in_direction(components.direction.opposite()).to_vec3(FIELD_DIMENSION, 0.0);
+        let target_position = Pos::from_vec3(target_coordinates);
+        let coordinates_ghost_came_from = target_position.neighbour_in_direction(components.direction.opposite()).to_vec3(0.0);
 
-        **components.direction = components.direction.opposite();
+        *components.direction = components.direction.opposite();
         components.target.set(coordinates_ghost_came_from);
     }
 }

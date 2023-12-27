@@ -1,16 +1,16 @@
 use bevy::prelude::*;
 use bevy_sprite_sheet::{SpriteSheet, SpriteSheets};
 use crate::animation::{Animation, Animations};
-use crate::game::direction::MovementDirection;
+use crate::game::direction::Dir;
+use crate::game::direction::Dir::*;
 use crate::game::edibles::energizer::EnergizerTimer;
 use crate::game::ghosts::Ghost;
 use crate::game::ghosts::Ghost::*;
 use crate::game::state::State;
-use pad::Direction::*;
 
 pub(crate) fn update_ghost_appearance(
     energizer_timer: Option<Res<EnergizerTimer>>,
-    mut query: Query<(&MovementDirection, &State, &mut Animations)>,
+    mut query: Query<(&Dir, &State, &mut Animations)>,
 ) {
     for (direction, state, mut animations) in query.iter_mut() {
         match state {
@@ -20,20 +20,18 @@ pub(crate) fn update_ghost_appearance(
                 _ => animations.change_animation_to("frightened"),
             },
             State::Eaten => {
-                animations.change_animation_to(match **direction {
-                    XP => "eaten_right",
-                    XM => "eaten_left",
-                    YP => "eaten_up",
-                    YM => "eaten_down",
-                    _ => panic!("invalid direction")
+                animations.change_animation_to(match *direction {
+                    Right => "eaten_right",
+                    Left => "eaten_left",
+                    Up => "eaten_up",
+                    Down => "eaten_down",
                 })
             }
-            _ => animations.change_animation_to(match **direction {
-                XP => "normal_right",
-                XM => "normal_left",
-                YP => "normal_up",
-                YM => "normal_down",
-                _ => panic!("invalid direction")
+            _ => animations.change_animation_to(match *direction {
+                Right => "normal_right",
+                Left => "normal_left",
+                Up => "normal_up",
+                Down => "normal_down",
             })
         }
     }

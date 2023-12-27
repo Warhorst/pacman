@@ -8,9 +8,8 @@ use crate::game::target::Target;
 use crate::game_state::Game::*;
 use crate::game_state::GameState::*;
 use crate::system_sets::MoveEntities;
-use pad::Direction;
-use pad::Direction::*;
-use crate::game::direction::MovementDirection;
+use crate::game::direction::Dir;
+use crate::game::direction::Dir::*;
 
 pub struct MovePlugin;
 
@@ -35,7 +34,7 @@ impl Plugin for MovePlugin {
 
 fn move_ghosts(
     time: Res<Time>,
-    mut query: Query<(&MovementDirection, &mut Target, &mut Transform, &Speed)>,
+    mut query: Query<(&Dir, &mut Target, &mut Transform, &Speed)>,
 ) {
     for (direction, mut target, mut transform, speed) in query.iter_mut() {
         move_ghost(&time, direction, &mut target, &mut transform, speed)
@@ -45,7 +44,7 @@ fn move_ghosts(
 fn move_only_not_currently_eaten_ghosts(
     time: Res<Time>,
     currently_eaten_ghost: Res<CurrentlyEatenGhost>,
-    mut query: Query<(Entity, &MovementDirection, &State, &mut Target, &mut Transform, &Speed)>,
+    mut query: Query<(Entity, &Dir, &State, &mut Target, &mut Transform, &Speed)>,
 ) {
     for (entity, direction, state, mut target, mut transform, speed) in query.iter_mut() {
         if entity == **currently_eaten_ghost || *state != Eaten { continue; }
@@ -53,7 +52,7 @@ fn move_only_not_currently_eaten_ghosts(
     }
 }
 
-fn move_ghost(time: &Time, direction: &Direction, target: &mut Target, transform: &mut Transform, speed: &Speed) {
+fn move_ghost(time: &Time, direction: &Dir, target: &mut Target, transform: &mut Transform, speed: &Speed) {
     if target.is_not_set() {
         return;
     }
@@ -72,37 +71,34 @@ fn move_ghost(time: &Time, direction: &Direction, target: &mut Target, transform
     }
 }
 
-fn move_in_direction(coordinates: &mut Vec3, delta_seconds: f32, direction: &Direction, speed: &Speed) {
+fn get_direction_modifiers(direction: &Dir) -> (f32, f32) {
+    match direction {
+        Up => (0.0, 1.0),
+        Down => (0.0, -1.0),
+        Left => (-1.0, 0.0),
+        Right => (1.0, 0.0),
+    }
+}
+
+fn move_in_direction(coordinates: &mut Vec3, delta_seconds: f32, direction: &Dir, speed: &Speed) {
     let (x, y) = get_direction_modifiers(direction);
     coordinates.x += delta_seconds * x * **speed;
     coordinates.y += delta_seconds * y * **speed;
 }
 
-fn get_direction_modifiers(direction: &Direction) -> (f32, f32) {
-    match direction {
-        YP => (0.0, 1.0),
-        YM => (0.0, -1.0),
-        XM => (-1.0, 0.0),
-        XP => (1.0, 0.0),
-        _ => (0.0, 0.0)
-    }
-}
-
 /// The ghost should not move over its target.
-fn limit_movement(coordinates: &mut Vec3, direction: &Direction, target_coordinates: &Vec3) {
+fn limit_movement(coordinates: &mut Vec3, direction: &Dir, target_coordinates: &Vec3) {
     match direction {
-        YP => coordinates.y = coordinates.y.min(target_coordinates.y),
-        YM => coordinates.y = coordinates.y.max(target_coordinates.y),
-        XM => coordinates.x = coordinates.x.max(target_coordinates.x),
-        XP => coordinates.x = coordinates.x.min(target_coordinates.x),
-        _ => {}
+        Up => coordinates.y = coordinates.y.min(target_coordinates.y),
+        Down => coordinates.y = coordinates.y.max(target_coordinates.y),
+        Left => coordinates.x = coordinates.x.max(target_coordinates.x),
+        Right => coordinates.x = coordinates.x.min(target_coordinates.x),
     }
 }
 
-fn on_target(coordinates: Vec3, target: Vec3, direction: &Direction) -> bool {
+fn on_target(coordinates: Vec3, target: Vec3, direction: &Dir) -> bool {
     match direction {
-        YP | YM => coordinates.y == target.y,
-        XP | XM => coordinates.x == target.x,
-        _ => panic!("invalid direction")
+        Up | Down => coordinates.y == target.y,
+        Left | Right => coordinates.x == target.x,
     }
 }

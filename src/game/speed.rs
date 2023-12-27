@@ -1,19 +1,19 @@
-use bevy::prelude::*;
 use bevy::ecs::query::WorldQuery;
-use pad::Position;
-use crate::constants::{FIELD_DIMENSION, GHOST_BASE_SPEED, PACMAN_BASE_SPEED};
+use bevy::prelude::*;
 
+use crate::constants::{GHOST_BASE_SPEED, PACMAN_BASE_SPEED};
+use crate::game::edibles::dots::EatenDots;
 use crate::game::edibles::energizer::EnergizerTimer;
 use crate::game::ghosts::Ghost;
 use crate::game::ghosts::Ghost::*;
-use crate::game_state::GameState::*;
-use crate::game_state::Game::*;
-use crate::game::state::State;
 use crate::game::level::Level;
-use crate::game::pacman::Pacman;
-use crate::game::edibles::dots::EatenDots;
 use crate::game::map::tunnel::{Tunnel, TunnelHallway};
+use crate::game::pacman::Pacman;
+use crate::game::position::Pos;
 use crate::game::specs_per_level::SpecsPerLevel;
+use crate::game::state::State;
+use crate::game_state::Game::*;
+use crate::game_state::GameState::*;
 
 pub(in crate::game) struct SpeedPlugin;
 
@@ -111,8 +111,8 @@ fn is_in_tunnel(
     tunnel_query
         .iter()
         .any(|transform| {
-            let tunnel_pos = Position::from_vec3(transform.translation, FIELD_DIMENSION);
-            let ghost_pos = Position::from_vec3(ghost_transform.translation, FIELD_DIMENSION);
+            let tunnel_pos = Pos::from_vec3(transform.translation);
+            let ghost_pos = Pos::from_vec3(ghost_transform.translation);
             tunnel_pos == ghost_pos
         })
 }
