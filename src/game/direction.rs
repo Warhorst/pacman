@@ -5,8 +5,9 @@ use serde::{Deserialize, Serialize};
 use crate::game::direction::Dir::*;
 
 /// The direction some entity is currently moving to
-#[derive(Component, Reflect, Serialize, Deserialize, Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(Component, Reflect, Serialize, Deserialize, Copy, Clone, Debug, Default, Eq, PartialEq)]
 pub enum Dir {
+    #[default]
     Right,
     Left,
     Up,

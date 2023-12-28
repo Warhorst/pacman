@@ -35,6 +35,14 @@ pub struct MapPlugin;
 impl Plugin for MapPlugin {
     fn build(&self, app: &mut App) {
         app
+            .register_type::<Map>()
+            .register_type::<Tiles>()
+            .register_type::<Maze>()
+            .register_type::<Wall>()
+            .register_type::<WallStyle>()
+            .register_type::<GhostHouseArea>()
+            .register_type::<Tunnel>()
+            .register_type::<TunnelHallway>()
             .add_plugins((
                 TunnelPlugin,
                 JsonAssetPlugin::<RawMap>::new(&["map.json"])
@@ -47,15 +55,61 @@ impl Plugin for MapPlugin {
 }
 
 /// Component for the parent map entity
-#[derive(Component)]
+#[derive(Component, Reflect, Default)]
+#[reflect(Component)]
 pub struct Map {
     pub width: usize,
     pub height: usize,
 }
 
+#[derive(Component, Reflect)]
+#[reflect(Component)]
+pub enum Tiles {
+    Single { pos: Pos },
+    Double { pos_a: Pos, pos_b: Pos },
+}
+
+impl Default for Tiles {
+    fn default() -> Self {
+        Tiles::Single {pos: Pos::default()}
+    }
+}
+
+/// Parent of all walls in the maze. For organization only.
+#[derive(Component, Reflect, Default)]
+#[reflect(Component)]
+pub struct Maze;
+
 /// Component to identify a wall
-#[derive(Component)]
+#[derive(Component, Reflect, Default)]
+#[reflect(Component)]
 pub struct Wall;
+
+/// Describes how a wall looks
+#[derive(Component, Reflect, Default)]
+#[reflect(Component)]
+pub struct WallStyle {
+    pub wall_type: WallType_,
+    pub rotation: Rotation,
+    pub is_corner: bool,
+}
+
+#[derive(Reflect, Default)]
+pub enum WallType_ {
+    #[default]
+    Inner,
+    Outer,
+    Ghost,
+}
+
+#[derive(Reflect, Serialize, Deserialize, Copy, Clone, Debug, Default, Eq, PartialEq)]
+pub enum Rotation {
+    #[default]
+    D0,
+    D90,
+    D180,
+    D270,
+}
 
 #[derive(Component, Deref)]
 pub struct PacmanSpawn(pub Vec3);
@@ -83,6 +137,26 @@ pub struct GhostCorner {
     pub ghost: Ghost,
     pub position: Pos,
 }
+
+/// A single tile of the ghost house
+#[derive(Component, Reflect, Default)]
+#[reflect(Component)]
+pub struct GhostHouseArea {
+    pub rotation: Rotation
+}
+
+/// Tile where pacman or a ghost can switch to another tunnel with the same index
+#[derive(Component, Reflect, Default)]
+#[reflect(Component)]
+pub struct Tunnel {
+    pub index: usize,
+    pub direction: Dir
+}
+
+/// Tile leading to a tunnel, which also slows down ghosts.
+#[derive(Component, Reflect, Default)]
+#[reflect(Component)]
+pub struct TunnelHallway;
 
 fn spawn_map(
     mut commands: Commands,
@@ -318,14 +392,6 @@ pub enum Element {
 pub enum WallType {
     Outer,
     Inner,
-}
-
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-pub enum Rotation {
-    D0,
-    D90,
-    D180,
-    D270,
 }
 
 impl Rotation {

@@ -7,7 +7,7 @@ use pad::Direction::*;
 use crate::game::direction::Dir::*;
 
 /// The x and y coordinates of some entity.
-#[derive(Serialize, Deserialize, Copy, Clone, Debug, Eq, PartialEq, Hash)]
+#[derive(Reflect, Serialize, Deserialize, Copy, Clone, Debug, Default, Eq, PartialEq, Hash)]
 pub struct Pos(Position);
 
 impl Pos {

@@ -13,6 +13,7 @@ use crate::game_state::GameStatePlugin;
 use crate::sound_effect::SoundEffectPlugin;
 use crate::system_sets::SystemSetsPlugin;
 use crate::animation::AnimationPlugin;
+use crate::map_creator::create_map;
 
 use crate::ui::UIPlugin;
 
@@ -26,9 +27,12 @@ mod ui;
 mod game;
 mod game_state;
 pub mod system_sets;
+mod map_creator;
+mod prelude;
 
 fn main() {
-    App::new()
+    let mut app = App::new();
+    app
         .add_plugins(DefaultPlugins
             .set(WindowPlugin {
                 primary_window: Some(Window {
@@ -55,5 +59,7 @@ fn main() {
             MusicPlugin,
             SoundEffectPlugin
         ))
-        .run()
+    ;
+    // create_map(&mut app);
+    app.run()
 }

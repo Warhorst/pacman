@@ -32,7 +32,7 @@ pub mod helper;
 mod schedule;
 pub mod state;
 pub mod target;
-mod position;
+pub mod position;
 
 /// Contains the entire gameplay logic for pacman.
 pub struct GamePlugin;
