@@ -60,6 +60,14 @@ fn main() {
             SoundEffectPlugin
         ))
     ;
-    // create_map(&mut app);
-    app.run()
+
+    if should_create_map() {
+        create_map(&mut app);
+    } else {
+        app.run();
+    }
+}
+
+fn should_create_map() -> bool {
+    std::env::args().into_iter().any(|arg| arg.contains("create_map"))
 }

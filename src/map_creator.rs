@@ -3,7 +3,9 @@ use std::io::Write;
 use bevy::prelude::*;
 use crate::prelude::*;
 
-pub fn create_map<'a>(commands: &'a mut App) {
+/// Create the default pacman map as a bevy scene.
+/// TODO ghost corners
+pub fn create_map(commands: &mut App) {
     let mut creator = MapCreator::new(28, 31, commands);
     creator.create();
     creator.save()
@@ -11,7 +13,7 @@ pub fn create_map<'a>(commands: &'a mut App) {
 
 macro_rules! corner {
     ($creator:expr, $rot:expr, O) => {
-        $creator.spawn((
+        $creator.spawn($creator.maze, (
             Wall,
             WallStyle {
                 wall_type: WallType_::Outer,
@@ -22,7 +24,7 @@ macro_rules! corner {
     };
 
     ($creator:expr, $rot:expr, I) => {
-        $creator.spawn((
+        $creator.spawn($creator.maze, (
             Wall,
             WallStyle {
                 wall_type: WallType_::Inner,
@@ -36,7 +38,7 @@ macro_rules! corner {
 macro_rules! wall {
     ($creator:expr, $amount:expr, $rot:expr, O) => {
         for _ in 0..$amount {
-            $creator.spawn((
+            $creator.spawn($creator.maze, (
                 Wall,
                 WallStyle {
                     wall_type: WallType_::Outer,
@@ -49,7 +51,7 @@ macro_rules! wall {
 
     ($creator:expr, $amount:expr, $rot:expr, I) => {
         for _ in 0..$amount {
-            $creator.spawn((
+            $creator.spawn($creator.maze, (
                 Wall,
                 WallStyle {
                     wall_type: WallType_::Inner,
@@ -64,7 +66,7 @@ macro_rules! wall {
 macro_rules! dot {
     ($creator:expr, $amount:expr) => {
         for _ in 0..$amount {
-            $creator.spawn((
+            $creator.spawn($creator.dot_spawns, (
                 // TODO remove the vec, use the tile instead
                 DotSpawn(Vec3::default()),
             ))
@@ -75,6 +77,7 @@ macro_rules! dot {
 macro_rules! energizer {
     ($creator:expr) => {
         $creator.spawn(
+            $creator.energizer_spawns,
             // TODO remove the vec, use the tile instead
             EnergizerSpawn(Vec3::default())
         );
@@ -93,6 +96,7 @@ macro_rules! ghost_house {
     ($creator:expr, $amount:expr) => {
         for _ in 0..$amount {
             $creator.spawn(
+                $creator.maze,
                 GhostHouseArea {rotation: D0}
             );
         }
@@ -102,11 +106,13 @@ macro_rules! ghost_house {
 macro_rules! tunnel_left {
     ($creator:expr) => {
         $creator.spawn(
+            $creator.maze,
             Tunnel {direction: Left, index: 0}
         );
 
         for _ in 0..5 {
             $creator.spawn(
+                $creator.maze,
                 TunnelHallway
             );
         }
@@ -117,11 +123,13 @@ macro_rules! tunnel_right {
     ($creator:expr) => {
         for _ in 0..5 {
             $creator.spawn(
+                $creator.maze,
                 TunnelHallway
             );
         }
 
         $creator.spawn(
+            $creator.maze,
             Tunnel {direction: Right, index: 0}
         );
     };
@@ -129,7 +137,8 @@ macro_rules! tunnel_right {
 
 macro_rules! fruit {
     ($creator:expr) => {
-        $creator.spawn(
+        $creator.spawn_double(
+            $creator.map,
             // TODO remove the vec, use the tile instead
             FruitSpawn(Vec3::default())
         );
@@ -138,7 +147,8 @@ macro_rules! fruit {
 
 macro_rules! pacman {
     ($creator:expr) => {
-        $creator.spawn(
+        $creator.spawn_double(
+            $creator.map,
             // TODO remove the vec, use the tile instead
             PacmanSpawn(Vec3::default())
         );
@@ -148,8 +158,6 @@ macro_rules! pacman {
 struct MapCreator<'a> {
     /// Max width (or column) of the map
     width: usize,
-    /// Max height (or row) of the map
-    height: usize,
     /// Current column in the spawn process
     current_column: usize,
     /// Current row in the spawn process
@@ -162,6 +170,10 @@ struct MapCreator<'a> {
     map: Entity,
     /// Parent entity of all walls
     maze: Entity,
+    /// Parent entity of all dot spawns
+    dot_spawns: Entity,
+    /// Parent entity of all energizer spawns
+    energizer_spawns: Entity
 }
 
 impl<'a> MapCreator<'a> {
@@ -169,16 +181,21 @@ impl<'a> MapCreator<'a> {
         let mut map_world = World::new();
         let map = map_world.spawn(Map { width, height }).id();
         let maze = map_world.spawn(Maze).id();
+        let dot_spawns = map_world.spawn(DotSpawns).id();
+        let energizer_spawns = map_world.spawn(EnergizerSpawns).id();
+
+        map_world.entity_mut(map).push_children(&[maze, dot_spawns, energizer_spawns]);
 
         MapCreator {
             width,
-            height,
             current_column: 0,
             current_row: 0,
             app,
             map_world,
             map,
             maze,
+            dot_spawns,
+            energizer_spawns
         }
     }
 
@@ -703,23 +720,27 @@ impl<'a> MapCreator<'a> {
         corner!(self, D180, O);
     }
 
-    fn spawn(&mut self, bundle: impl Bundle) {
-        self.map_world.spawn((
+    fn spawn(&mut self, parent: Entity, bundle: impl Bundle) {
+        let e = self.map_world.spawn((
             bundle,
             Tiles::Single { pos: Pos::new(self.current_column as isize, self.current_row as isize) }
-        ));
+        )).id();
+
+        self.map_world.entity_mut(parent).push_children(&[e]);
 
         self.cont()
     }
 
-    fn spawn_double(&mut self, bundle: impl Bundle) {
-        self.map_world.spawn((
+    fn spawn_double(&mut self, parent: Entity, bundle: impl Bundle) {
+        let e = self.map_world.spawn((
             bundle,
             Tiles::Double {
                 pos_a: Pos::new(self.current_column as isize, self.current_row as isize),
                 pos_b: Pos::new((self.current_column + 1) as isize, self.current_row as isize),
             }
-        ));
+        )).id();
+
+        self.map_world.entity_mut(parent).push_children(&[e]);
 
         self.cont();
         self.cont();

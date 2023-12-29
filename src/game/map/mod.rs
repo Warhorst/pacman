@@ -43,6 +43,12 @@ impl Plugin for MapPlugin {
             .register_type::<GhostHouseArea>()
             .register_type::<Tunnel>()
             .register_type::<TunnelHallway>()
+            .register_type::<EnergizerSpawns>()
+            .register_type::<EnergizerSpawn>()
+            .register_type::<DotSpawns>()
+            .register_type::<DotSpawn>()
+            .register_type::<FruitSpawn>()
+            .register_type::<PacmanSpawn>()
             .add_plugins((
                 TunnelPlugin,
                 JsonAssetPlugin::<RawMap>::new(&["map.json"])
@@ -111,25 +117,34 @@ pub enum Rotation {
     D270,
 }
 
-#[derive(Component, Deref)]
+/// Marks a tile to spawn pacman here
+#[derive(Component, Reflect, Deref, Default)]
+#[reflect(Component)]
 pub struct PacmanSpawn(pub Vec3);
 
 /// Parent component for all dot spawns (for organization only)
-#[derive(Component)]
+#[derive(Component, Reflect, Default)]
+#[reflect(Component)]
 pub struct DotSpawns;
 
 /// Coordinates where a dot can spawn
-#[derive(Component, Deref)]
+#[derive(Component, Reflect, Deref, Default)]
+#[reflect(Component)]
 pub struct DotSpawn(pub Vec3);
 
 /// Parent component for all energizer spawns (for organization only)
-#[derive(Component)]
+#[derive(Component, Reflect, Default)]
+#[reflect(Component)]
 pub struct EnergizerSpawns;
 
-#[derive(Component, Deref)]
+/// Marks a tile to spawn an energizer here.
+#[derive(Component, Reflect, Deref, Default)]
+#[reflect(Component)]
 pub struct EnergizerSpawn(pub Vec3);
 
-#[derive(Component, Deref)]
+/// Marks a tile to spawn a fruit here
+#[derive(Component, Reflect, Deref, Default)]
+#[reflect(Component)]
 pub struct FruitSpawn(pub Vec3);
 
 #[derive(Component)]
