@@ -32,3 +32,5 @@ pub const GHOST_DIMENSION: f32 = PACMAN_DIMENSION;
 
 pub const PACMAN_BASE_SPEED: f32 = FIELD_SIZE * 9.0;
 pub const GHOST_BASE_SPEED: f32 = PACMAN_BASE_SPEED;
+
+pub const MAP_SCENE_PATH: &'static str = "maps/map.scn.ron";

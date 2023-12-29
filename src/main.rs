@@ -6,6 +6,7 @@ use crate::prelude::*;
 use crate::animation::AnimationPlugin;
 
 use crate::map_creator::create_map;
+use crate::spawn::SpawnPlugin;
 
 use crate::ui::UIPlugin;
 
@@ -21,6 +22,7 @@ mod game_state;
 pub mod system_sets;
 mod map_creator;
 mod prelude;
+mod spawn;
 
 fn main() {
     let mut app = App::new();
@@ -40,6 +42,7 @@ fn main() {
         .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
         .add_plugins((
             GamePlugin,
+            SpawnPlugin,
             AssetPreloadPlugin::new(Setup(PreloadAssets), Setup(CreateSpriteSheets)),
             SpriteSheetPlugin::new(Setup(CreateSpriteSheets), Game(Start)),
             GameStatePlugin,

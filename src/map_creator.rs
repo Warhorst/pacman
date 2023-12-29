@@ -764,7 +764,7 @@ impl<'a> MapCreator<'a> {
 
         let type_registry = self.app.world.resource::<AppTypeRegistry>();
         let serialized_scene = scene.serialize_ron(type_registry).unwrap();
-        File::create("./map.ron")
+        File::create(format!("./assets/{MAP_SCENE_PATH}"))
             .and_then(|mut file| file.write(serialized_scene.as_bytes()))
             .expect("error while writing map to file");
     }

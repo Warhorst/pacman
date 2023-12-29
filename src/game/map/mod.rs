@@ -28,11 +28,17 @@ pub struct MapPlugin;
 impl Plugin for MapPlugin {
     fn build(&self, app: &mut App) {
         app
+            // TODO move the registrations to the correct places
+            .register_type::<Pos>()
+            .register_type::<pad::Position>()
+            .register_type::<Dir>()
             .register_type::<Map>()
             .register_type::<Tiles>()
             .register_type::<Maze>()
             .register_type::<Wall>()
             .register_type::<WallStyle>()
+            .register_type::<WallType_>()
+            .register_type::<Rotation>()
             .register_type::<GhostHouseArea>()
             .register_type::<Tunnel>()
             .register_type::<TunnelHallway>()

@@ -32,6 +32,8 @@ impl Plugin for GameStatePlugin {
 pub enum GameState {
     /// Perform necessary setup steps before the game can start
     Setup(Setup),
+    /// Spawn the maze
+    Spawn(Spawn),
     /// A group of states which represent different phases off the actual game (when you move pacman through the labyrinth)
     Game(Game),
 }
@@ -48,6 +50,16 @@ pub enum Setup {
     PreloadAssets,
     /// Create all sprite sheets from the preloaded assets
     CreateSpriteSheets
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum Spawn {
+    /// Load the map scene and spawn everything from it
+    SpawnMapScene,
+    /// Enhance the spawned entities with textures and more
+    EnhanceMap,
+    /// Spawn the ui of the game
+    SpawnUi
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
