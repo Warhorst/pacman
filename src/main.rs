@@ -2,17 +2,9 @@ use bevy::prelude::*;
 use bevy_asset_preload::AssetPreloadPlugin;
 use bevy_sprite_sheet::SpriteSheetPlugin;
 
-use crate::music::MusicPlugin;
-use crate::camera::CameraPlugin;
-use crate::constants::{WINDOW_HEIGHT, WINDOW_WIDTH};
-use crate::debug::DebugPlugin;
-use crate::game::GamePlugin;
-use crate::game_state::Game::Start;
-use crate::game_state::GameState::{CreateSpriteSheets, Game, Loading};
-use crate::game_state::GameStatePlugin;
-use crate::sound_effect::SoundEffectPlugin;
-use crate::system_sets::SystemSetsPlugin;
+use crate::prelude::*;
 use crate::animation::AnimationPlugin;
+
 use crate::map_creator::create_map;
 
 use crate::ui::UIPlugin;
@@ -48,8 +40,8 @@ fn main() {
         .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
         .add_plugins((
             GamePlugin,
-            AssetPreloadPlugin::new(Loading, CreateSpriteSheets),
-            SpriteSheetPlugin::new(CreateSpriteSheets, Game(Start)),
+            AssetPreloadPlugin::new(Setup(PreloadAssets), Setup(CreateSpriteSheets)),
+            SpriteSheetPlugin::new(Setup(CreateSpriteSheets), Game(Start)),
             GameStatePlugin,
             SystemSetsPlugin,
             AnimationPlugin,

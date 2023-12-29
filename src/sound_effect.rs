@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use std::time::Duration;
 
-pub(super)  struct SoundEffectPlugin;
+pub struct SoundEffectPlugin;
 
 impl Plugin for SoundEffectPlugin {
     fn build(&self, app: &mut App) {

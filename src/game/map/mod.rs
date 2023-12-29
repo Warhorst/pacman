@@ -10,19 +10,12 @@ use serde::{Deserialize, Serialize};
 
 use Rotation::*;
 
-use crate::constants::{DOT_Z, ENERGIZER_Z, FRUIT_Z, PACMAN_Z};
-use crate::game::ghosts::Ghost;
-use crate::game::ghosts::Ghost::{Blinky, Clyde, Inky, Pinky};
-use crate::game::helper::FromPositions;
+use crate::prelude::*;
+
 use crate::game::map::ghost_house::spawn_ghost_house;
 use crate::game::map::labyrinth::spawn_labyrinth;
 use crate::game::map::tunnel::{spawn_tunnel_hallways, spawn_tunnels, TunnelPlugin};
-use crate::animation::Animations;
-use crate::is;
-use crate::game_state::GameState::*;
-use crate::game_state::Game::*;
-use crate::game::direction::Dir;
-use crate::game::position::Pos;
+
 
 pub mod labyrinth;
 #[cfg(test)]
@@ -53,7 +46,7 @@ impl Plugin for MapPlugin {
                 TunnelPlugin,
                 JsonAssetPlugin::<RawMap>::new(&["map.json"])
             ))
-            .add_systems(OnExit(CreateSpriteSheets), spawn_map)
+            .add_systems(OnExit(Setup(CreateSpriteSheets)), spawn_map)
             .add_systems(OnEnter(Game(LevelTransition)), set_animation_to_blinking)
             .add_systems(OnExit(Game(LevelTransition)), set_animation_to_idle)
         ;

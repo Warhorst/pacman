@@ -5,6 +5,7 @@ use crate::game::interactions::{GhostWasEaten, PacmanWasHit};
 use crate::game::lives::Lives;
 use crate::game_state::Game::*;
 use crate::game_state::GameState::*;
+use crate::game_state::Setup::PreloadAssets;
 use crate::system_sets::UpdateGameState;
 use crate::ui::game_over_screen::EGameRestarted;
 
@@ -27,15 +28,26 @@ impl Plugin for GameStatePlugin {
 }
 
 /// The states of the games state machine.
-#[derive(States, Copy, Clone, Default, Eq, PartialEq, Hash, Debug)]
+#[derive(States, Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum GameState {
-    /// The startup state of the game. It will leave Loading when all assets are loaded.
-    #[default]
-    Loading,
-    /// Create sprite sheets from the loaded assets
-    CreateSpriteSheets,
+    /// Perform necessary setup steps before the game can start
+    Setup(Setup),
     /// A group of states which represent different phases off the actual game (when you move pacman through the labyrinth)
     Game(Game),
+}
+
+impl Default for GameState {
+    fn default() -> Self {
+        Setup(PreloadAssets)
+    }
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub enum Setup {
+    /// Start the preload of all assets of the game
+    PreloadAssets,
+    /// Create all sprite sheets from the preloaded assets
+    CreateSpriteSheets
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
