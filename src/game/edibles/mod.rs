@@ -1,9 +1,5 @@
 use bevy::prelude::*;
-use crate::game::edibles::dots::DotPlugin;
-use crate::game::edibles::energizer::EnergizerPlugin;
-use crate::game::edibles::fruit::FruitPlugin;
-use crate::game_state::GameState::*;
-use crate::game_state::Game::*;
+use crate::prelude::*;
 
 pub mod dots;
 pub mod fruit;
@@ -14,7 +10,6 @@ pub(in crate::game) struct EdiblePlugin;
 impl Plugin for EdiblePlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_event::<EAllEdiblesEaten>()
             .add_plugins((
                 DotPlugin,
                 EnergizerPlugin,
@@ -24,14 +19,6 @@ impl Plugin for EdiblePlugin {
         ;
     }
 }
-
-/// Component for everything in the maze that is edible.
-#[derive(Component)]
-pub struct Edible;
-
-/// Event that gets fired when all edibles are eaten (or at least gone), so the maze is empty
-#[derive(Event)]
-pub struct EAllEdiblesEaten;
 
 fn check_if_all_edibles_eaten(
     mut event_writer: EventWriter<EAllEdiblesEaten>,

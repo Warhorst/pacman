@@ -1,8 +1,6 @@
 use std::collections::HashMap;
 use bevy::prelude::*;
-use crate::game::edibles::fruit::Fruit;
-use crate::game::edibles::fruit::Fruit::*;
-use crate::game::level::Level;
+use crate::prelude::*;
 
 pub (in crate::game) struct SpecsPerLevelPlugin;
 

@@ -1,20 +1,20 @@
 use bevy::prelude::*;
 use bevy_sprite_sheet::{SpriteSheet, SpriteSheets};
 use crate::prelude::*;
-use crate::game::state::State;
+use crate::game::state::GhostState;
 
 pub(crate) fn update_ghost_appearance(
     energizer_timer: Option<Res<EnergizerTimer>>,
-    mut query: Query<(&Dir, &State, &mut Animations)>,
+    mut query: Query<(&Dir, &GhostState, &mut Animations)>,
 ) {
     for (direction, state, mut animations) in query.iter_mut() {
         match state {
-            State::Frightened => match energizer_timer {
+            GhostState::Frightened => match energizer_timer {
                 // animate a frightened ghost differently if the energizer timer is almost ending
                 Some(ref timer) if timer.remaining() < 2.0 => animations.change_animation_to("frightened_blinking"),
                 _ => animations.change_animation_to("frightened"),
             },
-            State::Eaten => {
+            GhostState::Eaten => {
                 animations.change_animation_to(match *direction {
                     Right => "eaten_right",
                     Left => "eaten_left",

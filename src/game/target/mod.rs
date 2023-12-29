@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use bevy::utils::{HashMap, HashSet};
 
 use crate::prelude::*;
-use crate::game::state::State;
+use crate::game::state::GhostState;
 
 mod spawned;
 mod eaten;
@@ -40,7 +40,7 @@ pub struct TargetComponents<'a> {
     target: &'a mut Target,
     direction: &'a mut Dir,
     transform: &'a Transform,
-    state: &'a State,
+    state: &'a GhostState,
 }
 
 fn set_target(

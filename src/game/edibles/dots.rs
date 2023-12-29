@@ -2,21 +2,13 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy_inspector_egui::quick::ResourceInspectorPlugin;
 
-use crate::constants::DOT_DIMENSION;
-use crate::game::edibles::Edible;
-use crate::game::interactions::DotWasEaten;
-use crate::game_state::GameState::*;
-use crate::game_state::Game::*;
-use crate::game::map::DotSpawn;
-use crate::sound_effect::SoundEfect;
-use crate::system_sets::ProcessIntersectionsWithPacman;
+use crate::prelude::*;
 
 pub struct DotPlugin;
 
 impl Plugin for DotPlugin {
     fn build(&self, app: &mut App) {
         app
-            .register_type::<EatenDots>()
             .add_plugins(ResourceInspectorPlugin::<EatenDots>::default())
             .add_systems(
                 OnEnter(Game(Start)),
@@ -161,47 +153,5 @@ fn despawn_dots(
 ) {
     for e in &query {
         commands.entity(e).despawn_recursive();
-    }
-}
-
-/// Parent component for all dots (for organization only)
-#[derive(Component)]
-pub struct Dots;
-
-#[derive(Component)]
-pub struct Dot;
-
-#[derive(Resource, Default, Reflect)]
-pub struct EatenDots {
-    max: usize,
-    eaten: usize,
-}
-
-impl EatenDots {
-    fn new(num_dots: usize) -> Self {
-        EatenDots {
-            max: num_dots,
-            eaten: 0,
-        }
-    }
-
-    pub fn increment(&mut self) {
-        self.eaten += 1
-    }
-
-    pub fn get_eaten(&self) -> usize {
-        self.eaten
-    }
-
-    pub fn get_remaining(&self) -> usize {
-        self.max - self.eaten
-    }
-
-    pub fn get_max(&self) -> usize {
-        self.max
-    }
-
-    fn reset(&mut self) {
-        self.eaten = 0
     }
 }

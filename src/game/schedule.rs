@@ -1,11 +1,6 @@
 use bevy::prelude::*;
 use bevy::utils::{Duration, HashMap};
-use crate::game::edibles::energizer::EnergizerTimer;
-use crate::game_state::GameState::*;
-use crate::game_state::Game::*;
-use crate::game::level::Level;
-use crate::game::state::State;
-use crate::game::state::State::*;
+use crate::prelude::*;
 
 pub(in crate::game) struct SchedulePlugin;
 
@@ -133,7 +128,7 @@ impl Schedule {
         }
     }
 
-    pub fn current_state(&self) -> State {
+    pub fn current_state(&self) -> GhostState {
         self.phases[self.current_phase_index].state
     }
 
@@ -157,19 +152,19 @@ impl Schedule {
 
 #[derive(Clone)]
 pub struct Phase {
-    state: State,
+    state: GhostState,
     time: Option<f32>,
 }
 
 impl Phase {
-    fn for_seconds(state: State, seconds: f32) -> Self {
+    fn for_seconds(state: GhostState, seconds: f32) -> Self {
         Phase {
             state,
             time: Some(seconds),
         }
     }
 
-    fn infinite(state: State) -> Self {
+    fn infinite(state: GhostState) -> Self {
         Phase {
             state,
             time: None,

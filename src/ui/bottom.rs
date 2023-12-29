@@ -1,14 +1,7 @@
 use bevy::prelude::*;
+use bevy::prelude::PositionType::Absolute;
 use bevy::prelude::Val::Percent;
-use bevy::ui::PositionType::Absolute;
-use crate::game::edibles::fruit::Fruit;
-use crate::game::edibles::fruit::Fruit::*;
-use crate::game::level::Level;
-use crate::game_state::GameState::*;
-use crate::game_state::Game::*;
-use crate::game::lives::Lives;
-use crate::game::specs_per_level::SpecsPerLevel;
-use crate::game_state::in_game;
+use crate::prelude::*;
 
 pub(in crate::ui) struct BottomUIPlugin;
 
@@ -190,19 +183,6 @@ fn spawn_ui_fruit(
             ..default()
         }
     )).id()
-}
-
-fn get_texture_for_fruit(fruit: &Fruit, asset_server: &AssetServer) -> Handle<Image> {
-    asset_server.load(&format!("textures/fruits/{}.png", match fruit {
-        Cherry => "cherry",
-        Strawberry => "strawberry",
-        Peach => "peach",
-        Apple => "apple",
-        Grapes => "grapes",
-        Galaxian => "galaxian",
-        Bell => "bell",
-        Key => "key"
-    }))
 }
 
 /// Update the lives ui by despawning it and respawn it with the updated amount of lives.

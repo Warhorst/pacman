@@ -26,9 +26,9 @@ impl Plugin for StatePlugin {
     }
 }
 
-// TODO rename, because it is ambiguous
+/// The current state of a ghost
 #[derive(Component, Copy, Clone, Debug, Eq, PartialEq)]
-pub enum State {
+pub enum GhostState {
     Scatter,
     Chase,
     Frightened,
@@ -41,7 +41,7 @@ pub enum State {
 struct StateUpdateComponents<'a> {
     entity: Entity,
     ghost: &'a Ghost,
-    state: &'a mut State,
+    state: &'a mut GhostState,
     target: &'a mut Target,
     direction: &'a mut Dir,
     transform: &'a Transform,
@@ -198,7 +198,7 @@ fn process_eaten(
     }
 }
 
-impl std::fmt::Display for State {
+impl std::fmt::Display for GhostState {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self)
     }

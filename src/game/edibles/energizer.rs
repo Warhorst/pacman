@@ -1,23 +1,11 @@
-use std::time::Duration;
 use bevy::prelude::*;
-
-use crate::constants::ENERGIZER_DIMENSION;
-use crate::game::edibles::Edible;
-use crate::game::interactions::EnergizerWasEaten;
-use crate::game_state::GameState::*;
-use crate::game_state::Game::*;
-use crate::game::level::Level;
-use crate::game::map::EnergizerSpawn;
-use crate::game::specs_per_level::SpecsPerLevel;
-use crate::game_state::in_game;
-use crate::system_sets::ProcessIntersectionsWithPacman;
+use crate::prelude::*;
 
 pub struct EnergizerPlugin;
 
 impl Plugin for EnergizerPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_event::<EnergizerOver>()
             .add_systems(
                 OnEnter(Game(Start)),
                 spawn_energizer,
@@ -57,44 +45,6 @@ impl Plugin for EnergizerPlugin {
                     .run_if(in_game),
             )
         ;
-    }
-}
-
-/// Parent component for all energizer (for organization only)
-#[derive(Component)]
-pub struct Energizers;
-
-/// An energizer that allows pacman to eat ghosts.
-#[derive(Component)]
-pub struct Energizer;
-
-/// Fired when an energizer is no longer active
-#[derive(Event, Copy, Clone)]
-pub struct EnergizerOver;
-
-#[derive(Resource)]
-pub struct EnergizerTimer {
-    timer: Timer,
-}
-
-impl EnergizerTimer {
-    fn start(seconds: f32) -> Self {
-        EnergizerTimer {
-            timer: Timer::from_seconds(seconds, TimerMode::Once)
-        }
-    }
-
-    pub fn tick(&mut self, delta: Duration) {
-        self.timer.tick(delta);
-    }
-
-    pub fn is_finished(&self) -> bool {
-        self.timer.finished()
-    }
-
-    /// Return the remaining seconds for this timer (if the timer is active, else None)
-    pub fn remaining(&self) -> f32 {
-        self.timer.duration().as_secs_f32() - self.timer.elapsed_secs()
     }
 }
 
@@ -193,8 +143,7 @@ fn animate_energizers(
         for mut vis in &mut query {
             *vis = match *vis {
                 Visibility::Visible => Visibility::Hidden,
-                Visibility::Hidden => Visibility::Visible,
-                _ => *vis
+                _ => Visibility::Visible
             }
         }
     }

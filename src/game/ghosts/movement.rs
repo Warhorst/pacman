@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use crate::prelude::*;
-use crate::game::state::State;
+use crate::game::state::GhostState;
 
 pub struct MovePlugin;
 
@@ -35,7 +35,7 @@ fn move_ghosts(
 fn move_only_not_currently_eaten_ghosts(
     time: Res<Time>,
     currently_eaten_ghost: Res<CurrentlyEatenGhost>,
-    mut query: Query<(Entity, &Dir, &State, &mut Target, &mut Transform, &Speed)>,
+    mut query: Query<(Entity, &Dir, &GhostState, &mut Target, &mut Transform, &Speed)>,
 ) {
     for (entity, direction, state, mut target, mut transform, speed) in query.iter_mut() {
         if entity == **currently_eaten_ghost || *state != Eaten { continue; }

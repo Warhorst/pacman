@@ -1,11 +1,5 @@
 use bevy::prelude::*;
-
-use crate::game::edibles::EAllEdiblesEaten;
-use crate::game::interactions::{GhostWasEaten, PacmanWasHit};
-use crate::game::lives::Lives;
-use crate::game_state::Game::*;
-use crate::game_state::GameState::*;
-use crate::game_state::Setup::PreloadAssets;
+use crate::prelude::*;
 use crate::system_sets::UpdateGameState;
 use crate::ui::game_over_screen::EGameRestarted;
 

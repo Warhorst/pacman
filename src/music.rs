@@ -1,12 +1,6 @@
 use bevy::audio::{AudioSink, Volume};
 use bevy::prelude::*;
-use crate::game_state::GameState::*;
-use crate::game::edibles::dots::EatenDots;
-use crate::game::edibles::energizer::EnergizerTimer;
-use crate::game::ghosts::Ghost;
-use crate::game_state::Game::*;
-use crate::game::state::State;
-use crate::game_state::in_game;
+use crate::prelude::*;
 use crate::music::CurrentTrack::*;
 use crate::sound_effect::SoundEfect;
 
@@ -111,14 +105,14 @@ fn update_background_music(
     mut background_music: ResMut<BackgroundMusic>,
     energizer_timer_opt: Option<Res<EnergizerTimer>>,
     eaten_dots: Res<EatenDots>,
-    query: Query<&State, With<Ghost>>,
+    query: Query<&GhostState, With<Ghost>>,
 ) {
-    let eaten_ghosts = query.iter().filter(|s| s == &&State::Eaten).count();
+    let eaten_ghosts = query.iter().filter(|s| s == &&GhostState::Eaten).count();
 
     if eaten_ghosts > 0 {
-        background_music.current_track = Eaten
+        background_music.current_track = EatenTrack
     } else if energizer_timer_opt.is_some() {
-        background_music.current_track = Frightened
+        background_music.current_track = FrightenedTrack
     } else {
         background_music.current_track = match eaten_dots.get_eaten() as f32 / eaten_dots.get_max() as f32 {
             r if (0.0..0.25).contains(&r) => Siren1,
@@ -158,8 +152,8 @@ fn play_track(
         Siren2 => mixer.play_siren_2(),
         Siren3 => mixer.play_siren_3(),
         Siren4 => mixer.play_siren_4(),
-        Frightened => mixer.play_frightened(),
-        Eaten => mixer.play_eaten(),
+        FrightenedTrack => mixer.play_frightened(),
+        EatenTrack => mixer.play_eaten(),
     }
 }
 
@@ -243,7 +237,7 @@ enum CurrentTrack {
     /// The siren sound, when the remaining dots are between 25% and 0%
     Siren4,
     /// The music that plays when pacman ate an energizer and the ghosts turn blue
-    Frightened,
+    FrightenedTrack,
     /// The sound that plays when an eaten ghost returns to the ghost house
-    Eaten,
+    EatenTrack,
 }

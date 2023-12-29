@@ -1,13 +1,7 @@
 use std::time::Duration;
 use bevy::prelude::*;
 
-use crate::constants::{FONT, POINTS_PER_DOT, POINTS_PER_ENERGIZER, POINTS_PER_GHOST, TEXT_Z};
-use crate::game::edibles::energizer::EnergizerOver;
-use crate::game::interactions::{DotWasEaten, EnergizerWasEaten, FruitWasEaten, GhostWasEaten};
-use crate::game_state::GameState::*;
-use crate::game_state::Game::*;
-use crate::game::edibles::fruit::Fruit::*;
-use crate::system_sets::ProcessIntersectionsWithPacman;
+use crate::prelude::*;
 
 pub(in crate::game) struct ScorePlugin;
 

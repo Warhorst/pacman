@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use crate::prelude::*;
-use crate::game::state::State;
+use crate::game::state::GhostState;
 
 pub(in crate::game) struct InteractionsPlugin;
 
@@ -55,7 +55,7 @@ fn pacman_hits_ghost(
     mut killed_event_writer: EventWriter<PacmanWasHit>,
     mut eat_event_writer: EventWriter<GhostWasEaten>,
     pacman_query: Query<&Transform, With<Pacman>>,
-    ghost_query: Query<(Entity, &Transform, &State), With<Ghost>>,
+    ghost_query: Query<(Entity, &Transform, &GhostState), With<Ghost>>,
 ) {
     for pacman_transform in &pacman_query {
         for (entity, ghost_transform, state) in &ghost_query {
@@ -63,11 +63,11 @@ fn pacman_hits_ghost(
             let ghost_pos = Pos::from_vec3(ghost_transform.translation);
 
             if pacman_pos == ghost_pos {
-                if let State::Scatter | State::Chase = state {
+                if let GhostState::Scatter | GhostState::Chase = state {
                     killed_event_writer.send(PacmanWasHit)
                 }
 
-                if let State::Frightened = state {
+                if let GhostState::Frightened = state {
                     eat_event_writer.send(GhostWasEaten(entity, *ghost_transform));
                     commands.insert_resource(CurrentlyEatenGhost(entity))
                 }

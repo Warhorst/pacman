@@ -1,17 +1,5 @@
-use std::time::Duration;
 use bevy::prelude::*;
-use crate::game::level::Level;
-use Fruit::*;
-use crate::constants::FRUIT_DIMENSION;
-use crate::game::edibles::dots::EatenDots;
-use crate::game::edibles::Edible;
-use crate::game::interactions::{DotWasEaten, FruitWasEaten};
-use crate::game_state::GameState::*;
-use crate::game_state::Game::*;
-use crate::game::map::FruitSpawn;
-use crate::game::specs_per_level::SpecsPerLevel;
-use crate::sound_effect::SoundEfect;
-use crate::system_sets::ProcessIntersectionsWithPacman;
+use crate::prelude::*;
 
 pub struct FruitPlugin;
 
@@ -44,28 +32,6 @@ impl Plugin for FruitPlugin {
                 despawn_fruit_and_timer
             )
         ;
-    }
-}
-
-#[derive(Copy, Clone, Component, Debug, Default, Eq, PartialEq)]
-pub enum Fruit {
-    #[default]
-    Cherry,
-    Strawberry,
-    Peach,
-    Apple,
-    Grapes,
-    Galaxian,
-    Bell,
-    Key,
-}
-
-#[derive(Deref, DerefMut, Resource)]
-pub struct FruitDespawnTimer(Timer);
-
-impl FruitDespawnTimer {
-    fn new() -> Self {
-        FruitDespawnTimer(Timer::new(Duration::from_secs_f32(9.5), TimerMode::Once))
     }
 }
 
@@ -168,17 +134,4 @@ fn play_fruit_eaten_sound_when_fruit_was_eaten(
             }
         ));
     }
-}
-
-fn get_texture_for_fruit(fruit: &Fruit, asset_server: &AssetServer) -> Handle<Image> {
-    asset_server.load(&format!("textures/fruits/{}.png", match fruit {
-        Cherry => "cherry",
-        Strawberry => "strawberry",
-        Peach => "peach",
-        Apple => "apple",
-        Grapes => "grapes",
-        Galaxian => "galaxian",
-        Bell => "bell",
-        Key => "key"
-    }))
 }
