@@ -1,10 +1,6 @@
 use bevy::prelude::*;
 use crate::game::target::TargetSetter;
-use crate::game::helper::XYEqual;
-use crate::constants::FIELD_SIZE;
-use crate::game::ghosts::Ghost::{Blinky, Pinky};
-use crate::game::direction::Dir;
-use crate::game::direction::Dir::*;
+use crate::prelude::*;
 
 impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
     /// Determine the next target coordinates for a ghost when in "Spawned" state.

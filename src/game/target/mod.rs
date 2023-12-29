@@ -4,22 +4,8 @@ use bevy::ecs::query::WorldQuery;
 use bevy::prelude::*;
 use bevy::utils::{HashMap, HashSet};
 
-use crate::constants::FIELD_SIZE;
-use crate::game::direction::Dir;
-use crate::game::direction::Dir::*;
-use crate::game::ghost_house_gate::GhostHouseGate;
-use crate::game::ghosts::Ghost;
-use crate::game::ghosts::Ghost::*;
-use crate::game::map::{GhostCorner, Wall};
-use crate::game::map::ghost_house::GhostSpawn;
-use crate::game::pacman::Pacman;
-use crate::game::position::Pos;
-use crate::game::random::Random;
+use crate::prelude::*;
 use crate::game::state::State;
-use crate::game::state::State::*;
-use crate::game_state::Game::*;
-use crate::game_state::GameState::*;
-use crate::system_sets::SetTarget;
 
 mod spawned;
 mod eaten;

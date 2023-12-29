@@ -11,8 +11,8 @@ use crate::sound_effect::SoundEfect;
 
 mod movement;
 mod spawn;
-mod textures;
-mod edible_eaten;
+pub(crate) mod textures;
+pub(crate) mod edible_eaten;
 
 pub(in crate::game) struct PacmanPlugin;
 

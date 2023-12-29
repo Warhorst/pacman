@@ -1,15 +1,6 @@
 use bevy::prelude::*;
-
-use crate::game::ghosts::CurrentlyEatenGhost;
-use crate::game::speed::Speed;
+use crate::prelude::*;
 use crate::game::state::State;
-use crate::game::state::State::Eaten;
-use crate::game::target::Target;
-use crate::game_state::Game::*;
-use crate::game_state::GameState::*;
-use crate::system_sets::MoveEntities;
-use crate::game::direction::Dir;
-use crate::game::direction::Dir::*;
 
 pub struct MovePlugin;
 

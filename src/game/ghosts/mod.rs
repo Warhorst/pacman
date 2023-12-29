@@ -14,7 +14,7 @@ use crate::sound_effect::SoundEfect;
 
 pub mod movement;
 pub mod spawn;
-mod textures;
+pub(crate) mod textures;
 
 pub(in crate::game) struct GhostPlugin;
 

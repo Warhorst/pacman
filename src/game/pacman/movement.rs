@@ -1,15 +1,9 @@
 use bevy::ecs::query::WorldQuery;
 use bevy::prelude::*;
 use bevy::sprite::collide_aabb::collide;
-
-use crate::constants::{FIELD_SIZE, PACMAN_Z, WALL_DIMENSION};
-use crate::game::direction::Dir;
-use crate::game::direction::Dir::*;
-use crate::game::map::Wall;
 use crate::game::pacman::edible_eaten::EdibleEatenStop;
-use crate::game::pacman::Pacman;
-use crate::game::position::Pos;
-use crate::game::speed::Speed;
+
+use crate::prelude::*;
 
 #[derive(WorldQuery)]
 #[world_query(mutable)]

@@ -4,6 +4,7 @@ use bevy_sprite_sheet::SpriteSheetPlugin;
 
 use crate::prelude::*;
 use crate::animation::AnimationPlugin;
+use crate::core::CorePlugin;
 
 use crate::map_creator::create_map;
 use crate::spawn::SpawnPlugin;
@@ -23,6 +24,7 @@ pub mod system_sets;
 mod map_creator;
 mod prelude;
 mod spawn;
+mod core;
 
 fn main() {
     let mut app = App::new();
@@ -41,6 +43,7 @@ fn main() {
         )
         .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
         .add_plugins((
+            CorePlugin,
             GamePlugin,
             SpawnPlugin,
             AssetPreloadPlugin::new(Setup(PreloadAssets), Setup(CreateSpriteSheets)),

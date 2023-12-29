@@ -1,10 +1,8 @@
 use bevy::prelude::*;
 use pad::Position;
-use serde::{Deserialize, Serialize};
-use crate::constants::FIELD_DIMENSION;
-use crate::game::direction::Dir;
 use pad::Direction::*;
-use crate::game::direction::Dir::*;
+use serde::{Deserialize, Serialize};
+use crate::prelude::*;
 
 /// The x and y coordinates of some entity.
 #[derive(Reflect, Serialize, Deserialize, Copy, Clone, Debug, Default, Eq, PartialEq, Hash)]

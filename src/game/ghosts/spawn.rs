@@ -1,15 +1,7 @@
 use bevy::prelude::*;
 use bevy_sprite_sheet::SpriteSheets;
-
-use crate::constants::{GHOST_BASE_SPEED, GHOST_DIMENSION};
-use crate::game::direction::Dir::*;
+use crate::prelude::*;
 use crate::game::state::State;
-use crate::game::target::Target;
-use crate::game::ghosts::textures::create_animations_for_ghost;
-use crate::game::level::Level;
-use crate::game::map::ghost_house::GhostSpawn;
-use crate::game::specs_per_level::SpecsPerLevel;
-use crate::game::speed::Speed;
 
 pub fn spawn_ghosts(
     mut commands: Commands,

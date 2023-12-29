@@ -1,17 +1,7 @@
 use bevy::prelude::*;
 use bevy_sprite_sheet::{SpriteSheet, SpriteSheets};
 
-use crate::animation::{Animation, Animations};
-use crate::constants::{BLINKY_Z, CLYDE_Z, INKY_Z, PINKY_Z, WALL_DIMENSION};
-use crate::game::direction::Dir;
-use crate::game::direction::Dir::*;
-use crate::game::ghosts::Ghost;
-use crate::game::ghosts::Ghost::*;
-use crate::game::helper::FromPositions;
-use crate::game::map::{Element, Rotation, TileMap, Wall};
-use crate::game::map::Rotation::{D0, D180, D270, D90};
-use crate::game::position::Pos;
-use crate::is;
+use crate::prelude::*;
 
 /// Parent component for everything related to the ghost house
 #[derive(Component)]

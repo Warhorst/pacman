@@ -1,14 +1,6 @@
 use bevy::prelude::*;
 use bevy_sprite_sheet::SpriteSheets;
-
-use crate::constants::{PACMAN_BASE_SPEED, PACMAN_DIMENSION};
-use crate::game::direction::Dir::*;
-use crate::game::level::Level;
-use crate::game::map::PacmanSpawn;
-use crate::game::pacman::Pacman;
-use crate::game::pacman::textures::create_pacman_animations;
-use crate::game::specs_per_level::SpecsPerLevel;
-use crate::game::speed::Speed;
+use crate::prelude::*;
 
 pub(crate) fn spawn_pacman(
     mut commands: Commands,

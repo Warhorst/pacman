@@ -2,21 +2,9 @@ use std::fmt::Formatter;
 use bevy::ecs::event::Event;
 use bevy::ecs::query::WorldQuery;
 use bevy::prelude::*;
-use crate::game::direction::Dir;
-
-use crate::game::edibles::energizer::EnergizerOver;
-use crate::game_state::GameState::*;
-use crate::game_state::Game::*;
 use crate::game::target::Target;
-use crate::game::ghosts::Ghost;
+use crate::prelude::*;
 use crate::game::schedule::Schedule;
-use crate::game::interactions::{EnergizerWasEaten, GhostWasEaten};
-use crate::game::helper::XYEqual;
-use crate::game::ghosts::Ghost::{Blinky, Pinky};
-use crate::game::state::State::*;
-use crate::game::map::ghost_house::GhostSpawn;
-use crate::game::position::Pos;
-use crate::system_sets::SetState;
 
 pub(in crate::game) struct StatePlugin;
 
@@ -38,6 +26,7 @@ impl Plugin for StatePlugin {
     }
 }
 
+// TODO rename, because it is ambiguous
 #[derive(Component, Copy, Clone, Debug, Eq, PartialEq)]
 pub enum State {
     Scatter,

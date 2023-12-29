@@ -1,15 +1,6 @@
 use bevy::prelude::*;
-
-use crate::game::edibles::dots::{Dot, EatenDots};
-use crate::game::edibles::energizer::Energizer;
-use crate::game::edibles::fruit::{Fruit, FruitDespawnTimer};
-use crate::game::ghosts::{CurrentlyEatenGhost, Ghost};
-use crate::game::pacman::Pacman;
-use crate::game::position::Pos;
+use crate::prelude::*;
 use crate::game::state::State;
-use crate::game_state::Game::*;
-use crate::game_state::GameState::*;
-use crate::system_sets::DetectIntersectionsWithPacman;
 
 pub(in crate::game) struct InteractionsPlugin;
 

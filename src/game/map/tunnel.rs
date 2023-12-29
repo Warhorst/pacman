@@ -1,14 +1,5 @@
 use bevy::prelude::*;
-use crate::constants::{TUNNEL_DIMENSION, TUNNEL_Z};
-use crate::game::direction::Dir;
-use crate::game::map::{Element, TileMap};
-use crate::game::ghosts::Ghost;
-use crate::game::pacman::Pacman;
-use crate::game::helper::SetXY;
-use crate::is;
-use crate::game_state::GameState::*;
-use crate::game_state::Game::*;
-use crate::game::position::Pos;
+use crate::prelude::*;
 
 pub struct TunnelPlugin;
 

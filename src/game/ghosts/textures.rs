@@ -1,11 +1,6 @@
 use bevy::prelude::*;
 use bevy_sprite_sheet::{SpriteSheet, SpriteSheets};
-use crate::animation::{Animation, Animations};
-use crate::game::direction::Dir;
-use crate::game::direction::Dir::*;
-use crate::game::edibles::energizer::EnergizerTimer;
-use crate::game::ghosts::Ghost;
-use crate::game::ghosts::Ghost::*;
+use crate::prelude::*;
 use crate::game::state::State;
 
 pub(crate) fn update_ghost_appearance(

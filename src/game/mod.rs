@@ -27,12 +27,10 @@ pub mod map;
 pub mod edibles;
 pub mod pacman;
 pub mod ghosts;
-pub mod direction;
 pub mod helper;
 mod schedule;
 pub mod state;
 pub mod target;
-pub mod position;
 
 /// Contains the entire gameplay logic for pacman.
 pub struct GamePlugin;

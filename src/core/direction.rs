@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use pad::Direction;
 use pad::Direction::*;
 use serde::{Deserialize, Serialize};
-use crate::game::direction::Dir::*;
+use crate::prelude::*;
 
 /// The direction some entity is currently moving to
 #[derive(Component, Reflect, Serialize, Deserialize, Copy, Clone, Debug, Default, Eq, PartialEq)]

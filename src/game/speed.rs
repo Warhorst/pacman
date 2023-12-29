@@ -1,19 +1,7 @@
 use bevy::ecs::query::WorldQuery;
 use bevy::prelude::*;
-
-use crate::constants::{GHOST_BASE_SPEED, PACMAN_BASE_SPEED};
-use crate::game::edibles::dots::EatenDots;
-use crate::game::edibles::energizer::EnergizerTimer;
-use crate::game::ghosts::Ghost;
-use crate::game::ghosts::Ghost::*;
-use crate::game::level::Level;
-use crate::game::map::tunnel::{Tunnel, TunnelHallway};
-use crate::game::pacman::Pacman;
-use crate::game::position::Pos;
-use crate::game::specs_per_level::SpecsPerLevel;
+use crate::prelude::*;
 use crate::game::state::State;
-use crate::game_state::Game::*;
-use crate::game_state::GameState::*;
 
 pub(in crate::game) struct SpeedPlugin;
 

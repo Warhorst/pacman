@@ -1,11 +1,7 @@
 use bevy::prelude::*;
 use bevy::utils::HashMap;
 use bevy_sprite_sheet::{SpriteSheet, SpriteSheets};
-
-use crate::animation::{Animation, Animations};
-use crate::constants::WALL_DIMENSION;
-use crate::game::map::{Element, Rotation, TileMap, Wall, WallType};
-use crate::game::position::Pos;
+use crate::prelude::*;
 
 #[derive(Component)]
 pub struct Labyrinth;
