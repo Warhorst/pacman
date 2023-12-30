@@ -24,16 +24,6 @@ impl Plugin for StatePlugin {
     }
 }
 
-/// The current state of a ghost
-#[derive(Component, Reflect, Copy, Clone, Debug, Eq, PartialEq)]
-pub enum GhostState {
-    Scatter,
-    Chase,
-    Frightened,
-    Eaten,
-    Spawned,
-}
-
 #[derive(WorldQuery)]
 #[world_query(mutable)]
 struct StateUpdateComponents<'a> {

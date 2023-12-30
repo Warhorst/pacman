@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 use crate::prelude::*;
-use crate::game::state::GhostState;
 
 pub(in crate::game) struct InteractionsPlugin;
 

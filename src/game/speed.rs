@@ -1,25 +1,22 @@
 use bevy::ecs::query::WorldQuery;
 use bevy::prelude::*;
 use crate::prelude::*;
-use crate::game::state::GhostState;
 
 pub(in crate::game) struct SpeedPlugin;
 
 impl Plugin for SpeedPlugin {
     fn build(&self, app: &mut App) {
         app
-            .register_type::<Speed>()
-            .add_systems(Update, (
-                update_ghost_speed,
-                update_pacman_speed
-            ).run_if(in_state(Game(Running))))
+            .add_systems(
+                Update,
+                (
+                    update_ghost_speed,
+                    update_pacman_speed
+                ).run_if(in_state(Game(Running))),
+            )
         ;
     }
 }
-
-/// The current speed of a moving entity
-#[derive(Copy, Clone, Default, Component, Deref, DerefMut, Reflect)]
-pub struct Speed(pub f32);
 
 #[derive(WorldQuery)]
 #[world_query(mutable)]
@@ -58,11 +55,11 @@ fn update_blinky_speed(
     let spec = specs_per_level.get_for(&level);
     let remaining_dots = eaten_dots.get_remaining();
 
-    if *comps.state == GhostState::Eaten {
+    if *comps.state == Eaten {
         *comps.speed = Speed(GHOST_BASE_SPEED * 2.0)
     } else if is_in_tunnel(&comps.transform, tunnel_query) {
         *comps.speed = Speed(GHOST_BASE_SPEED * spec.ghost_tunnel_speed_modifier);
-    } else if *comps.state == GhostState::Frightened {
+    } else if *comps.state == Frightened {
         *comps.speed = Speed(GHOST_BASE_SPEED * spec.ghost_frightened_speed_modifier)
     } else if remaining_dots <= spec.elroy_2_dots_left {
         *comps.speed = Speed(GHOST_BASE_SPEED * spec.elroy_2_speed_modifier)
@@ -81,11 +78,11 @@ fn update_non_blinky_speed(
 ) {
     let spec = specs_per_level.get_for(&level);
 
-    if *comps.state == GhostState::Eaten {
+    if *comps.state == Eaten {
         *comps.speed = Speed(GHOST_BASE_SPEED * 2.0)
     } else if is_in_tunnel(&comps.transform, tunnel_query) {
         *comps.speed = Speed(GHOST_BASE_SPEED * spec.ghost_tunnel_speed_modifier);
-    } else if *comps.state == GhostState::Frightened {
+    } else if *comps.state == Frightened {
         *comps.speed = Speed(GHOST_BASE_SPEED * spec.ghost_frightened_speed_modifier)
     } else {
         *comps.speed = Speed(GHOST_BASE_SPEED * spec.ghost_normal_speed_modifier)

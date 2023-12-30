@@ -5,7 +5,6 @@ use bevy::prelude::*;
 use bevy::utils::{HashMap, HashSet};
 
 use crate::prelude::*;
-use crate::game::state::GhostState;
 
 mod spawned;
 mod eaten;

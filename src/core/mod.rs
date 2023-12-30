@@ -3,6 +3,7 @@ use pad::Position;
 
 use crate::core::edibles::EdiblesPlugin;
 use crate::core::ghost_schedule::GhostSchedulePlugin;
+use crate::core::ghost_state::GhostStatePlugin;
 use crate::core::ghosts::GhostPlugin;
 use crate::core::interactions::InteractionsPlugin;
 use crate::core::level::LevelPlugin;
@@ -11,6 +12,7 @@ use crate::core::map::MapPlugin;
 use crate::core::pacman::PacmanPlugin;
 use crate::core::score::ScorePlugin;
 use crate::core::specs_per_level::SpecsPerLevelPlugin;
+use crate::core::speed::SpeedPlugin;
 use crate::core::target::TargetPlugin;
 use crate::prelude::*;
 
@@ -30,6 +32,8 @@ pub mod random;
 pub mod ghost_schedule;
 pub mod score;
 pub mod specs_per_level;
+pub mod speed;
+pub mod ghost_state;
 
 pub(super) struct CorePlugin;
 
@@ -50,7 +54,9 @@ impl Plugin for CorePlugin {
                 LivesPlugin,
                 GhostSchedulePlugin,
                 ScorePlugin,
-                SpecsPerLevelPlugin
+                SpecsPerLevelPlugin,
+                SpeedPlugin,
+                GhostStatePlugin
             ))
         ;
     }
