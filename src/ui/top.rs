@@ -1,11 +1,7 @@
 use std::time::Duration;
 use bevy::prelude::*;
 use bevy::prelude::Val::Percent;
-use crate::constants::FONT;
-use crate::game_state::GameState::*;
-use crate::game_state::Game::*;
-use crate::game::score::Score;
-use crate::game_state::in_game;
+use crate::prelude::*;
 
 pub(in crate::ui) struct TopUIPlugin;
 

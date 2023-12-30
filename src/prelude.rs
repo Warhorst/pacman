@@ -31,3 +31,4 @@ pub use crate::core::ghost_house_gate::*;
 pub use crate::core::level::*;
 pub use crate::core::lives::*;
 pub use crate::core::ghost_schedule::*;
+pub use crate::core::score::*;

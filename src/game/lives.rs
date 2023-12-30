@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use crate::game::score::Score;
 use crate::prelude::*;
 
 pub(super) struct LivesPlugin;

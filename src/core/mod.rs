@@ -9,6 +9,7 @@ use crate::core::level::LevelPlugin;
 use crate::core::lives::LivesPlugin;
 use crate::core::map::MapPlugin;
 use crate::core::pacman::PacmanPlugin;
+use crate::core::score::ScorePlugin;
 use crate::core::target::TargetPlugin;
 use crate::prelude::*;
 
@@ -26,6 +27,7 @@ pub mod level;
 pub mod lives;
 pub mod random;
 pub mod ghost_schedule;
+pub mod score;
 
 pub(super) struct CorePlugin;
 
@@ -44,7 +46,8 @@ impl Plugin for CorePlugin {
                 InteractionsPlugin,
                 LevelPlugin,
                 LivesPlugin,
-                GhostSchedulePlugin
+                GhostSchedulePlugin,
+                ScorePlugin
             ))
         ;
     }

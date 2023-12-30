@@ -46,28 +46,6 @@ impl Plugin for ScorePlugin {
     }
 }
 
-/// Resource that saves how many points the player has collected so far
-#[derive(Deref, DerefMut, Resource)]
-pub struct Score(usize);
-
-impl Score {
-    fn add(&mut self, points: usize) {
-        **self += points
-    }
-}
-
-#[derive(Component)]
-pub struct ScoreBoard;
-
-#[derive(Component)]
-pub struct ScoreText;
-
-#[derive(Component, Deref, DerefMut)]
-pub struct ScoreTextTimer(Timer);
-
-#[derive(Deref, DerefMut, Resource)]
-struct EatenGhostCounter(usize);
-
 fn update_scoreboard(
     score: Res<Score>,
     mut query: Query<&mut Text, With<ScoreBoard>>,
