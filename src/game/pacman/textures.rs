@@ -51,7 +51,7 @@ fn create_dying_animation(
 }
 
 /// pacman starts with stopped animations. Restart them here
-pub(crate) fn start_animation(
+pub(crate) fn start_pacman_animation(
     mut query: Query<&mut Animations, With<Pacman>>
 ) {
     for mut anim in &mut query {

@@ -44,3 +44,4 @@ pub use crate::core::edibles::*;
 pub use crate::core::edibles::Fruit::*;
 pub use crate::game::lives::*;
 pub use crate::sound_effect::*;
+pub use crate::core::pacman::*;

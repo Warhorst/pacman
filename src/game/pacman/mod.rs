@@ -1,13 +1,9 @@
 use bevy::prelude::*;
 use crate::animation::Animations;
-
-use crate::game_state::GameState::*;
-use crate::game_state::Game::*;
-use crate::game::pacman::edible_eaten::EdibleEatenPlugin;
-use crate::game::pacman::spawn::spawn_pacman;
 use crate::game::pacman::movement::{InputBuffer, move_pacman_new, reset_input_buffer, set_direction_based_on_keyboard_input};
-use crate::game::pacman::textures::{start_animation, update_pacman_appearance};
-use crate::sound_effect::SoundEfect;
+use crate::game::pacman::spawn::spawn_pacman;
+
+use crate::prelude::*;
 
 mod movement;
 mod spawn;
@@ -22,7 +18,7 @@ impl Plugin for PacmanPlugin {
             .add_plugins(EdibleEatenPlugin)
             .insert_resource(InputBuffer(None))
             .add_systems(OnEnter(Game(Ready)), spawn_pacman)
-            .add_systems(OnEnter(Game(Running)), start_animation)
+            .add_systems(OnEnter(Game(Running)), start_pacman_animation)
             .add_systems(Update, (
                 move_pacman_new,
                 set_direction_based_on_keyboard_input,
@@ -47,11 +43,6 @@ impl Plugin for PacmanPlugin {
         ;
     }
 }
-
-/// Marker component for a pacman entity.
-#[derive(Component, Reflect, Default)]
-#[reflect(Component)]
-pub struct Pacman;
 
 fn stop_animation(
     mut query: Query<&mut Animations, With<Pacman>>

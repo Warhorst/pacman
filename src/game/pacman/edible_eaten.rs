@@ -1,10 +1,6 @@
 use std::time::Duration;
 use bevy::prelude::*;
-use crate::game::interactions::{DotWasEaten, EnergizerWasEaten};
-use crate::game_state::GameState::*;
-use crate::game_state::Game::*;
-use crate::game::pacman::Pacman;
-use crate::system_sets::ProcessIntersectionsWithPacman;
+use crate::prelude::*;
 
 /// When eating dots/energizers, pacman stops for 1 or 3 Frames in the original game.
 /// The systems in this plugin do the same thing, but with timers for 1/60 and 3/60 seconds
