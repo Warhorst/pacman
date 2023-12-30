@@ -3,7 +3,6 @@ use std::cmp::Ordering;
 use bevy::ecs::query::WorldQuery;
 use bevy::prelude::*;
 use bevy::utils::{HashMap, HashSet};
-use crate::game::ghost_house_gate::GhostHouseGate;
 
 use crate::prelude::*;
 use crate::game::state::GhostState;

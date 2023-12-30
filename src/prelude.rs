@@ -29,3 +29,4 @@ pub use crate::core::map::Rotation::*;
 pub use crate::core::map::WallType_::*;
 pub use crate::core::target::*;
 pub use crate::core::interactions::*;
+pub use crate::core::ghost_house_gate::*;

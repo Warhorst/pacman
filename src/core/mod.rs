@@ -18,6 +18,7 @@ pub mod map;
 pub mod target;
 pub mod helper;
 pub mod interactions;
+pub mod ghost_house_gate;
 
 pub(super) struct CorePlugin;
 
