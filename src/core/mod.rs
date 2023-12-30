@@ -5,6 +5,7 @@ use crate::core::edibles::EdiblesPlugin;
 use crate::core::ghosts::GhostPlugin;
 use crate::core::interactions::InteractionsPlugin;
 use crate::core::level::LevelPlugin;
+use crate::core::lives::LivesPlugin;
 use crate::core::map::MapPlugin;
 use crate::core::pacman::PacmanPlugin;
 use crate::core::target::TargetPlugin;
@@ -21,6 +22,7 @@ pub mod helper;
 pub mod interactions;
 pub mod ghost_house_gate;
 pub mod level;
+pub mod lives;
 
 pub(super) struct CorePlugin;
 
@@ -37,7 +39,8 @@ impl Plugin for CorePlugin {
                 MapPlugin,
                 TargetPlugin,
                 InteractionsPlugin,
-                LevelPlugin
+                LevelPlugin,
+                LivesPlugin
             ))
         ;
     }
