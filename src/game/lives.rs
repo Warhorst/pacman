@@ -1,10 +1,7 @@
 use bevy::prelude::*;
 use bevy_inspector_egui::quick::ResourceInspectorPlugin;
-use crate::game::interactions::PacmanWasHit;
-use crate::game_state::GameState::*;
-use crate::game_state::Game::*;
 use crate::game::score::Score;
-use crate::system_sets::ProcessIntersectionsWithPacman;
+use crate::prelude::*;
 
 pub(in crate::game) struct LivesPlugin;
 

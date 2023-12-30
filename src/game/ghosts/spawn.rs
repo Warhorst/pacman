@@ -1,8 +1,7 @@
 use bevy::prelude::*;
 use bevy_sprite_sheet::SpriteSheets;
+use crate::game::ghosts::textures::create_animations_for_ghost;
 use crate::prelude::*;
-use crate::game::state::GhostState;
-use crate::prelude::textures::create_animations_for_ghost;
 
 pub fn spawn_ghosts(
     mut commands: Commands,
@@ -52,7 +51,7 @@ fn spawn_ghost(
         spawn_direction,
         Speed(GHOST_BASE_SPEED * specs_per_level.get_for(level).ghost_normal_speed_modifier),
         Target::new(),
-        GhostState::Spawned,
+        Spawned,
         animations
     ));
 }

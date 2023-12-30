@@ -7,11 +7,7 @@ pub(in crate::game) struct InteractionsPlugin;
 impl Plugin for InteractionsPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_event::<PacmanWasHit>()
-            .add_event::<GhostWasEaten>()
-            .add_event::<DotWasEaten>()
-            .add_event::<EnergizerWasEaten>()
-            .add_event::<FruitWasEaten>()
+
             .add_systems(
                 Update,
                 (
@@ -25,30 +21,6 @@ impl Plugin for InteractionsPlugin {
         ;
     }
 }
-
-/// Fired when pacman was hit by a ghost.
-#[derive(Event)]
-pub struct PacmanWasHit;
-
-/// Fired when Pacman ate a ghost in frightened state.
-/// Contains the eaten ghost entity and the transform to show a score on the ghosts
-/// former position.
-#[derive(Event, Copy, Clone)]
-pub struct GhostWasEaten(pub Entity, pub Transform);
-
-/// Fired when pacman eats a dot.
-#[derive(Event)]
-pub struct DotWasEaten;
-
-/// Fired when pacman eats an energizer.
-#[derive(Event, Copy, Clone)]
-pub struct EnergizerWasEaten;
-
-/// Event that gets fired when pacman ate a fruit.
-/// Holds the type of fruit and the transform to show a score on the fruits
-/// former position.
-#[derive(Event)]
-pub struct FruitWasEaten(pub Fruit, pub Transform);
 
 fn pacman_hits_ghost(
     mut commands: Commands,

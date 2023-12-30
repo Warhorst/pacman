@@ -1,10 +1,10 @@
 use bevy::prelude::*;
+use crate::game::ghosts::movement::MovePlugin;
+use crate::game::ghosts::spawn::spawn_ghosts;
+use crate::game::ghosts::textures::{start_ghost_animation, update_ghost_appearance};
 use crate::game::map::tunnel::GhostPassedTunnel;
 
 use crate::prelude::*;
-use crate::prelude::movement::MovePlugin;
-use crate::prelude::spawn::spawn_ghosts;
-use crate::prelude::textures::{start_animation, update_ghost_appearance};
 
 pub mod movement;
 pub mod spawn;
@@ -22,7 +22,7 @@ impl Plugin for GhostPlugin {
             )
             .add_systems(
                 OnEnter(Game(Running)),
-                start_animation,
+                start_ghost_animation,
             )
             .add_systems(
                 Update, (

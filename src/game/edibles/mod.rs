@@ -1,4 +1,7 @@
 use bevy::prelude::*;
+use crate::game::edibles::dots::DotPlugin;
+use crate::game::edibles::energizer::EnergizerPlugin;
+use crate::game::edibles::fruit::FruitPlugin;
 use crate::prelude::*;
 
 pub mod dots;

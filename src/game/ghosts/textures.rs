@@ -91,7 +91,7 @@ fn create_frightened_blinking_animation(sprite_sheet: &SpriteSheet) -> Animation
 }
 
 /// The ghosts start with stopped animations. Restart them here
-pub(crate) fn start_animation(
+pub(crate) fn start_ghost_animation(
     mut query: Query<&mut Animations, With<Ghost>>
 ) {
     for mut anim in &mut query {

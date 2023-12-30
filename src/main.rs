@@ -10,6 +10,7 @@ use crate::debug::DebugPlugin;
 use crate::game::GamePlugin;
 
 use crate::map_creator::create_map;
+use crate::music::MusicPlugin;
 use crate::spawn::SpawnPlugin;
 
 use crate::ui::UIPlugin;

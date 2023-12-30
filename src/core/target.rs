@@ -10,6 +10,8 @@ impl Plugin for TargetPlugin {
     }
 }
 
+/// The coordinates a ghost wants to go to.
+/// Uses coordinates instead of positions because some targets are in special areas, like the ghost house entrance.
 #[derive(Component, Reflect)]
 pub struct Target {
     coordinates: Option<Vec3>,
