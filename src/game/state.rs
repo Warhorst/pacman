@@ -3,7 +3,6 @@ use bevy::ecs::event::Event;
 use bevy::ecs::query::WorldQuery;
 use bevy::prelude::*;
 use crate::prelude::*;
-use crate::game::schedule::Schedule;
 
 pub(in crate::game) struct StatePlugin;
 
@@ -26,7 +25,7 @@ impl Plugin for StatePlugin {
 }
 
 /// The current state of a ghost
-#[derive(Component, Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(Component, Reflect, Copy, Clone, Debug, Eq, PartialEq)]
 pub enum GhostState {
     Scatter,
     Chase,
@@ -47,7 +46,7 @@ struct StateUpdateComponents<'a> {
 }
 
 fn update_state(
-    schedule: Res<Schedule>,
+    schedule: Res<GhostSchedule>,
     energizer_over_events: EventReader<EnergizerOver>,
     energizer_eaten_events: EventReader<EnergizerWasEaten>,
     ghost_eaten_events: EventReader<GhostWasEaten>,
@@ -79,7 +78,7 @@ fn update_state(
 }
 
 fn update_state_on_eaten_pause(
-    schedule: Res<Schedule>,
+    schedule: Res<GhostSchedule>,
     spawns_query: Query<&GhostSpawn>,
     mut query: Query<StateUpdateComponents, With<Ghost>>,
 ) {
@@ -128,7 +127,7 @@ fn process_energizer_eaten(
 }
 
 fn process_spawned(
-    schedule: &Schedule,
+    schedule: &GhostSchedule,
     components: &mut StateUpdateComponentsItem,
     spawns_query: &Query<&GhostSpawn>,
 ) {
@@ -147,7 +146,7 @@ fn process_spawned(
 /// If the current schedule is different to the ghosts state, the new state is the current schedule and
 /// the ghost reverses his location.
 fn process_scatter_chase(
-    schedule: &Schedule,
+    schedule: &GhostSchedule,
     components: &mut StateUpdateComponentsItem,
 ) {
     let schedule_state = schedule.current_state();
@@ -170,7 +169,7 @@ fn process_scatter_chase(
 }
 
 fn process_frightened(
-    schedule: &Schedule,
+    schedule: &GhostSchedule,
     energizer_over: bool,
     components: &mut StateUpdateComponentsItem,
 ) {

@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use pad::Position;
 
 use crate::core::edibles::EdiblesPlugin;
+use crate::core::ghost_schedule::GhostSchedulePlugin;
 use crate::core::ghosts::GhostPlugin;
 use crate::core::interactions::InteractionsPlugin;
 use crate::core::level::LevelPlugin;
@@ -23,6 +24,8 @@ pub mod interactions;
 pub mod ghost_house_gate;
 pub mod level;
 pub mod lives;
+pub mod random;
+pub mod ghost_schedule;
 
 pub(super) struct CorePlugin;
 
@@ -40,7 +43,8 @@ impl Plugin for CorePlugin {
                 TargetPlugin,
                 InteractionsPlugin,
                 LevelPlugin,
-                LivesPlugin
+                LivesPlugin,
+                GhostSchedulePlugin
             ))
         ;
     }

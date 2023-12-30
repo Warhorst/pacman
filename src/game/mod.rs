@@ -7,7 +7,7 @@ use crate::game::level::LevelPlugin;
 use crate::game::lives::LivesPlugin;
 use crate::game::map::MapPlugin;
 use crate::game::pacman::PacmanPlugin;
-use crate::game::random::RandomPlugin;
+use crate::core::random::RandomPlugin;
 use crate::game::schedule::SchedulePlugin;
 use crate::game::score::ScorePlugin;
 use crate::game::specs_per_level::SpecsPerLevelPlugin;
@@ -16,7 +16,6 @@ use crate::game::state::StatePlugin;
 use crate::game::target::TargetPlugin;
 
 pub mod interactions;
-pub mod random;
 pub mod score;
 pub mod speed;
 pub mod specs_per_level;
