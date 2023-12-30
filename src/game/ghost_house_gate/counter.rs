@@ -1,8 +1,6 @@
-use crate::game::level::Level;
 use ActiveCounter::*;
 use std::collections::HashMap;
-use crate::game::ghosts::Ghost;
-use crate::game::ghosts::Ghost::*;
+use crate::prelude::*;
 
 pub(crate) struct Counter {
     active_counter: ActiveCounter,

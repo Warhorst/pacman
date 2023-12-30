@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_sprite_sheet::SpriteSheets;
+use crate::game::pacman::textures::create_pacman_animations;
 use crate::prelude::*;
 
 pub(crate) fn spawn_pacman(

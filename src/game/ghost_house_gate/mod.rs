@@ -1,15 +1,9 @@
 use bevy::prelude::*;
 use std::collections::HashSet;
 use std::time::Duration;
-
-use crate::game_state::GameState::*;
-use crate::game_state::Game::*;
-use crate::game::ghosts::Ghost;
-use crate::game::ghosts::Ghost::*;
-use crate::game::level::Level;
 use crate::game::ghost_house_gate::counter::Counter;
-use crate::game::interactions::{DotWasEaten, PacmanWasHit};
-use crate::system_sets::ProcessIntersectionsWithPacman;
+
+use crate::prelude::*;
 
 mod counter;
 

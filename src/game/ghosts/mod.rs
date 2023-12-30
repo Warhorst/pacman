@@ -1,16 +1,10 @@
 use bevy::prelude::*;
 
-use crate::game::ghosts::movement::MovePlugin;
-use crate::game::ghosts::spawn::spawn_ghosts;
-use crate::game::ghosts::textures::{start_animation, update_ghost_appearance};
-use crate::game::interactions::GhostWasEaten;
-use crate::game::map::tunnel::GhostPassedTunnel;
-use crate::game::target::Target;
-use crate::game_state::Game::*;
-use crate::game_state::GameState::*;
-use crate::game_state::in_game;
-use crate::system_sets::ProcessIntersectionsWithPacman;
-use crate::sound_effect::SoundEfect;
+use crate::prelude::*;
+use crate::prelude::movement::MovePlugin;
+use crate::prelude::spawn::spawn_ghosts;
+use crate::prelude::textures::{start_animation, update_ghost_appearance};
+use crate::prelude::tunnel::GhostPassedTunnel;
 
 pub mod movement;
 pub mod spawn;
@@ -131,15 +125,3 @@ fn play_ghost_eaten_sound_when_ghost_was_eaten(
         ));
     }
 }
-
-#[derive(Copy, Clone, Component, Eq, PartialEq, Hash)]
-pub enum Ghost {
-    Blinky,
-    Pinky,
-    Inky,
-    Clyde,
-}
-
-/// Resource that holds the entity id of the ghost that is currently eaten by pacman
-#[derive(Deref, Resource)]
-pub struct CurrentlyEatenGhost(pub Entity);

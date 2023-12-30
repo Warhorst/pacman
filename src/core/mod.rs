@@ -8,6 +8,7 @@ pub mod position;
 pub mod direction;
 pub mod edibles;
 pub mod pacman;
+pub mod ghosts;
 
 pub(super) struct CorePlugin;
 
