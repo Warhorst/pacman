@@ -2,7 +2,6 @@ use std::fmt::Formatter;
 use bevy::ecs::event::Event;
 use bevy::ecs::query::WorldQuery;
 use bevy::prelude::*;
-use crate::game::target::Target;
 use crate::prelude::*;
 use crate::game::schedule::Schedule;
 

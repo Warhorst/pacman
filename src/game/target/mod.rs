@@ -291,35 +291,3 @@ fn minimal_distance_to_positions(big_target: &Pos, position_a: &Pos, position_b:
     big_target.distance(position_a).partial_cmp(&big_target.distance(position_b)).unwrap()
 }
 
-#[derive(Component)]
-pub struct Target {
-    coordinates: Option<Vec3>,
-}
-
-impl Target {
-    pub fn new() -> Self {
-        Target { coordinates: None }
-    }
-
-    pub fn is_set(&self) -> bool {
-        self.coordinates.is_some()
-    }
-
-    pub fn is_not_set(&self) -> bool {
-        !self.is_set()
-    }
-
-    /// Return the coordinates without checking if they are present.
-    /// The check should happen somewhere else anyway.
-    pub fn get(&self) -> Vec3 {
-        self.coordinates.unwrap()
-    }
-
-    pub fn set(&mut self, coordinates: Vec3) {
-        self.coordinates = Some(coordinates)
-    }
-
-    pub fn clear(&mut self) {
-        self.coordinates = None
-    }
-}

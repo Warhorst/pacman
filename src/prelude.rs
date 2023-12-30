@@ -36,3 +36,4 @@ pub use crate::core::ghosts::Ghost::*;
 pub use crate::core::map::*;
 pub use crate::core::map::Rotation::*;
 pub use crate::core::map::WallType_::*;
+pub use crate::core::target::*;

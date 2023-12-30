@@ -5,6 +5,7 @@ use crate::core::edibles::EdiblesPlugin;
 use crate::core::ghosts::GhostPlugin;
 use crate::core::map::MapPlugin;
 use crate::core::pacman::PacmanPlugin;
+use crate::core::target::TargetPlugin;
 use crate::prelude::*;
 
 pub mod position;
@@ -13,6 +14,7 @@ pub mod edibles;
 pub mod pacman;
 pub mod ghosts;
 pub mod map;
+pub mod target;
 
 pub(super) struct CorePlugin;
 
@@ -26,7 +28,8 @@ impl Plugin for CorePlugin {
                 PacmanPlugin,
                 GhostPlugin,
                 EdiblesPlugin,
-                MapPlugin
+                MapPlugin,
+                TargetPlugin
             ))
         ;
     }
