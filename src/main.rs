@@ -4,7 +4,10 @@ use bevy_sprite_sheet::SpriteSheetPlugin;
 
 use crate::prelude::*;
 use crate::animation::AnimationPlugin;
+use crate::camera::CameraPlugin;
 use crate::core::CorePlugin;
+use crate::debug::DebugPlugin;
+use crate::game::GamePlugin;
 
 use crate::map_creator::create_map;
 use crate::spawn::SpawnPlugin;

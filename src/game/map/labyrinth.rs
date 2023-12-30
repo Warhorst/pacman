@@ -1,10 +1,8 @@
 use bevy::prelude::*;
 use bevy::utils::HashMap;
 use bevy_sprite_sheet::{SpriteSheet, SpriteSheets};
+use crate::game::map::{Element, TileMap, WallType};
 use crate::prelude::*;
-
-#[derive(Component)]
-pub struct Labyrinth;
 
 type IsCorner = bool;
 
@@ -30,7 +28,6 @@ pub fn spawn_labyrinth(
 
     commands.spawn((
         Name::new("Labyrinth"),
-        Labyrinth,
         SpatialBundle::default(),
     )).push_children(walls).id()
 }

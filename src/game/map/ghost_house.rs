@@ -1,19 +1,8 @@
 use bevy::prelude::*;
 use bevy_sprite_sheet::{SpriteSheet, SpriteSheets};
+use crate::game::map::{Element, TileMap};
 
 use crate::prelude::*;
-
-/// Parent component for everything related to the ghost house
-#[derive(Component)]
-pub struct GhostHouse;
-
-#[derive(Copy, Clone, Component)]
-pub struct GhostSpawn {
-    pub ghost: Ghost,
-    pub coordinates: Vec3,
-    pub spawn_direction: Dir,
-    pub positions: [Pos; 2],
-}
 
 pub(crate) fn spawn_ghost_house(
     commands: &mut Commands,

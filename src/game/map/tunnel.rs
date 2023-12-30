@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use crate::game::map::{Element, TileMap};
 use crate::prelude::*;
 
 pub struct TunnelPlugin;
@@ -15,9 +16,11 @@ impl Plugin for TunnelPlugin {
     }
 }
 
+// TODO remove, use the ones from core::map instead
 #[derive(Component, Deref)]
 pub struct Tunnel(usize);
 
+// TODO remove, use the ones from core::map instead
 #[derive(Component)]
 pub struct TunnelHallway;
 

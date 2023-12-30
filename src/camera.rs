@@ -1,8 +1,5 @@
 use bevy::prelude::*;
-use crate::constants::FIELD_SIZE;
-use crate::game_state::GameState::*;
-use crate::game_state::Game::*;
-use crate::game::map::Map;
+use crate::prelude::*;
 
 pub struct CameraPlugin;
 

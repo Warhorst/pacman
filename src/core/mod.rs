@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 use pad::Position;
+
 use crate::core::edibles::EdiblesPlugin;
+use crate::core::ghosts::GhostPlugin;
+use crate::core::map::MapPlugin;
 use crate::core::pacman::PacmanPlugin;
 use crate::prelude::*;
 
@@ -9,6 +12,7 @@ pub mod direction;
 pub mod edibles;
 pub mod pacman;
 pub mod ghosts;
+pub mod map;
 
 pub(super) struct CorePlugin;
 
@@ -20,7 +24,9 @@ impl Plugin for CorePlugin {
             .register_type::<Dir>()
             .add_plugins((
                 PacmanPlugin,
+                GhostPlugin,
                 EdiblesPlugin,
+                MapPlugin
             ))
         ;
     }
