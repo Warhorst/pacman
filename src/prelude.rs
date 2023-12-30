@@ -12,7 +12,7 @@ pub use crate::is;
 pub use crate::game::state::GhostState;
 pub use crate::game::state::GhostState::*;
 pub use crate::system_sets::*;
-pub use crate::game::specs_per_level::*;
+pub use crate::core::specs_per_level::*;
 pub use crate::game::speed::*;
 pub use crate::core::random::*;
 pub use crate::core::helper::*;
