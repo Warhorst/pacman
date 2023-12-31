@@ -7,7 +7,7 @@ use bevy_common_assets::json::JsonAssetPlugin;
 use bevy_sprite_sheet::SpriteSheets;
 use serde::{Deserialize, Serialize};
 
-use crate::prelude::*;
+use crate::core::prelude::*;
 
 use crate::game::map::ghost_house::spawn_ghost_house;
 use crate::game::map::labyrinth::spawn_labyrinth;

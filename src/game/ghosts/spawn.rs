@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_sprite_sheet::SpriteSheets;
 use crate::game::ghosts::textures::create_animations_for_ghost;
-use crate::prelude::*;
+use crate::core::prelude::*;
 
 pub fn spawn_ghosts(
     mut commands: Commands,

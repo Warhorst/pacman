@@ -4,7 +4,7 @@ use crate::game::ghosts::spawn::spawn_ghosts;
 use crate::game::ghosts::textures::{start_ghost_animation, update_ghost_appearance};
 use crate::game::map::tunnel::GhostPassedTunnel;
 
-use crate::prelude::*;
+use crate::core::prelude::*;
 
 pub mod movement;
 pub mod spawn;

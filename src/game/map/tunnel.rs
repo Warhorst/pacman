@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use crate::game::map::{Element, TileMap};
-use crate::prelude::*;
+use crate::core::prelude::*;
 
 pub struct TunnelPlugin;
 

@@ -4,7 +4,7 @@ use bevy::ecs::query::WorldQuery;
 use bevy::prelude::*;
 use bevy::utils::{HashMap, HashSet};
 
-use crate::prelude::*;
+use crate::core::prelude::*;
 
 mod spawned;
 mod eaten;

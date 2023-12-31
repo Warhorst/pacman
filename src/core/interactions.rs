@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::prelude::Fruit;
+use crate::core::prelude::Fruit;
 
 pub(super) struct InteractionsPlugin;
 

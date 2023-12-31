@@ -6,7 +6,7 @@ use bevy::prelude::*;
 
 use ActiveCounter::*;
 
-use crate::prelude::*;
+use crate::core::prelude::*;
 
 /// Resource that tells if ghost can leave the ghost house.
 ///

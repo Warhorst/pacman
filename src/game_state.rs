@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::prelude::*;
+use crate::core::prelude::*;
 use crate::core::system_sets::UpdateGameState;
 use crate::ui::game_over_screen::EGameRestarted;
 

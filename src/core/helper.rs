@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::prelude::*;
+use crate::core::prelude::*;
 
 /// Provides a helper method to set the x and y value from this Vec3 to the x and y from another Vec3.
 /// Using 'this = other' might overwrite the z value wrong, leading to graphic errors.

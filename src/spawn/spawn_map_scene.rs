@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy::scene::SceneInstanceReady;
-use crate::prelude::*;
+use crate::core::prelude::*;
 
 pub(super) struct SpawnMapScenePlugin;
 

@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use bevy::sprite::collide_aabb::collide;
 use crate::game::pacman::edible_eaten::EdibleEatenStop;
 
-use crate::prelude::*;
+use crate::core::prelude::*;
 
 #[derive(WorldQuery)]
 #[world_query(mutable)]

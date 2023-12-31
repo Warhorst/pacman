@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_sprite_sheet::{SpriteSheet, SpriteSheets};
-use crate::prelude::*;
+use crate::core::prelude::*;
 
 pub(crate) fn update_pacman_appearance(
     mut query: Query<(&Dir, &mut Animations), With<Pacman>>

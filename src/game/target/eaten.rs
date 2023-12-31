@@ -1,5 +1,5 @@
 use crate::game::target::TargetSetter;
-use crate::prelude::*;
+use crate::core::prelude::*;
 
 impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
     /// Determine the next target coordinates for a ghost when in "Eaten" state.

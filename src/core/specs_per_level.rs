@@ -1,7 +1,7 @@
 use bevy::prelude::*;
-use crate::prelude::*;
+use crate::core::prelude::*;
 use std::collections::HashMap;
-use crate::prelude::{Fruit, Level};
+use crate::core::prelude::{Fruit, Level};
 
 pub(super) struct SpecsPerLevelPlugin;
 
@@ -347,7 +347,7 @@ pub struct Spec {
 #[cfg(test)]
 mod tests {
     use crate::core::specs_per_level::Spec;
-    use crate::prelude::*;
+    use crate::core::prelude::*;
 
     #[test]
     fn it_can_be_created_from_an_iterator_of_usize_spec_tuples() {

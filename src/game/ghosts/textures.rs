@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_sprite_sheet::{SpriteSheet, SpriteSheets};
-use crate::prelude::*;
+use crate::core::prelude::*;
 
 pub(crate) fn update_ghost_appearance(
     energizer_timer: Option<Res<EnergizerTimer>>,

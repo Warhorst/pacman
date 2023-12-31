@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy::utils::HashMap;
 use bevy_sprite_sheet::{SpriteSheet, SpriteSheets};
 use crate::game::map::{Element, TileMap, WallType};
-use crate::prelude::*;
+use crate::core::prelude::*;
 
 type IsCorner = bool;
 

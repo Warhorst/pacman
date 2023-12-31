@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::Write;
 use bevy::prelude::*;
-use crate::prelude::*;
+use crate::core::prelude::*;
 
 /// Create the default pacman map as a bevy scene.
 /// TODO ghost corners

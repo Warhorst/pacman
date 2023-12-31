@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_asset_preload::AssetPreloadPlugin;
 use bevy_sprite_sheet::SpriteSheetPlugin;
 
-use crate::prelude::*;
+use core::prelude::*;
 use crate::camera::CameraPlugin;
 use crate::core::CorePlugin;
 use crate::debug::DebugPlugin;
@@ -24,7 +24,6 @@ mod ui;
 mod game;
 mod game_state;
 mod map_creator;
-mod prelude;
 mod spawn;
 mod core;
 

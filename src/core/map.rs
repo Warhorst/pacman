@@ -1,7 +1,7 @@
 use std::f32::consts::PI;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
-use crate::prelude::*;
+use crate::core::prelude::*;
 
 pub(super) struct MapPlugin;
 

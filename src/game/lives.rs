@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::prelude::*;
+use crate::core::prelude::*;
 
 pub(super) struct LivesPlugin;
 

@@ -15,10 +15,11 @@ use crate::core::specs_per_level::SpecsPerLevelPlugin;
 use crate::core::speed::SpeedPlugin;
 use crate::core::target::TargetPlugin;
 use crate::core::animation::AnimationPlugin;
+use crate::core::direction::Dir;
 use crate::core::game_state::GameStatePlugin;
 use crate::core::music::MusicPlugin;
+use crate::core::position::Pos;
 use crate::core::sound_effect::SoundEffectPlugin;
-use crate::prelude::*;
 
 pub mod position;
 pub mod direction;
@@ -44,6 +45,7 @@ pub mod game_state;
 pub mod system_sets;
 pub mod sound_effect;
 pub mod music;
+pub mod prelude;
 
 pub(super) struct CorePlugin;
 

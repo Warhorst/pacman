@@ -1,6 +1,6 @@
 use bevy::ecs::query::WorldQuery;
 use bevy::prelude::*;
-use crate::prelude::*;
+use crate::core::prelude::*;
 
 pub(in crate::game) struct SpeedPlugin;
 

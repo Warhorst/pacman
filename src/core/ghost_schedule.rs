@@ -3,8 +3,8 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy::utils::HashMap;
 
-use crate::prelude::*;
-use crate::prelude::Level;
+use crate::core::prelude::*;
+use crate::core::prelude::Level;
 
 pub(super) struct GhostSchedulePlugin;
 

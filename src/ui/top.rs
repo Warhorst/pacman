@@ -1,7 +1,7 @@
 use std::time::Duration;
 use bevy::prelude::*;
 use bevy::prelude::Val::Percent;
-use crate::prelude::*;
+use crate::core::prelude::*;
 
 pub(in crate::ui) struct TopUIPlugin;
 
