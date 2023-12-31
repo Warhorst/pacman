@@ -10,11 +10,9 @@ use serde::{Deserialize, Serialize};
 use crate::core::prelude::*;
 
 use crate::game::map::ghost_house::spawn_ghost_house;
-use crate::game::map::labyrinth::spawn_labyrinth;
 use crate::game::map::tunnel::{spawn_tunnel_hallways, spawn_tunnels, TunnelPlugin};
 
 
-pub mod labyrinth;
 #[cfg(test)]
 mod map_creator;
 pub mod ghost_house;
@@ -29,7 +27,7 @@ impl Plugin for MapPlugin {
                 TunnelPlugin,
                 JsonAssetPlugin::<RawMap>::new(&["map.json"])
             ))
-            .add_systems(OnExit(Setup(CreateSpriteSheets)), spawn_map)
+            // .add_systems(OnExit(Setup(CreateSpriteSheets)), spawn_map)
             .add_systems(OnEnter(Game(LevelTransition)), set_animation_to_blinking)
             .add_systems(OnExit(Game(LevelTransition)), set_animation_to_idle)
         ;
@@ -54,7 +52,7 @@ fn spawn_map(
         SpatialBundle::default(),
     )).id();
 
-    let children = [spawn_labyrinth(&mut commands, &tile_map, &sprite_sheets)]
+    let children = []
         .into_iter()
         .chain([spawn_dot_spawns(&mut commands, &tile_map)])
         .chain([spawn_energizer_spawns(&mut commands, &tile_map)])

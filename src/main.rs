@@ -48,7 +48,7 @@ fn main() {
             GamePlugin,
             SpawnPlugin,
             AssetPreloadPlugin::new(Setup(PreloadAssets), Setup(CreateSpriteSheets)),
-            SpriteSheetPlugin::new(Setup(CreateSpriteSheets), Game(Start)),
+            SpriteSheetPlugin::new(Setup(CreateSpriteSheets), Spawn(SpawnMapScene)),
             GameStatePlugin,
             SystemSetsPlugin,
             CameraPlugin,

@@ -189,7 +189,7 @@ impl<'a> MapCreator<'a> {
         MapCreator {
             width,
             current_column: 0,
-            current_row: 0,
+            current_row: height,
             app,
             map_world,
             map,
@@ -752,7 +752,7 @@ impl<'a> MapCreator<'a> {
 
         if self.current_column == self.width {
             self.current_column = 0;
-            self.current_row += 1;
+            self.current_row -= 1;
         }
     }
 

@@ -2,6 +2,7 @@ use std::f32::consts::PI;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 use crate::core::prelude::*;
+use Tiles::*;
 
 pub(super) struct MapPlugin;
 
@@ -47,7 +48,16 @@ pub enum Tiles {
 
 impl Default for Tiles {
     fn default() -> Self {
-        Tiles::Single {pos: Pos::default()}
+        Single {pos: Pos::default()}
+    }
+}
+
+impl Tiles {
+    pub fn to_vec3(&self, z: f32) -> Vec3 {
+        match self {
+            Single { pos } => pos.to_vec3(z),
+            Double { pos_a, pos_b } => Vec3::from_positions([pos_a, pos_b], z)
+        }
     }
 }
 
@@ -70,7 +80,7 @@ pub struct WallStyle {
     pub is_corner: bool,
 }
 
-#[derive(Reflect, Default)]
+#[derive(Reflect, Copy, Clone, Debug, Default, Eq, PartialEq, Hash)]
 pub enum WallType_ {
     #[default]
     Inner,
