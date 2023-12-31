@@ -2,7 +2,6 @@ use bevy::audio::{AudioSink, Volume};
 use bevy::prelude::*;
 use crate::prelude::*;
 use crate::music::CurrentTrack::*;
-use crate::sound_effect::SoundEfect;
 
 pub struct MusicPlugin;
 
@@ -31,29 +30,13 @@ impl Plugin for MusicPlugin {
     }
 }
 
-/// Marker for a background track
-#[derive(Component)]
-struct BackgroundTrack;
-
-/// Marker for the siren background track
-#[derive(Component)]
-struct SirenBackground;
-
-/// Marker for the frightened background track
-#[derive(Component)]
-struct FrightenedBackground;
-
-/// Marker for the frightened eaten track
-#[derive(Component)]
-struct EatenBackground;
-
 fn play_start_sound(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
 ) {
     commands.spawn((
         Name::new("StartSound"),
-        SoundEfect::new(),
+        SoundEffect::new(),
         AudioBundle {
             source: asset_server.load("sounds/start.ogg"),
             ..default()
@@ -208,36 +191,4 @@ impl<'a> Mixer<'a> {
         self.frightened_track.set_volume(0.0);
         self.eaten_track.set_volume(0.0);
     }
-}
-
-/// Controller for the music that will play in the background
-#[derive(Resource)]
-struct BackgroundMusic {
-    current_track: CurrentTrack,
-    muted: bool,
-}
-
-impl BackgroundMusic {
-    fn new_muted() -> Self {
-        BackgroundMusic {
-            current_track: Siren1,
-            muted: true,
-        }
-    }
-}
-
-/// Identifiers for the current track that should be played
-enum CurrentTrack {
-    /// The siren sound, when the remaining dots are between 100% and 75%
-    Siren1,
-    /// The siren sound, when the remaining dots are between 75% and 50%
-    Siren2,
-    /// The siren sound, when the remaining dots are between 50% and 25%
-    Siren3,
-    /// The siren sound, when the remaining dots are between 25% and 0%
-    Siren4,
-    /// The music that plays when pacman ate an energizer and the ghosts turn blue
-    FrightenedTrack,
-    /// The sound that plays when an eaten ghost returns to the ghost house
-    EatenTrack,
 }

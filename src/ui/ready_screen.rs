@@ -1,8 +1,6 @@
 use bevy::prelude::*;
 use bevy::prelude::Val::Percent;
-use crate::game_state::GameState::*;
-use crate::game_state::Game::*;
-use crate::constants::FONT;
+use crate::prelude::*;
 
 pub(in crate::ui) struct ReadyScreenPlugin;
 

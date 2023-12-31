@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use crate::animation::Animations;
 use crate::game::pacman::edible_eaten::EdibleEatenPlugin;
 use crate::game::pacman::movement::{InputBuffer, move_pacman_new, reset_input_buffer, set_direction_based_on_keyboard_input};
 use crate::game::pacman::spawn::spawn_pacman;
@@ -69,7 +68,7 @@ fn play_the_dying_sound(
 ) {
     commands.spawn((
         Name::new("PacmanDyingSound"),
-        SoundEfect::new(),
+        SoundEffect::new(),
         AudioBundle {
             source: asset_server.load("sounds/dying.ogg"),
             ..default()

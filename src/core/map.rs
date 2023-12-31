@@ -1,6 +1,7 @@
+use std::f32::consts::PI;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
-use crate::prelude::{Dir, Ghost, Pos};
+use crate::prelude::*;
 
 pub(super) struct MapPlugin;
 
@@ -85,6 +86,18 @@ pub enum Rotation {
     D270,
 }
 
+impl Rotation {
+    /// Return the Quat created from rotating around the z axes for the given degree.
+    pub fn quat_z(&self) -> Quat {
+        match self {
+            D0 => Quat::from_rotation_z(PI * 0.0),
+            D90 => Quat::from_rotation_z(PI * 1.5),
+            D180 => Quat::from_rotation_z(PI),
+            D270 => Quat::from_rotation_z(PI * 0.5),
+        }
+    }
+}
+
 /// Marks a tile to spawn pacman here
 #[derive(Component, Reflect, Deref, Default)]
 #[reflect(Component)]
@@ -151,4 +164,19 @@ pub struct GhostSpawn {
     pub coordinates: Vec3,
     pub spawn_direction: Dir,
     pub positions: [Pos; 2],
+}
+
+/// Macro which quickly creates an element filter (closure Fn(&Element) -> bool) by passing a pattern.
+///
+/// The alternative would be a match/if let expression, which is much longer and harder to read.
+#[macro_export]
+macro_rules! is {
+    ($pattern:pat) => {
+        {
+            |e: &crate::game::map::Element| match e {
+                $pattern => true,
+                _ => false
+            }
+        }
+    };
 }

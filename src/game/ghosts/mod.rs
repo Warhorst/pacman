@@ -117,7 +117,7 @@ fn play_ghost_eaten_sound_when_ghost_was_eaten(
     if event_reader.read().count() > 0 {
         commands.spawn((
             Name::new("GhostEatenSound"),
-            SoundEfect::new(),
+            SoundEffect::new(),
             AudioBundle {
                 source: asset_server.load("sounds/ghost_eaten.ogg"),
                 ..default()

@@ -14,6 +14,10 @@ use crate::core::score::ScorePlugin;
 use crate::core::specs_per_level::SpecsPerLevelPlugin;
 use crate::core::speed::SpeedPlugin;
 use crate::core::target::TargetPlugin;
+use crate::core::animation::AnimationPlugin;
+use crate::core::game_state::GameStatePlugin;
+use crate::core::music::MusicPlugin;
+use crate::core::sound_effect::SoundEffectPlugin;
 use crate::prelude::*;
 
 pub mod position;
@@ -34,6 +38,12 @@ pub mod score;
 pub mod specs_per_level;
 pub mod speed;
 pub mod ghost_state;
+pub mod animation;
+pub mod constants;
+pub mod game_state;
+pub mod system_sets;
+pub mod sound_effect;
+pub mod music;
 
 pub(super) struct CorePlugin;
 
@@ -44,6 +54,8 @@ impl Plugin for CorePlugin {
             .register_type::<Position>()
             .register_type::<Dir>()
             .add_plugins((
+                GameStatePlugin,
+                AnimationPlugin,
                 PacmanPlugin,
                 GhostPlugin,
                 EdiblesPlugin,
@@ -57,6 +69,10 @@ impl Plugin for CorePlugin {
                 SpecsPerLevelPlugin,
                 SpeedPlugin,
                 GhostStatePlugin
+            ))
+            .add_plugins((
+                SoundEffectPlugin,
+                MusicPlugin
             ))
         ;
     }

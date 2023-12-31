@@ -3,28 +3,26 @@ use bevy_asset_preload::AssetPreloadPlugin;
 use bevy_sprite_sheet::SpriteSheetPlugin;
 
 use crate::prelude::*;
-use crate::animation::AnimationPlugin;
 use crate::camera::CameraPlugin;
 use crate::core::CorePlugin;
 use crate::debug::DebugPlugin;
 use crate::game::GamePlugin;
+use crate::game_state::GameStatePlugin;
 
 use crate::map_creator::create_map;
 use crate::music::MusicPlugin;
+use crate::sound_effect::SoundEffectPlugin;
 use crate::spawn::SpawnPlugin;
 
 use crate::ui::UIPlugin;
 
 mod camera;
-mod constants;
-mod animation;
 mod music;
 mod sound_effect;
 mod debug;
 mod ui;
 mod game;
 mod game_state;
-pub mod system_sets;
 mod map_creator;
 mod prelude;
 mod spawn;
@@ -54,7 +52,6 @@ fn main() {
             SpriteSheetPlugin::new(Setup(CreateSpriteSheets), Game(Start)),
             GameStatePlugin,
             SystemSetsPlugin,
-            AnimationPlugin,
             CameraPlugin,
             DebugPlugin,
             UIPlugin,
