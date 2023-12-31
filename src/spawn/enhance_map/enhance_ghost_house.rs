@@ -1,17 +1,29 @@
 use bevy::prelude::*;
 use bevy_sprite_sheet::{SpriteSheet, SpriteSheets};
-use crate::game::map::{Element, TileMap};
 
 use crate::core::prelude::*;
 
-pub(crate) fn spawn_ghost_house(
-    commands: &mut Commands,
-    tile_map: &TileMap,
-    asset_server: &AssetServer,
-    sprite_sheets: &SpriteSheets,
-) -> Entity {
-    let bottom_left = get_bottom_left(tile_map);
-    let rotation = get_rotation(tile_map);
+pub(super) struct EnhanceGhostHousePlugin;
+
+impl Plugin for EnhanceGhostHousePlugin {
+    fn build(&self, app: &mut App) {
+        app
+            .add_systems(
+                OnEnter(Spawn(EnhanceMap)),
+                enhance_ghost_house
+            )
+        ;
+    }
+}
+
+fn enhance_ghost_house(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    sprite_sheets: Res<SpriteSheets>,
+    ghost_house_areas: Query<(&GhostHouseArea, &Tiles)>,
+) {
+    let bottom_left = get_bottom_left(&ghost_house_areas);
+    let rotation = get_rotation(&ghost_house_areas);
     let spawns = create_spawns(rotation, bottom_left);
 
     let ghost_house = commands.spawn((
@@ -29,31 +41,31 @@ pub(crate) fn spawn_ghost_house(
         });
     }
 
-    spawn_house_walls(commands, ghost_house, bottom_left, rotation, asset_server, sprite_sheets);
-
-    ghost_house
+    spawn_house_walls(
+        &mut commands,
+        ghost_house,
+        bottom_left,
+        rotation,
+        &asset_server,
+        &sprite_sheets
+    );
 }
 
-fn get_bottom_left(tile_map: &TileMap) -> Pos {
-    tile_map
-        .get_positions_matching(is!(Element::GhostHouse {..}))
-        .into_iter()
+fn get_bottom_left(ghost_house_areas: &Query<(&GhostHouseArea, &Tiles)>) -> Pos {
+    ghost_house_areas
+        .iter()
+        .map(|(_, tiles)| tiles.to_pos())
         .fold(
             Pos::new(isize::MAX, isize::MAX),
             |acc, pos| Pos::new(isize::min(acc.x(), pos.x()), isize::min(acc.y(), pos.y())),
         )
 }
 
-fn get_rotation(tile_map: &TileMap) -> Rotation {
-    tile_map
-        .position_element_iter()
-        .into_iter()
-        .filter_map(|(_, elem)| match elem {
-            Element::GhostHouse { rotation } => Some(*rotation),
-            _ => None
-        })
-        .next()
-        .expect("the map should at least contain one ghost house entrance")
+fn get_rotation(ghost_house_areas: &Query<(&GhostHouseArea, &Tiles)>) -> Rotation {
+    ghost_house_areas
+        .iter()
+        .find_map(|(area, _)| Some(area.rotation))
+        .expect("at least one ghost house area should exist")
 }
 
 /// TODO: wrong. Pinky spawns looking down, Inky and Clyde looking up
@@ -372,4 +384,3 @@ fn spawn_entrance(
         }
     )).id()
 }
-

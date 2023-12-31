@@ -9,13 +9,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::core::prelude::*;
 
-use crate::game::map::ghost_house::spawn_ghost_house;
 use crate::game::map::tunnel::{spawn_tunnel_hallways, spawn_tunnels, TunnelPlugin};
 
 
 #[cfg(test)]
 mod map_creator;
-pub mod ghost_house;
 pub mod tunnel;
 
 pub(super) struct MapPlugin;
@@ -54,11 +52,6 @@ fn spawn_map(
 
     let children = []
         .into_iter()
-        .chain([spawn_dot_spawns(&mut commands, &tile_map)])
-        .chain([spawn_energizer_spawns(&mut commands, &tile_map)])
-        .chain([spawn_pacman_spawn(&mut commands, &tile_map)])
-        .chain([spawn_fruit_spawns(&mut commands, &tile_map)])
-        .chain([spawn_ghost_house(&mut commands, &tile_map, &asset_server, &sprite_sheets)])
         .chain(spawn_tunnels(&mut commands, &tile_map))
         .chain(spawn_tunnel_hallways(&mut commands, &tile_map))
         .chain(spawn_ghost_corners(&mut commands, &tile_map))
@@ -75,31 +68,6 @@ fn spawn_pacman_spawn(
         Name::new("PacmanSpawn"),
         PacmanSpawn(coordinates)
     )).id()
-}
-
-fn spawn_dot_spawns(
-    commands: &mut Commands,
-    tile_map: &TileMap,
-) -> Entity {
-    let dot_spawns = commands.spawn((
-        Name::new("DotSpawns"),
-        DotSpawns
-    )).id();
-
-    tile_map.get_positions_matching(is!(Element::DotSpawn))
-        .into_iter()
-        .for_each(|pos| {
-            commands
-                .entity(dot_spawns)
-                .with_children(|parent| {
-                    parent.spawn((
-                        Name::new("DotSpawn"),
-                        DotSpawn(pos.to_vec3(DOT_Z))
-                    ));
-                });
-        });
-
-    dot_spawns
 }
 
 fn spawn_energizer_spawns(

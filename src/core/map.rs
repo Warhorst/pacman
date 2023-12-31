@@ -59,6 +59,13 @@ impl Tiles {
             Double { pos_a, pos_b } => Vec3::from_positions([pos_a, pos_b], z)
         }
     }
+
+    pub fn to_pos(&self) -> Pos {
+        match self {
+            Single { pos } => *pos,
+            Double { .. } => panic!("can only retrieve the position for single position tiles")
+        }
+    }
 }
 
 /// Parent of all walls in the maze. For organization only.
