@@ -6,7 +6,6 @@ impl Plugin for ScorePlugin {
     fn build(&self, app: &mut App) {
         app
             .register_type::<Score>()
-            .register_type::<ScoreBoard>()
             .register_type::<ScoreText>()
             .register_type::<ScoreTextTimer>()
             .register_type::<EatenGhostCounter>()
@@ -23,10 +22,6 @@ impl Score {
         **self += points
     }
 }
-
-/// Identifies the ui element which shows the players score.
-#[derive(Component, Reflect)]
-pub struct ScoreBoard;
 
 /// Identifies floating text which pops up when pacman ate a ghost.
 #[derive(Component, Reflect)]

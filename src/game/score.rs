@@ -13,7 +13,6 @@ impl Plugin for ScorePlugin {
             .add_systems(
                 Update,
                 (
-                    update_scoreboard,
                     reset_eaten_ghost_counter_when_energizer_is_over,
                     update_score_texts,
                     add_points_for_eaten_dot
@@ -43,19 +42,6 @@ impl Plugin for ScorePlugin {
                 reset_ghost_eaten_counter,
             )
         ;
-    }
-}
-
-fn update_scoreboard(
-    score: Res<Score>,
-    mut query: Query<&mut Text, With<ScoreBoard>>,
-) {
-    if !score.is_changed() {
-        return;
-    }
-
-    for mut text in query.iter_mut() {
-        text.sections[0].value = format!("{}", **score)
     }
 }
 

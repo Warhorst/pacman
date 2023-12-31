@@ -8,25 +8,37 @@ pub(in crate::ui) struct TopUIPlugin;
 impl Plugin for TopUIPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(OnEnter(Game(Start)), spawn_top_ui)
-            .add_systems(Update, (
-                update_scoreboard,
-                blink_1_up_label
-            ).run_if(in_game))
-            .add_systems(OnExit(Game(GameOver)), despawn_top_ui)
+            .add_systems(
+                OnEnter(Game(Start)),
+                spawn_top_ui,
+            )
+            .add_systems(
+                Update,
+                (
+                    update_scoreboard,
+                    blink_1_up_label
+                ).run_if(in_game))
+            .add_systems(
+                OnExit(Game(GameOver)),
+                despawn_top_ui,
+            )
         ;
     }
 }
 
+/// Parent of all top UI elements
 #[derive(Component)]
 struct TopUI;
 
+/// Shows the score of the current game
 #[derive(Component)]
 struct ScoreBoard;
 
+/// Shows the current high score
 #[derive(Component)]
 struct HighScoreBoard;
 
+/// Shows the "1UP" in the top left corner of the screen
 #[derive(Component)]
 struct OneUpLabel;
 
