@@ -39,6 +39,7 @@ pub struct Map {
     pub height: usize,
 }
 
+/// An entity with this component spans either one or more tiles on the map.
 #[derive(Component, Reflect)]
 #[reflect(Component)]
 pub enum Tiles {

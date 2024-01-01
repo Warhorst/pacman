@@ -9,22 +9,17 @@ use serde::{Deserialize, Serialize};
 
 use crate::core::prelude::*;
 
-use crate::game::map::tunnel::{spawn_tunnel_hallways, spawn_tunnels, TunnelPlugin};
-
-
 #[cfg(test)]
 mod map_creator;
-pub mod tunnel;
 
 pub(super) struct MapPlugin;
 
 impl Plugin for MapPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_plugins((
-                TunnelPlugin,
+            .add_plugins(
                 JsonAssetPlugin::<RawMap>::new(&["map.json"])
-            ))
+            )
             // .add_systems(OnExit(Setup(CreateSpriteSheets)), spawn_map)
             .add_systems(OnEnter(Game(LevelTransition)), set_animation_to_blinking)
             .add_systems(OnExit(Game(LevelTransition)), set_animation_to_idle)
@@ -52,8 +47,6 @@ fn spawn_map(
 
     let children = []
         .into_iter()
-        .chain(spawn_tunnels(&mut commands, &tile_map))
-        .chain(spawn_tunnel_hallways(&mut commands, &tile_map))
         .chain(spawn_ghost_corners(&mut commands, &tile_map))
         .collect::<Vec<_>>();
     commands.entity(map).push_children(&children);

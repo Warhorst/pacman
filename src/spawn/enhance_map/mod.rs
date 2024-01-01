@@ -1,10 +1,12 @@
 mod enhance_maze;
 mod enhance_ghost_house;
+mod enhance_tunnels;
 
 use bevy::prelude::*;
 use crate::core::prelude::*;
 use crate::spawn::enhance_map::enhance_ghost_house::EnhanceGhostHousePlugin;
 use crate::spawn::enhance_map::enhance_maze::EnhanceMazePlugin;
+use crate::spawn::enhance_map::enhance_tunnels::EnhanceTunnelPlugin;
 
 pub(super) struct EnhanceMapPlugin;
 
@@ -13,7 +15,8 @@ impl Plugin for EnhanceMapPlugin {
         app
             .add_plugins((
                 EnhanceMazePlugin,
-                EnhanceGhostHousePlugin
+                EnhanceGhostHousePlugin,
+                EnhanceTunnelPlugin
             ))
             .add_systems(
                 OnEnter(Spawn(EnhanceMap)),

@@ -2,9 +2,9 @@ use bevy::prelude::*;
 use crate::game::ghosts::movement::MovePlugin;
 use crate::game::ghosts::spawn::spawn_ghosts;
 use crate::game::ghosts::textures::{start_ghost_animation, update_ghost_appearance};
-use crate::game::map::tunnel::GhostPassedTunnel;
 
 use crate::core::prelude::*;
+use crate::game::move_through_tunnel::GhostPassedTunnel;
 
 pub mod movement;
 pub mod spawn;

@@ -8,6 +8,7 @@ use crate::game::lives::LivesPlugin;
 use crate::game::map::MapPlugin;
 use crate::game::pacman::PacmanPlugin;
 use crate::core::random::RandomPlugin;
+use crate::game::move_through_tunnel::MoveThroughTunnelPlugin;
 use crate::game::schedule::SchedulePlugin;
 use crate::game::score::ScorePlugin;
 use crate::game::specs_per_level::SpecsPerLevelPlugin;
@@ -29,6 +30,7 @@ pub mod ghosts;
 mod schedule;
 pub mod state;
 pub mod target;
+mod move_through_tunnel;
 
 /// Contains the entire gameplay logic for pacman.
 pub struct GamePlugin;
@@ -51,8 +53,11 @@ impl Plugin for GamePlugin {
                 SpecsPerLevelPlugin,
                 SpeedPlugin,
                 StatePlugin,
-                TargetPlugin
+                TargetPlugin,
             ))
+            .add_plugins(
+                MoveThroughTunnelPlugin
+            )
         ;
     }
 }
