@@ -11,8 +11,9 @@ impl Plugin for GhostPlugin {
     }
 }
 
-#[derive(Component, Reflect, Copy, Clone, Eq, PartialEq, Hash)]
+#[derive(Component, Reflect, Copy, Clone, Default, Eq, PartialEq, Hash)]
 pub enum Ghost {
+    #[default]
     Blinky,
     Pinky,
     Inky,

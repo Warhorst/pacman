@@ -23,6 +23,21 @@ macro_rules! corner {
         ))
     };
 
+    ($creator:expr, $rot:expr, O, $ghost:expr) => {
+        $creator.spawn($creator.maze, (
+            Wall,
+            WallStyle {
+                wall_type: WallType_::Outer,
+                rotation: $rot,
+                is_corner: true,
+            },
+            GhostCorner {
+                ghost: $ghost,
+                position: Pos::new(0, 0)
+            }
+        ))
+    };
+
     ($creator:expr, $rot:expr, I) => {
         $creator.spawn($creator.maze, (
             Wall,
@@ -201,12 +216,12 @@ impl<'a> MapCreator<'a> {
 
     fn create(&mut self) {
         // 0
-        corner!(self, D0, O);
+        corner!(self, D0, O, Pinky);
         wall!(self, 12, D0, O);
         corner!(self, D90, O);
         corner!(self, D0, O);
         wall!(self, 12, D0, O);
-        corner!(self, D90, O);
+        corner!(self, D90, O, Blinky);
 
         // 1
         wall!(self, 1, D270, O);
@@ -715,9 +730,9 @@ impl<'a> MapCreator<'a> {
         wall!(self, 1, D90, O);
 
         // 30
-        corner!(self, D270, O);
+        corner!(self, D270, O, Clyde);
         wall!(self, 26, D180, O);
-        corner!(self, D180, O);
+        corner!(self, D180, O, Inky);
     }
 
     fn spawn(&mut self, parent: Entity, bundle: impl Bundle) {

@@ -801,6 +801,13 @@
           rotation: D0,
           is_corner: true,
         ),
+        "pacman::core::map::GhostCorner": (
+          ghost: Pinky,
+          position: ((
+            x: 0,
+            y: 0,
+          )),
+        ),
         "pacman::core::map::Tiles": Single(
           pos: ((
             x: 0,
@@ -1259,6 +1266,13 @@
           wall_type: Outer,
           rotation: D90,
           is_corner: true,
+        ),
+        "pacman::core::map::GhostCorner": (
+          ghost: Blinky,
+          position: ((
+            x: 0,
+            y: 0,
+          )),
         ),
         "pacman::core::map::Tiles": Single(
           pos: ((
@@ -12733,6 +12747,13 @@
           rotation: D270,
           is_corner: true,
         ),
+        "pacman::core::map::GhostCorner": (
+          ghost: Clyde,
+          position: ((
+            x: 0,
+            y: 0,
+          )),
+        ),
         "pacman::core::map::Tiles": Single(
           pos: ((
             x: 0,
@@ -13191,6 +13212,13 @@
           wall_type: Outer,
           rotation: D180,
           is_corner: true,
+        ),
+        "pacman::core::map::GhostCorner": (
+          ghost: Inky,
+          position: ((
+            x: 0,
+            y: 0,
+          )),
         ),
         "pacman::core::map::Tiles": Single(
           pos: ((

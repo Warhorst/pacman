@@ -27,6 +27,7 @@ impl Plugin for MapPlugin {
             .register_type::<PacmanSpawn>()
             .register_type::<GhostHouse>()
             .register_type::<GhostSpawn>()
+            .register_type::<GhostCorner>()
         ;
     }
 }
@@ -146,7 +147,8 @@ pub struct EnergizerSpawn(pub Vec3);
 #[reflect(Component)]
 pub struct FruitSpawn(pub Vec3);
 
-#[derive(Component)]
+#[derive(Component, Reflect, Default)]
+#[reflect(Component)]
 pub struct GhostCorner {
     pub ghost: Ghost,
     pub position: Pos,
