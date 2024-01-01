@@ -1,6 +1,5 @@
 use std::f32::consts::PI;
 use bevy::prelude::*;
-use serde::{Deserialize, Serialize};
 use crate::core::prelude::*;
 use Tiles::*;
 
@@ -96,7 +95,7 @@ pub enum WallType_ {
     Outer,
 }
 
-#[derive(Reflect, Serialize, Deserialize, Copy, Clone, Debug, Default, Eq, PartialEq)]
+#[derive(Reflect, Copy, Clone, Debug, Default, Eq, PartialEq)]
 pub enum Rotation {
     #[default]
     D0,
@@ -181,19 +180,4 @@ pub struct GhostSpawn {
     pub coordinates: Vec3,
     pub spawn_direction: Dir,
     pub positions: [Pos; 2],
-}
-
-/// Macro which quickly creates an element filter (closure Fn(&Element) -> bool) by passing a pattern.
-///
-/// The alternative would be a match/if let expression, which is much longer and harder to read.
-#[macro_export]
-macro_rules! is {
-    ($pattern:pat) => {
-        {
-            |e: &crate::game::map::Element| match e {
-                $pattern => true,
-                _ => false
-            }
-        }
-    };
 }

@@ -1,11 +1,10 @@
 use bevy::prelude::*;
 use pad::Position;
 use pad::Direction::*;
-use serde::{Deserialize, Serialize};
 use crate::core::prelude::*;
 
 /// The x and y coordinates of some entity.
-#[derive(Reflect, Serialize, Deserialize, Copy, Clone, Debug, Default, Eq, PartialEq, Hash)]
+#[derive(Reflect, Copy, Clone, Debug, Default, Eq, PartialEq, Hash)]
 pub struct Pos(Position);
 
 impl Pos {

@@ -8,7 +8,6 @@ pub use crate::core::game_state::Game::*;
 pub use crate::core::game_state::GameState::*;
 pub use crate::core::game_state::Setup::*;
 pub use crate::core::game_state::Spawn::*;
-pub use crate::is;
 pub use crate::core::ghost_state::*;
 pub use crate::core::ghost_state::GhostState::*;
 pub use crate::core::system_sets::*;

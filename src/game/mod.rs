@@ -5,7 +5,7 @@ use crate::game::ghosts::GhostPlugin;
 use crate::game::interactions::InteractionsPlugin;
 use crate::game::level::LevelPlugin;
 use crate::game::lives::LivesPlugin;
-use crate::game::map::MapPlugin;
+use crate::game::animate_walls::AnimateWallsPlugin;
 use crate::game::pacman::PacmanPlugin;
 use crate::core::random::RandomPlugin;
 use crate::game::move_through_tunnel::MoveThroughTunnelPlugin;
@@ -23,7 +23,7 @@ pub mod specs_per_level;
 pub mod lives;
 pub mod level;
 pub mod ghost_house_gate;
-pub mod map;
+pub mod animate_walls;
 pub mod edibles;
 pub mod pacman;
 pub mod ghosts;
@@ -45,7 +45,7 @@ impl Plugin for GamePlugin {
                 InteractionsPlugin,
                 LevelPlugin,
                 LivesPlugin,
-                MapPlugin,
+                AnimateWallsPlugin,
                 PacmanPlugin,
                 RandomPlugin,
                 SchedulePlugin,

@@ -42,8 +42,6 @@ pub enum Spawn {
     SpawnMapScene,
     /// Enhance the spawned entities with textures and more
     EnhanceMap,
-    /// Spawn the ui of the game
-    SpawnUi
 }
 
 #[derive(Reflect, Copy, Clone, Eq, PartialEq, Hash, Debug)]

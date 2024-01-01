@@ -1,11 +1,10 @@
 use bevy::prelude::*;
 use pad::Direction;
 use pad::Direction::*;
-use serde::{Deserialize, Serialize};
 use crate::core::prelude::*;
 
 /// The direction some entity is currently moving to
-#[derive(Component, Reflect, Serialize, Deserialize, Copy, Clone, Debug, Default, Eq, PartialEq)]
+#[derive(Component, Reflect, Copy, Clone, Debug, Default, Eq, PartialEq)]
 pub enum Dir {
     #[default]
     Right,
