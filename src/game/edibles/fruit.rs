@@ -44,13 +44,13 @@ fn spawn_fruit_when_dot_limit_reached(
     eaten_dots: Res<EatenDots>,
     specs_per_level: Res<SpecsPerLevel>,
     mut event_reader: EventReader<DotWasEaten>,
-    spawn_query: Query<&FruitSpawn>,
+    spawners: Query<&Tiles, With<FruitSpawn>>,
 ) {
     let num_eaten_dots = eaten_dots.get_eaten();
 
     for _ in event_reader.read() {
         if let 70 | 170 = num_eaten_dots {
-            for spawn in &spawn_query {
+            for tiles in &spawners {
                 let fruit = specs_per_level.get_for(&level).fruit_to_spawn;
                 commands.spawn((
                     Name::new("Fruit"),
@@ -60,7 +60,7 @@ fn spawn_fruit_when_dot_limit_reached(
                             custom_size: Some(Vec2::splat(FRUIT_DIMENSION)),
                             ..default()
                         },
-                        transform: Transform::from_translation(**spawn),
+                        transform: Transform::from_translation(tiles.to_vec3(FRUIT_Z)),
                         ..Default::default()
                     },
                     fruit,

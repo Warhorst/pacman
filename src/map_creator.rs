@@ -31,10 +31,7 @@ macro_rules! corner {
                 rotation: $rot,
                 is_corner: true,
             },
-            GhostCorner {
-                ghost: $ghost,
-                position: Pos::new(0, 0)
-            }
+            GhostCorner($ghost)
         ))
     };
 
@@ -82,8 +79,7 @@ macro_rules! dot {
     ($creator:expr, $amount:expr) => {
         for _ in 0..$amount {
             $creator.spawn($creator.dot_spawns, (
-                // TODO remove the vec, use the tile instead
-                DotSpawn(Vec3::default()),
+                DotSpawn,
             ))
         }
     };
@@ -93,8 +89,7 @@ macro_rules! energizer {
     ($creator:expr) => {
         $creator.spawn(
             $creator.energizer_spawns,
-            // TODO remove the vec, use the tile instead
-            EnergizerSpawn(Vec3::default())
+            EnergizerSpawn
         );
     };
 }
@@ -154,8 +149,7 @@ macro_rules! fruit {
     ($creator:expr) => {
         $creator.spawn_double(
             $creator.map,
-            // TODO remove the vec, use the tile instead
-            FruitSpawn(Vec3::default())
+            FruitSpawn
         );
     };
 }
@@ -164,8 +158,7 @@ macro_rules! pacman {
     ($creator:expr) => {
         $creator.spawn_double(
             $creator.map,
-            // TODO remove the vec, use the tile instead
-            PacmanSpawn(Vec3::default())
+            PacmanSpawn
         );
     };
 }

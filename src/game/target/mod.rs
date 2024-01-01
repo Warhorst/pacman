@@ -45,7 +45,7 @@ pub struct TargetComponents<'a> {
 fn set_target(
     random: Res<Random>,
     ghost_house_gate: Res<GhostHouseGate>,
-    corner_query: Query<&GhostCorner>,
+    corner_query: Query<(&GhostCorner, &Tiles)>,
     wall_query: Query<&Transform, With<Wall>>,
     ghost_spawn_query: Query<&GhostSpawn>,
     pacman_query: Query<(&Transform, &Dir), With<Pacman>>,
@@ -93,7 +93,7 @@ fn set_target(
 fn set_target_on_ghost_pause(
     random: Res<Random>,
     ghost_house_gate: Res<GhostHouseGate>,
-    corner_query: Query<&GhostCorner>,
+    corner_query: Query<(&GhostCorner, &Tiles)>,
     wall_query: Query<&Transform, With<Wall>>,
     ghost_spawn_query: Query<&GhostSpawn>,
     pacman_query: Query<(&Transform, &Dir), With<Pacman>>,
@@ -147,12 +147,12 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
         pacman_transform: Transform,
         pacman_direction: Dir,
         blinky_transform: Transform,
-        corner_query: &Query<&GhostCorner>,
+        corner_query: &Query<(&GhostCorner, &Tiles)>,
         wall_query: &Query<&Transform, With<Wall>>,
         ghost_spawn_query: &Query<&GhostSpawn>,
         components: &'a mut TargetComponentsItem<'b, 'c>,
     ) -> Self {
-        let corner_positions = corner_query.iter().map(|corner| (corner.ghost, corner.position)).collect();
+        let corner_positions = corner_query.iter().map(|(corner, tiles)| (**corner, tiles.to_pos())).collect();
         let wall_positions = wall_query.iter().map(|transform| Pos::from_vec3(transform.translation)).collect();
         let ghost_spawns = ghost_spawn_query.iter().map(|spawn| (spawn.ghost, *spawn)).collect();
         Self { random, ghost_spawns, ghost_house_gate, pacman_transform, pacman_direction, blinky_transform, corner_positions, wall_positions, components }

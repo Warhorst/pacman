@@ -22,6 +22,10 @@ impl Plugin for EnhanceMapPlugin {
                 OnEnter(Spawn(EnhanceMap)),
                 add_spatial_bundle_to_map,
             )
+            .add_systems(
+                Update,
+                switch_state_after_enhance.run_if(in_state(Spawn(EnhanceMap)))
+            )
         ;
     }
 }
@@ -31,4 +35,10 @@ fn add_spatial_bundle_to_map(
     maps: Query<Entity, With<Map>>,
 ) {
     commands.entity(maps.single()).insert(SpatialBundle::default());
+}
+
+fn switch_state_after_enhance(
+    mut next_state: ResMut<NextState<GameState>>,
+) {
+    next_state.set(Game(Start))
 }

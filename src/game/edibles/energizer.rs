@@ -51,7 +51,7 @@ impl Plugin for EnergizerPlugin {
 fn spawn_energizer(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    spawn_query: Query<&EnergizerSpawn>,
+    spawners: Query<&Tiles, With<EnergizerSpawn>>,
 ) {
     let energizers = commands.spawn((
         Name::new("Energizers"),
@@ -59,7 +59,7 @@ fn spawn_energizer(
         SpatialBundle::default()
     )).id();
 
-    for spawn in &spawn_query {
+    for tiles in &spawners {
         commands.entity(energizers).with_children(|parent| {
             parent.spawn((
                 SpriteBundle {
@@ -68,7 +68,7 @@ fn spawn_energizer(
                         custom_size: Some(Vec2::splat(ENERGIZER_DIMENSION)),
                         ..default()
                     },
-                    transform: Transform::from_translation(**spawn),
+                    transform: Transform::from_translation(tiles.to_vec3(ENERGIZER_Z)),
                     ..Default::default()
                 },
                 Energizer,

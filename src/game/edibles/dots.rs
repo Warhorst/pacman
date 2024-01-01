@@ -44,7 +44,7 @@ impl Plugin for DotPlugin {
 fn spawn_dots(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    spawn_query: Query<&DotSpawn>,
+    spawn_query: Query<&Tiles, With<DotSpawn>>,
 ) {
     let dots = commands.spawn((
         Name::new("Dots"),
@@ -52,7 +52,7 @@ fn spawn_dots(
         SpatialBundle::default()
     )).id();
 
-    for spawn in &spawn_query {
+    for tiles in &spawn_query {
         commands.entity(dots).with_children(|parent| {
             parent.spawn((
                 SpriteBundle {
@@ -61,7 +61,7 @@ fn spawn_dots(
                         custom_size: Some(Vec2::splat(DOT_DIMENSION)),
                         ..default()
                     },
-                    transform: Transform::from_translation(**spawn),
+                    transform: Transform::from_translation(tiles.to_vec3(DOT_Z)),
                     ..Default::default()
                 },
                 Dot,

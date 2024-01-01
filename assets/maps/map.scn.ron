@@ -801,13 +801,7 @@
           rotation: D0,
           is_corner: true,
         ),
-        "pacman::core::map::GhostCorner": (
-          ghost: Pinky,
-          position: ((
-            x: 0,
-            y: 0,
-          )),
-        ),
+        "pacman::core::map::GhostCorner": (Pinky),
         "pacman::core::map::Tiles": Single(
           pos: ((
             x: 0,
@@ -1267,13 +1261,7 @@
           rotation: D90,
           is_corner: true,
         ),
-        "pacman::core::map::GhostCorner": (
-          ghost: Blinky,
-          position: ((
-            x: 0,
-            y: 0,
-          )),
-        ),
+        "pacman::core::map::GhostCorner": (Blinky),
         "pacman::core::map::Tiles": Single(
           pos: ((
             x: 27,
@@ -1308,11 +1296,7 @@
             y: 30,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     34: (
@@ -1324,11 +1308,7 @@
             y: 30,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     35: (
@@ -1340,11 +1320,7 @@
             y: 30,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     36: (
@@ -1356,11 +1332,7 @@
             y: 30,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     37: (
@@ -1372,11 +1344,7 @@
             y: 30,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     38: (
@@ -1388,11 +1356,7 @@
             y: 30,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     39: (
@@ -1404,11 +1368,7 @@
             y: 30,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     40: (
@@ -1420,11 +1380,7 @@
             y: 30,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     41: (
@@ -1436,11 +1392,7 @@
             y: 30,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     42: (
@@ -1452,11 +1404,7 @@
             y: 30,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     43: (
@@ -1468,11 +1416,7 @@
             y: 30,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     44: (
@@ -1484,11 +1428,7 @@
             y: 30,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     45: (
@@ -1534,11 +1474,7 @@
             y: 30,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     48: (
@@ -1550,11 +1486,7 @@
             y: 30,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     49: (
@@ -1566,11 +1498,7 @@
             y: 30,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     50: (
@@ -1582,11 +1510,7 @@
             y: 30,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     51: (
@@ -1598,11 +1522,7 @@
             y: 30,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     52: (
@@ -1614,11 +1534,7 @@
             y: 30,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     53: (
@@ -1630,11 +1546,7 @@
             y: 30,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     54: (
@@ -1646,11 +1558,7 @@
             y: 30,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     55: (
@@ -1662,11 +1570,7 @@
             y: 30,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     56: (
@@ -1678,11 +1582,7 @@
             y: 30,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     57: (
@@ -1694,11 +1594,7 @@
             y: 30,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     58: (
@@ -1710,11 +1606,7 @@
             y: 30,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     59: (
@@ -1760,11 +1652,7 @@
             y: 29,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     62: (
@@ -1844,11 +1732,7 @@
             y: 29,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     67: (
@@ -1945,11 +1829,7 @@
             y: 29,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     73: (
@@ -1995,11 +1875,7 @@
             y: 29,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     76: (
@@ -2096,11 +1972,7 @@
             y: 29,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     82: (
@@ -2180,11 +2052,7 @@
             y: 29,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     87: (
@@ -2230,11 +2098,7 @@
             y: 28,
           )),
         ),
-        "pacman::core::map::EnergizerSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::EnergizerSpawn": (),
       },
     ),
     90: (
@@ -2280,11 +2144,7 @@
             y: 28,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     93: (
@@ -2330,11 +2190,7 @@
             y: 28,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     96: (
@@ -2380,11 +2236,7 @@
             y: 28,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     99: (
@@ -2430,11 +2282,7 @@
             y: 28,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     102: (
@@ -2480,11 +2328,7 @@
             y: 28,
           )),
         ),
-        "pacman::core::map::EnergizerSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::EnergizerSpawn": (),
       },
     ),
     105: (
@@ -2530,11 +2374,7 @@
             y: 27,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     108: (
@@ -2614,11 +2454,7 @@
             y: 27,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     113: (
@@ -2715,11 +2551,7 @@
             y: 27,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     119: (
@@ -2765,11 +2597,7 @@
             y: 27,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     122: (
@@ -2866,11 +2694,7 @@
             y: 27,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     128: (
@@ -2950,11 +2774,7 @@
             y: 27,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     133: (
@@ -3000,11 +2820,7 @@
             y: 26,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     136: (
@@ -3016,11 +2832,7 @@
             y: 26,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     137: (
@@ -3032,11 +2844,7 @@
             y: 26,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     138: (
@@ -3048,11 +2856,7 @@
             y: 26,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     139: (
@@ -3064,11 +2868,7 @@
             y: 26,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     140: (
@@ -3080,11 +2880,7 @@
             y: 26,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     141: (
@@ -3096,11 +2892,7 @@
             y: 26,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     142: (
@@ -3112,11 +2904,7 @@
             y: 26,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     143: (
@@ -3128,11 +2916,7 @@
             y: 26,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     144: (
@@ -3144,11 +2928,7 @@
             y: 26,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     145: (
@@ -3160,11 +2940,7 @@
             y: 26,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     146: (
@@ -3176,11 +2952,7 @@
             y: 26,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     147: (
@@ -3192,11 +2964,7 @@
             y: 26,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     148: (
@@ -3208,11 +2976,7 @@
             y: 26,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     149: (
@@ -3224,11 +2988,7 @@
             y: 26,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     150: (
@@ -3240,11 +3000,7 @@
             y: 26,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     151: (
@@ -3256,11 +3012,7 @@
             y: 26,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     152: (
@@ -3272,11 +3024,7 @@
             y: 26,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     153: (
@@ -3288,11 +3036,7 @@
             y: 26,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     154: (
@@ -3304,11 +3048,7 @@
             y: 26,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     155: (
@@ -3320,11 +3060,7 @@
             y: 26,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     156: (
@@ -3336,11 +3072,7 @@
             y: 26,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     157: (
@@ -3352,11 +3084,7 @@
             y: 26,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     158: (
@@ -3368,11 +3096,7 @@
             y: 26,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     159: (
@@ -3384,11 +3108,7 @@
             y: 26,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     160: (
@@ -3400,11 +3120,7 @@
             y: 26,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     161: (
@@ -3450,11 +3166,7 @@
             y: 25,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     164: (
@@ -3534,11 +3246,7 @@
             y: 25,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     169: (
@@ -3584,11 +3292,7 @@
             y: 25,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     172: (
@@ -3736,11 +3440,7 @@
             y: 25,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     181: (
@@ -3786,11 +3486,7 @@
             y: 25,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     184: (
@@ -3870,11 +3566,7 @@
             y: 25,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     189: (
@@ -3920,11 +3612,7 @@
             y: 24,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     192: (
@@ -4004,11 +3692,7 @@
             y: 24,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     197: (
@@ -4054,11 +3738,7 @@
             y: 24,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     200: (
@@ -4206,11 +3886,7 @@
             y: 24,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     209: (
@@ -4256,11 +3932,7 @@
             y: 24,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     212: (
@@ -4340,11 +4012,7 @@
             y: 24,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     217: (
@@ -4390,11 +4058,7 @@
             y: 23,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     220: (
@@ -4406,11 +4070,7 @@
             y: 23,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     221: (
@@ -4422,11 +4082,7 @@
             y: 23,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     222: (
@@ -4438,11 +4094,7 @@
             y: 23,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     223: (
@@ -4454,11 +4106,7 @@
             y: 23,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     224: (
@@ -4470,11 +4118,7 @@
             y: 23,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     225: (
@@ -4520,11 +4164,7 @@
             y: 23,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     228: (
@@ -4536,11 +4176,7 @@
             y: 23,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     229: (
@@ -4552,11 +4188,7 @@
             y: 23,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     230: (
@@ -4568,11 +4200,7 @@
             y: 23,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     231: (
@@ -4618,11 +4246,7 @@
             y: 23,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     234: (
@@ -4634,11 +4258,7 @@
             y: 23,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     235: (
@@ -4650,11 +4270,7 @@
             y: 23,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     236: (
@@ -4666,11 +4282,7 @@
             y: 23,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     237: (
@@ -4716,11 +4328,7 @@
             y: 23,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     240: (
@@ -4732,11 +4340,7 @@
             y: 23,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     241: (
@@ -4748,11 +4352,7 @@
             y: 23,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     242: (
@@ -4764,11 +4364,7 @@
             y: 23,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     243: (
@@ -4780,11 +4376,7 @@
             y: 23,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     244: (
@@ -4796,11 +4388,7 @@
             y: 23,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     245: (
@@ -4931,11 +4519,7 @@
             y: 22,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     253: (
@@ -5151,11 +4735,7 @@
             y: 22,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     266: (
@@ -5286,11 +4866,7 @@
             y: 21,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     274: (
@@ -5506,11 +5082,7 @@
             y: 21,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     287: (
@@ -5556,11 +5128,7 @@
             y: 20,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     290: (
@@ -5640,11 +5208,7 @@
             y: 20,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     295: (
@@ -5690,11 +5254,7 @@
             y: 19,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     298: (
@@ -5886,11 +5446,7 @@
             y: 19,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     311: (
@@ -6021,11 +5577,7 @@
             y: 18,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     319: (
@@ -6217,11 +5769,7 @@
             y: 18,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     332: (
@@ -6699,11 +6247,7 @@
             y: 16,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     365: (
@@ -6895,11 +6439,7 @@
             y: 16,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     378: (
@@ -7030,11 +6570,7 @@
             y: 15,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     386: (
@@ -7226,11 +6762,7 @@
             y: 15,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     399: (
@@ -7276,11 +6808,7 @@
             y: 14,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     402: (
@@ -7330,11 +6858,7 @@
             y: 14,
           )),
         ),
-        "pacman::core::map::FruitSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::FruitSpawn": (),
       },
     ),
     405: (
@@ -7380,11 +6904,7 @@
             y: 14,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     408: (
@@ -7430,11 +6950,7 @@
             y: 13,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     411: (
@@ -7650,11 +7166,7 @@
             y: 13,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     424: (
@@ -7785,11 +7297,7 @@
             y: 12,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     432: (
@@ -8005,11 +7513,7 @@
             y: 12,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     445: (
@@ -8140,11 +7644,7 @@
             y: 11,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     453: (
@@ -8156,11 +7656,7 @@
             y: 11,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     454: (
@@ -8172,11 +7668,7 @@
             y: 11,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     455: (
@@ -8188,11 +7680,7 @@
             y: 11,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     456: (
@@ -8204,11 +7692,7 @@
             y: 11,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     457: (
@@ -8220,11 +7704,7 @@
             y: 11,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     458: (
@@ -8236,11 +7716,7 @@
             y: 11,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     459: (
@@ -8252,11 +7728,7 @@
             y: 11,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     460: (
@@ -8268,11 +7740,7 @@
             y: 11,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     461: (
@@ -8284,11 +7752,7 @@
             y: 11,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     462: (
@@ -8300,11 +7764,7 @@
             y: 11,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     463: (
@@ -8316,11 +7776,7 @@
             y: 11,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     464: (
@@ -8366,11 +7822,7 @@
             y: 11,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     467: (
@@ -8382,11 +7834,7 @@
             y: 11,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     468: (
@@ -8398,11 +7846,7 @@
             y: 11,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     469: (
@@ -8414,11 +7858,7 @@
             y: 11,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     470: (
@@ -8430,11 +7870,7 @@
             y: 11,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     471: (
@@ -8446,11 +7882,7 @@
             y: 11,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     472: (
@@ -8462,11 +7894,7 @@
             y: 11,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     473: (
@@ -8478,11 +7906,7 @@
             y: 11,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     474: (
@@ -8494,11 +7918,7 @@
             y: 11,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     475: (
@@ -8510,11 +7930,7 @@
             y: 11,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     476: (
@@ -8526,11 +7942,7 @@
             y: 11,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     477: (
@@ -8542,11 +7954,7 @@
             y: 11,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     478: (
@@ -8592,11 +8000,7 @@
             y: 10,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     481: (
@@ -8676,11 +8080,7 @@
             y: 10,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     486: (
@@ -8777,11 +8177,7 @@
             y: 10,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     492: (
@@ -8827,11 +8223,7 @@
             y: 10,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     495: (
@@ -8928,11 +8320,7 @@
             y: 10,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     501: (
@@ -9012,11 +8400,7 @@
             y: 10,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     506: (
@@ -9062,11 +8446,7 @@
             y: 9,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     509: (
@@ -9146,11 +8526,7 @@
             y: 9,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     514: (
@@ -9247,11 +8623,7 @@
             y: 9,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     520: (
@@ -9297,11 +8669,7 @@
             y: 9,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     523: (
@@ -9398,11 +8766,7 @@
             y: 9,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     529: (
@@ -9482,11 +8846,7 @@
             y: 9,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     534: (
@@ -9532,11 +8892,7 @@
             y: 8,
           )),
         ),
-        "pacman::core::map::EnergizerSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::EnergizerSpawn": (),
       },
     ),
     537: (
@@ -9548,11 +8904,7 @@
             y: 8,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     538: (
@@ -9564,11 +8916,7 @@
             y: 8,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     539: (
@@ -9614,11 +8962,7 @@
             y: 8,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     542: (
@@ -9630,11 +8974,7 @@
             y: 8,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     543: (
@@ -9646,11 +8986,7 @@
             y: 8,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     544: (
@@ -9662,11 +8998,7 @@
             y: 8,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     545: (
@@ -9678,11 +9010,7 @@
             y: 8,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     546: (
@@ -9694,11 +9022,7 @@
             y: 8,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     547: (
@@ -9710,11 +9034,7 @@
             y: 8,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     548: (
@@ -9730,11 +9050,7 @@
             y: 8,
           )),
         ),
-        "pacman::core::map::PacmanSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::PacmanSpawn": (),
       },
     ),
     549: (
@@ -9746,11 +9062,7 @@
             y: 8,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     550: (
@@ -9762,11 +9074,7 @@
             y: 8,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     551: (
@@ -9778,11 +9086,7 @@
             y: 8,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     552: (
@@ -9794,11 +9098,7 @@
             y: 8,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     553: (
@@ -9810,11 +9110,7 @@
             y: 8,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     554: (
@@ -9826,11 +9122,7 @@
             y: 8,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     555: (
@@ -9842,11 +9134,7 @@
             y: 8,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     556: (
@@ -9892,11 +9180,7 @@
             y: 8,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     559: (
@@ -9908,11 +9192,7 @@
             y: 8,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     560: (
@@ -9924,11 +9204,7 @@
             y: 8,
           )),
         ),
-        "pacman::core::map::EnergizerSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::EnergizerSpawn": (),
       },
     ),
     561: (
@@ -10008,11 +9284,7 @@
             y: 7,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     566: (
@@ -10058,11 +9330,7 @@
             y: 7,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     569: (
@@ -10108,11 +9376,7 @@
             y: 7,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     572: (
@@ -10260,11 +9524,7 @@
             y: 7,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     581: (
@@ -10310,11 +9570,7 @@
             y: 7,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     584: (
@@ -10360,11 +9616,7 @@
             y: 7,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     587: (
@@ -10478,11 +9730,7 @@
             y: 6,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     594: (
@@ -10528,11 +9776,7 @@
             y: 6,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     597: (
@@ -10578,11 +9822,7 @@
             y: 6,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     600: (
@@ -10730,11 +9970,7 @@
             y: 6,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     609: (
@@ -10780,11 +10016,7 @@
             y: 6,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     612: (
@@ -10830,11 +10062,7 @@
             y: 6,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     615: (
@@ -10914,11 +10142,7 @@
             y: 5,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     620: (
@@ -10930,11 +10154,7 @@
             y: 5,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     621: (
@@ -10946,11 +10166,7 @@
             y: 5,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     622: (
@@ -10962,11 +10178,7 @@
             y: 5,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     623: (
@@ -10978,11 +10190,7 @@
             y: 5,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     624: (
@@ -10994,11 +10202,7 @@
             y: 5,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     625: (
@@ -11044,11 +10248,7 @@
             y: 5,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     628: (
@@ -11060,11 +10260,7 @@
             y: 5,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     629: (
@@ -11076,11 +10272,7 @@
             y: 5,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     630: (
@@ -11092,11 +10284,7 @@
             y: 5,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     631: (
@@ -11142,11 +10330,7 @@
             y: 5,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     634: (
@@ -11158,11 +10342,7 @@
             y: 5,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     635: (
@@ -11174,11 +10354,7 @@
             y: 5,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     636: (
@@ -11190,11 +10366,7 @@
             y: 5,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     637: (
@@ -11240,11 +10412,7 @@
             y: 5,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     640: (
@@ -11256,11 +10424,7 @@
             y: 5,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     641: (
@@ -11272,11 +10436,7 @@
             y: 5,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     642: (
@@ -11288,11 +10448,7 @@
             y: 5,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     643: (
@@ -11304,11 +10460,7 @@
             y: 5,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     644: (
@@ -11320,11 +10472,7 @@
             y: 5,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     645: (
@@ -11370,11 +10518,7 @@
             y: 4,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     648: (
@@ -11556,11 +10700,7 @@
             y: 4,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     659: (
@@ -11606,11 +10746,7 @@
             y: 4,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     662: (
@@ -11792,11 +10928,7 @@
             y: 4,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     673: (
@@ -11842,11 +10974,7 @@
             y: 3,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     676: (
@@ -12028,11 +11156,7 @@
             y: 3,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     687: (
@@ -12078,11 +11202,7 @@
             y: 3,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     690: (
@@ -12264,11 +11384,7 @@
             y: 3,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     701: (
@@ -12314,11 +11430,7 @@
             y: 2,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     704: (
@@ -12330,11 +11442,7 @@
             y: 2,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     705: (
@@ -12346,11 +11454,7 @@
             y: 2,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     706: (
@@ -12362,11 +11466,7 @@
             y: 2,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     707: (
@@ -12378,11 +11478,7 @@
             y: 2,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     708: (
@@ -12394,11 +11490,7 @@
             y: 2,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     709: (
@@ -12410,11 +11502,7 @@
             y: 2,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     710: (
@@ -12426,11 +11514,7 @@
             y: 2,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     711: (
@@ -12442,11 +11526,7 @@
             y: 2,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     712: (
@@ -12458,11 +11538,7 @@
             y: 2,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     713: (
@@ -12474,11 +11550,7 @@
             y: 2,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     714: (
@@ -12490,11 +11562,7 @@
             y: 2,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     715: (
@@ -12506,11 +11574,7 @@
             y: 2,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     716: (
@@ -12522,11 +11586,7 @@
             y: 2,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     717: (
@@ -12538,11 +11598,7 @@
             y: 2,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     718: (
@@ -12554,11 +11610,7 @@
             y: 2,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     719: (
@@ -12570,11 +11622,7 @@
             y: 2,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     720: (
@@ -12586,11 +11634,7 @@
             y: 2,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     721: (
@@ -12602,11 +11646,7 @@
             y: 2,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     722: (
@@ -12618,11 +11658,7 @@
             y: 2,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     723: (
@@ -12634,11 +11670,7 @@
             y: 2,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     724: (
@@ -12650,11 +11682,7 @@
             y: 2,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     725: (
@@ -12666,11 +11694,7 @@
             y: 2,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     726: (
@@ -12682,11 +11706,7 @@
             y: 2,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     727: (
@@ -12698,11 +11718,7 @@
             y: 2,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     728: (
@@ -12714,11 +11730,7 @@
             y: 2,
           )),
         ),
-        "pacman::core::map::DotSpawn": ((
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        )),
+        "pacman::core::map::DotSpawn": (),
       },
     ),
     729: (
@@ -12747,13 +11759,7 @@
           rotation: D270,
           is_corner: true,
         ),
-        "pacman::core::map::GhostCorner": (
-          ghost: Clyde,
-          position: ((
-            x: 0,
-            y: 0,
-          )),
-        ),
+        "pacman::core::map::GhostCorner": (Clyde),
         "pacman::core::map::Tiles": Single(
           pos: ((
             x: 0,
@@ -13213,13 +12219,7 @@
           rotation: D180,
           is_corner: true,
         ),
-        "pacman::core::map::GhostCorner": (
-          ghost: Inky,
-          position: ((
-            x: 0,
-            y: 0,
-          )),
-        ),
+        "pacman::core::map::GhostCorner": (Inky),
         "pacman::core::map::Tiles": Single(
           pos: ((
             x: 27,

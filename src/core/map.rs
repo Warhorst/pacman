@@ -118,9 +118,9 @@ impl Rotation {
 }
 
 /// Marks a tile to spawn pacman here
-#[derive(Component, Reflect, Deref, Default)]
+#[derive(Component, Reflect, Default)]
 #[reflect(Component)]
-pub struct PacmanSpawn(pub Vec3);
+pub struct PacmanSpawn;
 
 /// Parent component for all dot spawns (for organization only)
 #[derive(Component, Reflect, Default)]
@@ -128,9 +128,9 @@ pub struct PacmanSpawn(pub Vec3);
 pub struct DotSpawns;
 
 /// Coordinates where a dot can spawn
-#[derive(Component, Reflect, Deref, Default)]
+#[derive(Component, Reflect, Default)]
 #[reflect(Component)]
-pub struct DotSpawn(pub Vec3);
+pub struct DotSpawn;
 
 /// Parent component for all energizer spawns (for organization only)
 #[derive(Component, Reflect, Default)]
@@ -138,21 +138,18 @@ pub struct DotSpawn(pub Vec3);
 pub struct EnergizerSpawns;
 
 /// Marks a tile to spawn an energizer here.
-#[derive(Component, Reflect, Deref, Default)]
-#[reflect(Component)]
-pub struct EnergizerSpawn(pub Vec3);
-
-/// Marks a tile to spawn a fruit here
-#[derive(Component, Reflect, Deref, Default)]
-#[reflect(Component)]
-pub struct FruitSpawn(pub Vec3);
-
 #[derive(Component, Reflect, Default)]
 #[reflect(Component)]
-pub struct GhostCorner {
-    pub ghost: Ghost,
-    pub position: Pos,
-}
+pub struct EnergizerSpawn;
+
+/// Marks a tile to spawn a fruit here
+#[derive(Component, Reflect, Default)]
+#[reflect(Component)]
+pub struct FruitSpawn;
+
+#[derive(Component, Reflect, Deref, Default)]
+#[reflect(Component)]
+pub struct GhostCorner(pub Ghost);
 
 /// A single tile of the ghost house
 #[derive(Component, Reflect, Default)]
