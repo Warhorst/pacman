@@ -6,7 +6,7 @@ pub struct CameraPlugin;
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(OnEnter(Spawn(EnhanceMap)), spawn_camera)
+            .add_systems(OnEnter(Game(Start)), spawn_camera)
             .add_systems(OnExit(Game(GameOver)), despawn_camera)
         ;
     }
