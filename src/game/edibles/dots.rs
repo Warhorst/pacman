@@ -114,7 +114,7 @@ fn play_waka_when_dot_was_eaten(
 
                 commands.spawn((
                     Name::new("WakaSound"),
-                    SoundEffect::new(),
+                    SoundEffect::new(1),
                     AudioBundle {
                         source: asset_server.load("sounds/waka.ogg"),
                         ..default()
@@ -136,7 +136,7 @@ fn play_waka_when_dot_was_eaten(
 
                 commands.spawn((
                     Name::new("WakaSound"),
-                    SoundEffect::new(),
+                    SoundEffect::new(1),
                     AudioBundle {
                         source: asset_server.load("sounds/waka.ogg"),
                         ..default()

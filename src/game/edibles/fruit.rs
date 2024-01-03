@@ -127,7 +127,7 @@ fn play_fruit_eaten_sound_when_fruit_was_eaten(
     for _ in event_reader.read() {
         commands.spawn((
             Name::new("FruitEatenSound"),
-            SoundEffect::new(),
+            SoundEffect::new(1),
             AudioBundle {
                 source: asset_server.load("sounds/fruit_eaten.ogg"),
                 ..default()

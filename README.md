@@ -45,7 +45,6 @@ Things that are required for 1.0
 ### Current Bugs
 - the labyrinth does not blink when the player finished a level
 - the music does not resume after the player restarted the game after a game over
-- sound effects and music just stop after a second (might be related to the necessary despawn fix from the 0.11 migration)
 - pacman sometimes glitches around when moving (related to the pad migration)
 
 ## Ideas

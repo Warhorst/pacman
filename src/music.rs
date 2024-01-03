@@ -36,7 +36,7 @@ fn play_start_sound(
 ) {
     commands.spawn((
         Name::new("StartSound"),
-        SoundEffect::new(),
+        SoundEffect::new(5),
         AudioBundle {
             source: asset_server.load("sounds/start.ogg"),
             ..default()

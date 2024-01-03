@@ -20,9 +20,9 @@ pub struct SoundEffect {
 
 impl SoundEffect {
     /// Create a new sound effect with a timer of one second.
-    pub fn new() -> Self {
+    pub fn new(duration_secs: u64) -> Self {
         SoundEffect {
-            timer: Timer::new(Duration::from_secs(1), TimerMode::Once)
+            timer: Timer::new(Duration::from_secs(duration_secs), TimerMode::Once)
         }
     }
 
