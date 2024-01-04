@@ -43,9 +43,7 @@ Things that are required for 1.0
 - create a 1.0 WASM build
 
 ### Current Bugs
-- the labyrinth does not blink when the player finished a level
 - the music does not resume after the player restarted the game after a game over
-- pacman sometimes glitches around when moving (related to the pad migration)
 
 ## Ideas
 Some ideas for future development

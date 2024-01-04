@@ -18,7 +18,7 @@ fn update_entities_with_animations(
 ) {
     let delta = time.delta();
     for (visibility, mut texture, mut animations) in query.iter_mut() {
-        if visibility == Visibility::Visible && animations.is_running() {
+        if visibility != Visibility::Hidden && animations.is_running() {
             animations.current_mut().update(delta);
             *texture = animations.current().texture()
         }

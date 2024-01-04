@@ -51,7 +51,7 @@ fn enhance_maze(
 
 fn create_animations(
     sprite_sheets: &SpriteSheets
-) -> HashMap<(WallType_, IsCorner), Animations> {
+) -> HashMap<(WallType, IsCorner), Animations> {
     [
         (Outer, true, "textures/walls/outer_wall_corner"),
         (Outer, false, "textures/walls/outer_wall"),

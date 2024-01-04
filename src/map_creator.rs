@@ -16,7 +16,7 @@ macro_rules! corner {
         $creator.spawn($creator.maze, (
             Wall,
             WallStyle {
-                wall_type: WallType_::Outer,
+                wall_type: WallType::Outer,
                 rotation: $rot,
                 is_corner: true,
             }
@@ -27,7 +27,7 @@ macro_rules! corner {
         $creator.spawn($creator.maze, (
             Wall,
             WallStyle {
-                wall_type: WallType_::Outer,
+                wall_type: WallType::Outer,
                 rotation: $rot,
                 is_corner: true,
             },
@@ -39,7 +39,7 @@ macro_rules! corner {
         $creator.spawn($creator.maze, (
             Wall,
             WallStyle {
-                wall_type: WallType_::Inner,
+                wall_type: WallType::Inner,
                 rotation: $rot,
                 is_corner: true,
             }
@@ -53,7 +53,7 @@ macro_rules! wall {
             $creator.spawn($creator.maze, (
                 Wall,
                 WallStyle {
-                    wall_type: WallType_::Outer,
+                    wall_type: WallType::Outer,
                     rotation: $rot,
                     is_corner: false,
                 }
@@ -66,7 +66,7 @@ macro_rules! wall {
             $creator.spawn($creator.maze, (
                 Wall,
                 WallStyle {
-                    wall_type: WallType_::Inner,
+                    wall_type: WallType::Inner,
                     rotation: $rot,
                     is_corner: false,
                 }

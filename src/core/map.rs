@@ -13,7 +13,7 @@ impl Plugin for MapPlugin {
             .register_type::<Maze>()
             .register_type::<Wall>()
             .register_type::<WallStyle>()
-            .register_type::<WallType_>()
+            .register_type::<WallType>()
             .register_type::<Rotation>()
             .register_type::<GhostHouseArea>()
             .register_type::<Tunnel>()
@@ -83,13 +83,13 @@ pub struct Wall;
 #[derive(Component, Reflect, Default)]
 #[reflect(Component)]
 pub struct WallStyle {
-    pub wall_type: WallType_,
+    pub wall_type: WallType,
     pub rotation: Rotation,
     pub is_corner: bool,
 }
 
 #[derive(Reflect, Copy, Clone, Debug, Default, Eq, PartialEq, Hash)]
-pub enum WallType_ {
+pub enum WallType {
     #[default]
     Inner,
     Outer,
