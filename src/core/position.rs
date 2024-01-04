@@ -13,7 +13,13 @@ impl Pos {
     }
 
     pub fn from_vec3(vec: Vec3) -> Pos {
-        Pos(Position::from_vec3(vec, FIELD_DIMENSION))
+        let x = (vec.x + FIELD_SIZE / 2.0) / FIELD_SIZE;
+        let y = (vec.y + FIELD_SIZE / 2.0) / FIELD_SIZE;
+
+        Pos::new(
+            x as isize,
+            y as isize
+        )
     }
 
     pub fn x(&self) -> isize {
