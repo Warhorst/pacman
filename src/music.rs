@@ -26,6 +26,10 @@ impl Plugin for MusicPlugin {
                 OnExit(Game(Running)),
                 mute_background_music,
             )
+            .add_systems(
+                OnExit(Game(GameOver)),
+                despawn_tracks
+            )
         ;
     }
 }
@@ -62,6 +66,7 @@ fn start_background_track(
 ) {
     commands.spawn((
         Name::new(path),
+        BackgroundTrack,
         marker,
         AudioBundle {
             source: loaded_assets.load(path),
@@ -90,7 +95,7 @@ fn update_background_music(
     eaten_dots: Res<EatenDots>,
     query: Query<&GhostState, With<Ghost>>,
 ) {
-    let eaten_ghosts = query.iter().filter(|s| s == &&GhostState::Eaten).count();
+    let eaten_ghosts = query.iter().filter(|s| s == &&Eaten).count();
 
     if eaten_ghosts > 0 {
         background_music.current_track = EatenTrack
@@ -190,5 +195,14 @@ impl<'a> Mixer<'a> {
         self.siren_track.set_volume(0.0);
         self.frightened_track.set_volume(0.0);
         self.eaten_track.set_volume(0.0);
+    }
+}
+
+fn despawn_tracks(
+    mut commands: Commands,
+    tracks: Query<Entity, With<BackgroundTrack>>
+) {
+    for entity in &tracks {
+        commands.entity(entity).despawn()
     }
 }

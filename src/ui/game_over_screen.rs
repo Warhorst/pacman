@@ -24,9 +24,11 @@ impl Plugin for GameOverScreenPlugin {
     }
 }
 
+/// Shows a big red "GAME OVER"
 #[derive(Component)]
 struct GameOverScreen;
 
+/// Shows a prompt which indicates you can restart the game
 #[derive(Component)]
 struct RestartGameScreen;
 

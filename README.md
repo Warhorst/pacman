@@ -42,9 +42,6 @@ Things that are required for 1.0
 - ghosts only change direction at specific points, like in the real game
 - create a 1.0 WASM build
 
-### Current Bugs
-- the music does not resume after the player restarted the game after a game over
-
 ## Ideas
 Some ideas for future development
 - a real map editor (maybe using the bevy scenes format)
