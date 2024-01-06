@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use crate::game::pacman::edible_eaten::EdibleEatenPlugin;
-use crate::game::pacman::movement::{InputBuffer, move_pacman_new, reset_input_buffer, set_direction_based_on_keyboard_input};
+use crate::game::pacman::movement::{InputBuffer, move_pacman, reset_input_buffer, set_direction_based_on_keyboard_input};
 use crate::game::pacman::spawn::spawn_pacman;
 use crate::game::pacman::textures::{start_pacman_animation, update_pacman_appearance};
 
@@ -21,7 +21,7 @@ impl Plugin for PacmanPlugin {
             .add_systems(OnEnter(Game(Ready)), spawn_pacman)
             .add_systems(OnEnter(Game(Running)), start_pacman_animation)
             .add_systems(Update, (
-                move_pacman_new,
+                move_pacman,
                 set_direction_based_on_keyboard_input,
                 update_pacman_appearance.after(set_direction_based_on_keyboard_input)
             ).run_if(in_state(Game(Running))))

@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use crate::core::prelude::*;
 
-pub struct CameraPlugin;
+pub(super) struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {

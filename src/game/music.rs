@@ -1,7 +1,7 @@
 use bevy::audio::{AudioSink, Volume};
 use bevy::prelude::*;
 use crate::core::prelude::*;
-use crate::music::CurrentTrack::*;
+use CurrentTrack::*;
 
 pub struct MusicPlugin;
 

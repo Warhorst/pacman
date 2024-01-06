@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use crate::core::prelude::*;
 
-pub struct SoundEffectPlugin;
+pub(super) struct SoundEffectPlugin;
 
 impl Plugin for SoundEffectPlugin {
     fn build(&self, app: &mut App) {
@@ -16,7 +16,7 @@ impl Plugin for SoundEffectPlugin {
 
 /// Updates the timer on a all sound effects. As I currently know no other way to check if a sound
 /// finished playing, this is the solution.
-/// It doesn't matter if the sound plays longer than one second, the entity can be deleted
+/// It doesn't matter if the sound plays longer than its timer, the entity can be deleted
 /// anyway without interrupting it.
 fn update_sound_effects(
     mut commands: Commands,

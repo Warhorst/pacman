@@ -3,9 +3,9 @@ use crate::core::prelude::*;
 use crate::core::system_sets::UpdateGameState;
 use crate::ui::game_over_screen::EGameRestarted;
 
-pub struct GameStatePlugin;
+pub(super) struct GameStateTransitionPlugin;
 
-impl Plugin for GameStatePlugin {
+impl Plugin for GameStateTransitionPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_state::<GameState>()

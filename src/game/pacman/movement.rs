@@ -13,7 +13,7 @@ pub(crate) struct MoveComponents<'a> {
     speed: &'a Speed,
 }
 
-pub(in crate::game) fn move_pacman_new(
+pub(in crate::game) fn move_pacman(
     time: Res<Time>,
     wall_query: Query<&Transform, (With<Wall>, Without<Pacman>)>,
     mut pacman_query: Query<MoveComponents, (With<Pacman>, Without<EdibleEatenStop>)>,
