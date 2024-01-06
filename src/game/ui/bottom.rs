@@ -3,33 +3,46 @@ use bevy::prelude::PositionType::Absolute;
 use bevy::prelude::Val::Percent;
 use crate::core::prelude::*;
 
-pub(in crate::ui) struct BottomUIPlugin;
+pub(super) struct BottomUIPlugin;
 
 impl Plugin for BottomUIPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(OnEnter(Game(Start)), spawn_bottom_ui)
-            .add_systems(Update, (
-                update_lives,
-                update_fruits
-            ).run_if(in_game))
-            .add_systems(OnExit(Game(GameOver)), despawn_bottom_ui)
+            .add_systems(
+                OnEnter(Game(Start)),
+                spawn_bottom_ui,
+            )
+            .add_systems(
+                Update,
+                (
+                    update_lives,
+                    update_fruits
+                ).run_if(in_game))
+            .add_systems(
+                OnExit(Game(GameOver)),
+                despawn_bottom_ui
+            )
         ;
     }
 }
 
+/// Parent component for the ui beneath the maze
 #[derive(Component)]
 struct BottomUI;
 
+/// Parent component for all ui lives. For organization purposes only.
 #[derive(Component)]
 struct UILives;
 
+/// Component which represents a ui live. These are used to visualize the lives the player has left.
 #[derive(Component)]
 struct UILive;
 
+/// Parent component for all ui fruites. For organization purposes only.
 #[derive(Component)]
 struct UIFruits;
 
+/// Parent component for a ui fruit. These are used to show the player which fruit to expect and what past fruits occurred.
 #[derive(Component)]
 struct UIFruit;
 

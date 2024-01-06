@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use bevy::prelude::Val::Percent;
 use crate::core::prelude::*;
 
-pub(in crate::ui) struct TopUIPlugin;
+pub(super) struct TopUIPlugin;
 
 impl Plugin for TopUIPlugin {
     fn build(&self, app: &mut App) {

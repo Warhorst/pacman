@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy::prelude::Val::Percent;
 use crate::core::prelude::*;
 
-pub(in crate::ui) struct GameOverScreenPlugin;
+pub(super) struct GameOverScreenPlugin;
 
 impl Plugin for GameOverScreenPlugin {
     fn build(&self, app: &mut App) {

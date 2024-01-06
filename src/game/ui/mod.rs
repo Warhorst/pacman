@@ -1,16 +1,15 @@
 use bevy::prelude::*;
-use crate::ui::bottom::BottomUIPlugin;
-use crate::ui::game_over_screen::GameOverScreenPlugin;
-use crate::ui::ready_screen::ReadyScreenPlugin;
-
-use crate::ui::top::TopUIPlugin;
+use crate::game::ui::bottom::BottomUIPlugin;
+use crate::game::ui::game_over_screen::GameOverScreenPlugin;
+use crate::game::ui::ready_screen::ReadyScreenPlugin;
+use crate::game::ui::top::TopUIPlugin;
 
 mod top;
 mod bottom;
-pub mod game_over_screen;
-pub mod ready_screen;
+mod game_over_screen;
+mod ready_screen;
 
-pub struct UIPlugin;
+pub(super) struct UIPlugin;
 
 impl Plugin for UIPlugin {
     fn build(&self, app: &mut App) {

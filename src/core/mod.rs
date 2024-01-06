@@ -21,6 +21,7 @@ use crate::core::music::MusicPlugin;
 use crate::core::position::Pos;
 use crate::core::restart_game::RestartGamePlugin;
 use crate::core::sound_effect::SoundEffectPlugin;
+use crate::core::system_sets::SystemSetsPlugin;
 
 pub mod position;
 pub mod direction;
@@ -77,7 +78,8 @@ impl Plugin for CorePlugin {
             .add_plugins((
                 SoundEffectPlugin,
                 MusicPlugin,
-                RestartGamePlugin
+                RestartGamePlugin,
+                SystemSetsPlugin
             ))
         ;
     }

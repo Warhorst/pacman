@@ -10,10 +10,7 @@ use crate::game::GamePlugin;
 use crate::map_creator::create_map;
 use crate::spawn::SpawnPlugin;
 
-use crate::ui::UIPlugin;
-
 mod debug;
-mod ui;
 mod game;
 mod map_creator;
 mod spawn;
@@ -41,9 +38,7 @@ fn main() {
             SpawnPlugin,
             AssetPreloadPlugin::new(Setup(PreloadAssets), Setup(CreateSpriteSheets)),
             SpriteSheetPlugin::new(Setup(CreateSpriteSheets), Spawn(SpawnMapScene)),
-            SystemSetsPlugin,
             DebugPlugin,
-            UIPlugin,
         ))
     ;
 

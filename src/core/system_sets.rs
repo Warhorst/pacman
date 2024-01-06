@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 /// Configures the system sets of the game, defining their order of execution.
-pub struct SystemSetsPlugin;
+pub(super) struct SystemSetsPlugin;
 
 impl Plugin for SystemSetsPlugin {
     fn build(&self, app: &mut App) {

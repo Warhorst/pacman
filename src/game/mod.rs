@@ -20,6 +20,7 @@ use crate::game::specs_per_level::SpecsPerLevelPlugin;
 use crate::game::speed::SpeedPlugin;
 use crate::game::state::StatePlugin;
 use crate::game::target::TargetPlugin;
+use crate::game::ui::UIPlugin;
 
 pub mod interactions;
 pub mod score;
@@ -41,6 +42,7 @@ pub mod sound_effect;
 pub mod music;
 pub mod camera;
 mod restart_game;
+mod ui;
 
 /// Contains the entire gameplay logic for pacman.
 pub struct GamePlugin;
@@ -71,7 +73,8 @@ impl Plugin for GamePlugin {
                 GameStateTransitionPlugin,
                 SoundEffectPlugin,
                 MusicPlugin,
-                RestartGamePlugin
+                RestartGamePlugin,
+                UIPlugin
             ))
         ;
     }
