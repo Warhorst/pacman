@@ -12,6 +12,7 @@ use crate::game::camera::CameraPlugin;
 use crate::game::game_state_transition::GameStateTransitionPlugin;
 use crate::game::move_through_tunnel::MoveThroughTunnelPlugin;
 use crate::game::music::MusicPlugin;
+use crate::game::restart_game::RestartGamePlugin;
 use crate::game::schedule::SchedulePlugin;
 use crate::game::score::ScorePlugin;
 use crate::game::sound_effect::SoundEffectPlugin;
@@ -39,6 +40,7 @@ pub mod game_state_transition;
 pub mod sound_effect;
 pub mod music;
 pub mod camera;
+mod restart_game;
 
 /// Contains the entire gameplay logic for pacman.
 pub struct GamePlugin;
@@ -68,7 +70,8 @@ impl Plugin for GamePlugin {
                 MoveThroughTunnelPlugin,
                 GameStateTransitionPlugin,
                 SoundEffectPlugin,
-                MusicPlugin
+                MusicPlugin,
+                RestartGamePlugin
             ))
         ;
     }

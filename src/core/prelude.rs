@@ -33,3 +33,4 @@ pub use crate::core::ghost_schedule::*;
 pub use crate::core::score::*;
 pub use crate::core::music::*;
 pub use crate::core::music::CurrentTrack::*;
+pub use crate::core::restart_game::*;

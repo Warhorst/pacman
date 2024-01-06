@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 use crate::core::prelude::*;
 use crate::core::system_sets::UpdateGameState;
-use crate::ui::game_over_screen::EGameRestarted;
 
 pub(super) struct GameStateTransitionPlugin;
 
@@ -40,7 +39,7 @@ fn update_state(
     pacman_hit_events: EventReader<PacmanWasHit>,
     edibles_eaten_events: EventReader<EAllEdiblesEaten>,
     ghost_eaten_events: EventReader<GhostWasEaten>,
-    game_restartet_events: EventReader<EGameRestarted>,
+    game_restartet_events: EventReader<GameWasRestarted>,
 ) {
     match current_state.get() {
         Game(Start) => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 2.0, Game(Ready)),
@@ -116,7 +115,7 @@ fn switch_states_based_on_events(
 
 fn switch_to_start_after_game_over(
     game_state: &mut NextState<GameState>,
-    mut game_restarted_events: EventReader<EGameRestarted>,
+    mut game_restarted_events: EventReader<GameWasRestarted>,
 ) {
     if game_restarted_events.read().count() > 0 {
         game_state.set(Game(Start))

@@ -7,14 +7,9 @@ pub(in crate::ui) struct GameOverScreenPlugin;
 impl Plugin for GameOverScreenPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_event::<EGameRestarted>()
             .add_systems(
                 OnEnter(Game(GameOver)),
                 spawn_screens
-            )
-            .add_systems(
-                Update,
-                send_restart_event_when_key_pressed.run_if(in_state(Game(GameOver)))
             )
             .add_systems(
                 OnExit(Game(GameOver)),
@@ -31,10 +26,6 @@ struct GameOverScreen;
 /// Shows a prompt which indicates you can restart the game
 #[derive(Component)]
 struct RestartGameScreen;
-
-/// Event this is sent when the player decides to restart
-#[derive(Event)]
-pub struct EGameRestarted;
 
 fn spawn_screens(
     mut commands: Commands,
@@ -75,15 +66,6 @@ fn spawn_screens(
             ..default()
         }),
     ));
-}
-
-fn send_restart_event_when_key_pressed(
-    keyboard_input: Res<Input<KeyCode>>,
-    mut event_writer: EventWriter<EGameRestarted>,
-) {
-    if keyboard_input.just_pressed(KeyCode::R) {
-        event_writer.send(EGameRestarted);
-    }
 }
 
 fn despawn_screens(
