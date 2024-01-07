@@ -38,7 +38,6 @@ Did some cutting with [LosslessCut](https://github.com/mifi/lossless-cut) and ht
 
 ## TODOS
 Things that are required for 1.0
-- save a highscore for the current session and play a sound when beaten
 - ghosts only change direction at specific points, like in the real game
 - create a 1.0 WASM build
 
