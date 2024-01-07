@@ -9,6 +9,7 @@ impl Plugin for ScorePlugin {
     fn build(&self, app: &mut App) {
         app
             .insert_resource(Score(0))
+            .insert_resource(HighScore::new(10000))
             .insert_resource(EatenGhostCounter(0))
             .add_systems(
                 Update,
@@ -23,6 +24,8 @@ impl Plugin for ScorePlugin {
                         .in_set(ProcessIntersectionsWithPacman),
                     add_points_for_eaten_fruit_and_display_score_text
                         .in_set(ProcessIntersectionsWithPacman),
+                    update_high_score,
+                    play_highscore_broken_sound.after(update_high_score)
                 )
                     .run_if(in_state(Game(Running))),
             )
@@ -35,7 +38,10 @@ impl Plugin for ScorePlugin {
             )
             .add_systems(
                 OnExit(Game(GameOver)),
-                reset_score,
+                (
+                    reset_score,
+                    reset_high_score
+                )
             )
             .add_systems(
                 OnEnter(Game(LevelTransition)),
@@ -164,6 +170,42 @@ fn update_score_texts(
     }
 }
 
+fn update_high_score(
+    score: Res<Score>,
+    mut high_score: ResMut<HighScore>,
+    mut event_writer: EventWriter<HighScoreWasBeaten>,
+) {
+    if !score.is_changed() {
+        return;
+    }
+
+    if **score > high_score.score {
+        high_score.score = **score;
+
+        if !high_score.was_beaten {
+            high_score.was_beaten = true;
+            event_writer.send(HighScoreWasBeaten)
+        }
+    }
+}
+
+fn play_highscore_broken_sound(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut event_reader: EventReader<HighScoreWasBeaten>,
+) {
+    for _ in event_reader.read() {
+        commands.spawn((
+            Name::new("HighScoreBrokenSound"),
+            SoundEffect::new(3),
+            AudioBundle {
+                source: asset_server.load("sounds/high_score.ogg"),
+                ..default()
+            }
+        ));
+    }
+}
+
 fn despawn_score_texts(
     mut commands: Commands,
     query: Query<Entity, With<ScoreText>>,
@@ -177,4 +219,10 @@ fn reset_score(
     mut score: ResMut<Score>
 ) {
     score.0 = 0;
+}
+
+fn reset_high_score(
+    mut high_score: ResMut<HighScore>
+) {
+    high_score.was_beaten = false
 }

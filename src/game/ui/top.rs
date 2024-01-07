@@ -16,6 +16,7 @@ impl Plugin for TopUIPlugin {
                 Update,
                 (
                     update_scoreboard,
+                    update_high_score_board,
                     blink_1_up_label
                 ).run_if(in_game))
             .add_systems(
@@ -165,7 +166,7 @@ fn spawn_1up_label(
 
 fn update_scoreboard(
     score: Res<Score>,
-    mut query: Query<&mut Text, Or<(With<ScoreBoard>, With<HighScoreBoard>)>>,
+    mut query: Query<&mut Text, With<ScoreBoard>>,
 ) {
     if !score.is_changed() {
         return;
@@ -173,6 +174,19 @@ fn update_scoreboard(
 
     for mut text in query.iter_mut() {
         text.sections[0].value = format!("{}", **score)
+    }
+}
+
+fn update_high_score_board(
+    high_score: Res<HighScore>,
+    mut query: Query<&mut Text, With<HighScoreBoard>>,
+) {
+    if !high_score.is_changed() {
+        return;
+    }
+
+    for mut text in query.iter_mut() {
+        text.sections[0].value = format!("{}", high_score.score)
     }
 }
 
