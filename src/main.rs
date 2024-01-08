@@ -50,5 +50,5 @@ fn main() {
 }
 
 fn should_create_map() -> bool {
-    std::env::args().into_iter().any(|arg| arg.contains("create_map"))
+    std::env::args().any(|arg| arg.contains("create_map"))
 }

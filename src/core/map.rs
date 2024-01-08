@@ -174,6 +174,7 @@ pub struct TunnelHallway;
 #[derive(Component, Reflect)]
 pub struct GhostHouse;
 
+/// Spawn area of a ghost
 #[derive(Component, Reflect, Copy, Clone)]
 pub struct GhostSpawn {
     pub ghost: Ghost,
@@ -181,3 +182,9 @@ pub struct GhostSpawn {
     pub spawn_direction: Dir,
     pub positions: [Pos; 2],
 }
+
+/// Marks a tile as one way. A one way is used to mark an intersection as a point where
+/// a ghost cannot turn and only move into its facing direction.
+#[derive(Component, Reflect, Default)]
+#[reflect(Component)]
+pub struct OneWay;

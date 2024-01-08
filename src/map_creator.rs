@@ -94,6 +94,25 @@ macro_rules! energizer {
     };
 }
 
+macro_rules! one_way {
+    ($creator:expr, Empty) => {
+        $creator.spawn(
+            $creator.maze,
+            OneWay
+        );
+    };
+
+    ($creator:expr, Dot) => {
+        $creator.spawn(
+            $creator.dot_spawns,
+            (
+                OneWay,
+                DotSpawn
+            ),
+        );
+    };
+}
+
 macro_rules! empty {
     ($creator:expr, $amount:expr) => {
         for _ in 0..$amount {
@@ -411,7 +430,11 @@ impl<'a> MapCreator<'a> {
         dot!(self, 1);
         wall!(self, 1, D270, I);
         wall!(self, 1, D90, I);
-        empty!(self, 10);
+        empty!(self, 3);
+        one_way!(self, Empty);
+        empty!(self, 2);
+        one_way!(self, Empty);
+        empty!(self, 3);
         wall!(self, 1, D270, I);
         wall!(self, 1, D90, I);
         dot!(self, 1);
@@ -603,9 +626,11 @@ impl<'a> MapCreator<'a> {
         dot!(self, 2);
         wall!(self, 1, D270, I);
         wall!(self, 1, D90, I);
-        dot!(self, 7);
+        dot!(self, 6);
+        one_way!(self, Dot);
         pacman!(self);
-        dot!(self, 7);
+        one_way!(self, Dot);
+        dot!(self, 6);
         wall!(self, 1, D270, I);
         wall!(self, 1, D90, I);
         dot!(self, 2);
