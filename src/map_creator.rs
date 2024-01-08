@@ -4,7 +4,6 @@ use bevy::prelude::*;
 use crate::core::prelude::*;
 
 /// Create the default pacman map as a bevy scene.
-/// TODO ghost corners
 pub fn create_map(commands: &mut App) {
     let mut creator = MapCreator::new(28, 31, commands);
     creator.create();
