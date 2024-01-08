@@ -8,7 +8,9 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 (Use WASD or arrow keys to control pacman. Click into the canvas if it's not working)
 
 ## Main resources
-- the great pacman dossier: https://www.gamedeveloper.com/design/the-pac-man-dossier
+- the great pacman dossier: (multiple links, because this beautiful article gets nuked frequently)
+  - https://pacman.holenet.info 
+  - https://web.archive.org/web/20220118071921/https://www.gamedeveloper.com/design/the-pac-man-dossier
 - the game in action: https://www.youtube.com/watch?v=-CbyAk3Sn9I
 - longplay until the game glitches out: https://www.youtube.com/watch?v=AuoH0vz3Mqk
 
