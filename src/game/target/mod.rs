@@ -49,6 +49,7 @@ fn set_target(
     wall_query: Query<&Transform, With<Wall>>,
     ghost_spawn_query: Query<&GhostSpawn>,
     pacman_query: Query<(&Transform, &Dir), With<Pacman>>,
+    one_ways: Query<&Tiles, With<OneWay>>,
     mut ghost_query: Query<TargetComponents, Without<Pacman>>,
 ) {
     let (pm_transform, pm_dir) = pacman_query.single();
@@ -69,6 +70,7 @@ fn set_target(
             &corner_query,
             &wall_query,
             &ghost_spawn_query,
+            &one_ways,
             &mut components,
         );
 
@@ -88,8 +90,6 @@ fn set_target(
 }
 
 /// Set the target when on ghost pause (meaning only eaten and spawned)
-///
-/// TODO: I provide more resources than necessary, but I want to reuse the TargetSetter. Not ideal, but the best solution for now.
 fn set_target_on_ghost_pause(
     random: Res<Random>,
     ghost_house_gate: Res<GhostHouseGate>,
@@ -97,6 +97,7 @@ fn set_target_on_ghost_pause(
     wall_query: Query<&Transform, With<Wall>>,
     ghost_spawn_query: Query<&GhostSpawn>,
     pacman_query: Query<(&Transform, &Dir), With<Pacman>>,
+    one_ways: Query<&Tiles, With<OneWay>>,
     mut ghost_query: Query<TargetComponents, Without<Pacman>>,
 ) {
     let (pm_transform, pm_dir) = pacman_query.single();
@@ -117,6 +118,7 @@ fn set_target_on_ghost_pause(
             &corner_query,
             &wall_query,
             &ghost_spawn_query,
+            &one_ways,
             &mut components,
         );
 
@@ -137,6 +139,7 @@ struct TargetSetter<'a, 'b, 'c> {
     corner_positions: HashMap<Ghost, Pos>,
     wall_positions: HashSet<Pos>,
     ghost_spawns: HashMap<Ghost, GhostSpawn>,
+    one_ways: HashSet<Pos>,
     components: &'a mut TargetComponentsItem<'b, 'c>,
 }
 
@@ -150,12 +153,26 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
         corner_query: &Query<(&GhostCorner, &Tiles)>,
         wall_query: &Query<&Transform, With<Wall>>,
         ghost_spawn_query: &Query<&GhostSpawn>,
+        one_ways: &Query<&Tiles, With<OneWay>>,
         components: &'a mut TargetComponentsItem<'b, 'c>,
     ) -> Self {
         let corner_positions = corner_query.iter().map(|(corner, tiles)| (**corner, tiles.to_pos())).collect();
         let wall_positions = wall_query.iter().map(|transform| Pos::from_vec3(transform.translation)).collect();
         let ghost_spawns = ghost_spawn_query.iter().map(|spawn| (spawn.ghost, *spawn)).collect();
-        Self { random, ghost_spawns, ghost_house_gate, pacman_transform, pacman_direction, blinky_transform, corner_positions, wall_positions, components }
+        let one_ways = one_ways.iter().map(|t| t.to_pos()).collect();
+
+        Self {
+            random,
+            ghost_spawns,
+            ghost_house_gate,
+            pacman_transform,
+            pacman_direction,
+            blinky_transform,
+            corner_positions,
+            wall_positions,
+            one_ways,
+            components
+        }
     }
 
     fn set_blinky_chase_target(&mut self) {
@@ -231,14 +248,22 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
     }
 
     fn set_frightened_target(&mut self) {
-        let possible_neighbours = Pos::from_vec3(self.components.transform.translation)
+        let ghost_pos = Pos::from_vec3(self.components.transform.translation);
+        let opposite_dir = self.components.direction.opposite();
+
+        let possible_neighbours = ghost_pos
             .neighbours_with_directions()
             .into_iter()
-            .filter(|(_, dir)| *dir != self.components.direction.opposite())
+            .filter(|(_, dir)| *dir != opposite_dir)
             .filter(|(pos, _)| !self.wall_positions.contains(pos))
+            .filter(|(_, dir)| if self.is_on_one_way(ghost_pos) {
+                *dir == Left || *dir == Right
+            } else {
+                true
+            })
             .collect::<Vec<_>>();
         let next_target_neighbour = match possible_neighbours.len() {
-            0 => (Pos::from_vec3(self.components.transform.translation).neighbour_in_direction(self.components.direction.opposite()), self.components.direction.opposite()),
+            0 => (ghost_pos.neighbour_in_direction(opposite_dir), opposite_dir),
             1 => possible_neighbours.get(0).unwrap().clone(),
             len => possible_neighbours.get(self.random.zero_to(len)).unwrap().clone()
         };
@@ -249,16 +274,28 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
     /// positions, a specific filter is provided.
     ///
     /// It is generally not allowed for ghosts to turn around, so the position behind the ghost is always filtered. However,
-    /// if due to some circumstances (like bad map design) a ghost has no other way to go, we allow the pour soul to
+    /// if due to some circumstances (like bad map design) a ghost has no other way to go, we allow the poor soul to
     /// turn around.
     fn get_nearest_neighbour_to(&self, target: Pos) -> Neighbour {
-        Pos::from_vec3(self.components.transform.translation)
+        let ghost_pos = Pos::from_vec3(self.components.transform.translation);
+        let opposite_dir = self.components.direction.opposite();
+
+        ghost_pos
             .neighbours_with_directions()
             .into_iter()
-            .filter(|(_, dir)| *dir != self.components.direction.opposite())
+            .filter(|(_, dir)| *dir != opposite_dir)
             .filter(|(pos, _)| !self.wall_positions.contains(pos))
+            .filter(|(_, dir)| if self.is_on_one_way(ghost_pos) {
+                *dir == Left || *dir == Right
+            } else {
+                true
+            })
             .min_by(|n_a, n_b| minimal_distance_to_neighbours(&target, n_a, n_b))
-            .unwrap_or_else(|| (Pos::from_vec3(self.components.transform.translation).neighbour_in_direction(self.components.direction.opposite()), self.components.direction.opposite()))
+            .unwrap_or_else(|| (ghost_pos.neighbour_in_direction(opposite_dir), opposite_dir))
+    }
+
+    fn is_on_one_way(&self, pos: Pos) -> bool {
+        self.one_ways.contains(&pos)
     }
 
     fn set_target_to_neighbour(&mut self, neighbour: Neighbour) {
@@ -272,8 +309,6 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
 }
 
 /// Get the transform of blinky.
-///
-/// TODO: If one day more than one blinky exists return a set and choose the nearest one
 fn get_blinky_transform(query: &Query<TargetComponents, Without<Pacman>>) -> Transform {
     query.iter()
         .filter(|comps| comps.ghost == &Blinky)

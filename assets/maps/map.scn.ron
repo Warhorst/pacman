@@ -5176,6 +5176,7 @@
             y: 20,
           )),
         ),
+        "pacman::core::map::OneWay": (),
       },
     ),
     293: (
@@ -5187,6 +5188,7 @@
             y: 20,
           )),
         ),
+        "pacman::core::map::OneWay": (),
       },
     ),
     294: (
@@ -9059,6 +9061,7 @@
           )),
         ),
         "pacman::core::map::DotSpawn": (),
+        "pacman::core::map::OneWay": (),
       },
     ),
     550: (
@@ -9087,6 +9090,7 @@
           )),
         ),
         "pacman::core::map::DotSpawn": (),
+        "pacman::core::map::OneWay": (),
       },
     ),
     552: (

@@ -27,6 +27,7 @@ impl Plugin for MapPlugin {
             .register_type::<GhostHouse>()
             .register_type::<GhostSpawn>()
             .register_type::<GhostCorner>()
+            .register_type::<OneWay>()
         ;
     }
 }
@@ -40,7 +41,7 @@ pub struct Map {
 }
 
 /// An entity with this component spans either one or more tiles on the map.
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Copy, Clone)]
 #[reflect(Component)]
 pub enum Tiles {
     Single { pos: Pos },
@@ -184,7 +185,7 @@ pub struct GhostSpawn {
 }
 
 /// Marks a tile as one way. A one way is used to mark an intersection as a point where
-/// a ghost cannot turn and only move into its facing direction.
+/// a ghost can only move left or right.
 #[derive(Component, Reflect, Default)]
 #[reflect(Component)]
 pub struct OneWay;
