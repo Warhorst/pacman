@@ -7,6 +7,18 @@ Despite its age and appearance, Pacman was a quite complex game. Therefore, this
 
 (Use WASD or arrow keys to control pacman. Click into the canvas if it's not working)
 
+## State of the game
+The game is on version 1.0.0. As I implemented every feature listed in the pacman dossier (as far as I can tell), I consider the game feature complete.
+
+There are still other things one can do, like:
+- the main menu, with an introduction to all ghosts
+- level transition cutscenes
+- persisted high scores
+- bugs from the original game, like Pinky cannot walk upwards or the "death screen"
+- a new WASM build (would require an update of asset preload first)
+
+The game was also designed (and therefore overengineered) with a map editor in mind (or at least custom maps). Make this will come to fruition one day.
+
 ## Main resources
 - the great pacman dossier: (multiple links, because this beautiful article gets nuked frequently)
   - https://pacman.holenet.info 
@@ -36,16 +48,3 @@ Downloaded with [yt-dlp](https://github.com/yt-dlp/yt-dlp)
 Did some cutting with [LosslessCut](https://github.com/mifi/lossless-cut) and https://mp3cut.net
 
 (Tip: Don't even try to download the sounds from other sides than YouTube. The quality is trash and the tracks are incomplete)
-
-
-## TODOS
-Things that are required for 1.0
-- create a 1.0 WASM build
-
-## Ideas
-Some ideas for future development
-- a real map editor (maybe using the bevy scenes format)
-- main menu with persistent highscores and intro sequence
-- cutscenes
-- savegames
-- adding the other pacman games

@@ -1,6 +1,6 @@
 [package]
 name = "pacman"
-version = "0.1.0"
+version = "1.0.0"
 authors = ["Warhorst <46809804+Warhorst@users.noreply.github.com>"]
 edition = "2021"
 
