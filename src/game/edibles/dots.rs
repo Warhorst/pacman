@@ -1,6 +1,5 @@
 use std::time::Duration;
 use bevy::prelude::*;
-use bevy_inspector_egui::quick::ResourceInspectorPlugin;
 
 use crate::core::prelude::*;
 
@@ -9,7 +8,6 @@ pub struct DotPlugin;
 impl Plugin for DotPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_plugins(ResourceInspectorPlugin::<EatenDots>::default())
             .add_systems(
                 OnEnter(Game(Start)),
                 (

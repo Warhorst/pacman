@@ -1,11 +1,14 @@
 use bevy::prelude::*;
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
+#[cfg(debug_assertions)]
 use crate::core::prelude::*;
 
 pub struct DebugPlugin;
 
 impl Plugin for DebugPlugin {
+    #[cfg(debug_assertions)]
     fn build(&self, app: &mut App) {
+        use bevy_inspector_egui::quick::WorldInspectorPlugin;
+
         app
             .add_plugins(WorldInspectorPlugin::new())
             .add_systems(
@@ -17,8 +20,14 @@ impl Plugin for DebugPlugin {
             )
         ;
     }
+
+    #[cfg(not(debug_assertions))]
+    fn build(&self, _app: &mut App) {
+
+    }
 }
 
+#[cfg(debug_assertions)]
 fn toggle_time(
     mut time: ResMut<Time<Virtual>>,
     keyboard_input: Res<Input<KeyCode>>,
@@ -32,6 +41,7 @@ fn toggle_time(
     }
 }
 
+#[cfg(debug_assertions)]
 fn despawn_all_edibles(
     mut commands: Commands,
     keyboard_input: Res<Input<KeyCode>>,
