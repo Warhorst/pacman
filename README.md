@@ -17,7 +17,7 @@ There are still other things one can do, like:
 - bugs from the original game, like Pinky cannot walk upwards or the "death screen"
 - a new WASM build (would require an update of asset preload first)
 
-The game was also designed (and therefore overengineered) with a map editor in mind (or at least custom maps). Make this will come to fruition one day.
+The game was also designed (and therefore overengineered) with a map editor in mind (or at least custom maps). Maybe this will come to fruition one day.
 
 ## Main resources
 - the great pacman dossier: (multiple links, because this beautiful article gets nuked frequently)

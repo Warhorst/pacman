@@ -35,7 +35,7 @@ fn spawn_screen(
             TextStyle {
                 font: asset_server.load(FONT),
                 font_size: 20.0,
-                color: Color::rgb(1.0, 1.0, 0.0),
+                color: Color::srgb(1.0, 1.0, 0.0),
             },
         ).with_style(Style {
             position_type: PositionType::Absolute,

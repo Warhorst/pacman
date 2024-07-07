@@ -83,7 +83,7 @@ fn add_points_for_eaten_ghost_and_display_score_text(
 
         let mut coordinates = event.1.translation;
         coordinates.z = TEXT_Z;
-        spawn_score_text(&mut commands, &asset_server, Color::hex("31FFFF").unwrap(), points, coordinates)
+        spawn_score_text(&mut commands, &asset_server, Color::Srgba(Srgba::hex("31FFFF").unwrap()), points, coordinates)
     }
 }
 
@@ -126,7 +126,7 @@ fn add_points_for_eaten_fruit_and_display_score_text(
         coordinates.z = TEXT_Z;
 
         score.add(points);
-        spawn_score_text(&mut commands, &asset_server, Color::hex("FFBDFF").unwrap(), points, coordinates)
+        spawn_score_text(&mut commands, &asset_server, Color::Srgba(Srgba::hex("FFBDFF").unwrap()), points, coordinates)
     }
 }
 
@@ -146,7 +146,7 @@ fn spawn_score_text(
                     font_size: 10.0,
                     color,
                 },
-            ).with_alignment(TextAlignment::Center),
+            ).with_justify(JustifyText::Center),
             transform: Transform::from_translation(coordinates),
             ..Default::default()
         },
@@ -184,7 +184,7 @@ fn update_high_score(
 
         if !high_score.was_beaten {
             high_score.was_beaten = true;
-            event_writer.send(HighScoreWasBeaten)
+            event_writer.send(HighScoreWasBeaten);
         }
     }
 }

@@ -7,7 +7,7 @@ pub(super) struct GameStateTransitionPlugin;
 impl Plugin for GameStateTransitionPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_state::<GameState>()
+            .init_state::<GameState>()
             .add_systems(
                 Update,
                 (

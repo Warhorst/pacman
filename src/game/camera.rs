@@ -24,7 +24,6 @@ fn spawn_camera(
             transform: Transform::from_translation(Vec3::new((map.width as f32 * FIELD_SIZE) / 2.0, (map.height as f32 * FIELD_SIZE) / 2.0, 1000.0)),
             ..default()
         },
-        UiCameraConfig { show_ui: true }
     ));
 }
 

@@ -70,7 +70,7 @@ fn start_background_track(
         marker,
         AudioBundle {
             source: loaded_assets.load(path),
-            settings: PlaybackSettings::LOOP.with_volume(Volume::new_relative(0.0)),
+            settings: PlaybackSettings::LOOP.with_volume(Volume::new(0.0)),
         }
     ));
 }

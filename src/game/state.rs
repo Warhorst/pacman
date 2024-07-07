@@ -1,7 +1,9 @@
 use std::fmt::Formatter;
+
 use bevy::ecs::event::Event;
-use bevy::ecs::query::WorldQuery;
+use bevy::ecs::query::QueryData;
 use bevy::prelude::*;
+
 use crate::core::prelude::*;
 
 pub(in crate::game) struct StatePlugin;
@@ -24,8 +26,8 @@ impl Plugin for StatePlugin {
     }
 }
 
-#[derive(WorldQuery)]
-#[world_query(mutable)]
+#[derive(QueryData)]
+#[query_data(mutable)]
 struct StateUpdateComponents<'a> {
     entity: Entity,
     ghost: &'a Ghost,

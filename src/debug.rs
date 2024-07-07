@@ -30,7 +30,7 @@ impl Plugin for DebugPlugin {
 #[cfg(debug_assertions)]
 fn toggle_time(
     mut time: ResMut<Time<Virtual>>,
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::Space) {
         if time.relative_speed() == 1.0 {
@@ -44,10 +44,10 @@ fn toggle_time(
 #[cfg(debug_assertions)]
 fn despawn_all_edibles(
     mut commands: Commands,
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
     query: Query<Entity, With<Edible>>
 ) {
-    if keyboard_input.just_pressed(KeyCode::C) {
+    if keyboard_input.just_pressed(KeyCode::KeyC) {
         for e in &query {
             commands.entity(e).despawn();
         }

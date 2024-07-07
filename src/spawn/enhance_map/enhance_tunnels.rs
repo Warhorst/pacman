@@ -30,7 +30,7 @@ fn enhance_tunnels(
             .entity(entity)
             .insert(SpriteBundle {
                 sprite: Sprite {
-                    color: Color::rgb(0.0, 0.0, 0.0),
+                    color: Color::srgb(0.0, 0.0, 0.0),
                     custom_size: Some(Vec2::splat(TUNNEL_DIMENSION)),
                     ..default()
                 },
@@ -42,7 +42,7 @@ fn enhance_tunnels(
             Name::new("TunnelEntrance"),
             SpriteBundle {
                 sprite: Sprite {
-                    color: Color::rgb(0.0, 0.0, 0.0),
+                    color: Color::srgb(0.0, 0.0, 0.0),
                     custom_size: Some(Vec2::splat(TUNNEL_DIMENSION)),
                     ..default()
                 },

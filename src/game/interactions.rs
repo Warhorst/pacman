@@ -34,11 +34,11 @@ fn pacman_hits_ghost(
             let ghost_pos = Pos::from_vec3(ghost_transform.translation);
 
             if pacman_pos == ghost_pos {
-                if let GhostState::Scatter | GhostState::Chase = state {
-                    killed_event_writer.send(PacmanWasHit)
+                if let Scatter | Chase = state {
+                    killed_event_writer.send(PacmanWasHit);
                 }
 
-                if let GhostState::Frightened = state {
+                if let Frightened = state {
                     eat_event_writer.send(GhostWasEaten(entity, *ghost_transform));
                     commands.insert_resource(CurrentlyEatenGhost(entity))
                 }
@@ -62,7 +62,7 @@ fn pacman_eat_dot(
             if pacman_pos == dot_pos {
                 commands.entity(entity).despawn();
                 eaten_dots.increment();
-                event_writer.send(DotWasEaten)
+                event_writer.send(DotWasEaten);
             }
         }
     }
@@ -81,7 +81,7 @@ fn pacman_eat_energizer(
 
             if energizer_pos == pacman_pos {
                 commands.entity(energizer_entity).despawn();
-                event_writer.send(EnergizerWasEaten)
+                event_writer.send(EnergizerWasEaten);
             }
         }
     }
@@ -102,7 +102,7 @@ fn eat_fruit_when_pacman_touches_it(
             if pacman_pos == fruit_pos {
                 commands.entity(entity).despawn();
                 commands.remove_resource::<FruitDespawnTimer>();
-                event_writer.send(FruitWasEaten(*fruit, *fruit_tf))
+                event_writer.send(FruitWasEaten(*fruit, *fruit_tf));
             }
         }
     }

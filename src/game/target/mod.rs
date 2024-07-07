@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-use bevy::ecs::query::WorldQuery;
+use bevy::ecs::query::QueryData;
 use bevy::prelude::*;
 use bevy::utils::{HashMap, HashSet};
 
@@ -32,8 +32,8 @@ impl Plugin for TargetPlugin {
     }
 }
 
-#[derive(WorldQuery)]
-#[world_query(mutable)]
+#[derive(QueryData)]
+#[query_data(mutable)]
 pub struct TargetComponents<'a> {
     ghost: &'a Ghost,
     target: &'a mut Target,

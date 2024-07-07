@@ -1,5 +1,6 @@
-use bevy::ecs::query::WorldQuery;
+use bevy::ecs::query::QueryData;
 use bevy::prelude::*;
+
 use crate::core::prelude::*;
 
 pub(in crate::game) struct SpeedPlugin;
@@ -18,8 +19,8 @@ impl Plugin for SpeedPlugin {
     }
 }
 
-#[derive(WorldQuery)]
-#[world_query(mutable)]
+#[derive(QueryData)]
+#[query_data(mutable)]
 struct GhostSpeedUpdateComponents<'a> {
     ghost: &'a Ghost,
     transform: &'a Transform,

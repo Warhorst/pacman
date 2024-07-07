@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_asset_preload::AssetPreloadPlugin;
+use bevy_asset_preload::{AssetPreloadPlugin, load_assets};
 use bevy_sprite_sheet::SpriteSheetPlugin;
 
 use core::prelude::*;
@@ -31,12 +31,12 @@ fn main() {
             })
             .set(ImagePlugin::default_nearest())
         )
-        .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
+        .insert_resource(ClearColor(Color::srgb(0.0, 0.0, 0.0)))
         .add_plugins((
             CorePlugin,
             GamePlugin,
             SpawnPlugin,
-            AssetPreloadPlugin::new(Setup(PreloadAssets), Setup(CreateSpriteSheets)),
+            AssetPreloadPlugin::load_given_paths(Setup(PreloadAssets), Setup(CreateSpriteSheets), load_assets!()),
             SpriteSheetPlugin::new(Setup(CreateSpriteSheets), Spawn(SpawnMapScene)),
             DebugPlugin,
         ))

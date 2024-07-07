@@ -789,13 +789,13 @@ impl<'a> MapCreator<'a> {
     }
 
     fn save(&mut self) {
-        let type_registry = self.app.world.resource::<AppTypeRegistry>().clone();
+        let type_registry = self.app.world().resource::<AppTypeRegistry>().clone();
         self.map_world.insert_resource(type_registry);
 
         let scene = DynamicScene::from_world(&self.map_world);
 
-        let type_registry = self.app.world.resource::<AppTypeRegistry>();
-        let serialized_scene = scene.serialize_ron(type_registry).unwrap();
+        let type_registry = self.app.world().resource::<AppTypeRegistry>();
+        let serialized_scene = scene.serialize(&type_registry.read()).unwrap();
         File::create(format!("./assets/{MAP_SCENE_PATH}"))
             .and_then(|mut file| file.write(serialized_scene.as_bytes()))
             .expect("error while writing map to file");

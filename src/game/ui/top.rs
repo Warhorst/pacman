@@ -83,7 +83,7 @@ fn spawn_score_board(
             TextStyle {
                 font,
                 font_size: 20.0,
-                color: Color::rgb(1.0, 1.0, 1.0),
+                color: Color::srgb(1.0, 1.0, 1.0),
             },
         ).with_style(Style {
             position_type: PositionType::Absolute,
@@ -105,7 +105,7 @@ fn spawn_high_score_board(
             TextStyle {
                 font,
                 font_size: 20.0,
-                color: Color::rgb(1.0, 1.0, 1.0),
+                color: Color::srgb(1.0, 1.0, 1.0),
             },
         ).with_style(Style {
             position_type: PositionType::Absolute,
@@ -127,7 +127,7 @@ fn spawn_high_score_label(
             TextStyle {
                 font,
                 font_size: 20.0,
-                color: Color::rgb(1.0, 1.0, 1.0),
+                color: Color::srgb(1.0, 1.0, 1.0),
             },
         ).with_style(Style {
             position_type: PositionType::Absolute,
@@ -154,7 +154,7 @@ fn spawn_1up_label(
             TextStyle {
                 font,
                 font_size: 20.0,
-                color: Color::rgb(1.0, 1.0, 1.0),
+                color: Color::srgb(1.0, 1.0, 1.0),
             },
         ).with_style(Style {
             position_type: PositionType::Absolute,

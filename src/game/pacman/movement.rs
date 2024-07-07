@@ -1,12 +1,12 @@
-use bevy::ecs::query::WorldQuery;
+use bevy::ecs::query::QueryData;
+use bevy::math::bounding::{Aabb2d, IntersectsVolume};
 use bevy::prelude::*;
-use bevy::sprite::collide_aabb::collide;
-use crate::game::pacman::edible_eaten::EdibleEatenStop;
 
 use crate::core::prelude::*;
+use crate::game::pacman::edible_eaten::EdibleEatenStop;
 
-#[derive(WorldQuery)]
-#[world_query(mutable)]
+#[derive(QueryData)]
+#[query_data(mutable)]
 pub(crate) struct MoveComponents<'a> {
     direction: &'a Dir,
     transform: &'a mut Transform,
@@ -22,7 +22,12 @@ pub(in crate::game) fn move_pacman(
         let new_coordinates = calculate_new_coordinates(&move_components, time.delta_seconds());
 
         for transform in &wall_query {
-            if collide(new_coordinates, Vec2::splat(FIELD_SIZE), transform.translation, Vec2::splat(WALL_DIMENSION)).is_some() {
+            let a = Aabb2d::new(new_coordinates.truncate(), Vec2::splat(FIELD_SIZE) / 2.0);
+            // removing this slight fraction of the wall is necessary, as Aabb2d::intersects also 
+            // counts touching as intersection, which was not the case in collide_aabb prior to bevy 0.13  
+            let b = Aabb2d::new(transform.translation.truncate(), Vec2::splat(WALL_DIMENSION - 0.1) / 2.0);
+
+            if a.intersects(&b) {
                 move_components.transform.translation = Pos::from_vec3(new_coordinates).to_vec3(PACMAN_Z);
                 return;
             }
@@ -51,7 +56,7 @@ fn get_modifiers_for_direction(direction: &Dir) -> (f32, f32) {
 }
 
 pub(in crate::game) fn set_direction_based_on_keyboard_input(
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
     mut input_buffer: ResMut<InputBuffer>,
     mut pacman_query: Query<(&Transform, &mut Dir), With<Pacman>>,
     wall_query: Query<&Transform, With<Wall>>
@@ -76,20 +81,20 @@ pub(in crate::game) fn set_direction_based_on_keyboard_input(
 }
 
 /// Return the direction pacman should move to next. If no matching keyboard key was pressed, return the last buffered input.
-fn get_wished_direction(keyboard_input: &Input<KeyCode>, input_buffer: &InputBuffer) -> Option<Dir> {
-    if keyboard_input.pressed(KeyCode::Left) || keyboard_input.pressed(KeyCode::A) {
+fn get_wished_direction(keyboard_input: &ButtonInput<KeyCode>, input_buffer: &InputBuffer) -> Option<Dir> {
+    if keyboard_input.pressed(KeyCode::ArrowLeft) || keyboard_input.pressed(KeyCode::KeyA) {
         return Some(Left);
     }
 
-    if keyboard_input.pressed(KeyCode::Right) || keyboard_input.pressed(KeyCode::D) {
+    if keyboard_input.pressed(KeyCode::ArrowRight) || keyboard_input.pressed(KeyCode::KeyD) {
         return Some(Right);
     }
 
-    if keyboard_input.pressed(KeyCode::Up) || keyboard_input.pressed(KeyCode::W) {
+    if keyboard_input.pressed(KeyCode::ArrowUp) || keyboard_input.pressed(KeyCode::KeyW) {
         return Some(Up);
     }
 
-    if keyboard_input.pressed(KeyCode::Down) || keyboard_input.pressed(KeyCode::S) {
+    if keyboard_input.pressed(KeyCode::ArrowDown) || keyboard_input.pressed(KeyCode::KeyS) {
         return Some(Down);
     }
 
