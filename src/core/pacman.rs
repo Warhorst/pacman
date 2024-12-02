@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use crate::core::prelude::*;
 
 pub(super) struct PacmanPlugin;
 
@@ -13,4 +14,11 @@ impl Plugin for PacmanPlugin {
 /// Marker component for a pacman entity.
 #[derive(Component, Reflect, Default)]
 #[reflect(Component)]
+#[require(
+    Name(|| Name::new("Pacman")),
+    Dir(|| Dir::Up),
+    Speed,
+    Sprite,
+    Animations
+)]
 pub struct Pacman;
