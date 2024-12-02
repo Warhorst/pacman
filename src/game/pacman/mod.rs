@@ -69,10 +69,7 @@ fn play_the_dying_sound(
     commands.spawn((
         Name::new("PacmanDyingSound"),
         SoundEffect::new(4),
-        AudioBundle {
-            source: asset_server.load("sounds/dying.ogg"),
-            ..default()
-        }
+        AudioPlayer::<AudioSource>(asset_server.load("sounds/dying.ogg")),
     ));
 }
 

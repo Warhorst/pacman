@@ -20,10 +20,8 @@ fn spawn_camera(
 
     commands.spawn((
         Name::new("GameCamera"),
-        Camera2dBundle {
-            transform: Transform::from_translation(Vec3::new((map.width as f32 * FIELD_SIZE) / 2.0, (map.height as f32 * FIELD_SIZE) / 2.0, 1000.0)),
-            ..default()
-        },
+        Camera2d,
+        Transform::from_translation(Vec3::new((map.width as f32 * FIELD_SIZE) / 2.0, (map.height as f32 * FIELD_SIZE) / 2.0, 1000.0)),
     ));
 }
 

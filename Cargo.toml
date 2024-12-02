@@ -11,9 +11,9 @@ opt-level = 1
 opt-level = 3
 
 [dependencies]
-bevy = "0.14.0"
+bevy = "0.15.0"
 rand = "0.8.5"
-bevy-inspector-egui = "0.25.0"
+bevy-inspector-egui = "0.28.0"
 bevy_asset_preload = {git = "https://github.com/Warhorst/bevy_asset_preload"}
 bevy_sprite_sheet = {git = "https://github.com/Warhorst/bevy_sprite_sheet"}
-pad = {git = "https://github.com/Warhorst/pad"}
+pad = {git = "https://github.com/Warhorst/pad", features = ["bevy"]}

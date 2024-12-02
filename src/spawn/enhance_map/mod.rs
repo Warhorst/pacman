@@ -34,7 +34,10 @@ fn add_spatial_bundle_to_map(
     mut commands: Commands,
     maps: Query<Entity, With<Map>>,
 ) {
-    commands.entity(maps.single()).insert(SpatialBundle::default());
+    commands.entity(maps.single()).insert((
+        Transform::default(),
+        Visibility::default(),
+    ));
 }
 
 fn switch_state_after_enhance(

@@ -52,17 +52,14 @@ fn spawn_top_ui(
     commands.spawn((
         Name::new("TopUI"),
         TopUI,
-        NodeBundle {
-            style: Style {
-                width: Percent(40.0),
-                height: Percent(10.0),
-                justify_content: JustifyContent::SpaceBetween,
-                left: Percent(30.0),
-                position_type: PositionType::Absolute,
-                ..default()
-            },
+        Node {
+            width: Percent(40.0),
+            height: Percent(10.0),
+            justify_content: JustifyContent::SpaceBetween,
+            left: Percent(30.0),
+            position_type: PositionType::Absolute,
             ..default()
-        }
+        },
     ))
         .with_children(|parent| spawn_score_board(font.clone(), parent))
         .with_children(|parent| spawn_high_score_board(font.clone(), parent))
@@ -78,18 +75,18 @@ fn spawn_score_board(
     parent.spawn((
         Name::new("ScoreBoard"),
         ScoreBoard,
-        TextBundle::from_section(
-            "0",
-            TextStyle {
-                font,
-                font_size: 20.0,
-                color: Color::srgb(1.0, 1.0, 1.0),
-            },
-        ).with_style(Style {
+        Node {
             position_type: PositionType::Absolute,
             top: Percent(50.0),
             ..default()
-        })
+        },
+        Text::new("0"),
+        TextFont {
+            font,
+            font_size: 20.0,
+            ..default()
+        },
+        TextColor(Color::srgb(1.0, 1.0, 1.0)),
     ));
 }
 
@@ -100,19 +97,19 @@ fn spawn_high_score_board(
     parent.spawn((
         Name::new("HighScoreBoard"),
         HighScoreBoard,
-        TextBundle::from_section(
-            "0",
-            TextStyle {
-                font,
-                font_size: 20.0,
-                color: Color::srgb(1.0, 1.0, 1.0),
-            },
-        ).with_style(Style {
+        Node {
             position_type: PositionType::Absolute,
             left: Percent(50.0),
             top: Percent(50.0),
             ..default()
-        })
+        },
+        Text::new("0"),
+        TextFont {
+            font,
+            font_size: 20.0,
+            ..default()
+        },
+        TextColor(Color::srgb(1.0, 1.0, 1.0)),
     ));
 }
 
@@ -122,19 +119,19 @@ fn spawn_high_score_label(
 ) {
     parent.spawn((
         Name::new("HighScoreBoardLabel"),
-        TextBundle::from_section(
-            "HIGH SCORE",
-            TextStyle {
-                font,
-                font_size: 20.0,
-                color: Color::srgb(1.0, 1.0, 1.0),
-            },
-        ).with_style(Style {
+        Node {
             position_type: PositionType::Absolute,
             top: Percent(10.0),
             left: Percent(30.0),
             ..default()
-        })
+        },
+        Text::new("HIGH SCORE"),
+        TextFont {
+            font,
+            font_size: 20.0,
+            ..default()
+        },
+        TextColor(Color::srgb(1.0, 1.0, 1.0)),
     ));
 }
 
@@ -149,44 +146,46 @@ fn spawn_1up_label(
     parent.spawn((
         Name::new("1UPLabel"),
         OneUpLabel,
-        TextBundle::from_section(
-            "1UP",
-            TextStyle {
-                font,
-                font_size: 20.0,
-                color: Color::srgb(1.0, 1.0, 1.0),
-            },
-        ).with_style(Style {
+        Node {
             position_type: PositionType::Absolute,
             top: Percent(10.0),
             ..default()
-        })
+        },
+        Text::new("1UP"),
+        TextFont {
+            font,
+            font_size: 20.0,
+            ..default()
+        },
+        TextColor(Color::srgb(1.0, 1.0, 1.0)),
     ));
 }
 
 fn update_scoreboard(
+    mut writer: TextUiWriter,
     score: Res<Score>,
-    mut query: Query<&mut Text, With<ScoreBoard>>,
+    query: Query<Entity, With<ScoreBoard>>,
 ) {
     if !score.is_changed() {
         return;
     }
 
-    for mut text in query.iter_mut() {
-        text.sections[0].value = format!("{}", **score)
+    for entity in query.iter() {
+        *writer.text(entity, 0) = format!("{}", **score)
     }
 }
 
 fn update_high_score_board(
+    mut writer: TextUiWriter,
     high_score: Res<HighScore>,
-    mut query: Query<&mut Text, With<HighScoreBoard>>,
+    query: Query<Entity, With<HighScoreBoard>>,
 ) {
     if !high_score.is_changed() {
         return;
     }
 
-    for mut text in query.iter_mut() {
-        text.sections[0].value = format!("{}", high_score.score)
+    for entity in query.iter() {
+        *writer.text(entity, 0) = format!("{}", high_score.score)
     }
 }
 

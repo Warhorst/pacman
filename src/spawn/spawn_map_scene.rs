@@ -12,8 +12,8 @@ impl Plugin for SpawnMapScenePlugin {
                 spawn_map_scene,
             )
             .add_systems(
-                Update,
-                switch_state_when_map_spawned.run_if(in_state(Spawn(SpawnMapScene))),
+                Startup,
+                switch_state_when_map_spawned,
             )
         ;
     }
@@ -27,24 +27,17 @@ fn spawn_map_scene(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
 ) {
-    let entity = commands.spawn((
-        DynamicSceneBundle {
-            scene: asset_server.load(MAP_SCENE_PATH),
-            ..default()
-        },
-    )).id();
+    let entity = commands.spawn(DynamicSceneRoot(asset_server.load(MAP_SCENE_PATH))).id();
 
     commands.insert_resource(LoadingMap(entity));
 }
 
 fn switch_state_when_map_spawned(
-    mut events: EventReader<SceneInstanceReady>,
-    loading_map: Res<LoadingMap>,
-    mut next_state: ResMut<NextState<GameState>>,
+    mut commands: Commands,
 ) {
-    for event in events.read() {
-        if event.parent == **loading_map {
-            next_state.set(Spawn(EnhanceMap));
-        }
-    }
+    commands.add_observer(|_: Trigger<SceneInstanceReady>, mut next_state: ResMut<NextState<GameState>>| {
+        // todo in the current bevy version at the time of writing (0.15.0), I don't really understand how to check if a
+        //  specific scene was spawned, only that some scene was spawned. But as I only have one, this should be fine
+        next_state.set(Spawn(EnhanceMap));
+    });
 }

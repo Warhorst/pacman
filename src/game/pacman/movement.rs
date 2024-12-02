@@ -19,7 +19,7 @@ pub(in crate::game) fn move_pacman(
     mut pacman_query: Query<MoveComponents, (With<Pacman>, Without<EdibleEatenStop>)>,
 ) {
     for mut move_components in &mut pacman_query {
-        let new_coordinates = calculate_new_coordinates(&move_components, time.delta_seconds());
+        let new_coordinates = calculate_new_coordinates(&move_components, time.delta_secs());
 
         for transform in &wall_query {
             let a = Aabb2d::new(new_coordinates.truncate(), Vec2::splat(FIELD_SIZE) / 2.0);

@@ -1,7 +1,6 @@
 use std::f32::consts::PI;
 use bevy::prelude::*;
 use crate::core::prelude::*;
-use Tiles::*;
 
 pub(super) struct MapPlugin;
 
@@ -50,22 +49,22 @@ pub enum Tiles {
 
 impl Default for Tiles {
     fn default() -> Self {
-        Single {pos: Pos::default()}
+        Tiles::Single {pos: Pos::default()}
     }
 }
 
 impl Tiles {
     pub fn to_vec3(&self, z: f32) -> Vec3 {
         match self {
-            Single { pos } => pos.to_vec3(z),
-            Double { pos_a, pos_b } => Vec3::from_positions([pos_a, pos_b], z)
+            Tiles::Single { pos } => pos.to_vec3(z),
+            Tiles::Double { pos_a, pos_b } => Vec3::from_positions([pos_a, pos_b], z)
         }
     }
 
     pub fn to_pos(&self) -> Pos {
         match self {
-            Single { pos } => *pos,
-            Double { .. } => panic!("can only retrieve the position for single position tiles")
+            Tiles::Single { pos } => *pos,
+            Tiles::Double { .. } => panic!("can only retrieve the position for single position tiles")
         }
     }
 }

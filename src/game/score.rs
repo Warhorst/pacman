@@ -138,18 +138,18 @@ fn spawn_score_text(
     coordinates: Vec3,
 ) {
     commands.spawn((
-        Text2dBundle {
-            text: Text::from_section(
-                points.to_string(),
-                TextStyle {
-                    font: asset_server.load(FONT),
-                    font_size: 10.0,
-                    color,
-                },
-            ).with_justify(JustifyText::Center),
-            transform: Transform::from_translation(coordinates),
-            ..Default::default()
+        Text2d(points.to_string()),
+        TextFont {
+            font: asset_server.load(FONT),
+            font_size: 10.0,
+            ..default()
         },
+        TextColor(color),
+        TextLayout {
+            justify: JustifyText::Center,
+            ..default()
+        },
+        Transform::from_translation(coordinates),
         Name::new("ScoreText"),
         ScoreText,
         ScoreTextTimer(Timer::new(Duration::from_secs(1), TimerMode::Once))
@@ -198,10 +198,7 @@ fn play_highscore_broken_sound(
         commands.spawn((
             Name::new("HighScoreBrokenSound"),
             SoundEffect::new(3),
-            AudioBundle {
-                source: asset_server.load("sounds/high_score.ogg"),
-                ..default()
-            }
+            AudioPlayer::<AudioSource>(asset_server.load("sounds/high_score.ogg")),
         ));
     }
 }

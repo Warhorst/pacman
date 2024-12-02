@@ -10,7 +10,7 @@ impl Plugin for EnhanceMazePlugin {
         app
             .add_systems(
                 OnEnter(Spawn(EnhanceMap)),
-                enhance_maze
+                enhance_maze,
             )
         ;
     }
@@ -26,7 +26,10 @@ fn enhance_maze(
 ) {
     let wall_animations_map = create_animations(&sprite_sheets);
 
-    commands.entity(mazes.single()).insert(SpatialBundle::default());
+    commands.entity(mazes.single()).insert((
+        Transform::default(),
+        Visibility::default(),
+    ));
 
     for (entity, tiles, style) in &walls {
         let transform = create_transform(tiles, &style.rotation);
@@ -35,15 +38,12 @@ fn enhance_maze(
         commands
             .entity(entity)
             .insert((
-                SpriteBundle {
-                    texture: animations.current().texture(),
-                    sprite: Sprite {
-                        custom_size: Some(Vec2::splat(WALL_DIMENSION)),
-                        ..default()
-                    },
-                    transform,
-                    ..Default::default()
+                Sprite {
+                    image: animations.current().texture(),
+                    custom_size: Some(Vec2::splat(WALL_DIMENSION)),
+                    ..default()
                 },
+                transform,
                 animations,
             ));
     }

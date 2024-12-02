@@ -9,7 +9,7 @@ impl Plugin for EnhanceTunnelPlugin {
         app
             .add_systems(
                 OnEnter(Spawn(EnhanceMap)),
-                enhance_tunnels
+                enhance_tunnels,
             )
         ;
     }
@@ -28,29 +28,25 @@ fn enhance_tunnels(
 
         commands
             .entity(entity)
-            .insert(SpriteBundle {
-                sprite: Sprite {
+            .insert((
+                Sprite {
                     color: Color::srgb(0.0, 0.0, 0.0),
                     custom_size: Some(Vec2::splat(TUNNEL_DIMENSION)),
                     ..default()
                 },
-                transform: tunnel_transform,
-                ..Default::default()
-            });
+                tunnel_transform
+            ));
 
         let entrance = commands.spawn((
             Name::new("TunnelEntrance"),
-            SpriteBundle {
-                sprite: Sprite {
-                    color: Color::srgb(0.0, 0.0, 0.0),
-                    custom_size: Some(Vec2::splat(TUNNEL_DIMENSION)),
-                    ..default()
-                },
-                transform: tunnel_entrance_transform,
-                ..Default::default()
-            }
+            Sprite {
+                color: Color::srgb(0.0, 0.0, 0.0),
+                custom_size: Some(Vec2::splat(TUNNEL_DIMENSION)),
+                ..default()
+            },
+            tunnel_entrance_transform,
         )).id();
 
-        commands.entity(map).push_children(&[entrance]);
+        commands.entity(map).add_children(&[entrance]);
     }
 }

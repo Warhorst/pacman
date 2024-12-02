@@ -47,24 +47,22 @@ fn spawn_dots(
     let dots = commands.spawn((
         Name::new("Dots"),
         Dots,
-        SpatialBundle::default()
+        Transform::default(),
+        Visibility::default()
     )).id();
 
     for tiles in &spawn_query {
         commands.entity(dots).with_children(|parent| {
             parent.spawn((
-                SpriteBundle {
-                    texture: asset_server.load("textures/dot.png"),
-                    sprite: Sprite {
-                        custom_size: Some(Vec2::splat(DOT_DIMENSION)),
-                        ..default()
-                    },
-                    transform: Transform::from_translation(tiles.to_vec3(DOT_Z)),
-                    ..Default::default()
-                },
                 Dot,
                 Edible,
-                Name::new("Dot")
+                Name::new("Dot"),
+                Sprite {
+                    image: asset_server.load("textures/dot.png"),
+                    custom_size: Some(Vec2::splat(DOT_DIMENSION)),
+                    ..default()
+                },
+                Transform::from_translation(tiles.to_vec3(DOT_Z)),
             ));
         });
     }
@@ -113,10 +111,7 @@ fn play_waka_when_dot_was_eaten(
                 commands.spawn((
                     Name::new("WakaSound"),
                     SoundEffect::new(1),
-                    AudioBundle {
-                        source: asset_server.load("sounds/waka.ogg"),
-                        ..default()
-                    }
+                    AudioPlayer::<AudioSource>(asset_server.load("sounds/waka.ogg")),
                 ));
 
                 *cached = false;
@@ -135,10 +130,7 @@ fn play_waka_when_dot_was_eaten(
                 commands.spawn((
                     Name::new("WakaSound"),
                     SoundEffect::new(1),
-                    AudioBundle {
-                        source: asset_server.load("sounds/waka.ogg"),
-                        ..default()
-                    }
+                    AudioPlayer::<AudioSource>(asset_server.load("sounds/waka.ogg")),
                 ));
             }
         };

@@ -16,20 +16,17 @@ pub(crate) fn spawn_pacman(
     animations.stop();
 
     commands.spawn((
-        SpriteBundle {
-            texture: animations.current().texture(),
-            sprite: Sprite {
-                custom_size: Some(Vec2::splat(PACMAN_DIMENSION)),
-                ..default()
-            },
-            transform,
-            visibility: Visibility::Visible,
-            ..Default::default()
-        },
         Name::new("Pacman"),
         Pacman,
         Speed(PACMAN_BASE_SPEED * specs_per_level.get_for(&level).pacman_normal_speed_modifier),
         Up,
+        Sprite {
+            image: animations.current().texture(),
+            custom_size: Some(Vec2::splat(PACMAN_DIMENSION)),
+            ..default()
+        },
+        Visibility::Visible,
+        transform,
         animations
     ));
 }

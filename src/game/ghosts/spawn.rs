@@ -37,21 +37,18 @@ fn spawn_ghost(
 
     commands.spawn((
         Name::new("Ghost"),
-        SpriteBundle {
-            texture: animations.current().texture(),
-            sprite: Sprite {
-                custom_size: Some(Vec2::splat(GHOST_DIMENSION)),
-                ..default()
-            },
-            transform: Transform::from_translation(spawn_coordinates),
-            visibility: Visibility::Visible,
-            ..Default::default()
-        },
         spawn.ghost,
         spawn_direction,
         Speed(GHOST_BASE_SPEED * specs_per_level.get_for(level).ghost_normal_speed_modifier),
         Target::new(),
         Spawned,
+        Sprite {
+            image: animations.current().texture(),
+            custom_size: Some(Vec2::splat(GHOST_DIMENSION)),
+            ..default()
+        },
+        Transform::from_translation(spawn_coordinates),
+        Visibility::Visible,
         animations
     ));
 }

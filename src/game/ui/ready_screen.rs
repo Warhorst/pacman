@@ -30,19 +30,19 @@ fn spawn_screen(
     commands.spawn((
         Name::new("ReadyScreen"),
         ReadyScreen,
-        TextBundle::from_section(
-            "Ready!",
-            TextStyle {
-                font: asset_server.load(FONT),
-                font_size: 20.0,
-                color: Color::srgb(1.0, 1.0, 0.0),
-            },
-        ).with_style(Style {
+        Node {
             position_type: PositionType::Absolute,
             left: Percent(45.0),
             top: Percent(55.0),
             ..default()
-        }),
+        },
+        Text::new("Ready!"),
+        TextFont {
+            font: asset_server.load(FONT),
+            font_size: 20.0,
+            ..default()
+        },
+        TextColor(Color::srgb(1.0, 1.0, 0.0)),
     ));
 }
 

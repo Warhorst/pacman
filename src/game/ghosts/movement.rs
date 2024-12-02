@@ -48,7 +48,7 @@ fn move_ghost(time: &Time, direction: &Dir, target: &mut Target, transform: &mut
     }
 
     let mut coordinates = &mut transform.translation;
-    let delta_seconds = time.delta_seconds();
+    let delta_seconds = time.delta_secs();
     let target_coordinates = target.get();
     move_in_direction(&mut coordinates, delta_seconds, &direction, speed);
     limit_movement(&mut coordinates, &direction, &target_coordinates);

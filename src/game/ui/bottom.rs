@@ -56,24 +56,21 @@ fn spawn_bottom_ui(
     let bottom_ui = commands.spawn((
         Name::new("BottomUI"),
         BottomUI,
-        NodeBundle {
-            style: Style {
-                width: Percent(40.0),
-                height: Percent(10.0),
-                justify_content: JustifyContent::SpaceBetween,
-                top: Percent(90.0),
-                left: Percent(30.0),
-                position_type: Absolute,
-                ..default()
-            },
+        Node {
+            width: Percent(40.0),
+            height: Percent(10.0),
+            justify_content: JustifyContent::SpaceBetween,
+            top: Percent(90.0),
+            left: Percent(30.0),
+            position_type: Absolute,
             ..default()
-        }
+        },
     )).id();
 
     let ui_lives = spawn_ui_lives(&mut commands, &asset_server, &lives);
     let ui_fruits = spawn_ui_fruits(&mut commands, &asset_server, &level, &specs_per_level);
 
-    commands.entity(bottom_ui).push_children(&[ui_lives, ui_fruits]);
+    commands.entity(bottom_ui).add_children(&[ui_lives, ui_fruits]);
 }
 
 fn spawn_ui_lives(
@@ -84,24 +81,21 @@ fn spawn_ui_lives(
     let ui_lives = commands.spawn((
         Name::new("UILives"),
         UILives,
-        NodeBundle {
-            style: Style {
-                width: Percent(40.0),
-                height: Percent(50.0),
-                position_type: Absolute,
-                bottom: Percent(40.0),
-                justify_content: JustifyContent::SpaceBetween,
-                ..default()
-            },
+        Node {
+            width: Percent(40.0),
+            height: Percent(50.0),
+            position_type: Absolute,
+            bottom: Percent(40.0),
+            justify_content: JustifyContent::SpaceBetween,
             ..default()
-        }
+        },
     )).id();
 
     let ui_live_vec = (0..**lives).into_iter()
         .map(|i| spawn_ui_live(i, commands, asset_server))
         .collect::<Vec<_>>();
 
-    commands.entity(ui_lives).push_children(&ui_live_vec);
+    commands.entity(ui_lives).add_children(&ui_live_vec);
     ui_lives
 }
 
@@ -114,17 +108,14 @@ fn spawn_ui_live(
     commands.spawn((
         Name::new("UILive"),
         UILive,
-        ImageBundle {
-            image: UiImage::new(image.clone()),
-            style: Style {
-                width: Percent(20.0),
-                height: Percent(100.0),
-                left: Percent(index as f32 * 20.0),
-                position_type: Absolute,
-                ..default()
-            },
+        Node {
+            width: Percent(20.0),
+            height: Percent(100.0),
+            left: Percent(index as f32 * 20.0),
+            position_type: Absolute,
             ..default()
         },
+        ImageNode::new(image.clone()),
     )).id()
 }
 
@@ -137,25 +128,22 @@ fn spawn_ui_fruits(
     let ui_fruits = commands.spawn((
         Name::new("UIFruits"),
         UIFruits,
-        NodeBundle {
-            style: Style {
-                width: Percent(60.0),
-                height: Percent(50.0),
-                position_type: Absolute,
-                left: Percent(40.0),
-                bottom: Percent(40.0),
-                justify_content: JustifyContent::SpaceBetween,
-                ..default()
-            },
+        Node {
+            width: Percent(60.0),
+            height: Percent(50.0),
+            position_type: Absolute,
+            left: Percent(40.0),
+            bottom: Percent(40.0),
+            justify_content: JustifyContent::SpaceBetween,
             ..default()
-        }
+        },
     )).id();
 
     let fruits_to_display = get_fruits_to_display(&level, &specs_per_level);
 
     for (i, fruit) in fruits_to_display.into_iter().enumerate() {
         let ui_fruit = spawn_ui_fruit(commands, asset_server, i, fruit);
-        commands.entity(ui_fruits).push_children(&[ui_fruit]);
+        commands.entity(ui_fruits).add_children(&[ui_fruit]);
     }
 
     ui_fruits
@@ -184,17 +172,14 @@ fn spawn_ui_fruit(
     commands.spawn((
         Name::new("UIFruit"),
         UIFruit,
-        ImageBundle {
-            image: UiImage::new(image),
-            style: Style {
-                width: Percent(100.0 / 7.0),
-                height: Percent(100.0),
-                left: Percent(left_percent),
-                position_type: Absolute,
-                ..default()
-            },
+        Node {
+            width: Percent(100.0 / 7.0),
+            height: Percent(100.0),
+            left: Percent(left_percent),
+            position_type: Absolute,
             ..default()
-        }
+        },
+        ImageNode::new(image),
     )).id()
 }
 
@@ -213,7 +198,7 @@ fn update_lives(
 
         for bottom_ui in &bottom_ui_query {
             let ui_lives = spawn_ui_lives(&mut commands, &asset_server, &lives);
-            commands.entity(bottom_ui).push_children(&[ui_lives]);
+            commands.entity(bottom_ui).add_children(&[ui_lives]);
         }
     }
 }
@@ -233,7 +218,7 @@ fn update_fruits(
 
         for bottom_ui in &bottom_ui_query {
             let ui_fruits = spawn_ui_fruits(&mut commands, &asset_server, &level, &specs_per_level);
-            commands.entity(bottom_ui).push_children(&[ui_fruits]);
+            commands.entity(bottom_ui).add_children(&[ui_fruits]);
         }
     }
 }

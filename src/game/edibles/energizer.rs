@@ -56,24 +56,22 @@ fn spawn_energizer(
     let energizers = commands.spawn((
         Name::new("Energizers"),
         Energizers,
-        SpatialBundle::default()
+        Transform::default(),
+        Visibility::default(),
     )).id();
 
     for tiles in &spawners {
         commands.entity(energizers).with_children(|parent| {
             parent.spawn((
-                SpriteBundle {
-                    texture: asset_server.load("textures/energizer.png"),
-                    sprite: Sprite {
-                        custom_size: Some(Vec2::splat(ENERGIZER_DIMENSION)),
-                        ..default()
-                    },
-                    transform: Transform::from_translation(tiles.to_vec3(ENERGIZER_Z)),
-                    ..Default::default()
-                },
                 Energizer,
                 Edible,
-                Name::new("Energizer")
+                Name::new("Energizer"),
+                Sprite {
+                    image: asset_server.load("textures/energizer.png"),
+                    custom_size: Some(Vec2::splat(ENERGIZER_DIMENSION)),
+                    ..default()
+                },
+                Transform::from_translation(tiles.to_vec3(ENERGIZER_Z)),
             ));
         });
     }

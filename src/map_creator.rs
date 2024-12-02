@@ -210,7 +210,7 @@ impl<'a> MapCreator<'a> {
         let dot_spawns = map_world.spawn(DotSpawns).id();
         let energizer_spawns = map_world.spawn(EnergizerSpawns).id();
 
-        map_world.entity_mut(map).push_children(&[maze, dot_spawns, energizer_spawns]);
+        map_world.entity_mut(map).add_children(&[maze, dot_spawns, energizer_spawns]);
 
         MapCreator {
             width,
@@ -758,7 +758,7 @@ impl<'a> MapCreator<'a> {
             Tiles::Single { pos: Pos::new(self.current_column as isize, self.current_row as isize) }
         )).id();
 
-        self.map_world.entity_mut(parent).push_children(&[e]);
+        self.map_world.entity_mut(parent).add_children(&[e]);
 
         self.cont()
     }
@@ -772,7 +772,7 @@ impl<'a> MapCreator<'a> {
             }
         )).id();
 
-        self.map_world.entity_mut(parent).push_children(&[e]);
+        self.map_world.entity_mut(parent).add_children(&[e]);
 
         self.cont();
         self.cont();

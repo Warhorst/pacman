@@ -41,10 +41,7 @@ fn play_start_sound(
     commands.spawn((
         Name::new("StartSound"),
         SoundEffect::new(5),
-        AudioBundle {
-            source: asset_server.load("sounds/start.ogg"),
-            ..default()
-        }
+        AudioPlayer::<AudioSource>(asset_server.load("sounds/start.ogg")),
     ));
 }
 
@@ -60,7 +57,7 @@ fn init_background_music(
 
 fn start_background_track(
     commands: &mut Commands,
-    loaded_assets: &AssetServer,
+    asset_server: &AssetServer,
     marker: impl Component,
     path: &'static str,
 ) {
@@ -68,10 +65,8 @@ fn start_background_track(
         Name::new(path),
         BackgroundTrack,
         marker,
-        AudioBundle {
-            source: loaded_assets.load(path),
-            settings: PlaybackSettings::LOOP.with_volume(Volume::new(0.0)),
-        }
+        AudioPlayer::<AudioSource>(asset_server.load(path)),
+        PlaybackSettings::LOOP.with_volume(Volume::new(0.0))
     ));
 }
 

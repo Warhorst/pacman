@@ -54,17 +54,14 @@ fn spawn_fruit_when_dot_limit_reached(
                 let fruit = specs_per_level.get_for(&level).fruit_to_spawn;
                 commands.spawn((
                     Name::new("Fruit"),
-                    SpriteBundle {
-                        texture: get_texture_for_fruit(&fruit, &asset_server),
-                        sprite: Sprite {
-                            custom_size: Some(Vec2::splat(FRUIT_DIMENSION)),
-                            ..default()
-                        },
-                        transform: Transform::from_translation(tiles.to_vec3(FRUIT_Z)),
-                        ..Default::default()
-                    },
                     fruit,
-                    Edible
+                    Edible,
+                    Sprite {
+                        image: get_texture_for_fruit(&fruit, &asset_server),
+                        custom_size: Some(Vec2::splat(FRUIT_DIMENSION)),
+                        ..default()
+                    },
+                    Transform::from_translation(tiles.to_vec3(FRUIT_Z)),
                 ));
             }
             commands.insert_resource(FruitDespawnTimer::new());
@@ -128,10 +125,7 @@ fn play_fruit_eaten_sound_when_fruit_was_eaten(
         commands.spawn((
             Name::new("FruitEatenSound"),
             SoundEffect::new(1),
-            AudioBundle {
-                source: asset_server.load("sounds/fruit_eaten.ogg"),
-                ..default()
-            }
+            AudioPlayer::<AudioSource>(asset_server.load("sounds/fruit_eaten.ogg")),
         ));
     }
 }

@@ -29,7 +29,8 @@ fn enhance_ghost_house(
     let ghost_house = commands.spawn((
         Name::new("GhostHouse"),
         GhostHouse,
-        SpatialBundle::default()
+        Transform::default(),
+        Visibility::default(),
     )).id();
 
     for spawn in spawns {
@@ -160,11 +161,11 @@ fn spawn_house_walls(
     let bottom = spawn_bottom(commands, rotation, bottom_left, asset_server, sprite_sheets);
     let left = spawn_left(commands, rotation, bottom_left, asset_server, sprite_sheets);
     let right = spawn_right(commands, rotation, bottom_left, top_right, asset_server, sprite_sheets);
-    commands.entity(ghost_house).push_children(&corners);
-    commands.entity(ghost_house).push_children(&top);
-    commands.entity(ghost_house).push_children(&bottom);
-    commands.entity(ghost_house).push_children(&left);
-    commands.entity(ghost_house).push_children(&right);
+    commands.entity(ghost_house).add_children(&corners);
+    commands.entity(ghost_house).add_children(&top);
+    commands.entity(ghost_house).add_children(&bottom);
+    commands.entity(ghost_house).add_children(&left);
+    commands.entity(ghost_house).add_children(&right);
 }
 
 fn spawn_corners(
@@ -348,15 +349,12 @@ fn spawn_wall(
     commands.spawn((
         Name::new("Wall"),
         Wall,
-        SpriteBundle {
-            texture: animations.current().texture(),
-            sprite: Sprite {
-                custom_size: Some(Vec2::splat(WALL_DIMENSION)),
-                ..default()
-            },
-            transform,
+        Sprite {
+            image: animations.current().texture(),
+            custom_size: Some(Vec2::splat(WALL_DIMENSION)),
             ..default()
         },
+        transform,
         animations
     )).id()
 }
@@ -373,14 +371,11 @@ fn spawn_entrance(
     commands.spawn((
         Name::new("Wall"),
         Wall,
-        SpriteBundle {
-            texture: asset_server.load("textures/walls/ghost_house_entrance.png"),
-            sprite: Sprite {
-                custom_size: Some(Vec2::splat(WALL_DIMENSION)),
-                ..default()
-            },
-            transform,
+        Sprite {
+            image: asset_server.load("textures/walls/ghost_house_entrance.png"),
+            custom_size: Some(Vec2::splat(WALL_DIMENSION)),
             ..default()
-        }
+        },
+        transform,
     )).id()
 }

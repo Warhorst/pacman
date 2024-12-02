@@ -14,13 +14,13 @@ impl Plugin for AnimationPlugin {
 
 fn update_entities_with_animations(
     time: Res<Time>,
-    mut query: Query<(&Visibility, &mut Handle<Image>, &mut Animations)>,
+    mut query: Query<(&Visibility, &mut Sprite, &mut Animations)>,
 ) {
     let delta = time.delta();
-    for (visibility, mut texture, mut animations) in query.iter_mut() {
+    for (visibility, mut sprite, mut animations) in query.iter_mut() {
         if visibility != Visibility::Hidden && animations.is_running() {
             animations.current_mut().update(delta);
-            *texture = animations.current().texture()
+            sprite.image = animations.current().texture()
         }
     }
 }
