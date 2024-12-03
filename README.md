@@ -3,7 +3,7 @@ A recreation of the arcade game "Pacman" with rust and the bevy engine.
 
 Despite its age and appearance, Pacman was a quite complex game. Therefore, this project aims to battle test bevy.
 
-[Play the latest WASM build (last updated October 10, 2022)](https://warhorst.github.io/pacman/)
+[Play the latest WASM build (last updated December 3, 2024)](https://warhorst.github.io/pacman/)
 
 (Use WASD or arrow keys to control pacman. Click into the canvas if it's not working)
 
