@@ -100,7 +100,7 @@ fn update_energizer_timer(
 
         if timer.is_finished() {
             commands.remove_resource::<EnergizerTimer>();
-            event_writer.send(EnergizerOver);
+            event_writer.write(EnergizerOver);
         }
     }
 }
@@ -116,7 +116,7 @@ fn despawn_energizers(
     query: Query<Entity, With<Energizers>>,
 ) {
     for e in &query {
-        commands.entity(e).despawn_recursive();
+        commands.entity(e).despawn();
     }
 }
 

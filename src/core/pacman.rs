@@ -15,8 +15,8 @@ impl Plugin for PacmanPlugin {
 #[derive(Component, Reflect, Default)]
 #[reflect(Component)]
 #[require(
-    Name(|| Name::new("Pacman")),
-    Dir(|| Dir::Up),
+    Name::new("Pacman"),
+    Dir::Up,
     Speed,
     Sprite,
     Animations

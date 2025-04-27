@@ -60,19 +60,19 @@ fn spawn_top_ui(
             position_type: PositionType::Absolute,
             ..default()
         },
-    ))
-        .with_children(|parent| spawn_score_board(font.clone(), parent))
-        .with_children(|parent| spawn_high_score_board(font.clone(), parent))
-        .with_children(|parent| spawn_high_score_label(font.clone(), parent))
-        .with_children(|parent| spawn_1up_label(font.clone(), parent))
-    ;
+        children![
+            score_board(font.clone()),
+            high_score_board(font.clone()),
+            high_score_label(font.clone()),
+            one_up_label(font.clone())
+        ]
+    ));
 }
 
-fn spawn_score_board(
+fn score_board(
     font: Handle<Font>,
-    parent: &mut ChildBuilder,
-) {
-    parent.spawn((
+) -> impl Bundle {
+    (
         Name::new("ScoreBoard"),
         ScoreBoard,
         Node {
@@ -87,14 +87,13 @@ fn spawn_score_board(
             ..default()
         },
         TextColor(Color::srgb(1.0, 1.0, 1.0)),
-    ));
+    )
 }
 
-fn spawn_high_score_board(
+fn high_score_board(
     font: Handle<Font>,
-    parent: &mut ChildBuilder,
-) {
-    parent.spawn((
+) -> impl Bundle {
+    (
         Name::new("HighScoreBoard"),
         HighScoreBoard,
         Node {
@@ -110,14 +109,13 @@ fn spawn_high_score_board(
             ..default()
         },
         TextColor(Color::srgb(1.0, 1.0, 1.0)),
-    ));
+    )
 }
 
-fn spawn_high_score_label(
+fn high_score_label(
     font: Handle<Font>,
-    parent: &mut ChildBuilder,
-) {
-    parent.spawn((
+) -> impl Bundle {
+    (
         Name::new("HighScoreBoardLabel"),
         Node {
             position_type: PositionType::Absolute,
@@ -132,18 +130,17 @@ fn spawn_high_score_label(
             ..default()
         },
         TextColor(Color::srgb(1.0, 1.0, 1.0)),
-    ));
+    )
 }
 
 /// Spawn the "1UP" in the top left of the screen.
 ///
 /// To be honest, I didn't find out what this exactly does. It's not a Super Mario 1UP (aka extra live), but probably a pinball 1UP
 /// (if 1UP is displayed then you see the score of player one; when he is done, it says 2UP and its player twos turn and score).
-fn spawn_1up_label(
+fn one_up_label(
     font: Handle<Font>,
-    parent: &mut ChildBuilder,
-) {
-    parent.spawn((
+) -> impl Bundle {
+    (
         Name::new("1UPLabel"),
         OneUpLabel,
         Node {
@@ -158,7 +155,7 @@ fn spawn_1up_label(
             ..default()
         },
         TextColor(Color::srgb(1.0, 1.0, 1.0)),
-    ));
+    )
 }
 
 fn update_scoreboard(
@@ -224,6 +221,6 @@ fn despawn_top_ui(
     query: Query<Entity, With<TopUI>>,
 ) {
     for e in &query {
-        commands.entity(e).despawn_recursive()
+        commands.entity(e).despawn()
     }
 }

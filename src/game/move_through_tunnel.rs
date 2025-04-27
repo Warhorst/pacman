@@ -63,7 +63,7 @@ fn move_ghost_trough_tunnel(
                 if entity_0 != entity_1 && tunnel_0.index == tunnel_1.index {
                     transform.translation.set_xy(&tunnel_tiles_1.to_vec3(0.0));
                     *ghost_direction = tunnel_1.direction.opposite();
-                    event_writer.send(GhostPassedTunnel(ghost_entity));
+                    event_writer.write(GhostPassedTunnel(ghost_entity));
                 }
             }
         }

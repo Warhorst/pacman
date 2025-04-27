@@ -17,7 +17,7 @@ pub enum GameState {
     /// Perform necessary setup steps before the game can start
     Setup(Setup),
     /// Spawn the maze
-    Spawn(Spawn),
+    SpawnMaze(SpawnMaze),
     /// A group of states which represent different phases off the actual game (when you move pacman through the labyrinth)
     Game(Game),
 }
@@ -37,7 +37,7 @@ pub enum Setup {
 }
 
 #[derive(Reflect, Copy, Clone, Eq, PartialEq, Hash, Debug)]
-pub enum Spawn {
+pub enum SpawnMaze {
     /// Load the map scene and spawn everything from it
     SpawnMapScene,
     /// Enhance the spawned entities with textures and more

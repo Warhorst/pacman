@@ -1,5 +1,5 @@
+use bevy::platform::collections::HashMap;
 use bevy::prelude::*;
-use bevy::utils::HashMap;
 use bevy_sprite_sheet::{SpriteSheet, SpriteSheets};
 use crate::core::prelude::*;
 
@@ -9,7 +9,7 @@ impl Plugin for EnhanceMazePlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(
-                OnEnter(Spawn(EnhanceMap)),
+                OnEnter(SpawnMaze(EnhanceMap)),
                 enhance_maze,
             )
         ;
@@ -23,10 +23,10 @@ fn enhance_maze(
     sprite_sheets: Res<SpriteSheets>,
     mazes: Query<Entity, With<Maze>>,
     walls: Query<(Entity, &Tiles, &WallStyle), With<Wall>>,
-) {
+) -> Result {
     let wall_animations_map = create_animations(&sprite_sheets);
 
-    commands.entity(mazes.single()).insert((
+    commands.entity(mazes.single()?).insert((
         Transform::default(),
         Visibility::default(),
     ));
@@ -47,6 +47,8 @@ fn enhance_maze(
                 animations,
             ));
     }
+    
+    Ok(())
 }
 
 fn create_animations(

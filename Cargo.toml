@@ -11,9 +11,9 @@ opt-level = 1
 opt-level = 3
 
 [dependencies]
-bevy = "0.15.0"
+bevy = "0.16.0"
 rand = "0.8.5"
-bevy-inspector-egui = { version = "0.28.0", default-features = false, features = ["bevy_pbr", "bevy_image", "bevy_render"] }
+bevy-inspector-egui = { version = "0.31.0", default-features = false, features = ["bevy_pbr", "bevy_image", "bevy_render"] }
 bevy_asset_preload = { git = "https://github.com/Warhorst/bevy_asset_preload" }
 bevy_sprite_sheet = { git = "https://github.com/Warhorst/bevy_sprite_sheet" }
 pad = { git = "https://github.com/Warhorst/pad", features = ["bevy"] }

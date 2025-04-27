@@ -28,6 +28,6 @@ fn check_if_all_edibles_eaten(
     query: Query<&Edible>,
 ) {
     if query.iter().count() == 0 {
-        event_writer.send(EAllEdiblesEaten);
+        event_writer.write(EAllEdiblesEaten);
     }
 }

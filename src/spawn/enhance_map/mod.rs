@@ -19,12 +19,12 @@ impl Plugin for EnhanceMapPlugin {
                 EnhanceTunnelPlugin
             ))
             .add_systems(
-                OnEnter(Spawn(EnhanceMap)),
+                OnEnter(SpawnMaze(EnhanceMap)),
                 add_spatial_bundle_to_map,
             )
             .add_systems(
                 Update,
-                switch_state_after_enhance.run_if(in_state(Spawn(EnhanceMap)))
+                switch_state_after_enhance.run_if(in_state(SpawnMaze(EnhanceMap)))
             )
         ;
     }
@@ -33,11 +33,13 @@ impl Plugin for EnhanceMapPlugin {
 fn add_spatial_bundle_to_map(
     mut commands: Commands,
     maps: Query<Entity, With<Map>>,
-) {
-    commands.entity(maps.single()).insert((
+) -> Result {
+    commands.entity(maps.single()?).insert((
         Transform::default(),
         Visibility::default(),
     ));
+    
+    Ok(())
 }
 
 fn switch_state_after_enhance(

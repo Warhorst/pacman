@@ -8,7 +8,7 @@ impl Plugin for SpawnMapScenePlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(
-                OnEnter(Spawn(SpawnMapScene)),
+                OnEnter(SpawnMaze(SpawnMapScene)),
                 spawn_map_scene,
             )
             .add_systems(
@@ -38,6 +38,6 @@ fn switch_state_when_map_spawned(
     commands.add_observer(|_: Trigger<SceneInstanceReady>, mut next_state: ResMut<NextState<GameState>>| {
         // todo in the current bevy version at the time of writing (0.15.0), I don't really understand how to check if a
         //  specific scene was spawned, only that some scene was spawned. But as I only have one, this should be fine
-        next_state.set(Spawn(EnhanceMap));
+        next_state.set(SpawnMaze(EnhanceMap));
     });
 }

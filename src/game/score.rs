@@ -184,7 +184,7 @@ fn update_high_score(
 
         if !high_score.was_beaten {
             high_score.was_beaten = true;
-            event_writer.send(HighScoreWasBeaten);
+            event_writer.write(HighScoreWasBeaten);
         }
     }
 }

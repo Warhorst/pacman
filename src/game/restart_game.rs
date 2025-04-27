@@ -21,6 +21,6 @@ fn send_restart_event_on_key_press(
     mut event_writer: EventWriter<GameWasRestarted>,
 ) {
     if keyboard_input.just_pressed(KeyCode::KeyR) {
-        event_writer.send(GameWasRestarted);
+        event_writer.write(GameWasRestarted);
     }
 }

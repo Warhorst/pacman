@@ -193,7 +193,7 @@ fn update_lives(
 ) {
     if lives.is_changed() {
         for e in &ui_lives_query {
-            commands.entity(e).despawn_recursive();
+            commands.entity(e).despawn();
         }
 
         for bottom_ui in &bottom_ui_query {
@@ -213,7 +213,7 @@ fn update_fruits(
 ) {
     if level.is_changed() {
         for e in &ui_fruits_query {
-            commands.entity(e).despawn_recursive();
+            commands.entity(e).despawn();
         }
 
         for bottom_ui in &bottom_ui_query {
@@ -228,6 +228,6 @@ fn despawn_bottom_ui(
     query: Query<Entity, With<BottomUI>>,
 ) {
     for e in &query {
-        commands.entity(e).despawn_recursive();
+        commands.entity(e).despawn();
     }
 }

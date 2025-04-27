@@ -8,7 +8,7 @@ impl Plugin for EnhanceTunnelPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(
-                OnEnter(Spawn(EnhanceMap)),
+                OnEnter(SpawnMaze(EnhanceMap)),
                 enhance_tunnels,
             )
         ;
@@ -19,8 +19,8 @@ fn enhance_tunnels(
     mut commands: Commands,
     maps: Query<Entity, With<Map>>,
     tunnels: Query<(Entity, &Tunnel, &Tiles)>,
-) {
-    let map = maps.single();
+) -> Result {
+    let map = maps.single()?;
 
     for (entity, tunnel, tiles) in &tunnels {
         let tunnel_transform = Transform::from_translation(tiles.to_vec3(TUNNEL_Z));
@@ -49,4 +49,6 @@ fn enhance_tunnels(
 
         commands.entity(map).add_children(&[entrance]);
     }
+    
+    Ok(())
 }

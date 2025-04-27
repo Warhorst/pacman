@@ -33,12 +33,12 @@ fn main() {
         )
         .insert_resource(ClearColor(Color::srgb(0.0, 0.0, 0.0)))
         .add_plugins((
+            DebugPlugin,
             CorePlugin,
             GamePlugin,
             SpawnPlugin,
             AssetPreloadPlugin::load_given_paths(Setup(PreloadAssets), Setup(CreateSpriteSheets), load_assets!()),
-            SpriteSheetPlugin::new(Setup(CreateSpriteSheets), Spawn(SpawnMapScene)),
-            DebugPlugin,
+            SpriteSheetPlugin::new(Setup(CreateSpriteSheets), SpawnMaze(SpawnMapScene)),
         ))
     ;
 

@@ -9,7 +9,7 @@ impl Plugin for EnhanceGhostHousePlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(
-                OnEnter(Spawn(EnhanceMap)),
+                OnEnter(SpawnMaze(EnhanceMap)),
                 enhance_ghost_house
             )
         ;

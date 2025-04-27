@@ -9,8 +9,8 @@ pub(crate) fn spawn_pacman(
     level: Res<Level>,
     specs_per_level: Res<SpecsPerLevel>,
     spawns: Query<&Tiles, With<PacmanSpawn>>,
-) {
-    let tiles = spawns.single();
+) -> Result {
+    let tiles = spawns.single()?;
     let transform = Transform::from_translation(tiles.to_vec3(PACMAN_Z));
     let mut animations = create_pacman_animations(&sprite_sheets);
     animations.stop();
@@ -26,4 +26,6 @@ pub(crate) fn spawn_pacman(
         transform,
         animations
     ));
+    
+    Ok(())
 }

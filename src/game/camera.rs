@@ -15,14 +15,16 @@ impl Plugin for CameraPlugin {
 fn spawn_camera(
     mut commands: Commands,
     map_query: Query<&Map>,
-) {
-    let map = map_query.single();
+) -> Result {
+    let map = map_query.single()?;
 
     commands.spawn((
         Name::new("GameCamera"),
         Camera2d,
         Transform::from_translation(Vec3::new((map.width as f32 * FIELD_SIZE) / 2.0, (map.height as f32 * FIELD_SIZE) / 2.0, 1000.0)),
     ));
+    
+    Ok(())
 }
 
 fn despawn_camera(

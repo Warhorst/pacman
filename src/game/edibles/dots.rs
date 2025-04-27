@@ -142,6 +142,6 @@ fn despawn_dots(
     query: Query<Entity, With<Dots>>,
 ) {
     for e in &query {
-        commands.entity(e).despawn_recursive();
+        commands.entity(e).despawn();
     }
 }

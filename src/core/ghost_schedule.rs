@@ -1,7 +1,6 @@
 use std::time::Duration;
-
+use bevy::platform::collections::HashMap;
 use bevy::prelude::*;
-use bevy::utils::HashMap;
 
 use crate::core::prelude::*;
 use crate::core::prelude::Level;

@@ -66,7 +66,7 @@ fn start_background_track(
         BackgroundTrack,
         marker,
         AudioPlayer::<AudioSource>(asset_server.load(path)),
-        PlaybackSettings::LOOP.with_volume(Volume::new(0.0))
+        PlaybackSettings::LOOP.with_volume(Volume::Linear(0.0))
     ));
 }
 
@@ -108,26 +108,22 @@ fn update_background_music(
 
 fn play_track(
     background_music: Res<BackgroundMusic>,
-    siren_tracks: Query<&AudioSink, With<SirenBackground>>,
-    frightened_tracks: Query<&AudioSink, With<FrightenedBackground>>,
-    eaten_tracks: Query<&AudioSink, With<EatenBackground>>,
-) {
+    mut siren_tracks: Query<&mut AudioSink, (With<SirenBackground>, Without<FrightenedBackground>, Without<EatenBackground>)>,
+    mut frightened_tracks: Query<&mut AudioSink, (With<FrightenedBackground>, Without<SirenBackground>, Without<EatenBackground>)>,
+    mut eaten_tracks: Query<&mut AudioSink, (With<EatenBackground>, Without<SirenBackground>, Without<FrightenedBackground>)>,
+) -> Result {
     if !background_music.is_changed() {
-        return;
+        return Ok(());
     }
 
-    let mixer = match (
-        siren_tracks.get_single(),
-        frightened_tracks.get_single(),
-        eaten_tracks.get_single()
-    ) {
-        (Ok(siren), Ok(frightened), Ok(eaten)) => Mixer::new(siren, frightened, eaten),
-        _ => return
-    };
+    let mut siren_track = if let Ok(t) = siren_tracks.single_mut() { t } else { return Ok(()) };
+    let mut frightened_track = if let Ok(t) = frightened_tracks.single_mut() {t} else { return Ok(()) };
+    let mut eaten_track = if let Ok(t) = eaten_tracks.single_mut() { t } else { return Ok(()) };
+    let mixer = Mixer::new(&mut siren_track, &mut frightened_track, &mut eaten_track);
 
     if background_music.muted {
         mixer.mute_all();
-        return;
+        return Ok(());
     }
 
     match &background_music.current_track {
@@ -138,16 +134,22 @@ fn play_track(
         FrightenedTrack => mixer.play_frightened(),
         EatenTrack => mixer.play_eaten(),
     }
+
+    Ok(())
 }
 
 struct Mixer<'a> {
-    siren_track: &'a AudioSink,
-    frightened_track: &'a AudioSink,
-    eaten_track: &'a AudioSink,
+    siren_track: &'a mut AudioSink,
+    frightened_track: &'a mut AudioSink,
+    eaten_track: &'a mut AudioSink,
 }
 
 impl<'a> Mixer<'a> {
-    pub fn new(siren_track: &'a AudioSink, frightened_track: &'a AudioSink, eaten_track: &'a AudioSink) -> Self {
+    pub fn new(
+        siren_track: &'a mut AudioSink,
+        frightened_track: &'a mut AudioSink,
+        eaten_track: &'a mut AudioSink
+    ) -> Self {
         Self { siren_track, frightened_track, eaten_track }
     }
 
@@ -168,28 +170,28 @@ impl<'a> Mixer<'a> {
     }
 
     fn play_siren(self, speed: f32) {
-        self.siren_track.set_volume(1.0);
+        self.siren_track.set_volume(Volume::Linear(1.0));
         self.siren_track.set_speed(speed);
-        self.frightened_track.set_volume(0.0);
-        self.eaten_track.set_volume(0.0);
+        self.frightened_track.set_volume(Volume::Linear(0.0));
+        self.eaten_track.set_volume(Volume::Linear(0.0));
     }
 
     fn play_frightened(self) {
-        self.siren_track.set_volume(0.0);
-        self.frightened_track.set_volume(1.0);
-        self.eaten_track.set_volume(0.0);
+        self.siren_track.set_volume(Volume::Linear(0.0));
+        self.frightened_track.set_volume(Volume::Linear(1.0));
+        self.eaten_track.set_volume(Volume::Linear(0.0));
     }
 
     fn play_eaten(self) {
-        self.siren_track.set_volume(0.0);
-        self.frightened_track.set_volume(0.0);
-        self.eaten_track.set_volume(1.0);
+        self.siren_track.set_volume(Volume::Linear(0.0));
+        self.frightened_track.set_volume(Volume::Linear(0.0));
+        self.eaten_track.set_volume(Volume::Linear(1.0));
     }
 
     fn mute_all(self) {
-        self.siren_track.set_volume(0.0);
-        self.frightened_track.set_volume(0.0);
-        self.eaten_track.set_volume(0.0);
+        self.siren_track.set_volume(Volume::Linear(0.0));
+        self.frightened_track.set_volume(Volume::Linear(0.0));
+        self.eaten_track.set_volume(Volume::Linear(0.0));
     }
 }
 

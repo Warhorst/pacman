@@ -1,8 +1,8 @@
 use std::cmp::Ordering;
 
 use bevy::ecs::query::QueryData;
+use bevy::platform::collections::{HashMap, HashSet};
 use bevy::prelude::*;
-use bevy::utils::{HashMap, HashSet};
 
 use crate::core::prelude::*;
 
@@ -51,8 +51,8 @@ fn set_target(
     pacman_query: Query<(&Transform, &Dir), With<Pacman>>,
     one_ways: Query<&Tiles, With<OneWay>>,
     mut ghost_query: Query<TargetComponents, Without<Pacman>>,
-) {
-    let (pm_transform, pm_dir) = pacman_query.single();
+) -> Result {
+    let (pm_transform, pm_dir) = pacman_query.single()?;
     let blinky_transform = get_blinky_transform(&ghost_query);
 
     for mut components in &mut ghost_query {
@@ -87,6 +87,8 @@ fn set_target(
             Spawned => setter.set_spawned_target(),
         }
     }
+    
+    Ok(())
 }
 
 /// Set the target when on ghost pause (meaning only eaten and spawned)
@@ -99,8 +101,8 @@ fn set_target_on_ghost_pause(
     pacman_query: Query<(&Transform, &Dir), With<Pacman>>,
     one_ways: Query<&Tiles, With<OneWay>>,
     mut ghost_query: Query<TargetComponents, Without<Pacman>>,
-) {
-    let (pm_transform, pm_dir) = pacman_query.single();
+) -> Result {
+    let (pm_transform, pm_dir) = pacman_query.single()?;
     let blinky_transform = get_blinky_transform(&ghost_query);
 
     for mut components in &mut ghost_query {
@@ -128,6 +130,8 @@ fn set_target_on_ghost_pause(
             _ => continue
         }
     }
+
+    Ok(())
 }
 
 struct TargetSetter<'a, 'b, 'c> {
