@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use rand::prelude::*;
+use rand::rng;
 
 pub(crate) struct RandomPlugin;
 
@@ -17,7 +18,7 @@ pub struct Random;
 
 impl Random {
     pub fn zero_to(&self, n: usize) -> usize {
-        let mut rng = thread_rng();
-        rng.gen_range(0..n)
+        let mut rng = rng();
+        rng.random_range(0..n)
     }
 }
