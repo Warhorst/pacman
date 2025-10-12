@@ -134,7 +134,7 @@ fn set_target_on_ghost_pause(
     Ok(())
 }
 
-struct TargetSetter<'a, 'b, 'c> {
+struct TargetSetter<'a, 'b, 'c, 'd> {
     random: &'a Random,
     ghost_house_gate: &'a GhostHouseGate,
     pacman_transform: Transform,
@@ -144,10 +144,10 @@ struct TargetSetter<'a, 'b, 'c> {
     wall_positions: HashSet<Pos>,
     ghost_spawns: HashMap<Ghost, GhostSpawn>,
     one_ways: HashSet<Pos>,
-    components: &'a mut TargetComponentsItem<'b, 'c>,
+    components: &'a mut TargetComponentsItem<'b, 'c, 'd>,
 }
 
-impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
+impl<'a, 'b, 'c, 'd> TargetSetter<'a, 'b, 'c, 'd> {
     pub fn new(
         random: &'a Random,
         ghost_house_gate: &'a GhostHouseGate,
@@ -158,7 +158,7 @@ impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
         wall_query: &Query<&Transform, With<Wall>>,
         ghost_spawn_query: &Query<&GhostSpawn>,
         one_ways: &Query<&Tiles, With<OneWay>>,
-        components: &'a mut TargetComponentsItem<'b, 'c>,
+        components: &'a mut TargetComponentsItem<'b, 'c, 'd>,
     ) -> Self {
         let corner_positions = corner_query.iter().map(|(corner, tiles)| (**corner, tiles.to_pos())).collect();
         let wall_positions = wall_query.iter().map(|transform| Pos::from_vec3(transform.translation)).collect();

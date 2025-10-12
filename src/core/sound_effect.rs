@@ -31,6 +31,6 @@ impl SoundEffect {
     }
 
     pub fn finished(&self) -> bool {
-        self.timer.finished()
+        self.timer.is_finished()
     }
 }

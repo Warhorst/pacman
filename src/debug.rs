@@ -11,7 +11,7 @@ impl Plugin for DebugPlugin {
         use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
         app
-            .add_plugins(EguiPlugin { enable_multipass_for_primary_context: true })
+            .add_plugins(EguiPlugin::default())
             .add_plugins(WorldInspectorPlugin::new())
             .add_systems(
                 Update,

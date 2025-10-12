@@ -79,11 +79,11 @@ fn spawn_energizer(
 
 fn start_energizer_timer_when_energizer_eaten(
     mut commands: Commands,
-    mut event_reader: EventReader<EnergizerWasEaten>,
+    mut message_reader: MessageReader<EnergizerWasEaten>,
     level: Res<Level>,
     specs_per_level: Res<SpecsPerLevel>,
 ) {
-    for _ in event_reader.read() {
+    for _ in message_reader.read() {
         let spec = specs_per_level.get_for(&level);
         commands.insert_resource(EnergizerTimer::start(spec.frightened_time));
     }
@@ -91,7 +91,7 @@ fn start_energizer_timer_when_energizer_eaten(
 
 fn update_energizer_timer(
     mut commands: Commands,
-    mut event_writer: EventWriter<EnergizerOver>,
+    mut message_writer: MessageWriter<EnergizerOver>,
     energizer_timer: Option<ResMut<EnergizerTimer>>,
     time: Res<Time>,
 ) {
@@ -100,7 +100,7 @@ fn update_energizer_timer(
 
         if timer.is_finished() {
             commands.remove_resource::<EnergizerTimer>();
-            event_writer.write(EnergizerOver);
+            message_writer.write(EnergizerOver);
         }
     }
 }

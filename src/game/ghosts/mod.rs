@@ -60,10 +60,10 @@ impl Plugin for GhostPlugin {
 }
 
 fn ghost_passed_tunnel(
-    mut event_reader: EventReader<GhostPassedTunnel>,
+    mut message_reader: MessageReader<GhostPassedTunnel>,
     mut query: Query<(Entity, &mut Target), With<Ghost>>,
 ) {
-    for event in event_reader.read() {
+    for event in message_reader.read() {
         for (entity, mut target) in query.iter_mut() {
             if entity == **event {
                 target.clear();
@@ -112,9 +112,9 @@ fn set_currently_eaten_ghost_visible(
 fn play_ghost_eaten_sound_when_ghost_was_eaten(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut event_reader: EventReader<GhostWasEaten>,
+    mut message_reader: MessageReader<GhostWasEaten>,
 ) {
-    if event_reader.read().count() > 0 {
+    if message_reader.read().count() > 0 {
         commands.spawn((
             Name::new("GhostEatenSound"),
             SoundEffect::new(1),

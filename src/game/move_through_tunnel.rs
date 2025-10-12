@@ -7,7 +7,7 @@ pub(super) struct MoveThroughTunnelPlugin;
 impl Plugin for MoveThroughTunnelPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_event::<GhostPassedTunnel>()
+            .add_message::<GhostPassedTunnel>()
             .add_systems(Update, (
                 move_pacman_through_tunnel,
                 move_ghost_trough_tunnel
@@ -17,7 +17,7 @@ impl Plugin for MoveThroughTunnelPlugin {
 }
 
 /// Event. Fired when a ghost moved through a tunnel.
-#[derive( Event, Deref, DerefMut)]
+#[derive(Message, Deref, DerefMut)]
 pub struct GhostPassedTunnel(pub Entity);
 
 fn move_pacman_through_tunnel(
@@ -45,7 +45,7 @@ fn move_pacman_through_tunnel(
 }
 
 fn move_ghost_trough_tunnel(
-    mut event_writer: EventWriter<GhostPassedTunnel>,
+    mut message_writer: MessageWriter<GhostPassedTunnel>,
     tunnel_query_0: Query<(Entity, &Tunnel, &Tiles), Without<Ghost>>,
     tunnel_query_1: Query<(Entity, &Tunnel, &Tiles), Without<Ghost>>,
     mut ghost_query: Query<(Entity, &mut Transform, &mut Dir), With<Ghost>>,
@@ -63,7 +63,7 @@ fn move_ghost_trough_tunnel(
                 if entity_0 != entity_1 && tunnel_0.index == tunnel_1.index {
                     transform.translation.set_xy(&tunnel_tiles_1.to_vec3(0.0));
                     *ghost_direction = tunnel_1.direction.opposite();
-                    event_writer.write(GhostPassedTunnel(ghost_entity));
+                    message_writer.write(GhostPassedTunnel(ghost_entity));
                 }
             }
         }

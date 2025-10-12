@@ -40,19 +40,19 @@ fn update_ghost_house_gate(
 }
 
 fn increment_counter_when_dot_eaten(
-    mut event_reader: EventReader<DotWasEaten>,
+    mut message_reader: MessageReader<DotWasEaten>,
     mut ghost_house_gate: ResMut<GhostHouseGate>,
 ) {
-    for _ in event_reader.read() {
+    for _ in message_reader.read() {
         ghost_house_gate.increment_counter()
     }
 }
 
 fn switch_to_global_counter_when_pacman_got_killed(
-    mut event_reader: EventReader<PacmanWasHit>,
+    mut message_reader: MessageReader<PacmanWasHit>,
     mut ghost_house_gate: ResMut<GhostHouseGate>,
 ) {
-    for _ in event_reader.read() {
+    for _ in message_reader.read() {
         ghost_house_gate.switch_to_global_counter()
     }
 }

@@ -43,12 +43,12 @@ fn spawn_fruit_when_dot_limit_reached(
     level: Res<Level>,
     eaten_dots: Res<EatenDots>,
     specs_per_level: Res<SpecsPerLevel>,
-    mut event_reader: EventReader<DotWasEaten>,
+    mut message_reader: MessageReader<DotWasEaten>,
     spawners: Query<&Tiles, With<FruitSpawn>>,
 ) {
     let num_eaten_dots = eaten_dots.get_eaten();
 
-    for _ in event_reader.read() {
+    for _ in message_reader.read() {
         if let 70 | 170 = num_eaten_dots {
             for tiles in &spawners {
                 let fruit = specs_per_level.get_for(&level).fruit_to_spawn;
@@ -86,7 +86,7 @@ fn despawn_fruit_if_timer_exceeded(
     query: Query<Entity, With<Fruit>>,
 ) {
     if let Some(ref despawn_timer) = despawn_timer_opt {
-        if despawn_timer.finished() {
+        if despawn_timer.is_finished() {
             for entity in query.iter() {
                 commands.entity(entity).despawn();
                 commands.remove_resource::<FruitDespawnTimer>()
@@ -119,9 +119,9 @@ fn despawn_fruit_and_timer(
 fn play_fruit_eaten_sound_when_fruit_was_eaten(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut event_reader: EventReader<FruitWasEaten>,
+    mut message_reader: MessageReader<FruitWasEaten>,
 ) {
-    for _ in event_reader.read() {
+    for _ in message_reader.read() {
         commands.spawn((
             Name::new("FruitEatenSound"),
             SoundEffect::new(1),

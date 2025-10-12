@@ -23,8 +23,8 @@ impl Plugin for InteractionsPlugin {
 
 fn pacman_hits_ghost(
     mut commands: Commands,
-    mut killed_event_writer: EventWriter<PacmanWasHit>,
-    mut eat_event_writer: EventWriter<GhostWasEaten>,
+    mut killed_message_writer: MessageWriter<PacmanWasHit>,
+    mut eat_message_writer: MessageWriter<GhostWasEaten>,
     pacman_query: Query<&Transform, With<Pacman>>,
     ghost_query: Query<(Entity, &Transform, &GhostState), With<Ghost>>,
 ) {
@@ -35,11 +35,11 @@ fn pacman_hits_ghost(
 
             if pacman_pos == ghost_pos {
                 if let Scatter | Chase = state {
-                    killed_event_writer.write(PacmanWasHit);
+                    killed_message_writer.write(PacmanWasHit);
                 }
 
                 if let Frightened = state {
-                    eat_event_writer.write(GhostWasEaten(entity, *ghost_transform));
+                    eat_message_writer.write(GhostWasEaten(entity, *ghost_transform));
                     commands.insert_resource(CurrentlyEatenGhost(entity))
                 }
             }
@@ -49,7 +49,7 @@ fn pacman_hits_ghost(
 
 fn pacman_eat_dot(
     mut commands: Commands,
-    mut event_writer: EventWriter<DotWasEaten>,
+    mut message_writer: MessageWriter<DotWasEaten>,
     mut eaten_dots: ResMut<EatenDots>,
     pacman_positions: Query<&Transform, With<Pacman>>,
     dot_positions: Query<(Entity, &Transform), With<Dot>>,
@@ -62,7 +62,7 @@ fn pacman_eat_dot(
             if pacman_pos == dot_pos {
                 commands.entity(entity).despawn();
                 eaten_dots.increment();
-                event_writer.write(DotWasEaten);
+                message_writer.write(DotWasEaten);
             }
         }
     }
@@ -70,7 +70,7 @@ fn pacman_eat_dot(
 
 fn pacman_eat_energizer(
     mut commands: Commands,
-    mut event_writer: EventWriter<EnergizerWasEaten>,
+    mut message_writer: MessageWriter<EnergizerWasEaten>,
     pacman_positions: Query<&Transform, With<Pacman>>,
     energizer_positions: Query<(Entity, &Transform), With<Energizer>>,
 ) {
@@ -81,7 +81,7 @@ fn pacman_eat_energizer(
 
             if energizer_pos == pacman_pos {
                 commands.entity(energizer_entity).despawn();
-                event_writer.write(EnergizerWasEaten);
+                message_writer.write(EnergizerWasEaten);
             }
         }
     }
@@ -90,7 +90,7 @@ fn pacman_eat_energizer(
 /// If pacman touches the fruit, despawn it, remove the timer and send an event.
 fn eat_fruit_when_pacman_touches_it(
     mut commands: Commands,
-    mut event_writer: EventWriter<FruitWasEaten>,
+    mut message_writer: MessageWriter<FruitWasEaten>,
     pacman_query: Query<&Transform, With<Pacman>>,
     fruit_query: Query<(Entity, &Fruit, &Transform)>,
 ) {
@@ -102,7 +102,7 @@ fn eat_fruit_when_pacman_touches_it(
             if pacman_pos == fruit_pos {
                 commands.entity(entity).despawn();
                 commands.remove_resource::<FruitDespawnTimer>();
-                event_writer.write(FruitWasEaten(*fruit, *fruit_tf));
+                message_writer.write(FruitWasEaten(*fruit, *fruit_tf));
             }
         }
     }

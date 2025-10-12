@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use crate::game::target::TargetSetter;
 use crate::core::prelude::*;
 
-impl<'a, 'b, 'c> TargetSetter<'a, 'b, 'c> {
+impl<'a, 'b, 'c, 'd> TargetSetter<'a, 'b, 'c, 'd> {
     /// Determine the next target coordinates for a ghost when in "Spawned" state.
     ///
     /// A ghost can only leave the house if their dot counter reached its predefined limit.

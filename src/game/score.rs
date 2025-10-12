@@ -53,18 +53,18 @@ impl Plugin for ScorePlugin {
 
 fn add_points_for_eaten_dot(
     mut score: ResMut<Score>,
-    mut event_reader: EventReader<DotWasEaten>,
+    mut message_reader: MessageReader<DotWasEaten>,
 ) {
-    for _ in event_reader.read() {
+    for _ in message_reader.read() {
         score.add(POINTS_PER_DOT)
     }
 }
 
 fn add_points_for_eaten_energizer(
     mut score: ResMut<Score>,
-    mut event_reader: EventReader<EnergizerWasEaten>,
+    mut message_reader: MessageReader<EnergizerWasEaten>,
 ) {
-    for _ in event_reader.read() {
+    for _ in message_reader.read() {
         score.add(POINTS_PER_ENERGIZER)
     }
 }
@@ -74,9 +74,9 @@ fn add_points_for_eaten_ghost_and_display_score_text(
     asset_server: Res<AssetServer>,
     mut score: ResMut<Score>,
     mut eaten_ghost_counter: ResMut<EatenGhostCounter>,
-    mut event_reader: EventReader<GhostWasEaten>,
+    mut message_reader: MessageReader<GhostWasEaten>,
 ) {
-    for event in event_reader.read() {
+    for event in message_reader.read() {
         let points = POINTS_PER_GHOST * 2usize.pow(**eaten_ghost_counter as u32);
         score.add(points);
         **eaten_ghost_counter += 1;
@@ -88,10 +88,10 @@ fn add_points_for_eaten_ghost_and_display_score_text(
 }
 
 fn reset_eaten_ghost_counter_when_energizer_is_over(
-    mut event_reader: EventReader<EnergizerOver>,
+    mut message_reader: MessageReader<EnergizerOver>,
     mut eaten_ghost_counter: ResMut<EatenGhostCounter>,
 ) {
-    for _ in event_reader.read() {
+    for _ in message_reader.read() {
         **eaten_ghost_counter = 0
     }
 }
@@ -106,9 +106,9 @@ fn add_points_for_eaten_fruit_and_display_score_text(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut score: ResMut<Score>,
-    mut event_reader: EventReader<FruitWasEaten>,
+    mut message_reader: MessageReader<FruitWasEaten>,
 ) {
-    for event in event_reader.read() {
+    for event in message_reader.read() {
         let (fruit, transform) = (event.0, event.1);
 
         let points = match fruit {
@@ -146,7 +146,7 @@ fn spawn_score_text(
         },
         TextColor(color),
         TextLayout {
-            justify: JustifyText::Center,
+            justify: Justify::Center,
             ..default()
         },
         Transform::from_translation(coordinates),
@@ -164,7 +164,7 @@ fn update_score_texts(
     for (entity, mut timer) in &mut query {
         timer.tick(time.delta());
 
-        if timer.finished() {
+        if timer.is_finished() {
             commands.entity(entity).despawn();
         }
     }
@@ -173,7 +173,7 @@ fn update_score_texts(
 fn update_high_score(
     score: Res<Score>,
     mut high_score: ResMut<HighScore>,
-    mut event_writer: EventWriter<HighScoreWasBeaten>,
+    mut message_writer: MessageWriter<HighScoreWasBeaten>,
 ) {
     if !score.is_changed() {
         return;
@@ -184,7 +184,7 @@ fn update_high_score(
 
         if !high_score.was_beaten {
             high_score.was_beaten = true;
-            event_writer.write(HighScoreWasBeaten);
+            message_writer.write(HighScoreWasBeaten);
         }
     }
 }
@@ -192,9 +192,9 @@ fn update_high_score(
 fn play_highscore_broken_sound(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut event_reader: EventReader<HighScoreWasBeaten>,
+    mut message_reader: MessageReader<HighScoreWasBeaten>,
 ) {
-    for _ in event_reader.read() {
+    for _ in message_reader.read() {
         commands.spawn((
             Name::new("HighScoreBrokenSound"),
             SoundEffect::new(3),

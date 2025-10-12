@@ -21,8 +21,8 @@ impl Plugin for EdiblesPlugin {
             .register_type::<Energizer>()
             .register_type::<EnergizerOver>()
             .register_type::<EnergizerTimer>()
-            .add_event::<EAllEdiblesEaten>()
-            .add_event::<EnergizerOver>()
+            .add_message::<EAllEdiblesEaten>()
+            .add_message::<EnergizerOver>()
         ;
 
         #[cfg(debug_assertions)]
@@ -37,7 +37,7 @@ impl Plugin for EdiblesPlugin {
 pub struct Edible;
 
 /// Event that gets fired when all edibles are eaten (or at least gone), so the maze is empty
-#[derive(Event)]
+#[derive(Message)]
 pub struct EAllEdiblesEaten;
 
 /// Parent component for all dots (for organization only)
@@ -130,7 +130,7 @@ pub struct Energizers;
 pub struct Energizer;
 
 /// Fired when an energizer is no longer active
-#[derive(Event, Reflect, Copy, Clone)]
+#[derive(Message, Reflect, Copy, Clone)]
 pub struct EnergizerOver;
 
 /// Keeps track of how long an active energizer remains active
@@ -151,7 +151,7 @@ impl EnergizerTimer {
     }
 
     pub fn is_finished(&self) -> bool {
-        self.timer.finished()
+        self.timer.is_finished()
     }
 
     /// Return the remaining seconds for this timer (if the timer is active, else None)

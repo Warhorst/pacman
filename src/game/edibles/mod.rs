@@ -24,10 +24,10 @@ impl Plugin for EdiblePlugin {
 }
 
 fn check_if_all_edibles_eaten(
-    mut event_writer: EventWriter<EAllEdiblesEaten>,
+    mut message_writer: MessageWriter<EAllEdiblesEaten>,
     query: Query<&Edible>,
 ) {
     if query.iter().count() == 0 {
-        event_writer.write(EAllEdiblesEaten);
+        message_writer.write(EAllEdiblesEaten);
     }
 }

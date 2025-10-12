@@ -99,12 +99,12 @@ fn play_waka_when_dot_was_eaten(
     mut waka_timer: Local<Option<Timer>>,
     mut cached: Local<bool>,
     asset_server: Res<AssetServer>,
-    mut event_reader: EventReader<DotWasEaten>,
+    mut message_reader: MessageReader<DotWasEaten>,
 ) {
     if let Some(ref mut timer) = *waka_timer {
         timer.tick(time.delta());
 
-        if timer.finished() {
+        if timer.is_finished() {
             if *cached {
                 timer.reset();
 
@@ -121,7 +121,7 @@ fn play_waka_when_dot_was_eaten(
         }
     }
 
-    for _ in event_reader.read() {
+    for _ in message_reader.read() {
         match *waka_timer {
             Some(_) => *cached = true,
             None => {

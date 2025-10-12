@@ -85,7 +85,7 @@ impl GhostHouseGate {
 
         self.release_timer.tick(delta);
 
-        if self.release_timer.finished() {
+        if self.release_timer.is_finished() {
             self.release_timer.reset();
             self.release_current_waiting_ghost();
         } else if self.counter.limit_reached(&self.current_waiting_ghost) {

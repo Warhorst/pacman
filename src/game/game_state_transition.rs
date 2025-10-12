@@ -36,19 +36,19 @@ fn update_state(
     mut next_state: ResMut<NextState<GameState>>,
     lives: Res<Lives>,
     state_timer: Option<Res<StateTimer>>,
-    pacman_hit_events: EventReader<PacmanWasHit>,
-    edibles_eaten_events: EventReader<EAllEdiblesEaten>,
-    ghost_eaten_events: EventReader<GhostWasEaten>,
-    game_restartet_events: EventReader<GameWasRestarted>,
+    pacman_hit_messages: MessageReader<PacmanWasHit>,
+    edibles_eaten_messages: MessageReader<EAllEdiblesEaten>,
+    ghost_eaten_messages: MessageReader<GhostWasEaten>,
+    game_restarted_messages: MessageReader<GameWasRestarted>,
 ) {
     match current_state.get() {
         Game(Start) => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 2.0, Game(Ready)),
         Game(Ready) => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 2.5, Game(Running)),
-        Game(Running) => switch_states_based_on_events(&mut next_state, pacman_hit_events, edibles_eaten_events, ghost_eaten_events),
+        Game(Running) => switch_states_based_on_events(&mut next_state, pacman_hit_messages, edibles_eaten_messages, ghost_eaten_messages),
         Game(PacmanHit) => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 1.0, Game(PacmanDying)),
         Game(PacmanDying) => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 1.5, Game(PacmanDead)),
         Game(PacmanDead) => switch_to_ready_or_game_over(&mut commands, &state_timer, &lives, &mut next_state),
-        Game(GameOver) => switch_to_start_after_game_over(&mut next_state, game_restartet_events),
+        Game(GameOver) => switch_to_start_after_game_over(&mut next_state, game_restarted_messages),
         Game(LevelTransition) => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 3.0, Game(Ready)),
         Game(GhostEatenPause) => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 1.0, Game(Running)),
         _ => {}
@@ -63,7 +63,7 @@ fn switch_when_timer_finished(
     new_state: GameState,
 ) {
     match state_timer {
-        Some(timer) => if timer.finished() {
+        Some(timer) => if timer.is_finished() {
             commands.remove_resource::<StateTimer>();
             game_state.set(new_state);
         },
@@ -78,7 +78,7 @@ fn switch_to_ready_or_game_over(
     game_state: &mut NextState<GameState>,
 ) {
     match state_timer {
-        Some(timer) => if timer.finished() {
+        Some(timer) => if timer.is_finished() {
             commands.remove_resource::<StateTimer>();
 
             if **lives > 0 {
@@ -93,21 +93,21 @@ fn switch_to_ready_or_game_over(
 
 fn switch_states_based_on_events(
     game_state: &mut NextState<GameState>,
-    mut pacman_hit_events: EventReader<PacmanWasHit>,
-    mut edibles_eaten_events: EventReader<EAllEdiblesEaten>,
-    mut ghost_eaten_events: EventReader<GhostWasEaten>,
+    mut pacman_hit_messages: MessageReader<PacmanWasHit>,
+    mut edibles_eaten_messages: MessageReader<EAllEdiblesEaten>,
+    mut ghost_eaten_messages: MessageReader<GhostWasEaten>,
 ) {
-    if pacman_hit_events.read().count() > 0 {
+    if pacman_hit_messages.read().count() > 0 {
         game_state.set(Game(PacmanHit));
         return;
     }
 
-    if edibles_eaten_events.read().count() > 0 {
+    if edibles_eaten_messages.read().count() > 0 {
         game_state.set(Game(LevelTransition));
         return;
     }
 
-    if ghost_eaten_events.read().count() > 0 {
+    if ghost_eaten_messages.read().count() > 0 {
         game_state.set(Game(GhostEatenPause));
         return;
     }
@@ -115,9 +115,9 @@ fn switch_states_based_on_events(
 
 fn switch_to_start_after_game_over(
     game_state: &mut NextState<GameState>,
-    mut game_restarted_events: EventReader<GameWasRestarted>,
+    mut game_restarted_messages: MessageReader<GameWasRestarted>,
 ) {
-    if game_restarted_events.read().count() > 0 {
+    if game_restarted_messages.read().count() > 0 {
         game_state.set(Game(Start))
     }
 }

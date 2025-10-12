@@ -24,10 +24,10 @@ impl Plugin for LivesPlugin {
 }
 
 fn remove_life_when_pacman_dies(
-    mut event_reader: EventReader<PacmanWasHit>,
+    mut message_reader: MessageReader<PacmanWasHit>,
     mut lives: ResMut<Lives>,
 ) {
-    if event_reader.read().count() > 0 && **lives > 0 {
+    if message_reader.read().count() > 0 && **lives > 0 {
         **lives -= 1;
     }
 }

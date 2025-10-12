@@ -107,7 +107,7 @@ impl GhostSchedule {
         if let Some(ref mut timer) = self.current_phase_timer {
             timer.tick(delta);
 
-            if timer.finished() {
+            if timer.is_finished() {
                 self.switch_to_next_phase()
             }
         }

@@ -18,9 +18,9 @@ impl Plugin for RestartGamePlugin {
 
 fn send_restart_event_on_key_press(
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut event_writer: EventWriter<GameWasRestarted>,
+    mut message_writer: MessageWriter<GameWasRestarted>,
 ) {
     if keyboard_input.just_pressed(KeyCode::KeyR) {
-        event_writer.write(GameWasRestarted);
+        message_writer.write(GameWasRestarted);
     }
 }

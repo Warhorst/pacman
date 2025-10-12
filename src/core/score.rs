@@ -5,7 +5,7 @@ pub(super) struct ScorePlugin;
 impl Plugin for ScorePlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_event::<HighScoreWasBeaten>()
+            .add_message::<HighScoreWasBeaten>()
             .register_type::<Score>()
             .register_type::<HighScore>()
             .register_type::<HighScoreWasBeaten>()
@@ -46,7 +46,7 @@ impl HighScore {
 }
 
 /// Fired when the player broke the current high score
-#[derive(Event, Reflect)]
+#[derive(Message, Reflect)]
 pub struct HighScoreWasBeaten;
 
 /// Identifies floating text which pops up when pacman ate a ghost.

@@ -1,6 +1,5 @@
 use std::fmt::Formatter;
 
-use bevy::ecs::event::Event;
 use bevy::ecs::query::QueryData;
 use bevy::prelude::*;
 
@@ -39,15 +38,15 @@ struct StateUpdateComponents<'a> {
 
 fn update_state(
     schedule: Res<GhostSchedule>,
-    energizer_over_events: EventReader<EnergizerOver>,
-    energizer_eaten_events: EventReader<EnergizerWasEaten>,
-    ghost_eaten_events: EventReader<GhostWasEaten>,
+    energizer_over_messages: MessageReader<EnergizerOver>,
+    energizer_eaten_messages: MessageReader<EnergizerWasEaten>,
+    ghost_eaten_messages: MessageReader<GhostWasEaten>,
     spawns_query: Query<&GhostSpawn>,
     mut query: Query<StateUpdateComponents, With<Ghost>>,
 ) {
-    let energizer_eaten = energizer_eaten(energizer_eaten_events);
-    let energizer_over = energizer_over(energizer_over_events);
-    let ghost_eaten_events = collect_events(ghost_eaten_events);
+    let energizer_eaten = energizer_eaten(energizer_eaten_messages);
+    let energizer_over = energizer_over(energizer_over_messages);
+    let ghost_eaten_events = collect_events(ghost_eaten_messages);
 
     for mut components in &mut query {
         if ghost_eaten(components.entity, &ghost_eaten_events) {
@@ -83,16 +82,16 @@ fn update_state_on_eaten_pause(
     }
 }
 
-fn collect_events<'a, E: Copy + Event>(mut event_reader: EventReader<E>) -> Vec<E> {
-    event_reader.read().copied().collect()
+fn collect_events<'a, M: Copy + Message>(mut message_reader: MessageReader<M>) -> Vec<M> {
+    message_reader.read().copied().collect()
 }
 
-fn energizer_eaten(mut events: EventReader<EnergizerWasEaten>) -> bool {
-    events.read().count() > 0
+fn energizer_eaten(mut messages: MessageReader<EnergizerWasEaten>) -> bool {
+    messages.read().count() > 0
 }
 
-fn energizer_over(mut events: EventReader<EnergizerOver>) -> bool {
-    events.read().count() > 0
+fn energizer_over(mut messages: MessageReader<EnergizerOver>) -> bool {
+    messages.read().count() > 0
 }
 
 fn ghost_eaten(entity: Entity, eaten_events: &[GhostWasEaten]) -> bool {

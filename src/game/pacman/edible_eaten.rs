@@ -25,10 +25,10 @@ impl Plugin for EdibleEatenPlugin {
 
 fn add_edible_stop_when_dot_eaten(
     mut commands: Commands,
-    mut event_reader: EventReader<DotWasEaten>,
+    mut message_reader: MessageReader<DotWasEaten>,
     query: Query<Entity, With<Pacman>>,
 ) {
-    for _ in event_reader.read() {
+    for _ in message_reader.read() {
         for e in &query {
             commands.entity(e).insert(EdibleEatenStop(Timer::new(Duration::from_secs_f32(1.0 / 60.0), TimerMode::Once)));
         }
@@ -37,10 +37,10 @@ fn add_edible_stop_when_dot_eaten(
 
 fn add_edible_stop_when_energizer_eaten(
     mut commands: Commands,
-    mut event_reader: EventReader<EnergizerWasEaten>,
+    mut message_reader: MessageReader<EnergizerWasEaten>,
     query: Query<Entity, With<Pacman>>,
 ) {
-    for _ in event_reader.read() {
+    for _ in message_reader.read() {
         for e in &query {
             commands.entity(e).insert(EdibleEatenStop(Timer::new(Duration::from_secs_f32(3.0 / 60.0), TimerMode::Once)));
         }
@@ -55,7 +55,7 @@ fn remove_edible_stop_when_timer_ended(
     for (e, mut stop) in &mut query {
         stop.tick(time.delta());
 
-        if stop.finished() {
+        if stop.is_finished() {
             commands.entity(e).remove::<EdibleEatenStop>();
         }
     }
