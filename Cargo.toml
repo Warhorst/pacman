@@ -2,7 +2,7 @@
 name = "pacman"
 version = "1.0.0"
 authors = ["Warhorst <46809804+Warhorst@users.noreply.github.com>"]
-edition = "2021"
+edition = "2024"
 
 [profile.dev]
 opt-level = 1

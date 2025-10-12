@@ -81,7 +81,7 @@ impl Animation {
     pub fn update(&mut self, delta: Duration) {
         let (current_texture_index, timer, repeating, num_textures) = match self {
             Animation::SingleTexture { .. } => return,
-            Animation::TextureList { ref mut current_texture_index, timer, repeating, textures, .. } => (current_texture_index, timer, repeating, textures.len()),
+            Animation::TextureList { current_texture_index, timer, repeating, textures, .. } => (current_texture_index, timer, repeating, textures.len()),
         };
 
         timer.tick(delta);
@@ -109,7 +109,7 @@ impl Animation {
     pub fn reset(&mut self) {
         let (current_texture_index, timer) = match self {
             Animation::SingleTexture { .. } => return,
-            Animation::TextureList { ref mut current_texture_index, timer, .. } => (current_texture_index, timer),
+            Animation::TextureList { current_texture_index, timer, .. } => (current_texture_index, timer),
         };
 
         timer.reset();
