@@ -1,6 +1,6 @@
 use bevy::prelude::*;
-use pad::Position;
-use pad::Direction::*;
+use pad::position::Position;
+use pad::direction::Direction::*;
 use crate::core::prelude::*;
 
 /// The x and y coordinates of some entity.

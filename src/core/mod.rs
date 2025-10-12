@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use pad::Position;
+use pad::position::Position;
 
 use crate::core::edibles::EdiblesPlugin;
 use crate::core::ghost_schedule::GhostSchedulePlugin;

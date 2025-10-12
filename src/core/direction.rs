@@ -1,6 +1,6 @@
 use bevy::prelude::*;
-use pad::Direction;
-use pad::Direction::*;
+use pad::direction::Direction;
+use pad::direction::Direction::*;
 use crate::core::prelude::*;
 
 /// The direction some entity is currently moving to
