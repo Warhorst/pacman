@@ -1,5 +1,5 @@
-use crate::game::target::TargetSetter;
 use crate::core::prelude::*;
+use crate::game::target::TargetSetter;
 
 impl<'a, 'b, 'c, 'd> TargetSetter<'a, 'b, 'c, 'd> {
     /// Determine the next target coordinates for a ghost when in "Eaten" state.
@@ -21,7 +21,10 @@ impl<'a, 'b, 'c, 'd> TargetSetter<'a, 'b, 'c, 'd> {
 
     /// Return if the ghost is perfectly centered in front of the ghost house entrance.
     fn is_directly_before_entrance(&self) -> bool {
-        self.components.transform.translation.xy_equal(&self.get_spawn(Blinky).coordinates)
+        self.components
+            .transform
+            .translation
+            .xy_equal(&self.get_spawn(Blinky).coordinates)
     }
 
     fn move_in_house_center(&mut self) {
@@ -40,40 +43,44 @@ impl<'a, 'b, 'c, 'd> TargetSetter<'a, 'b, 'c, 'd> {
 
     fn move_directly_before_entrance(&mut self) {
         let in_front_of_house = self.get_spawn(Blinky).coordinates;
-        let position_coordinates = Pos::from_vec3(self.components.transform.translation).to_vec3(0.0);
+        let position_coordinates =
+            Pos::from_vec3(self.components.transform.translation).to_vec3(0.0);
 
         *self.components.direction = match self.get_spawn(Pinky).spawn_direction {
             Up | Down => match in_front_of_house.x < position_coordinates.x {
                 true => Left,
-                false => Right
+                false => Right,
             },
             Left | Right => match in_front_of_house.y < position_coordinates.y {
                 true => Down,
-                false => Up
+                false => Up,
             },
         };
         self.components.target.set(in_front_of_house);
     }
 
     fn is_in_center(&self) -> bool {
-        self.components.transform.translation.xy_equal(&self.get_spawn(Pinky).coordinates)
+        self.components
+            .transform
+            .translation
+            .xy_equal(&self.get_spawn(Pinky).coordinates)
     }
 
     fn move_to_respawn(&mut self) {
         let center = self.get_spawn(Pinky).coordinates;
         let respawn = match *self.components.ghost {
             Blinky => self.get_spawn(Pinky).coordinates,
-            _ => self.get_spawn(*self.components.ghost).coordinates
+            _ => self.get_spawn(*self.components.ghost).coordinates,
         };
 
         *self.components.direction = match self.get_spawn(Pinky).spawn_direction {
             Up | Down => match respawn.x < center.x {
                 true => Left,
-                false => Right
+                false => Right,
             },
             Left | Right => match respawn.y < center.y {
                 true => Down,
-                false => Up
+                false => Up,
             },
         };
         self.components.target.set(respawn);
@@ -81,11 +88,12 @@ impl<'a, 'b, 'c, 'd> TargetSetter<'a, 'b, 'c, 'd> {
 
     fn move_to_nearest_position_before_entrance(&mut self) {
         let position = Pos::from_vec3(self.components.transform.translation);
-        let nearest_spawn_position = self.get_spawn(Blinky)
+        let nearest_spawn_position = self
+            .get_spawn(Blinky)
             .positions
             .into_iter()
             .map(|pos| (pos, pos.distance(&position)))
-            .min_by(|(_, dis_a), (_, dis_b)| dis_a.partial_cmp(&dis_b).unwrap())
+            .min_by(|(_, dis_a), (_, dis_b)| dis_a.partial_cmp(dis_b).unwrap())
             .map(|(pos, _)| pos)
             .unwrap();
 

@@ -1,37 +1,27 @@
-use bevy::prelude::*;
 use crate::core::prelude::*;
+use bevy::prelude::*;
 
 pub struct FruitPlugin;
 
 impl Plugin for FruitPlugin {
-    fn build(&self, app: &mut App) {
-        app
-            .add_systems(
-                Update,
-                (
-                    spawn_fruit_when_dot_limit_reached
-                        .in_set(ProcessIntersectionsWithPacman),
-                    update_despawn_timer,
-                    despawn_fruit_if_timer_exceeded,
-                    play_fruit_eaten_sound_when_fruit_was_eaten
-                        .in_set(ProcessIntersectionsWithPacman),
-                    reset_fruit_despawn_timer_when_level_changed
-                )
-                    .run_if(in_state(Game(Running))),
+    fn build(
+        &self,
+        app: &mut App,
+    ) {
+        app.add_systems(
+            Update,
+            (
+                spawn_fruit_when_dot_limit_reached.in_set(ProcessIntersectionsWithPacman),
+                update_despawn_timer,
+                despawn_fruit_if_timer_exceeded,
+                play_fruit_eaten_sound_when_fruit_was_eaten.in_set(ProcessIntersectionsWithPacman),
+                reset_fruit_despawn_timer_when_level_changed,
             )
-            .add_systems(
-                OnEnter(Game(PacmanHit)),
-                despawn_fruit_and_timer
-            )
-            .add_systems(
-                OnEnter(Game(LevelTransition)),
-                despawn_fruit_and_timer
-            )
-            .add_systems(
-                OnExit(Game(GameOver)),
-                despawn_fruit_and_timer
-            )
-        ;
+                .run_if(in_state(Game(Running))),
+        )
+        .add_systems(OnEnter(Game(PacmanHit)), despawn_fruit_and_timer)
+        .add_systems(OnEnter(Game(LevelTransition)), despawn_fruit_and_timer)
+        .add_systems(OnExit(Game(GameOver)), despawn_fruit_and_timer);
     }
 }
 
@@ -85,12 +75,12 @@ fn despawn_fruit_if_timer_exceeded(
     despawn_timer_opt: Option<Res<FruitDespawnTimer>>,
     query: Query<Entity, With<Fruit>>,
 ) {
-    if let Some(ref despawn_timer) = despawn_timer_opt {
-        if despawn_timer.is_finished() {
-            for entity in query.iter() {
-                commands.entity(entity).despawn();
-                commands.remove_resource::<FruitDespawnTimer>()
-            }
+    if let Some(ref despawn_timer) = despawn_timer_opt
+        && despawn_timer.is_finished()
+    {
+        for entity in query.iter() {
+            commands.entity(entity).despawn();
+            commands.remove_resource::<FruitDespawnTimer>()
         }
     }
 }

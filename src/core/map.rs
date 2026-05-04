@@ -1,13 +1,15 @@
-use std::f32::consts::PI;
-use bevy::prelude::*;
 use crate::core::prelude::*;
+use bevy::prelude::*;
+use std::f32::consts::PI;
 
 pub(super) struct MapPlugin;
 
 impl Plugin for MapPlugin {
-    fn build(&self, app: &mut App) {
-        app
-            .register_type::<Map>()
+    fn build(
+        &self,
+        app: &mut App,
+    ) {
+        app.register_type::<Map>()
             .register_type::<Tiles>()
             .register_type::<Maze>()
             .register_type::<Wall>()
@@ -26,8 +28,7 @@ impl Plugin for MapPlugin {
             .register_type::<GhostHouse>()
             .register_type::<GhostSpawn>()
             .register_type::<GhostCorner>()
-            .register_type::<OneWay>()
-        ;
+            .register_type::<OneWay>();
     }
 }
 
@@ -49,22 +50,29 @@ pub enum Tiles {
 
 impl Default for Tiles {
     fn default() -> Self {
-        Tiles::Single {pos: Pos::default()}
+        Tiles::Single {
+            pos: Pos::default(),
+        }
     }
 }
 
 impl Tiles {
-    pub fn to_vec3(&self, z: f32) -> Vec3 {
+    pub fn to_vec3(
+        self,
+        z: f32,
+    ) -> Vec3 {
         match self {
             Tiles::Single { pos } => pos.to_vec3(z),
-            Tiles::Double { pos_a, pos_b } => Vec3::from_positions([pos_a, pos_b], z)
+            Tiles::Double { pos_a, pos_b } => Vec3::from_positions([&pos_a, &pos_b], z),
         }
     }
 
-    pub fn to_pos(&self) -> Pos {
+    pub fn to_pos(self) -> Pos {
         match self {
-            Tiles::Single { pos } => *pos,
-            Tiles::Double { .. } => panic!("can only retrieve the position for single position tiles")
+            Tiles::Single { pos } => pos,
+            Tiles::Double { .. } => {
+                panic!("can only retrieve the position for single position tiles")
+            }
         }
     }
 }
@@ -154,7 +162,7 @@ pub struct GhostCorner(pub Ghost);
 #[derive(Component, Reflect, Default)]
 #[reflect(Component)]
 pub struct GhostHouseArea {
-    pub rotation: Rotation
+    pub rotation: Rotation,
 }
 
 /// Tile where pacman or a ghost can switch to another tunnel with the same index
@@ -162,7 +170,7 @@ pub struct GhostHouseArea {
 #[reflect(Component)]
 pub struct Tunnel {
     pub index: usize,
-    pub direction: Dir
+    pub direction: Dir,
 }
 
 /// Tile leading to a tunnel, which also slows down ghosts.

@@ -1,28 +1,18 @@
-use bevy::prelude::*;
+use crate::core::prelude::*;
 use bevy::prelude::PositionType::Absolute;
 use bevy::prelude::Val::Percent;
-use crate::core::prelude::*;
+use bevy::prelude::*;
 
 pub(super) struct BottomUIPlugin;
 
 impl Plugin for BottomUIPlugin {
-    fn build(&self, app: &mut App) {
-        app
-            .add_systems(
-                OnEnter(Game(Start)),
-                spawn_bottom_ui,
-            )
-            .add_systems(
-                Update,
-                (
-                    update_lives,
-                    update_fruits
-                ).run_if(in_game))
-            .add_systems(
-                OnExit(Game(GameOver)),
-                despawn_bottom_ui
-            )
-        ;
+    fn build(
+        &self,
+        app: &mut App,
+    ) {
+        app.add_systems(OnEnter(Game(Start)), spawn_bottom_ui)
+            .add_systems(Update, (update_lives, update_fruits).run_if(in_game))
+            .add_systems(OnExit(Game(GameOver)), despawn_bottom_ui);
     }
 }
 
@@ -53,24 +43,28 @@ fn spawn_bottom_ui(
     level: Res<Level>,
     specs_per_level: Res<SpecsPerLevel>,
 ) {
-    let bottom_ui = commands.spawn((
-        Name::new("BottomUI"),
-        BottomUI,
-        Node {
-            width: Percent(40.0),
-            height: Percent(10.0),
-            justify_content: JustifyContent::SpaceBetween,
-            top: Percent(90.0),
-            left: Percent(30.0),
-            position_type: Absolute,
-            ..default()
-        },
-    )).id();
+    let bottom_ui = commands
+        .spawn((
+            Name::new("BottomUI"),
+            BottomUI,
+            Node {
+                width: Percent(40.0),
+                height: Percent(10.0),
+                justify_content: JustifyContent::SpaceBetween,
+                top: Percent(90.0),
+                left: Percent(30.0),
+                position_type: Absolute,
+                ..default()
+            },
+        ))
+        .id();
 
     let ui_lives = spawn_ui_lives(&mut commands, &asset_server, &lives);
     let ui_fruits = spawn_ui_fruits(&mut commands, &asset_server, &level, &specs_per_level);
 
-    commands.entity(bottom_ui).add_children(&[ui_lives, ui_fruits]);
+    commands
+        .entity(bottom_ui)
+        .add_children(&[ui_lives, ui_fruits]);
 }
 
 fn spawn_ui_lives(
@@ -78,20 +72,22 @@ fn spawn_ui_lives(
     asset_server: &AssetServer,
     lives: &Lives,
 ) -> Entity {
-    let ui_lives = commands.spawn((
-        Name::new("UILives"),
-        UILives,
-        Node {
-            width: Percent(40.0),
-            height: Percent(50.0),
-            position_type: Absolute,
-            bottom: Percent(40.0),
-            justify_content: JustifyContent::SpaceBetween,
-            ..default()
-        },
-    )).id();
+    let ui_lives = commands
+        .spawn((
+            Name::new("UILives"),
+            UILives,
+            Node {
+                width: Percent(40.0),
+                height: Percent(50.0),
+                position_type: Absolute,
+                bottom: Percent(40.0),
+                justify_content: JustifyContent::SpaceBetween,
+                ..default()
+            },
+        ))
+        .id();
 
-    let ui_live_vec = (0..**lives).into_iter()
+    let ui_live_vec = (0..**lives)
         .map(|i| spawn_ui_live(i, commands, asset_server))
         .collect::<Vec<_>>();
 
@@ -105,18 +101,20 @@ fn spawn_ui_live(
     asset_server: &AssetServer,
 ) -> Entity {
     let image = asset_server.load("textures/pacman/pacman_life.png");
-    commands.spawn((
-        Name::new("UILive"),
-        UILive,
-        Node {
-            width: Percent(20.0),
-            height: Percent(100.0),
-            left: Percent(index as f32 * 20.0),
-            position_type: Absolute,
-            ..default()
-        },
-        ImageNode::new(image.clone()),
-    )).id()
+    commands
+        .spawn((
+            Name::new("UILive"),
+            UILive,
+            Node {
+                width: Percent(20.0),
+                height: Percent(100.0),
+                left: Percent(index as f32 * 20.0),
+                position_type: Absolute,
+                ..default()
+            },
+            ImageNode::new(image.clone()),
+        ))
+        .id()
 }
 
 fn spawn_ui_fruits(
@@ -125,21 +123,23 @@ fn spawn_ui_fruits(
     level: &Level,
     specs_per_level: &SpecsPerLevel,
 ) -> Entity {
-    let ui_fruits = commands.spawn((
-        Name::new("UIFruits"),
-        UIFruits,
-        Node {
-            width: Percent(60.0),
-            height: Percent(50.0),
-            position_type: Absolute,
-            left: Percent(40.0),
-            bottom: Percent(40.0),
-            justify_content: JustifyContent::SpaceBetween,
-            ..default()
-        },
-    )).id();
+    let ui_fruits = commands
+        .spawn((
+            Name::new("UIFruits"),
+            UIFruits,
+            Node {
+                width: Percent(60.0),
+                height: Percent(50.0),
+                position_type: Absolute,
+                left: Percent(40.0),
+                bottom: Percent(40.0),
+                justify_content: JustifyContent::SpaceBetween,
+                ..default()
+            },
+        ))
+        .id();
 
-    let fruits_to_display = get_fruits_to_display(&level, &specs_per_level);
+    let fruits_to_display = get_fruits_to_display(level, specs_per_level);
 
     for (i, fruit) in fruits_to_display.into_iter().enumerate() {
         let ui_fruit = spawn_ui_fruit(commands, asset_server, i, fruit);
@@ -154,8 +154,8 @@ fn get_fruits_to_display(
     specs_per_level: &SpecsPerLevel,
 ) -> Vec<Fruit> {
     let border = level.checked_sub(6).unwrap_or(1).max(1);
-    (border..=**level).rev()
-        .into_iter()
+    (border..=**level)
+        .rev()
         .map(|i| specs_per_level.get_for(&Level(i)).fruit_to_spawn)
         .collect()
 }
@@ -169,18 +169,20 @@ fn spawn_ui_fruit(
     let image = get_texture_for_fruit(&fruit, asset_server);
     let left_percent = 100.0 - index as f32 * (100.0 / 7.0) - 100.0 / 7.0;
 
-    commands.spawn((
-        Name::new("UIFruit"),
-        UIFruit,
-        Node {
-            width: Percent(100.0 / 7.0),
-            height: Percent(100.0),
-            left: Percent(left_percent),
-            position_type: Absolute,
-            ..default()
-        },
-        ImageNode::new(image),
-    )).id()
+    commands
+        .spawn((
+            Name::new("UIFruit"),
+            UIFruit,
+            Node {
+                width: Percent(100.0 / 7.0),
+                height: Percent(100.0),
+                left: Percent(left_percent),
+                position_type: Absolute,
+                ..default()
+            },
+            ImageNode::new(image),
+        ))
+        .id()
 }
 
 /// Update the lives ui by despawning it and respawn it with the updated amount of lives.

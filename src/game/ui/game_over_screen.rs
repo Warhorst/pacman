@@ -1,21 +1,16 @@
-use bevy::prelude::*;
-use bevy::prelude::Val::Percent;
 use crate::core::prelude::*;
+use bevy::prelude::Val::Percent;
+use bevy::prelude::*;
 
 pub(super) struct GameOverScreenPlugin;
 
 impl Plugin for GameOverScreenPlugin {
-    fn build(&self, app: &mut App) {
-        app
-            .add_systems(
-                OnEnter(Game(GameOver)),
-                spawn_screens
-            )
-            .add_systems(
-                OnExit(Game(GameOver)),
-                despawn_screens
-            )
-        ;
+    fn build(
+        &self,
+        app: &mut App,
+    ) {
+        app.add_systems(OnEnter(Game(GameOver)), spawn_screens)
+            .add_systems(OnExit(Game(GameOver)), despawn_screens);
     }
 }
 
@@ -68,6 +63,7 @@ fn spawn_screens(
     ));
 }
 
+#[allow(clippy::type_complexity)]
 fn despawn_screens(
     mut commands: Commands,
     query: Query<Entity, Or<(With<GameOverScreen>, With<RestartGameScreen>)>>,

@@ -20,7 +20,7 @@ pub const ENERGIZER_Z: f32 = 50.0;
 pub const DOT_Z: f32 = 40.0;
 pub const FRUIT_Z: f32 = 30.0;
 
-pub const FONT: &'static str = "fonts/PressStart2P-Regular.ttf";
+pub const FONT: &str = "fonts/PressStart2P-Regular.ttf";
 
 pub const FIELD_SIZE: f32 = 18.5;
 pub const FIELD_DIMENSION: Vec2 = Vec2::splat(FIELD_SIZE);
@@ -35,4 +35,4 @@ pub const GHOST_DIMENSION: f32 = PACMAN_DIMENSION;
 pub const PACMAN_BASE_SPEED: f32 = FIELD_SIZE * 9.0;
 pub const GHOST_BASE_SPEED: f32 = PACMAN_BASE_SPEED;
 
-pub const MAP_SCENE_PATH: &'static str = "maps/map.scn.ron";
+pub const MAP_SCENE_PATH: &str = "maps/map.scn.ron";

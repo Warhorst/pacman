@@ -1,22 +1,18 @@
-use bevy::prelude::*;
 use crate::core::prelude::*;
 use crate::core::system_sets::UpdateGameState;
+use bevy::prelude::*;
 
 pub(super) struct GameStateTransitionPlugin;
 
 impl Plugin for GameStateTransitionPlugin {
-    fn build(&self, app: &mut App) {
-        app
-            .init_state::<GameState>()
-            .add_systems(
-                Update,
-                (
-                    update_state
-                        .in_set(UpdateGameState),
-                    update_state_timer
-                ),
-            )
-        ;
+    fn build(
+        &self,
+        app: &mut App,
+    ) {
+        app.init_state::<GameState>().add_systems(
+            Update,
+            (update_state.in_set(UpdateGameState), update_state_timer),
+        );
     }
 }
 
@@ -30,6 +26,7 @@ struct StateTimer(Timer);
 /// just load assets, but InGame is the actual running game. Every state inside the game is represented
 /// as a state on top of InGame in the stack. This enables systems to use InGame for stuff that should always be
 /// run when playing the actual game, like updating ui.
+#[allow(clippy::too_many_arguments)]
 fn update_state(
     mut commands: Commands,
     current_state: Res<State<GameState>>,
@@ -42,15 +39,58 @@ fn update_state(
     game_restarted_messages: MessageReader<GameWasRestarted>,
 ) {
     match current_state.get() {
-        Game(Start) => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 2.0, Game(Ready)),
-        Game(Ready) => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 2.5, Game(Running)),
-        Game(Running) => switch_states_based_on_events(&mut next_state, pacman_hit_messages, edibles_eaten_messages, ghost_eaten_messages),
-        Game(PacmanHit) => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 1.0, Game(PacmanDying)),
-        Game(PacmanDying) => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 1.5, Game(PacmanDead)),
-        Game(PacmanDead) => switch_to_ready_or_game_over(&mut commands, &state_timer, &lives, &mut next_state),
+        Game(Start) => switch_when_timer_finished(
+            &mut commands,
+            &state_timer,
+            &mut next_state,
+            2.0,
+            Game(Ready),
+        ),
+        Game(Ready) => switch_when_timer_finished(
+            &mut commands,
+            &state_timer,
+            &mut next_state,
+            2.5,
+            Game(Running),
+        ),
+        Game(Running) => switch_states_based_on_events(
+            &mut next_state,
+            pacman_hit_messages,
+            edibles_eaten_messages,
+            ghost_eaten_messages,
+        ),
+        Game(PacmanHit) => switch_when_timer_finished(
+            &mut commands,
+            &state_timer,
+            &mut next_state,
+            1.0,
+            Game(PacmanDying),
+        ),
+        Game(PacmanDying) => switch_when_timer_finished(
+            &mut commands,
+            &state_timer,
+            &mut next_state,
+            1.5,
+            Game(PacmanDead),
+        ),
+        Game(PacmanDead) => {
+            switch_to_ready_or_game_over(&mut commands, &state_timer, &lives, &mut next_state)
+        }
         Game(GameOver) => switch_to_start_after_game_over(&mut next_state, game_restarted_messages),
-        Game(LevelTransition) => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 3.0, Game(Ready)),
-        Game(GhostEatenPause) => switch_when_timer_finished(&mut commands, &state_timer, &mut next_state, 1.0, Game(Running)),
+        Game(LevelTransition) => switch_when_timer_finished(
+            &mut commands,
+            &state_timer,
+            &mut next_state,
+            3.0,
+            Game(Ready),
+        ),
+        Game(GhostEatenPause) => switch_when_timer_finished(
+            &mut commands,
+            &state_timer,
+            &mut next_state,
+            1.0,
+            Game(Running),
+        ),
         _ => {}
     }
 }
@@ -63,11 +103,13 @@ fn switch_when_timer_finished(
     new_state: GameState,
 ) {
     match state_timer {
-        Some(timer) => if timer.is_finished() {
-            commands.remove_resource::<StateTimer>();
-            game_state.set(new_state);
-        },
-        None => commands.insert_resource(StateTimer(Timer::from_seconds(time, TimerMode::Once)))
+        Some(timer) => {
+            if timer.is_finished() {
+                commands.remove_resource::<StateTimer>();
+                game_state.set(new_state);
+            }
+        }
+        None => commands.insert_resource(StateTimer(Timer::from_seconds(time, TimerMode::Once))),
     }
 }
 
@@ -78,16 +120,18 @@ fn switch_to_ready_or_game_over(
     game_state: &mut NextState<GameState>,
 ) {
     match state_timer {
-        Some(timer) => if timer.is_finished() {
-            commands.remove_resource::<StateTimer>();
+        Some(timer) => {
+            if timer.is_finished() {
+                commands.remove_resource::<StateTimer>();
 
-            if **lives > 0 {
-                game_state.set(Game(Ready))
-            } else {
-                game_state.set(Game(GameOver))
+                if **lives > 0 {
+                    game_state.set(Game(Ready))
+                } else {
+                    game_state.set(Game(GameOver))
+                }
             }
-        },
-        None => commands.insert_resource(StateTimer(Timer::from_seconds(1.0, TimerMode::Once)))
+        }
+        None => commands.insert_resource(StateTimer(Timer::from_seconds(1.0, TimerMode::Once))),
     }
 }
 
@@ -109,7 +153,6 @@ fn switch_states_based_on_events(
 
     if ghost_eaten_messages.read().count() > 0 {
         game_state.set(Game(GhostEatenPause));
-        return;
     }
 }
 

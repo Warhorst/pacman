@@ -9,9 +9,11 @@ use crate::core::prelude::*;
 pub(super) struct EdiblesPlugin;
 
 impl Plugin for EdiblesPlugin {
-    fn build(&self, app: &mut App) {
-        app
-            .register_type::<Edible>()
+    fn build(
+        &self,
+        app: &mut App,
+    ) {
+        app.register_type::<Edible>()
             .register_type::<Dots>()
             .register_type::<Dot>()
             .register_type::<EatenDots>()
@@ -22,13 +24,10 @@ impl Plugin for EdiblesPlugin {
             .register_type::<EnergizerOver>()
             .register_type::<EnergizerTimer>()
             .add_message::<EAllEdiblesEaten>()
-            .add_message::<EnergizerOver>()
-        ;
+            .add_message::<EnergizerOver>();
 
         #[cfg(debug_assertions)]
-        app
-            .add_plugins(ResourceInspectorPlugin::<EatenDots>::default())
-        ;
+        app.add_plugins(ResourceInspectorPlugin::<EatenDots>::default());
     }
 }
 
@@ -108,17 +107,23 @@ impl FruitDespawnTimer {
     }
 }
 
-pub fn get_texture_for_fruit(fruit: &Fruit, asset_server: &AssetServer) -> Handle<Image> {
-    asset_server.load(&format!("textures/fruits/{}.png", match fruit {
-        Cherry => "cherry",
-        Strawberry => "strawberry",
-        Peach => "peach",
-        Apple => "apple",
-        Grapes => "grapes",
-        Galaxian => "galaxian",
-        Bell => "bell",
-        Key => "key"
-    }))
+pub fn get_texture_for_fruit(
+    fruit: &Fruit,
+    asset_server: &AssetServer,
+) -> Handle<Image> {
+    asset_server.load(format!(
+        "textures/fruits/{}.png",
+        match fruit {
+            Cherry => "cherry",
+            Strawberry => "strawberry",
+            Peach => "peach",
+            Apple => "apple",
+            Grapes => "grapes",
+            Galaxian => "galaxian",
+            Bell => "bell",
+            Key => "key",
+        }
+    ))
 }
 
 /// Parent component for all energizer (for organization only)
@@ -142,11 +147,14 @@ pub struct EnergizerTimer {
 impl EnergizerTimer {
     pub fn start(seconds: f32) -> Self {
         EnergizerTimer {
-            timer: Timer::from_seconds(seconds, TimerMode::Once)
+            timer: Timer::from_seconds(seconds, TimerMode::Once),
         }
     }
 
-    pub fn tick(&mut self, delta: Duration) {
+    pub fn tick(
+        &mut self,
+        delta: Duration,
+    ) {
         self.timer.tick(delta);
     }
 

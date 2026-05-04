@@ -39,7 +39,7 @@ impl FromPositions for Vec3 {
         assert_eq!(positions.len(), 2);
 
         let (pos0, pos1) = (positions[0], positions[1]);
-        let neighbour_direction = pos0.get_direction_to_neighbour(&pos1);
+        let neighbour_direction = pos0.get_direction_to_neighbour(pos1);
         let (vec0, vec1) = (pos0.to_vec3(0.0), pos1.to_vec3(0.0));
 
         match neighbour_direction {

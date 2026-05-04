@@ -1,18 +1,19 @@
-use std::time::Duration;
 use bevy::platform::collections::HashMap;
 use bevy::prelude::*;
+use std::time::Duration;
 
-use crate::core::prelude::*;
 use crate::core::prelude::Level;
+use crate::core::prelude::*;
 
 pub(super) struct GhostSchedulePlugin;
 
 impl Plugin for GhostSchedulePlugin {
-    fn build(&self, app: &mut App) {
-        app
-            .register_type::<ScheduleByLevel>()
-            .register_type::<GhostSchedule>()
-        ;
+    fn build(
+        &self,
+        app: &mut App,
+    ) {
+        app.register_type::<ScheduleByLevel>()
+            .register_type::<GhostSchedule>();
     }
 }
 
@@ -31,7 +32,9 @@ impl ScheduleByLevel {
                 (Level(2), Self::level_two_to_four()),
                 (Level(3), Self::level_two_to_four()),
                 (Level(4), Self::level_two_to_four()),
-            ].into_iter().collect(),
+            ]
+            .into_iter()
+            .collect(),
             default_schedule: Self::level_five_and_beyond(),
         }
     }
@@ -45,7 +48,7 @@ impl ScheduleByLevel {
             Phase::for_seconds(Scatter, 5.0),
             Phase::for_seconds(Chase, 1033.0),
             Phase::for_seconds(Scatter, 1.0 / 60.0),
-            Phase::infinite(Chase)
+            Phase::infinite(Chase),
         ])
     }
 
@@ -58,7 +61,7 @@ impl ScheduleByLevel {
             Phase::for_seconds(Scatter, 5.0),
             Phase::for_seconds(Chase, 1037.0),
             Phase::for_seconds(Scatter, 1.0 / 60.0),
-            Phase::infinite(Chase)
+            Phase::infinite(Chase),
         ])
     }
 
@@ -75,8 +78,14 @@ impl ScheduleByLevel {
         ])
     }
 
-    pub fn get_schedule_for_level(&self, level: &Level) -> GhostSchedule {
-        self.level_schedule_map.get(level).unwrap_or(&self.default_schedule).clone()
+    pub fn get_schedule_for_level(
+        &self,
+        level: &Level,
+    ) -> GhostSchedule {
+        self.level_schedule_map
+            .get(level)
+            .unwrap_or(&self.default_schedule)
+            .clone()
     }
 }
 
@@ -89,12 +98,15 @@ pub struct GhostSchedule {
 }
 
 impl GhostSchedule {
-    fn new(phases: impl IntoIterator<Item=Phase>) -> Self {
+    fn new(phases: impl IntoIterator<Item = Phase>) -> Self {
         let phases = phases.into_iter().collect::<Vec<_>>();
 
         GhostSchedule {
             current_phase_index: 0,
-            current_phase_timer: phases.get(0).expect("at least one phase must be provided").phase_timer(),
+            current_phase_timer: phases
+                .first()
+                .expect("at least one phase must be provided")
+                .phase_timer(),
             phases,
         }
     }
@@ -103,7 +115,10 @@ impl GhostSchedule {
         self.phases[self.current_phase_index].state
     }
 
-    pub fn update(&mut self, delta: Duration) {
+    pub fn update(
+        &mut self,
+        delta: Duration,
+    ) {
         if let Some(ref mut timer) = self.current_phase_timer {
             timer.tick(delta);
 
@@ -129,7 +144,10 @@ pub struct Phase {
 }
 
 impl Phase {
-    fn for_seconds(state: GhostState, seconds: f32) -> Self {
+    fn for_seconds(
+        state: GhostState,
+        seconds: f32,
+    ) -> Self {
         Phase {
             state,
             time: Some(seconds),
@@ -137,10 +155,7 @@ impl Phase {
     }
 
     fn infinite(state: GhostState) -> Self {
-        Phase {
-            state,
-            time: None,
-        }
+        Phase { state, time: None }
     }
 
     fn phase_timer(&self) -> Option<Timer> {

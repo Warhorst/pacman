@@ -6,29 +6,28 @@ use bevy::prelude::*;
 
 use crate::core::prelude::*;
 
-mod spawned;
 mod eaten;
+mod spawned;
 
 type Neighbour = (Pos, Dir);
 
 pub(in crate::game) struct TargetPlugin;
 
 impl Plugin for TargetPlugin {
-    fn build(&self, app: &mut App) {
-        app
-            .add_systems(
-                Update,
-                set_target
-                    .in_set(SetTarget)
-                    .run_if(in_state(Game(Running))),
-            )
-            .add_systems(
-                Update,
-                set_target_on_ghost_pause
-                    .in_set(SetTarget)
-                    .run_if(in_state(Game(GhostEatenPause))),
-            )
-        ;
+    fn build(
+        &self,
+        app: &mut App,
+    ) {
+        app.add_systems(
+            Update,
+            set_target.in_set(SetTarget).run_if(in_state(Game(Running))),
+        )
+        .add_systems(
+            Update,
+            set_target_on_ghost_pause
+                .in_set(SetTarget)
+                .run_if(in_state(Game(GhostEatenPause))),
+        );
     }
 }
 
@@ -42,6 +41,7 @@ pub struct TargetComponents<'a> {
     state: &'a GhostState,
 }
 
+#[allow(clippy::too_many_arguments)]
 fn set_target(
     random: Res<Random>,
     ghost_house_gate: Res<GhostHouseGate>,
@@ -87,11 +87,12 @@ fn set_target(
             Spawned => setter.set_spawned_target(),
         }
     }
-    
+
     Ok(())
 }
 
 /// Set the target when on ghost pause (meaning only eaten and spawned)
+#[allow(clippy::too_many_arguments)]
 fn set_target_on_ghost_pause(
     random: Res<Random>,
     ghost_house_gate: Res<GhostHouseGate>,
@@ -127,7 +128,7 @@ fn set_target_on_ghost_pause(
         match state {
             Eaten => setter.set_eaten_target(),
             Spawned => setter.set_spawned_target(),
-            _ => continue
+            _ => continue,
         }
     }
 
@@ -148,6 +149,7 @@ struct TargetSetter<'a, 'b, 'c, 'd> {
 }
 
 impl<'a, 'b, 'c, 'd> TargetSetter<'a, 'b, 'c, 'd> {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         random: &'a Random,
         ghost_house_gate: &'a GhostHouseGate,
@@ -160,9 +162,18 @@ impl<'a, 'b, 'c, 'd> TargetSetter<'a, 'b, 'c, 'd> {
         one_ways: &Query<&Tiles, With<OneWay>>,
         components: &'a mut TargetComponentsItem<'b, 'c, 'd>,
     ) -> Self {
-        let corner_positions = corner_query.iter().map(|(corner, tiles)| (**corner, tiles.to_pos())).collect();
-        let wall_positions = wall_query.iter().map(|transform| Pos::from_vec3(transform.translation)).collect();
-        let ghost_spawns = ghost_spawn_query.iter().map(|spawn| (spawn.ghost, *spawn)).collect();
+        let corner_positions = corner_query
+            .iter()
+            .map(|(corner, tiles)| (**corner, tiles.to_pos()))
+            .collect();
+        let wall_positions = wall_query
+            .iter()
+            .map(|transform| Pos::from_vec3(transform.translation))
+            .collect();
+        let ghost_spawns = ghost_spawn_query
+            .iter()
+            .map(|spawn| (spawn.ghost, *spawn))
+            .collect();
         let one_ways = one_ways.iter().map(|t| t.to_pos()).collect();
 
         Self {
@@ -175,7 +186,7 @@ impl<'a, 'b, 'c, 'd> TargetSetter<'a, 'b, 'c, 'd> {
             corner_positions,
             wall_positions,
             one_ways,
-            components
+            components,
         }
     }
 
@@ -220,10 +231,14 @@ impl<'a, 'b, 'c, 'd> TargetSetter<'a, 'b, 'c, 'd> {
     fn calculate_inky_target(&self) -> Pos {
         let pacman_position = Pos::from_vec3(self.pacman_transform.translation);
         let blinky_position = Pos::from_vec3(self.blinky_transform.translation);
-        let position_pacman_is_facing = pacman_position.position_in_direction(self.pacman_direction, 2);
+        let position_pacman_is_facing =
+            pacman_position.position_in_direction(self.pacman_direction, 2);
         let x_diff = position_pacman_is_facing.x() - blinky_position.x();
         let y_diff = position_pacman_is_facing.y() - blinky_position.y();
-        Pos::new(blinky_position.x() + 2 * x_diff, blinky_position.y() + 2 * y_diff)
+        Pos::new(
+            blinky_position.x() + 2 * x_diff,
+            blinky_position.y() + 2 * y_diff,
+        )
     }
 
     fn set_clyde_chase_target(&mut self) {
@@ -260,16 +275,18 @@ impl<'a, 'b, 'c, 'd> TargetSetter<'a, 'b, 'c, 'd> {
             .into_iter()
             .filter(|(_, dir)| *dir != opposite_dir)
             .filter(|(pos, _)| !self.wall_positions.contains(pos))
-            .filter(|(_, dir)| if self.is_on_one_way(ghost_pos) {
-                *dir == Left || *dir == Right
-            } else {
-                true
+            .filter(|(_, dir)| {
+                if self.is_on_one_way(ghost_pos) {
+                    *dir == Left || *dir == Right
+                } else {
+                    true
+                }
             })
             .collect::<Vec<_>>();
         let next_target_neighbour = match possible_neighbours.len() {
             0 => (ghost_pos.neighbour_in_direction(opposite_dir), opposite_dir),
-            1 => possible_neighbours.get(0).unwrap().clone(),
-            len => possible_neighbours.get(self.random.zero_to(len)).unwrap().clone()
+            1 => *possible_neighbours.first().unwrap(),
+            len => *possible_neighbours.get(self.random.zero_to(len)).unwrap(),
         };
         self.set_target_to_neighbour(next_target_neighbour)
     }
@@ -280,7 +297,10 @@ impl<'a, 'b, 'c, 'd> TargetSetter<'a, 'b, 'c, 'd> {
     /// It is generally not allowed for ghosts to turn around, so the position behind the ghost is always filtered. However,
     /// if due to some circumstances (like bad map design) a ghost has no other way to go, we allow the poor soul to
     /// turn around.
-    fn get_nearest_neighbour_to(&self, target: Pos) -> Neighbour {
+    fn get_nearest_neighbour_to(
+        &self,
+        target: Pos,
+    ) -> Neighbour {
         let ghost_pos = Pos::from_vec3(self.components.transform.translation);
         let opposite_dir = self.components.direction.opposite();
 
@@ -289,43 +309,65 @@ impl<'a, 'b, 'c, 'd> TargetSetter<'a, 'b, 'c, 'd> {
             .into_iter()
             .filter(|(_, dir)| *dir != opposite_dir)
             .filter(|(pos, _)| !self.wall_positions.contains(pos))
-            .filter(|(_, dir)| if self.is_on_one_way(ghost_pos) {
-                *dir == Left || *dir == Right
-            } else {
-                true
+            .filter(|(_, dir)| {
+                if self.is_on_one_way(ghost_pos) {
+                    *dir == Left || *dir == Right
+                } else {
+                    true
+                }
             })
             .min_by(|n_a, n_b| minimal_distance_to_neighbours(&target, n_a, n_b))
             .unwrap_or_else(|| (ghost_pos.neighbour_in_direction(opposite_dir), opposite_dir))
     }
 
-    fn is_on_one_way(&self, pos: Pos) -> bool {
+    fn is_on_one_way(
+        &self,
+        pos: Pos,
+    ) -> bool {
         self.one_ways.contains(&pos)
     }
 
-    fn set_target_to_neighbour(&mut self, neighbour: Neighbour) {
+    fn set_target_to_neighbour(
+        &mut self,
+        neighbour: Neighbour,
+    ) {
         *self.components.direction = neighbour.1;
         self.components.target.set(neighbour.0.to_vec3(0.0));
     }
 
-    fn get_spawn(&self, ghost: Ghost) -> &GhostSpawn {
+    fn get_spawn(
+        &self,
+        ghost: Ghost,
+    ) -> &GhostSpawn {
         self.ghost_spawns.get(&ghost).unwrap()
     }
 }
 
 /// Get the transform of blinky.
 fn get_blinky_transform(query: &Query<TargetComponents, Without<Pacman>>) -> Transform {
-    query.iter()
+    query
+        .iter()
         .filter(|comps| comps.ghost == &Blinky)
         .map(|comps| *comps.transform)
         .next()
         .expect("there should be one blinky")
 }
 
-fn minimal_distance_to_neighbours(big_target: &Pos, neighbour_a: &Neighbour, neighbour_b: &Neighbour) -> Ordering {
+fn minimal_distance_to_neighbours(
+    big_target: &Pos,
+    neighbour_a: &Neighbour,
+    neighbour_b: &Neighbour,
+) -> Ordering {
     minimal_distance_to_positions(big_target, &neighbour_a.0, &neighbour_b.0)
 }
 
-fn minimal_distance_to_positions(big_target: &Pos, position_a: &Pos, position_b: &Pos) -> Ordering {
-    big_target.distance(position_a).partial_cmp(&big_target.distance(position_b)).unwrap()
+fn minimal_distance_to_positions(
+    big_target: &Pos,
+    position_a: &Pos,
+    position_b: &Pos,
+) -> Ordering {
+    big_target
+        .distance(position_a)
+        .partial_cmp(&big_target.distance(position_b))
+        .unwrap()
 }
-

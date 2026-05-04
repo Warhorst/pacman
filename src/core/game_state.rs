@@ -45,6 +45,7 @@ pub enum SpawnMaze {
 }
 
 #[derive(Reflect, Copy, Clone, Eq, PartialEq, Hash, Debug)]
+#[allow(clippy::enum_variant_names)]
 pub enum Game {
     /// Startup state which spawns the labyrinth, ui, etc
     Start,

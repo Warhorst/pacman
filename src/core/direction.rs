@@ -33,7 +33,7 @@ impl Dir {
         }
     }
 
-    pub fn to_direction(&self) -> Direction {
+    pub fn to_direction(self) -> Direction {
         match self {
             Right => XP,
             Left => XM,

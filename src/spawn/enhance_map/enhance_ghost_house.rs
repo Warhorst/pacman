@@ -6,13 +6,11 @@ use crate::core::prelude::*;
 pub(super) struct EnhanceGhostHousePlugin;
 
 impl Plugin for EnhanceGhostHousePlugin {
-    fn build(&self, app: &mut App) {
-        app
-            .add_systems(
-                OnEnter(SpawnMaze(EnhanceMap)),
-                enhance_ghost_house
-            )
-        ;
+    fn build(
+        &self,
+        app: &mut App,
+    ) {
+        app.add_systems(OnEnter(SpawnMaze(EnhanceMap)), enhance_ghost_house);
     }
 }
 
@@ -26,19 +24,18 @@ fn enhance_ghost_house(
     let rotation = get_rotation(&ghost_house_areas);
     let spawns = create_spawns(rotation, bottom_left);
 
-    let ghost_house = commands.spawn((
-        Name::new("GhostHouse"),
-        GhostHouse,
-        Transform::default(),
-        Visibility::default(),
-    )).id();
+    let ghost_house = commands
+        .spawn((
+            Name::new("GhostHouse"),
+            GhostHouse,
+            Transform::default(),
+            Visibility::default(),
+        ))
+        .id();
 
     for spawn in spawns {
         commands.entity(ghost_house).with_children(|parent| {
-            parent.spawn((
-                Name::new("GhostSpawn"),
-                spawn
-            ));
+            parent.spawn((Name::new("GhostSpawn"), spawn));
         });
     }
 
@@ -48,7 +45,7 @@ fn enhance_ghost_house(
         bottom_left,
         rotation,
         &asset_server,
-        &sprite_sheets
+        &sprite_sheets,
     );
 }
 
@@ -56,21 +53,24 @@ fn get_bottom_left(ghost_house_areas: &Query<(&GhostHouseArea, &Tiles)>) -> Pos 
     ghost_house_areas
         .iter()
         .map(|(_, tiles)| tiles.to_pos())
-        .fold(
-            Pos::new(isize::MAX, isize::MAX),
-            |acc, pos| Pos::new(isize::min(acc.x(), pos.x()), isize::min(acc.y(), pos.y())),
-        )
+        .fold(Pos::new(isize::MAX, isize::MAX), |acc, pos| {
+            Pos::new(isize::min(acc.x(), pos.x()), isize::min(acc.y(), pos.y()))
+        })
 }
 
 fn get_rotation(ghost_house_areas: &Query<(&GhostHouseArea, &Tiles)>) -> Rotation {
     ghost_house_areas
         .iter()
-        .find_map(|(area, _)| Some(area.rotation))
+        .map(|(area, _)| area.rotation)
+        .next()
         .expect("at least one ghost house area should exist")
 }
 
 /// TODO: wrong. Pinky spawns looking down, Inky and Clyde looking up
-fn create_spawns(rotation: Rotation, bottom_left: Pos) -> [GhostSpawn; 4] {
+fn create_spawns(
+    rotation: Rotation,
+    bottom_left: Pos,
+) -> [GhostSpawn; 4] {
     [
         create_blinky_spawn(rotation, bottom_left),
         create_pinky_spawn(rotation, bottom_left),
@@ -79,7 +79,10 @@ fn create_spawns(rotation: Rotation, bottom_left: Pos) -> [GhostSpawn; 4] {
     ]
 }
 
-fn create_blinky_spawn(rotation: Rotation, bottom_left: Pos) -> GhostSpawn {
+fn create_blinky_spawn(
+    rotation: Rotation,
+    bottom_left: Pos,
+) -> GhostSpawn {
     match rotation {
         D0 => create_spawn_with_offsets(bottom_left, (3, 5), (4, 5), BLINKY_Z, Blinky, Left),
         D90 => create_spawn_with_offsets(bottom_left, (5, 3), (5, 4), BLINKY_Z, Blinky, Up),
@@ -88,7 +91,10 @@ fn create_blinky_spawn(rotation: Rotation, bottom_left: Pos) -> GhostSpawn {
     }
 }
 
-fn create_pinky_spawn(rotation: Rotation, bottom_left: Pos) -> GhostSpawn {
+fn create_pinky_spawn(
+    rotation: Rotation,
+    bottom_left: Pos,
+) -> GhostSpawn {
     match rotation {
         D0 => create_spawn_with_offsets(bottom_left, (3, 2), (4, 2), PINKY_Z, Pinky, Up),
         D90 => create_spawn_with_offsets(bottom_left, (2, 3), (2, 4), PINKY_Z, Pinky, Right),
@@ -97,7 +103,10 @@ fn create_pinky_spawn(rotation: Rotation, bottom_left: Pos) -> GhostSpawn {
     }
 }
 
-fn create_inky_spawn(rotation: Rotation, bottom_left: Pos) -> GhostSpawn {
+fn create_inky_spawn(
+    rotation: Rotation,
+    bottom_left: Pos,
+) -> GhostSpawn {
     match rotation {
         D0 => create_spawn_with_offsets(bottom_left, (1, 2), (2, 2), INKY_Z, Inky, Down),
         D90 => create_spawn_with_offsets(bottom_left, (2, 5), (2, 6), INKY_Z, Inky, Left),
@@ -106,7 +115,10 @@ fn create_inky_spawn(rotation: Rotation, bottom_left: Pos) -> GhostSpawn {
     }
 }
 
-fn create_clyde_spawn(rotation: Rotation, bottom_left: Pos) -> GhostSpawn {
+fn create_clyde_spawn(
+    rotation: Rotation,
+    bottom_left: Pos,
+) -> GhostSpawn {
     match rotation {
         D0 => create_spawn_with_offsets(bottom_left, (5, 2), (6, 2), CLYDE_Z, Clyde, Down),
         D90 => create_spawn_with_offsets(bottom_left, (2, 1), (2, 2), CLYDE_Z, Clyde, Left),
@@ -151,16 +163,25 @@ fn spawn_house_walls(
         _ => Pos::new(bottom_left.x() + 4, bottom_left.y() + 7),
     };
 
-    let corners = spawn_corners(
+    let corners = spawn_corners(commands, bottom_left, top_right, sprite_sheets);
+    let top = spawn_top(
         commands,
+        rotation,
         bottom_left,
         top_right,
+        asset_server,
         sprite_sheets,
     );
-    let top = spawn_top(commands, rotation, bottom_left, top_right, asset_server, sprite_sheets);
     let bottom = spawn_bottom(commands, rotation, bottom_left, asset_server, sprite_sheets);
     let left = spawn_left(commands, rotation, bottom_left, asset_server, sprite_sheets);
-    let right = spawn_right(commands, rotation, bottom_left, top_right, asset_server, sprite_sheets);
+    let right = spawn_right(
+        commands,
+        rotation,
+        bottom_left,
+        top_right,
+        asset_server,
+        sprite_sheets,
+    );
     commands.entity(ghost_house).add_children(&corners);
     commands.entity(ghost_house).add_children(&top);
     commands.entity(ghost_house).add_children(&bottom);
@@ -176,10 +197,20 @@ fn spawn_corners(
 ) -> [Entity; 4] {
     let sheet = sprite_sheets.get_sheet("textures/walls/ghost_house_wall_corner");
     [
-        spawn_wall(commands, &sheet, D0, Pos::new(bottom_left.x(), top_right.y())),
-        spawn_wall(commands, &sheet, D90, top_right),
-        spawn_wall(commands, &sheet, D180, Pos::new(top_right.x(), bottom_left.y())),
-        spawn_wall(commands, &sheet, D270, bottom_left),
+        spawn_wall(
+            commands,
+            sheet,
+            D0,
+            Pos::new(bottom_left.x(), top_right.y()),
+        ),
+        spawn_wall(commands, sheet, D90, top_right),
+        spawn_wall(
+            commands,
+            sheet,
+            D180,
+            Pos::new(top_right.x(), bottom_left.y()),
+        ),
+        spawn_wall(commands, sheet, D270, bottom_left),
     ]
 }
 
@@ -197,25 +228,25 @@ fn spawn_top(
 
     match rotation {
         D0 => vec![
-            spawn_wall(commands, &sheet, rotation, Pos::new(x, y)),
-            spawn_wall(commands, &sheet, rotation, Pos::new(x + 1, y)),
+            spawn_wall(commands, sheet, rotation, Pos::new(x, y)),
+            spawn_wall(commands, sheet, rotation, Pos::new(x + 1, y)),
             spawn_entrance(commands, asset_server, rotation, Pos::new(x + 2, y)),
             spawn_entrance(commands, asset_server, rotation, Pos::new(x + 3, y)),
-            spawn_wall(commands, &sheet, rotation, Pos::new(x + 4, y)),
-            spawn_wall(commands, &sheet, rotation, Pos::new(x + 5, y)),
+            spawn_wall(commands, sheet, rotation, Pos::new(x + 4, y)),
+            spawn_wall(commands, sheet, rotation, Pos::new(x + 5, y)),
         ],
         D180 => vec![
-            spawn_wall(commands, &sheet, rotation, Pos::new(x, y)),
-            spawn_wall(commands, &sheet, rotation, Pos::new(x + 1, y)),
-            spawn_wall(commands, &sheet, rotation, Pos::new(x + 2, y)),
-            spawn_wall(commands, &sheet, rotation, Pos::new(x + 3, y)),
-            spawn_wall(commands, &sheet, rotation, Pos::new(x + 4, y)),
-            spawn_wall(commands, &sheet, rotation, Pos::new(x + 5, y)),
+            spawn_wall(commands, sheet, rotation, Pos::new(x, y)),
+            spawn_wall(commands, sheet, rotation, Pos::new(x + 1, y)),
+            spawn_wall(commands, sheet, rotation, Pos::new(x + 2, y)),
+            spawn_wall(commands, sheet, rotation, Pos::new(x + 3, y)),
+            spawn_wall(commands, sheet, rotation, Pos::new(x + 4, y)),
+            spawn_wall(commands, sheet, rotation, Pos::new(x + 5, y)),
         ],
         _ => vec![
-            spawn_wall(commands, &sheet, rotation, Pos::new(x, y)),
-            spawn_wall(commands, &sheet, rotation, Pos::new(x + 1, y)),
-            spawn_wall(commands, &sheet, rotation, Pos::new(x + 2, y)),
+            spawn_wall(commands, sheet, rotation, Pos::new(x, y)),
+            spawn_wall(commands, sheet, rotation, Pos::new(x + 1, y)),
+            spawn_wall(commands, sheet, rotation, Pos::new(x + 2, y)),
         ],
     }
 }
@@ -233,25 +264,25 @@ fn spawn_bottom(
 
     match rotation {
         D180 => vec![
-            spawn_wall(commands, &sheet, rotation, Pos::new(x, y)),
-            spawn_wall(commands, &sheet, rotation, Pos::new(x + 1, y)),
+            spawn_wall(commands, sheet, rotation, Pos::new(x, y)),
+            spawn_wall(commands, sheet, rotation, Pos::new(x + 1, y)),
             spawn_entrance(commands, asset_server, rotation, Pos::new(x + 2, y)),
             spawn_entrance(commands, asset_server, rotation, Pos::new(x + 3, y)),
-            spawn_wall(commands, &sheet, rotation, Pos::new(x + 4, y)),
-            spawn_wall(commands, &sheet, rotation, Pos::new(x + 5, y)),
+            spawn_wall(commands, sheet, rotation, Pos::new(x + 4, y)),
+            spawn_wall(commands, sheet, rotation, Pos::new(x + 5, y)),
         ],
         D0 => vec![
-            spawn_wall(commands, &sheet, rotation, Pos::new(x, y)),
-            spawn_wall(commands, &sheet, rotation, Pos::new(x + 1, y)),
-            spawn_wall(commands, &sheet, rotation, Pos::new(x + 2, y)),
-            spawn_wall(commands, &sheet, rotation, Pos::new(x + 3, y)),
-            spawn_wall(commands, &sheet, rotation, Pos::new(x + 4, y)),
-            spawn_wall(commands, &sheet, rotation, Pos::new(x + 5, y)),
+            spawn_wall(commands, sheet, rotation, Pos::new(x, y)),
+            spawn_wall(commands, sheet, rotation, Pos::new(x + 1, y)),
+            spawn_wall(commands, sheet, rotation, Pos::new(x + 2, y)),
+            spawn_wall(commands, sheet, rotation, Pos::new(x + 3, y)),
+            spawn_wall(commands, sheet, rotation, Pos::new(x + 4, y)),
+            spawn_wall(commands, sheet, rotation, Pos::new(x + 5, y)),
         ],
         _ => vec![
-            spawn_wall(commands, &sheet, rotation, Pos::new(x, y)),
-            spawn_wall(commands, &sheet, rotation, Pos::new(x + 1, y)),
-            spawn_wall(commands, &sheet, rotation, Pos::new(x + 2, y)),
+            spawn_wall(commands, sheet, rotation, Pos::new(x, y)),
+            spawn_wall(commands, sheet, rotation, Pos::new(x + 1, y)),
+            spawn_wall(commands, sheet, rotation, Pos::new(x + 2, y)),
         ],
     }
 }
@@ -338,25 +369,30 @@ fn spawn_wall(
     let animations = Animations::new(
         [
             ("idle", Animation::from_texture(sheet.image_at(0))),
-            ("blinking", Animation::from_textures(0.5, true, sheet.images_at([0, 1])))
-        ]
-        , "idle",
+            (
+                "blinking",
+                Animation::from_textures(0.5, true, sheet.images_at([0, 1])),
+            ),
+        ],
+        "idle",
     );
 
     let mut transform = Transform::from_translation(position.to_vec3(0.0));
     transform.rotation = rotation.quat_z();
 
-    commands.spawn((
-        Name::new("Wall"),
-        Wall,
-        Sprite {
-            image: animations.current().texture(),
-            custom_size: Some(Vec2::splat(WALL_DIMENSION)),
-            ..default()
-        },
-        transform,
-        animations
-    )).id()
+    commands
+        .spawn((
+            Name::new("Wall"),
+            Wall,
+            Sprite {
+                image: animations.current().texture(),
+                custom_size: Some(Vec2::splat(WALL_DIMENSION)),
+                ..default()
+            },
+            transform,
+            animations,
+        ))
+        .id()
 }
 
 fn spawn_entrance(
@@ -368,14 +404,16 @@ fn spawn_entrance(
     let mut transform = Transform::from_translation(position.to_vec3(0.0));
     transform.rotation = rotation.quat_z();
 
-    commands.spawn((
-        Name::new("Wall"),
-        Wall,
-        Sprite {
-            image: asset_server.load("textures/walls/ghost_house_entrance.png"),
-            custom_size: Some(Vec2::splat(WALL_DIMENSION)),
-            ..default()
-        },
-        transform,
-    )).id()
+    commands
+        .spawn((
+            Name::new("Wall"),
+            Wall,
+            Sprite {
+                image: asset_server.load("textures/walls/ghost_house_entrance.png"),
+                custom_size: Some(Vec2::splat(WALL_DIMENSION)),
+                ..default()
+            },
+            transform,
+        ))
+        .id()
 }
