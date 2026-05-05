@@ -1,18 +1,16 @@
+use crate::core::prelude::*;
+use crate::sprite_sheet::{SpriteSheet, SpriteSheets};
 use bevy::platform::collections::HashMap;
 use bevy::prelude::*;
-use bevy_sprite_sheet::{SpriteSheet, SpriteSheets};
-use crate::core::prelude::*;
 
 pub(super) struct EnhanceMazePlugin;
 
 impl Plugin for EnhanceMazePlugin {
-    fn build(&self, app: &mut App) {
-        app
-            .add_systems(
-                OnEnter(SpawnMaze(EnhanceMap)),
-                enhance_maze,
-            )
-        ;
+    fn build(
+        &self,
+        app: &mut App,
+    ) {
+        app.add_systems(OnEnter(SpawnMaze(EnhanceMap)), enhance_maze);
     }
 }
 
@@ -26,56 +24,65 @@ fn enhance_maze(
 ) -> Result {
     let wall_animations_map = create_animations(&sprite_sheets);
 
-    commands.entity(mazes.single()?).insert((
-        Transform::default(),
-        Visibility::default(),
-    ));
+    commands
+        .entity(mazes.single()?)
+        .insert((Transform::default(), Visibility::default()));
 
     for (entity, tiles, style) in &walls {
         let transform = create_transform(tiles, &style.rotation);
-        let animations = wall_animations_map.get(&(style.wall_type, style.is_corner)).unwrap().clone();
+        let animations = wall_animations_map
+            .get(&(style.wall_type, style.is_corner))
+            .unwrap()
+            .clone();
 
-        commands
-            .entity(entity)
-            .insert((
-                Sprite {
-                    image: animations.current().texture(),
-                    custom_size: Some(Vec2::splat(WALL_DIMENSION)),
-                    ..default()
-                },
-                transform,
-                animations,
-            ));
+        commands.entity(entity).insert((
+            Sprite {
+                image: animations.current().texture(),
+                custom_size: Some(Vec2::splat(WALL_DIMENSION)),
+                ..default()
+            },
+            transform,
+            animations,
+        ));
     }
-    
+
     Ok(())
 }
 
-fn create_animations(
-    sprite_sheets: &SpriteSheets
-) -> HashMap<(WallType, IsCorner), Animations> {
+fn create_animations(sprite_sheets: &SpriteSheets) -> HashMap<(WallType, IsCorner), Animations> {
     [
         (Outer, true, "textures/walls/outer_wall_corner"),
         (Outer, false, "textures/walls/outer_wall"),
         (Inner, true, "textures/walls/inner_wall_corner"),
         (Inner, false, "textures/walls/inner_wall"),
     ]
-        .into_iter()
-        .map(|(tp, is_corner, sheet_path)| ((tp, is_corner), create_wall_animations(sprite_sheets.get_sheet(sheet_path))))
-        .collect()
+    .into_iter()
+    .map(|(tp, is_corner, sheet_path)| {
+        (
+            (tp, is_corner),
+            create_wall_animations(sprite_sheets.get_sheet(sheet_path)),
+        )
+    })
+    .collect()
 }
 
 fn create_wall_animations(sheet: &SpriteSheet) -> Animations {
     Animations::new(
         [
             ("idle", Animation::from_texture(sheet.image_at(0))),
-            ("blinking", Animation::from_textures(0.5, true, sheet.images_at([0, 1])))
-        ]
-        , "idle",
+            (
+                "blinking",
+                Animation::from_textures(0.5, true, sheet.images_at([0, 1])),
+            ),
+        ],
+        "idle",
     )
 }
 
-fn create_transform(tiles: &Tiles, rotation: &Rotation) -> Transform {
+fn create_transform(
+    tiles: &Tiles,
+    rotation: &Rotation,
+) -> Transform {
     let mut transform = Transform::from_translation(tiles.to_vec3(0.0));
     transform.rotation = rotation.quat_z();
     transform

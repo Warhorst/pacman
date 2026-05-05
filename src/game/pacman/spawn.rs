@@ -1,7 +1,7 @@
-use bevy::prelude::*;
-use bevy_sprite_sheet::SpriteSheets;
-use crate::game::pacman::textures::create_pacman_animations;
 use crate::core::prelude::*;
+use crate::game::pacman::textures::create_pacman_animations;
+use crate::sprite_sheet::SpriteSheets;
+use bevy::prelude::*;
 
 pub(crate) fn spawn_pacman(
     mut commands: Commands,
@@ -24,8 +24,8 @@ pub(crate) fn spawn_pacman(
             ..default()
         },
         transform,
-        animations
+        animations,
     ));
-    
+
     Ok(())
 }

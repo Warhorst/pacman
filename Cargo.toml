@@ -15,5 +15,6 @@ bevy = "0.18"
 rand = "0.9"
 bevy-inspector-egui = { version = "0.36", default-features = false, features = ["bevy_pbr", "bevy_image", "bevy_render"] }
 bevy_asset_preload = { git = "https://github.com/Warhorst/bevy_asset_preload", tag = "1.2.0" }
-bevy_sprite_sheet = { git = "https://github.com/Warhorst/bevy_sprite_sheet", tag = "1.2.0"}
+serde = { version = "1.0.137", features = ["derive"] }
+bevy_common_assets = { version = "0.15", features = ["json"]}
 pad = { git = "https://github.com/Warhorst/pad", features = ["bevy"], tag = "1.3.0"}

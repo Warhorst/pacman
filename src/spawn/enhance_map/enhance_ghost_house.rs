@@ -1,5 +1,5 @@
+use crate::sprite_sheet::{SpriteSheet, SpriteSheets};
 use bevy::prelude::*;
-use bevy_sprite_sheet::{SpriteSheet, SpriteSheets};
 
 use crate::core::prelude::*;
 

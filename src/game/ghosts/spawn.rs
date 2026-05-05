@@ -1,7 +1,7 @@
-use bevy::prelude::*;
-use bevy_sprite_sheet::SpriteSheets;
-use crate::game::ghosts::textures::create_animations_for_ghost;
 use crate::core::prelude::*;
+use crate::game::ghosts::textures::create_animations_for_ghost;
+use crate::sprite_sheet::SpriteSheets;
+use bevy::prelude::*;
 
 pub fn spawn_ghosts(
     mut commands: Commands,
@@ -12,7 +12,14 @@ pub fn spawn_ghosts(
     spawn_query: Query<&GhostSpawn>,
 ) {
     for spawn in &spawn_query {
-        spawn_ghost(&mut commands, spawn, &asset_server, &sprite_sheets, &level, &specs_per_level);
+        spawn_ghost(
+            &mut commands,
+            spawn,
+            &asset_server,
+            &sprite_sheets,
+            &level,
+            &specs_per_level,
+        );
     }
 }
 
@@ -49,6 +56,6 @@ fn spawn_ghost(
         },
         Transform::from_translation(spawn_coordinates),
         Visibility::Visible,
-        animations
+        animations,
     ));
 }
