@@ -1,6 +1,7 @@
 use bevy::prelude::*;
-use bevy_asset_preload::{AssetPreloadPlugin, load_assets};
+use load_assets::load_assets;
 
+use crate::asset_preload::AssetPreloadPlugin;
 use crate::core::CorePlugin;
 use crate::debug::DebugPlugin;
 use crate::game::GamePlugin;
@@ -10,6 +11,7 @@ use crate::map_creator::create_map;
 use crate::spawn::SpawnPlugin;
 use crate::sprite_sheet::SpriteSheetPlugin;
 
+mod asset_preload;
 mod core;
 mod debug;
 mod game;
